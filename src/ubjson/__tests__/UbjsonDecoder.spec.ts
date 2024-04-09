@@ -1,9 +1,9 @@
 import {encode} from '@shelacek/ubjson';
-import {Writer} from '../../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {PackValue} from '../../types';
 import {UbjsonEncoder} from '../UbjsonEncoder';
 import {UbjsonDecoder} from '../UbjsonDecoder';
-import {NullObject} from '../../util/NullObject';
+import {NullObject} from '@jsonjoy.com/util/lib/NullObject';
 
 const encoder = new UbjsonEncoder(new Writer(8));
 const decoder = new UbjsonDecoder();

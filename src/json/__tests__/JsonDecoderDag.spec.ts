@@ -1,5 +1,5 @@
-import {Writer} from '../../util/buffers/Writer';
-import {utf8} from '../../util/buffers/strings';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {utf8} from '@jsonjoy.com/util/lib/buffers/strings';
 import {JsonEncoderDag} from '../JsonEncoderDag';
 import {JsonDecoderDag} from '../JsonDecoderDag';
 

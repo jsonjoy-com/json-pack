@@ -1,5 +1,5 @@
 import {decode} from '@shelacek/ubjson';
-import {Writer} from '../../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {PackValue} from '../../types';
 import {UbjsonEncoder} from '../UbjsonEncoder';
 

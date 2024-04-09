@@ -1,7 +1,7 @@
-import {Writer} from '../../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {utf8} from '@jsonjoy.com/util/lib/buffers/strings';
 import {BencodeEncoder} from '../BencodeEncoder';
 import {BencodeDecoder} from '../BencodeDecoder';
-import {utf8} from '../../util/buffers/strings';
 
 const decoder = new BencodeDecoder();
 

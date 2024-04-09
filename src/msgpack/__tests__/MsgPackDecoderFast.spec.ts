@@ -1,4 +1,4 @@
-import {NullObject} from '../../util/NullObject';
+import {NullObject} from '@jsonjoy.com/util/lib/NullObject';
 import {MsgPackDecoderFast} from '../MsgPackDecoderFast';
 import {MsgPackEncoderFast} from '../MsgPackEncoderFast';
 

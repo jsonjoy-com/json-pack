@@ -1,5 +1,5 @@
 import {JsonEncoderStable} from './JsonEncoderStable';
-import {createToBase64Bin} from '../util/base64/createToBase64Bin';
+import {createToBase64Bin} from '@jsonjoy.com/base64/lib/createToBase64Bin';
 
 const objBaseLength = '{"/":{"bytes":""}}'.length;
 const cidBaseLength = '{"/":""}'.length;

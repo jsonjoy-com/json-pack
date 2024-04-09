@@ -39,24 +39,14 @@
   ],
   "typedocOptions": {
     "entryPoints": [
-      "src/binary-rx/index.ts",
-      "src/json-crdt/index.ts",
-      "src/json-crdt/codec/structural/binary/index.ts",
-      "src/json-crdt/codec/structural/compact/index.ts",
-      "src/json-crdt/codec/structural/verbose/index.ts",
-      "src/json-crdt/codec/indexed/binary/index.ts",
-      "src/json-crdt/codec/sidecar/binary/index.ts",
-      "src/json-crdt-patch/codec/verbose/index.ts",
-      "src/json-crdt-patch/codec/compact/index.ts",
-      "src/json-crdt-patch/codec/binary/index.ts",
-      "src/index.ts",
-      "src/json-patch/index.ts",
-      "src/json-patch-ot/index.ts",
-      "src/json-pointer/index.ts",
-      "src/json-rpc/index.ts",
-      "src/json-rx/index.ts",
-      "src/json-type/index.ts",
-      "src/json-random/index.ts"
+      "src/cbor/index.ts",
+      "src/json/index.ts",
+      "src/msgpack/index.ts",
+      "src/resp/index.ts",
+      "src/bencode/index.ts",
+      "src/ubjson/index.ts",
+      "src/ion/index.ts",
+      "src/bson/index.ts"
     ],
     "out": "typedocs"
   }

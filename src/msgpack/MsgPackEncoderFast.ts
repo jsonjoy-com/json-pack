@@ -1,5 +1,5 @@
-import {IWriter, IWriterGrowable} from '../util/buffers';
-import {Writer} from '../util/buffers/Writer';
+import {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {JsonPackExtension} from '../JsonPackExtension';
 import {BinaryJsonEncoder, TlvBinaryJsonEncoder} from '../types';
 import {IMessagePackEncoder} from './types';

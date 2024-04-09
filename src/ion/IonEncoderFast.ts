@@ -1,5 +1,5 @@
-import type {IWriter, IWriterGrowable} from '../util/buffers';
-import {Writer} from '../util/buffers/Writer';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {
   AnnotationAstNode,
   ArrAstNode,

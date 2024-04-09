@@ -1,5 +1,5 @@
 import {encode} from '@msgpack/msgpack';
-import {RandomJson} from '../../json-random';
+import {RandomJson} from '@jsonjoy.com/util/lib/json-random';
 import {MsgPackEncoderFast} from '../MsgPackEncoderFast';
 import {MsgPackDecoderFast} from '../MsgPackDecoderFast';
 

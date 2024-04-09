@@ -1,9 +1,9 @@
 import {JsonPackExtension} from '../JsonPackExtension';
-import {Reader} from '../util/buffers/Reader';
+import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
 import {ERROR} from '../cbor/constants';
-import sharedCachedUtf8Decoder from '../util/buffers/utf8/sharedCachedUtf8Decoder';
+import sharedCachedUtf8Decoder from '@jsonjoy.com/util/lib/buffers/utf8/sharedCachedUtf8Decoder';
 import type {BinaryJsonDecoder, PackValue} from '../types';
-import type {CachedUtf8Decoder} from '../util/buffers/utf8/CachedUtf8Decoder';
+import type {CachedUtf8Decoder} from '@jsonjoy.com/util/lib/buffers/utf8/CachedUtf8Decoder';
 
 /**
  * @category Decoder

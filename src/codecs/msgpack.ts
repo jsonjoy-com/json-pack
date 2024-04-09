@@ -1,7 +1,7 @@
 import {EncodingFormat} from '../constants';
 import {MsgPackEncoder} from '../msgpack';
 import {MsgPackDecoder} from '../msgpack/MsgPackDecoder';
-import type {Writer} from '../util/buffers/Writer';
+import type {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import type {JsonValueCodec} from './types';
 
 export class MsgPackJsonValueCodec implements JsonValueCodec {

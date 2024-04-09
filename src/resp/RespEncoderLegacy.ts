@@ -2,7 +2,7 @@ import {RESP} from './constants';
 import {RespAttributes, RespPush, RespVerbatimString} from './extensions';
 import {JsonPackExtension} from '../JsonPackExtension';
 import {RespEncoder} from './RespEncoder';
-import type {IWriter, IWriterGrowable} from '../util/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
 const REG_RN = /[\r\n]/;
 const isSafeInteger = Number.isSafeInteger;

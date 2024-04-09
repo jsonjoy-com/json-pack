@@ -1,4 +1,4 @@
-import {Reader} from '../util/buffers/Reader';
+import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
 import type {BinaryJsonDecoder, PackValue} from '../types';
 
 export class BencodeDecoder implements BinaryJsonDecoder {

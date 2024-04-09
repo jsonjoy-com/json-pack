@@ -8,7 +8,7 @@
 
 import {JsonEncoder} from '../json/JsonEncoder';
 import {JsonDecoder} from '../json/JsonDecoder';
-import {Writer} from '../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 
 const encoder = new JsonEncoder(new Writer());
 const decoder = new JsonDecoder();

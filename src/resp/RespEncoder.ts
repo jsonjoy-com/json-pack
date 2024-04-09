@@ -1,11 +1,11 @@
-import {Writer} from '../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {utf8Size} from '@jsonjoy.com/util/lib/strings/utf8';
 import {RESP} from './constants';
-import {utf8Size} from '../util/strings/utf8';
 import {RespAttributes, RespPush, RespVerbatimString} from './extensions';
 import {JsonPackExtension} from '../JsonPackExtension';
-import type {IWriter, IWriterGrowable} from '../util/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 import type {BinaryJsonEncoder, StreamingBinaryJsonEncoder, TlvBinaryJsonEncoder} from '../types';
-import type {Slice} from '../util/buffers/Slice';
+import type {Slice} from '@jsonjoy.com/util/lib/buffers/Slice';
 
 const REG_RN = /[\r\n]/;
 const isSafeInteger = Number.isSafeInteger;

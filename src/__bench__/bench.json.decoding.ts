@@ -3,7 +3,7 @@
 import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
 import {JsonDecoder} from '../json/JsonDecoder';
 import {payloads} from '../__bench__/payloads';
-import {deepEqual} from '../json-equal/deepEqual';
+import {deepEqual} from '@jsonjoy.com/util/lib/json-equal/deepEqual';
 
 const encodedPayloads = payloads.map((payload) => {
   return {

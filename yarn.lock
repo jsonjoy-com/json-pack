@@ -600,6 +600,13 @@
   resolved "https://registry.yarnpkg.com/@jsonjoy.com/base64/-/base64-1.1.1.tgz#a717fd8840f7bad49c7fe66cc65db8bcfc4c4dc5"
   integrity sha512-LnFjVChaGY8cZVMwAIMjvA1XwQjZ/zIXHyh28IyJkyNkzof4Dkm1+KN9UIm3lHhREH4vs7XwZ0NpkZKnwOtEfg==
 
+"@jsonjoy.com/util@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@jsonjoy.com/util/-/util-1.0.0.tgz#417a4e6c112501ac98e3a4e695f5ffa23ba01b2d"
+  integrity sha512-uTa/IyBC3/xTC5/qwMnY79ZqCA6ENQgsM6nzuAISa7pYiiUn+U4JIXoyaHEApX6k8KvTCBDNJs+k8U03bw5ffQ==
+  dependencies:
+    hyperdyperid "^1.2.0"
+
 "@msgpack/msgpack@^3.0.0-beta2":
   version "3.0.0-beta2"
   resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-3.0.0-beta2.tgz#5bccee30f84df220b33905e3d8249ba96deca0b7"

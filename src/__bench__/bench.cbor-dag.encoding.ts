@@ -5,7 +5,7 @@ import {CborEncoderDag} from '../cbor/CborEncoderDag';
 import {CborEncoder} from '../cbor/CborEncoder';
 import {CborDecoder} from '../cbor/CborDecoder';
 import {payloads} from '../__bench__/payloads';
-import {deepEqual} from '../json-equal/deepEqual';
+import {deepEqual} from '@jsonjoy.com/util/lib/json-equal/deepEqual';
 
 const benchmark: IBenchmark = {
   name: 'Encoding',

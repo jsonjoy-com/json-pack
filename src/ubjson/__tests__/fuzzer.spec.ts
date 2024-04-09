@@ -1,5 +1,5 @@
-import {RandomJson} from '../../json-random';
-import {Writer} from '../../util/buffers/Writer';
+import {RandomJson} from '@jsonjoy.com/util/lib/json-random';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {JsonValue} from '../../types';
 import {UbjsonEncoder} from '../UbjsonEncoder';
 import {UbjsonDecoder} from '../UbjsonDecoder';
@@ -29,7 +29,7 @@ const assertEncoder = (value: JsonValue) => {
 test('fuzzing', () => {
   for (let i = 0; i < 1000; i++) {
     const json = RandomJson.generate();
-    assertEncoder(json);
+    assertEncoder(json as any);
   }
 }, 50000);
 

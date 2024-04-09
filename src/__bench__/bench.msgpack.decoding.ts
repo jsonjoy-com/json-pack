@@ -5,7 +5,7 @@ import {MsgPackEncoderFast} from '../msgpack/MsgPackEncoderFast';
 import {MsgPackDecoderFast} from '../msgpack/MsgPackDecoderFast';
 import {MsgPackDecoder} from '../msgpack/MsgPackDecoder';
 import {payloads} from '../__bench__/payloads';
-import {deepEqual} from '../json-equal/deepEqual';
+import {deepEqual} from '@jsonjoy.com/util/lib/json-equal/deepEqual';
 
 const encoder = new MsgPackEncoderFast();
 

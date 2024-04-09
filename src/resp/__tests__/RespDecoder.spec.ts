@@ -1,9 +1,9 @@
 import {RespEncoder} from '../RespEncoder';
 import {RespDecoder} from '../RespDecoder';
-import {bufferToUint8Array} from '../../util/buffers/bufferToUint8Array';
+import {bufferToUint8Array} from '@jsonjoy.com/util/lib/buffers/bufferToUint8Array';
 import {RespAttributes, RespPush} from '../extensions';
-import {Writer} from '../../util/buffers/Writer';
-import {utf8} from '../../util/buffers/strings';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {utf8} from '@jsonjoy.com/util/lib/buffers/strings';
 
 const decode = (encoded: string | Uint8Array): unknown => {
   const decoder = new RespDecoder();

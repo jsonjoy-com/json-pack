@@ -8,7 +8,7 @@
 
 import {UbjsonEncoder} from '../ubjson/UbjsonEncoder';
 import {UbjsonDecoder} from '../ubjson/UbjsonDecoder';
-import {Writer} from '../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 
 const encoder = new UbjsonEncoder(new Writer());
 const decoder = new UbjsonDecoder();

@@ -1,4 +1,4 @@
-import {utf8Size} from '../util/strings/utf8';
+import {utf8Size} from '@jsonjoy.com/util/lib/strings/utf8';
 import {Import} from './Import';
 
 export interface AstNode<T> {

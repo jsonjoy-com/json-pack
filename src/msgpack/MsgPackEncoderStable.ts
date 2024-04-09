@@ -1,4 +1,4 @@
-import {sort} from '../util/sort/insertion';
+import {sort} from '@jsonjoy.com/util/lib/sort/insertion';
 import {MsgPackEncoderFast} from './MsgPackEncoderFast';
 
 /**

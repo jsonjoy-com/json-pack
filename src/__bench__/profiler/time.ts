@@ -1,7 +1,7 @@
 /* tslint:disable no-console */
 
 import {MsgPackEncoderFast} from '../../msgpack/MsgPackEncoderFast';
-import {Writer} from '../../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 
 const json = [1234];
 

@@ -1,7 +1,7 @@
 import {JsonPackValue} from '.';
 import {MsgPackDecoderFast} from './MsgPackDecoderFast';
 import type {Path} from '../json-pointer';
-import type {Reader} from '../util/buffers/Reader';
+import type {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
 
 /**
  * @category Decoder

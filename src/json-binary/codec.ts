@@ -1,7 +1,7 @@
 import {JsonPackExtension, JsonPackValue} from '../msgpack';
 import {fromBase64} from '@jsonjoy.com/base64/lib/fromBase64';
 import {toBase64} from '@jsonjoy.com/base64/lib/toBase64';
-import {isUint8Array} from '../util/buffers/isUint8Array';
+import {isUint8Array} from '@jsonjoy.com/util/lib/buffers/isUint8Array';
 import {binUriStart, msgPackExtStart, msgPackUriStart} from './constants';
 import {binary_string} from './types';
 

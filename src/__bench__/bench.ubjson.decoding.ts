@@ -3,9 +3,9 @@
 import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
 import {UbjsonEncoder} from '../ubjson/UbjsonEncoder';
 import {UbjsonDecoder} from '../ubjson/UbjsonDecoder';
-import {Writer} from '../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {payloads} from '../__bench__/payloads';
-import {deepEqual} from '../json-equal/deepEqual';
+import {deepEqual} from '@jsonjoy.com/util/lib/json-equal/deepEqual';
 
 const encoder = new UbjsonEncoder(new Writer());
 const encodedPayloads = payloads.map((payload) => {

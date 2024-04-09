@@ -4,7 +4,7 @@ import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
 import {CborEncoder} from '../cbor/CborEncoder';
 import {CborEncoderFast} from '../cbor/CborEncoderFast';
 import {CborDecoder} from '../cbor/CborDecoder';
-import {deepEqual} from '../json-equal/deepEqual';
+import {deepEqual} from '@jsonjoy.com/util/lib/json-equal/deepEqual';
 import {payloads} from '../__bench__/payloads';
 
 const benchmark: IBenchmark = {

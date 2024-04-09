@@ -2,9 +2,9 @@
 
 import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
 import {BsonEncoder} from '../bson/BsonEncoder';
-import {Writer} from '../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {payloads as payloads_} from '../__bench__/payloads';
-import {deepEqual} from '../json-equal/deepEqual';
+import {deepEqual} from '@jsonjoy.com/util/lib/json-equal/deepEqual';
 import {BSON, EJSON} from 'bson';
 
 const payloads = payloads_.map((p) => ({...p, data: {data: p.data}}));

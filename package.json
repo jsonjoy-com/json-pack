@@ -62,6 +62,7 @@
     "tslib": "2"
   },
   "dependencies": {
+    "@jsonjoy.com/base64": "^1.1.1",
     "hyperdyperid": "^1.2.0",
     "thingies": "^1.20.0"
   },

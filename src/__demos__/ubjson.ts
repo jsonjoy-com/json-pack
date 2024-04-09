@@ -3,7 +3,7 @@
 /**
  * Run this demo with:
  *
- *     npx nodemon -q -x npx ts-node src/json-pack/__demos__/ubjson.ts
+ *     npx nodemon -q -x npx ts-node src/__demos__/ubjson.ts
  */
 
 import {UbjsonEncoder} from '../ubjson/UbjsonEncoder';

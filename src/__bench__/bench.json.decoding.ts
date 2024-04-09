@@ -1,9 +1,9 @@
-// npx ts-node src/json-pack/__bench__/bench.json.decoding.ts
+// npx ts-node src/__bench__/bench.json.decoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {JsonDecoder} from '../../json/JsonDecoder';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {JsonDecoder} from '../json/JsonDecoder';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 
 const encodedPayloads = payloads.map((payload) => {
   return {
@@ -22,7 +22,7 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack JsonDecoder.decode()',
+      name: 'json-pack JsonDecoder.decode()',
       setup: () => {
         const decoder = new JsonDecoder();
         return (json: any) => decoder.read(json);

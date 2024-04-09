@@ -1,7 +1,7 @@
-// npx ts-node src/json-pack/__bench__/bench.resp.encoding.ts
+// npx ts-node src/__bench__/bench.resp.encoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {RespEncoder} from '../../resp/RespEncoder';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {RespEncoder} from '../resp/RespEncoder';
 import encodeCommand from '@redis/client/dist/lib/client/RESP2/encoder';
 
 const data = ['set', 'production:project-name:keys:foobarbaz', 'PX', 'NX', 'EX', '60000', 'KEEPTTL'];
@@ -21,7 +21,7 @@ const benchmark: IBenchmark = {
   ],
   runners: [
     {
-      name: 'json-joy/json-pack RespEncoder.encode()',
+      name: 'json-pack RespEncoder.encode()',
       setup: () => {
         const encoder = new RespEncoder();
         return (data: any) => {
@@ -30,7 +30,7 @@ const benchmark: IBenchmark = {
       },
     },
     {
-      name: 'json-joy/json-pack RespEncoder.encodeCmd()',
+      name: 'json-pack RespEncoder.encodeCmd()',
       setup: () => {
         const encoder = new RespEncoder();
         return (data: any) => {

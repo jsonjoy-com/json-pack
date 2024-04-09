@@ -4,7 +4,7 @@ A JSON serializer and parser which supports `Uint8Array` binary data.
 Encodes binary data as Base64 encoded data URI strings.
 
 ```ts
-import * as JSONB from 'json-joy/lib/json-binary';
+import * as JSONB from 'json-pack/lib/json-binary';
 
 const data = {
   foo: new Uint8Array([1, 2, 3]),

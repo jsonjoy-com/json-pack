@@ -1,11 +1,11 @@
-// npx ts-node src/json-pack/__bench__/bench.ion.encoding.ts
+// npx ts-node src/__bench__/bench.ion.encoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {IonEncoderFast} from '../../ion/IonEncoderFast';
-import {Writer} from '../../util/buffers/Writer';
-import {payloads} from '../../__bench__/payloads';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {IonEncoderFast} from '../ion/IonEncoderFast';
+import {Writer} from '../util/buffers/Writer';
+import {payloads} from '../__bench__/payloads';
 import {load, makeBinaryWriter, dom} from 'ion-js';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {deepEqual} from '../json-equal/deepEqual';
 
 const benchmark: IBenchmark = {
   name: 'Encoding',
@@ -18,7 +18,7 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack IonEncoderFast',
+      name: 'json-pack IonEncoderFast',
       setup: () => {
         const writer = new Writer();
         const encoder = new IonEncoderFast(writer);

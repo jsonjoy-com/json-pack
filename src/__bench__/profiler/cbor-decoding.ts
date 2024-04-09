@@ -1,4 +1,4 @@
-// NODE_ENV=production node --prof -r ts-node/register src/json-pack/__bench__/profiler/cbor-decoding.ts
+// NODE_ENV=production node --prof -r ts-node/register src/__bench__/profiler/cbor-decoding.ts
 // node --prof-process isolate-0xnnnnnnnnnnnn-v8.log > processed.txt
 
 import {CborEncoder} from '../../cbor/CborEncoder';

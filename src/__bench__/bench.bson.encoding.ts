@@ -1,10 +1,10 @@
-// npx ts-node src/json-pack/__bench__/bench.bson.encoding.ts
+// npx ts-node src/__bench__/bench.bson.encoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {BsonEncoder} from '../../bson/BsonEncoder';
-import {Writer} from '../../util/buffers/Writer';
-import {payloads as payloads_} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {BsonEncoder} from '../bson/BsonEncoder';
+import {Writer} from '../util/buffers/Writer';
+import {payloads as payloads_} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 import {BSON, EJSON} from 'bson';
 
 const payloads = payloads_.map((p) => ({...p, data: {data: p.data}}));
@@ -20,7 +20,7 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack BsonEncoder',
+      name: 'json-pack BsonEncoder',
       setup: () => {
         const writer = new Writer();
         const encoder = new BsonEncoder(writer);

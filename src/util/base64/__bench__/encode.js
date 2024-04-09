@@ -50,11 +50,11 @@ const suite = new Benchmark.Suite();
 
 const encoders = [
   {
-    name: `json-joy/util/base64 toBase64(uint8)`,
+    name: `util/base64 toBase64(uint8)`,
     encode: (uint8) => toBase64(uint8),
   },
   {
-    name: `json-joy/util/base64 createToBase64()(uint8)`,
+    name: `util/base64 createToBase64()(uint8)`,
     encode: (uint8) => toBase64Native(uint8, uint8.length),
   },
   {

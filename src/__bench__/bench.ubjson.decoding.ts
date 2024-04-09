@@ -1,11 +1,11 @@
-// npx ts-node src/json-pack/__bench__/bench.ubjson.decoding.ts
+// npx ts-node src/__bench__/bench.ubjson.decoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {UbjsonEncoder} from '../../ubjson/UbjsonEncoder';
-import {UbjsonDecoder} from '../../ubjson/UbjsonDecoder';
-import {Writer} from '../../util/buffers/Writer';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {UbjsonEncoder} from '../ubjson/UbjsonEncoder';
+import {UbjsonDecoder} from '../ubjson/UbjsonDecoder';
+import {Writer} from '../util/buffers/Writer';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 
 const encoder = new UbjsonEncoder(new Writer());
 const encodedPayloads = payloads.map((payload) => {
@@ -25,7 +25,7 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack UbjsonDecoder',
+      name: 'json-pack UbjsonDecoder',
       setup: () => {
         const decoder = new UbjsonDecoder();
         return (data: any) => decoder.read(data);

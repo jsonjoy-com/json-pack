@@ -1,9 +1,9 @@
-// npx ts-node src/json-pack/__bench__/bench.ubjson.encoding.ts
+// npx ts-node src/__bench__/bench.ubjson.encoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {UbjsonEncoder} from '../../ubjson/UbjsonEncoder';
-import {Writer} from '../../util/buffers/Writer';
-import {payloads} from '../../__bench__/payloads';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {UbjsonEncoder} from '../ubjson/UbjsonEncoder';
+import {Writer} from '../util/buffers/Writer';
+import {payloads} from '../__bench__/payloads';
 
 const benchmark: IBenchmark = {
   name: 'Encoding',
@@ -11,7 +11,7 @@ const benchmark: IBenchmark = {
   payloads,
   runners: [
     {
-      name: 'json-joy/json-pack UbjsonEncoder',
+      name: 'json-pack UbjsonEncoder',
       setup: () => {
         const writer = new Writer();
         const encoder = new UbjsonEncoder(writer);

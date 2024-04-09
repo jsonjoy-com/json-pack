@@ -8,7 +8,7 @@ The `json-random` library lets you generate random JSON values.
 Generate a random JSON object.
 
 ```ts
-import {RandomJson} from 'json-joy/lib/json-random';
+import {RandomJson} from 'json-pack/lib/json-random';
 
 const json1 = RandomJson.generate();
 console.log(json1);

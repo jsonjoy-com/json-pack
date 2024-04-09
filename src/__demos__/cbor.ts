@@ -3,7 +3,7 @@
 /**
  * Run this demo with:
  *
- *     npx nodemon -q -x npx ts-node src/json-pack/__demos__/cbor.ts
+ *     npx nodemon -q -x npx ts-node src/__demos__/cbor.ts
  */
 
 import {CborEncoder} from '../cbor/CborEncoder';

@@ -7,7 +7,7 @@
  * Use `Encoder` to encode plain JSON values.
  *
  * ```ts
- * import {Encoder, Decoder} from 'json-joy/{lib,es6,esm}/json-pack';
+ * import {Encoder, Decoder} from 'json-pack/lib/json-pack';
  *
  * const encoder = new Encoder();
  * const decoder = new Decoder();

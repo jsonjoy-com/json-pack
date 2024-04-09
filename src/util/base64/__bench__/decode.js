@@ -28,11 +28,11 @@ const suite = new Benchmark.Suite();
 
 const encoders = [
   {
-    name: `json-joy/util/base64 fromBase64(str)`,
+    name: `util/base64 fromBase64(str)`,
     decode: (str) => fromBase64(str),
   },
   {
-    name: `json-joy/util/base64 createFromBase64()(str)`,
+    name: `util/base64 createFromBase64()(str)`,
     decode: (str) => fromBase642(str),
   },
   {

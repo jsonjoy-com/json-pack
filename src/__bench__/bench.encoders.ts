@@ -1,17 +1,17 @@
-// npx ts-node src/json-pack/__bench__/bench.encoders.ts
+// npx ts-node src/__bench__/bench.encoders.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {CborEncoder} from '../../cbor/CborEncoder';
-import {CborEncoderFast} from '../../cbor/CborEncoderFast';
-import {MsgPackEncoderFast} from '../../msgpack/MsgPackEncoderFast';
-import {MsgPackEncoder} from '../../msgpack/MsgPackEncoder';
-import {JsonEncoder} from '../../json/JsonEncoder';
-import {UbjsonEncoder} from '../../ubjson/UbjsonEncoder';
-import {IonEncoderFast} from '../../ion/IonEncoderFast';
-import {CborDecoder} from '../../cbor/CborDecoder';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
-import {Writer} from '../../util/buffers/Writer';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {CborEncoder} from '../cbor/CborEncoder';
+import {CborEncoderFast} from '../cbor/CborEncoderFast';
+import {MsgPackEncoderFast} from '../msgpack/MsgPackEncoderFast';
+import {MsgPackEncoder} from '../msgpack/MsgPackEncoder';
+import {JsonEncoder} from '../json/JsonEncoder';
+import {UbjsonEncoder} from '../ubjson/UbjsonEncoder';
+import {IonEncoderFast} from '../ion/IonEncoderFast';
+import {CborDecoder} from '../cbor/CborDecoder';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
+import {Writer} from '../util/buffers/Writer';
 
 const benchmark: IBenchmark = {
   name: 'Encoding',

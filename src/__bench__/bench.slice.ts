@@ -1,10 +1,10 @@
-// npx ts-node src/json-pack/__bench__/bench.slice.ts
+// npx ts-node src/__bench__/bench.slice.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {CborEncoder} from '../../cbor/CborEncoder';
-import {CborDecoder} from '../../cbor/CborDecoder';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {CborEncoder} from '../cbor/CborEncoder';
+import {CborDecoder} from '../cbor/CborDecoder';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 
 const encoder = new CborEncoder();
 

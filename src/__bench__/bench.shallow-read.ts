@@ -1,9 +1,9 @@
-import {runBenchmark} from '../../__bench__/runBenchmark';
-import {CborDecoder} from '../../cbor/CborDecoder';
-import {CborEncoder} from '../../cbor/CborEncoder';
-import {MsgPackEncoderFast} from '../../msgpack';
-import {MsgPackDecoder} from '../../msgpack/MsgPackDecoder';
-import {genShallowReader} from '../../msgpack/shallow-read';
+import {runBenchmark} from '../__bench__/runBenchmark';
+import {CborDecoder} from '../cbor/CborDecoder';
+import {CborEncoder} from '../cbor/CborEncoder';
+import {MsgPackEncoderFast} from '../msgpack';
+import {MsgPackDecoder} from '../msgpack/MsgPackDecoder';
+import {genShallowReader} from '../msgpack/shallow-read';
 
 const benchmark = {
   name: 'Encoding',

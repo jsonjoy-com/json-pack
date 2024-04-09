@@ -1,9 +1,9 @@
-// npx ts-node src/json-pack/__bench__/bench.encoding.cbor.ts
+// npx ts-node src/__bench__/bench.encoding.cbor.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {CborEncoderFast} from '../../cbor/CborEncoderFast';
-import {CborEncoder} from '../../cbor/CborEncoder';
-import {payloads} from '../../__bench__/payloads';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {CborEncoderFast} from '../cbor/CborEncoderFast';
+import {CborEncoder} from '../cbor/CborEncoder';
+import {payloads} from '../__bench__/payloads';
 
 const benchmark: IBenchmark = {
   name: 'Encoding',
@@ -23,14 +23,14 @@ const benchmark: IBenchmark = {
       },
     },
     {
-      name: 'json-joy/json-pack CborEncoderFast',
+      name: 'json-pack CborEncoderFast',
       setup: () => {
         const encoder = new CborEncoderFast();
         return (json: any) => encoder.encode(json);
       },
     },
     {
-      name: 'json-joy/json-pack CborEncoder',
+      name: 'json-pack CborEncoder',
       setup: () => {
         const encoder = new CborEncoder();
         return (json: any) => encoder.encode(json);

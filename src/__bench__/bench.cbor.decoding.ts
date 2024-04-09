@@ -1,10 +1,10 @@
-// npx ts-node src/json-pack/__bench__/bench.cbor.decoding.ts
+// npx ts-node src/__bench__/bench.cbor.decoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {CborEncoder} from '../../cbor/CborEncoder';
-import {CborDecoderBase} from '../../cbor/CborDecoderBase';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {CborEncoder} from '../cbor/CborEncoder';
+import {CborDecoderBase} from '../cbor/CborDecoderBase';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 
 const encoder = new CborEncoder();
 
@@ -26,7 +26,7 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack CborDecoder',
+      name: 'json-pack CborDecoder',
       setup: () => {
         const decoder = new CborDecoderBase();
         return (data: any) => decoder.read(data);

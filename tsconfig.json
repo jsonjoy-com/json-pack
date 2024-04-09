@@ -49,7 +49,7 @@
       "src/json-crdt-patch/codec/verbose/index.ts",
       "src/json-crdt-patch/codec/compact/index.ts",
       "src/json-crdt-patch/codec/binary/index.ts",
-      "src/json-pack/index.ts",
+      "src/index.ts",
       "src/json-patch/index.ts",
       "src/json-patch-ot/index.ts",
       "src/json-pointer/index.ts",

@@ -1,11 +1,11 @@
-// npx ts-node src/json-pack/__bench__/bench.msgpack.decoding.ts
+// npx ts-node src/__bench__/bench.msgpack.decoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {MsgPackEncoderFast} from '../../msgpack/MsgPackEncoderFast';
-import {MsgPackDecoderFast} from '../../msgpack/MsgPackDecoderFast';
-import {MsgPackDecoder} from '../../msgpack/MsgPackDecoder';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {MsgPackEncoderFast} from '../msgpack/MsgPackEncoderFast';
+import {MsgPackDecoderFast} from '../msgpack/MsgPackDecoderFast';
+import {MsgPackDecoder} from '../msgpack/MsgPackDecoder';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 
 const encoder = new MsgPackEncoderFast();
 
@@ -27,14 +27,14 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack MsgPackDecoderFast',
+      name: 'json-pack MsgPackDecoderFast',
       setup: () => {
         const decoder = new MsgPackDecoderFast();
         return (data: any) => decoder.read(data);
       },
     },
     {
-      name: 'json-joy/json-pack MsgPackDecoder',
+      name: 'json-pack MsgPackDecoder',
       setup: () => {
         const decoder = new MsgPackDecoder();
         return (data: any) => decoder.read(data);

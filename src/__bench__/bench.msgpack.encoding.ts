@@ -1,11 +1,11 @@
-// npx ts-node src/json-pack/__bench__/bench.msgpack.encoding.ts
+// npx ts-node src/__bench__/bench.msgpack.encoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {MsgPackEncoder} from '../../msgpack/MsgPackEncoder';
-import {MsgPackEncoderFast} from '../../msgpack/MsgPackEncoderFast';
-import {CborDecoder} from '../../cbor/CborDecoder';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {MsgPackEncoder} from '../msgpack/MsgPackEncoder';
+import {MsgPackEncoderFast} from '../msgpack/MsgPackEncoderFast';
+import {CborDecoder} from '../cbor/CborDecoder';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 
 const benchmark: IBenchmark = {
   name: 'MessagePack Encoding',
@@ -18,14 +18,14 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack MsgPackEncoderFast',
+      name: 'json-pack MsgPackEncoderFast',
       setup: () => {
         const encoder = new MsgPackEncoderFast();
         return (data: any) => encoder.encode(data);
       },
     },
     {
-      name: 'json-joy/json-pack MsgPackEncoder',
+      name: 'json-pack MsgPackEncoder',
       setup: () => {
         const encoder = new MsgPackEncoder();
         return (data: any) => encoder.encode(data);

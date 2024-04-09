@@ -1,13 +1,13 @@
-// npx ts-node src/json-pack/__bench__/bench.encoding.ts
+// npx ts-node src/__bench__/bench.encoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {JsonEncoder} from '../../json/JsonEncoder';
-import {UbjsonEncoder} from '../../ubjson/UbjsonEncoder';
-import {CborEncoderFast} from '../../cbor/CborEncoderFast';
-import {CborEncoder} from '../../cbor/CborEncoder';
-import {Writer} from '../../util/buffers/Writer';
-import {payloads} from '../../__bench__/payloads';
-import {MsgPackEncoderFast} from '../../msgpack';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {JsonEncoder} from '../json/JsonEncoder';
+import {UbjsonEncoder} from '../ubjson/UbjsonEncoder';
+import {CborEncoderFast} from '../cbor/CborEncoderFast';
+import {CborEncoder} from '../cbor/CborEncoder';
+import {Writer} from '../util/buffers/Writer';
+import {payloads} from '../__bench__/payloads';
+import {MsgPackEncoderFast} from '../msgpack';
 
 const benchmark: IBenchmark = {
   name: 'Encoding',
@@ -15,7 +15,7 @@ const benchmark: IBenchmark = {
   payloads,
   runners: [
     {
-      name: 'json-joy/json-pack JsonEncoder',
+      name: 'json-pack JsonEncoder',
       setup: () => {
         const writer = new Writer();
         const encoder = new JsonEncoder(writer);
@@ -23,7 +23,7 @@ const benchmark: IBenchmark = {
       },
     },
     {
-      name: 'json-joy/json-pack UbjsonEncoder',
+      name: 'json-pack UbjsonEncoder',
       setup: () => {
         const writer = new Writer();
         const encoder = new UbjsonEncoder(writer);
@@ -44,21 +44,21 @@ const benchmark: IBenchmark = {
       },
     },
     {
-      name: 'json-joy/json-pack CborEncoderFast',
+      name: 'json-pack CborEncoderFast',
       setup: () => {
         const encoder = new CborEncoderFast();
         return (json: any) => encoder.encode(json);
       },
     },
     {
-      name: 'json-joy/json-pack CborEncoder',
+      name: 'json-pack CborEncoder',
       setup: () => {
         const encoder = new CborEncoder();
         return (json: any) => encoder.encode(json);
       },
     },
     {
-      name: 'json-joy/json-pack MsgPackEncoderFast',
+      name: 'json-pack MsgPackEncoderFast',
       setup: () => {
         const encoder = new MsgPackEncoderFast();
         const jsonPack4 = encoder.encode.bind(encoder);

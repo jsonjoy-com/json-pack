@@ -3,7 +3,7 @@
 TypeScript branded type for a JSON string.
 
 ```ts
-import {JSON, json} from 'json-joy/lib/json-brand';
+import {JSON, json} from 'json-pack/lib/json-brand';
 
 const str = '{"hello": "world"}' as json<{hello: string}>;
 

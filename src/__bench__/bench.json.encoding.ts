@@ -1,10 +1,10 @@
-// npx ts-node src/json-pack/__bench__/bench.json.encoding.ts
+// npx ts-node src/__bench__/bench.json.encoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {JsonEncoder} from '../../json/JsonEncoder';
-import {Writer} from '../../util/buffers/Writer';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {JsonEncoder} from '../json/JsonEncoder';
+import {Writer} from '../util/buffers/Writer';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 const safeStringify = require('fast-safe-stringify');
 
 const benchmark: IBenchmark = {
@@ -18,7 +18,7 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack JsonEncoder.encode()',
+      name: 'json-pack JsonEncoder.encode()',
       setup: () => {
         const writer = new Writer();
         const encoder = new JsonEncoder(writer);

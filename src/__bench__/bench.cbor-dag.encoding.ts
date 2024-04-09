@@ -1,11 +1,11 @@
-// npx ts-node src/json-pack/__bench__/bench.cbor-dag.encoding.ts
+// npx ts-node src/__bench__/bench.cbor-dag.encoding.ts
 
-import {runBenchmark, IBenchmark} from '../../__bench__/runBenchmark';
-import {CborEncoderDag} from '../../cbor/CborEncoderDag';
-import {CborEncoder} from '../../cbor/CborEncoder';
-import {CborDecoder} from '../../cbor/CborDecoder';
-import {payloads} from '../../__bench__/payloads';
-import {deepEqual} from '../../json-equal/deepEqual';
+import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
+import {CborEncoderDag} from '../cbor/CborEncoderDag';
+import {CborEncoder} from '../cbor/CborEncoder';
+import {CborDecoder} from '../cbor/CborDecoder';
+import {payloads} from '../__bench__/payloads';
+import {deepEqual} from '../json-equal/deepEqual';
 
 const benchmark: IBenchmark = {
   name: 'Encoding',
@@ -18,14 +18,14 @@ const benchmark: IBenchmark = {
   },
   runners: [
     {
-      name: 'json-joy/json-pack CborEncoder',
+      name: 'json-pack CborEncoder',
       setup: () => {
         const encoder = new CborEncoder();
         return (json: any) => encoder.encode(json);
       },
     },
     {
-      name: 'json-joy/json-pack CborEncoderDag',
+      name: 'json-pack CborEncoderDag',
       setup: () => {
         const encoder = new CborEncoderDag();
         return (json: any) => encoder.encode(json);

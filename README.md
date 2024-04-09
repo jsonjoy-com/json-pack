@@ -12,8 +12,8 @@ formats, such as MessagePack, CBOR and other formats.
 - DAG-JSON
 - UBJSON
 - Amazon Ion
-- Redis RESP3
-- BitTorrent Bencode
+- RESP3
+- Bencode
 
 
 ## Benchmarks

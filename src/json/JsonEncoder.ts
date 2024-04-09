@@ -1,4 +1,4 @@
-import {toBase64Bin} from '../util/base64/toBase64Bin';
+import {toBase64Bin} from '@jsonjoy.com/base64/lib/toBase64Bin';
 import type {IWriter, IWriterGrowable} from '../util/buffers';
 import type {BinaryJsonEncoder, StreamingBinaryJsonEncoder} from '../types';
 

@@ -1,7 +1,7 @@
 import {JsonDecoder} from './JsonDecoder';
 import {findEndingQuote} from './util';
 import type {PackValue} from '../types';
-import {createFromBase64Bin} from '../util/base64/createFromBase64Bin';
+import {createFromBase64Bin} from '@jsonjoy.com/base64/lib/createFromBase64Bin';
 
 export const fromBase64Bin = createFromBase64Bin(undefined, '');
 

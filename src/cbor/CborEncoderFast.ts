@@ -1,8 +1,8 @@
-import {Writer} from '../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {CONST, MAJOR_OVERLAY} from './constants';
-import type {IWriter, IWriterGrowable} from '../util/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 import type {BinaryJsonEncoder, StreamingBinaryJsonEncoder, TlvBinaryJsonEncoder} from '../types';
-import type {Slice} from '../util/buffers/Slice';
+import type {Slice} from '@jsonjoy.com/util/lib/buffers/Slice';
 
 const isSafeInteger = Number.isSafeInteger;
 

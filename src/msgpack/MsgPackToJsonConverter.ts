@@ -1,5 +1,5 @@
-import {json_string} from '../json-brand';
-import {asString} from '../util/strings/asString';
+import {json_string} from '@jsonjoy.com/util/lib/json-brand';
+import {asString} from '@jsonjoy.com/util/lib/strings/asString';
 import {toDataUri} from '../util/buffers/toDataUri';
 
 /**

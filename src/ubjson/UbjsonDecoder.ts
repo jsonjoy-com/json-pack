@@ -1,4 +1,4 @@
-import {Reader} from '../util/buffers/Reader';
+import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
 import {JsonPackExtension} from '../JsonPackExtension';
 import {ERROR} from '../cbor/constants';
 import type {BinaryJsonDecoder, PackValue} from '../types';

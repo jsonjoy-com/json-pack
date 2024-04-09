@@ -1,6 +1,6 @@
 import type {MsgPack} from '../msgpack';
 import type {CborUint8Array} from '../cbor/types';
-import type {Brand} from '../util/types';
+import type {Brand} from '@jsonjoy.com/util/lib/types';
 
 export type base64_string<T extends Uint8Array = Uint8Array> = Brand<string, T, 'base64_string'>;
 export type binary_string<T extends Uint8Array = Uint8Array> = Brand<

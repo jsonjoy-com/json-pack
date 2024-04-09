@@ -1,5 +1,5 @@
-import {decodeUtf8} from '../util/buffers/utf8/decodeUtf8';
-import {Reader} from '../util/buffers/Reader';
+import {decodeUtf8} from '@jsonjoy.com/util/lib/buffers/utf8/decodeUtf8';
+import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
 import {fromBase64Bin} from '@jsonjoy.com/base64/lib/fromBase64Bin';
 import {findEndingQuote} from './util';
 import type {BinaryJsonDecoder, PackValue} from '../types';

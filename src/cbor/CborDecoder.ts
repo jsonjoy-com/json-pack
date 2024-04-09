@@ -2,7 +2,7 @@ import {CONST, ERROR, MAJOR} from './constants';
 import {CborDecoderBase} from './CborDecoderBase';
 import {JsonPackValue} from '../JsonPackValue';
 import type {Path} from '../json-pointer';
-import type {IReader, IReaderResettable} from '../util/buffers';
+import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
 
 export class CborDecoder<
   R extends IReader & IReaderResettable = IReader & IReaderResettable,

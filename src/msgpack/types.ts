@@ -1,4 +1,4 @@
-import type {IWriter, IWriterGrowable} from '../util/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
 export type MsgPack<T> = Uint8Array & {__BRAND__: 'msgpack'; __TYPE__: T};
 

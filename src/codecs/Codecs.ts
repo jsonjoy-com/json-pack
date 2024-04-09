@@ -1,4 +1,4 @@
-import {Writer} from '../util/buffers/Writer';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {CborJsonValueCodec} from './cbor';
 import {JsonJsonValueCodec} from './json';
 import {MsgPackJsonValueCodec} from './msgpack';

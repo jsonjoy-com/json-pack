@@ -1,6 +1,6 @@
 import {JsonEncoder} from './JsonEncoder';
-import {sort} from '../util/sort/insertion2';
-import {objKeyCmp} from '../util/objKeyCmp';
+import {sort} from '@jsonjoy.com/util/lib/sort/insertion2';
+import {objKeyCmp} from '@jsonjoy.com/util/lib/objKeyCmp';
 
 export class JsonEncoderStable extends JsonEncoder {
   public writeObj(obj: Record<string, unknown>): void {

@@ -11,7 +11,7 @@ import {
   BsonObjectId,
   BsonTimestamp,
 } from './values';
-import type {IWriter, IWriterGrowable} from '../util/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 import type {BinaryJsonEncoder} from '../types';
 
 export class BsonEncoder implements BinaryJsonEncoder {

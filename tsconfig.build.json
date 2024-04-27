@@ -5,6 +5,7 @@
   "exclude": [
     "src/demo",
     "src/__tests__",
+    "src/**/__demos__/**/*.*",
     "src/**/__tests__/**/*.*",
     "src/**/__bench__/**/*.*",
     "src/**/__mocks__/**/*.*",

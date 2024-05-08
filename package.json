@@ -8,6 +8,7 @@
   },
   "homepage": "https://github.com/jsonjoy-com/json-pack",
   "repository": "jsonjoy-com/json-pack",
+  "license": "Apache-2.0",
   "funding": {
     "type": "github",
     "url": "https://github.com/sponsors/streamich"

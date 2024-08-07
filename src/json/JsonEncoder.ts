@@ -40,6 +40,8 @@ export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncode
           case Uint8Array:
             return this.writeBin(value as Uint8Array);
           default:
+            if (value instanceof Uint8Array) return this.writeBin(value);
+            if (Array.isArray(value)) return this.writeArr(value);
             return this.writeUnknown(value);
         }
       }

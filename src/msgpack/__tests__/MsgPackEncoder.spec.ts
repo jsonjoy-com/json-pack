@@ -18,6 +18,15 @@ describe('binary', () => {
   });
 });
 
+describe('Buffer', () => {
+  test('supports Buffer instances', () => {
+    const data = {foo: Buffer.from([3, 2, 1])};
+    const encoded = encode(data);
+    const decoded = decode(encoded);
+    expect(decoded).toStrictEqual({foo: new Uint8Array([3, 2, 1])});
+  });
+});
+
 describe('extensions', () => {
   test('can encode a 5 byte extension', () => {
     const ext = new JsonPackExtension(33, new Uint8Array([1, 2, 3, 4, 5]));

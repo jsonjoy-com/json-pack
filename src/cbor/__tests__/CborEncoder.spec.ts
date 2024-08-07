@@ -135,6 +135,13 @@ describe('binary', () => {
     const decoded = decode(encoded) as Buffer;
     expect(toUint8Array(decoded)).toStrictEqual(new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]));
   });
+
+  test('can encode Buffer', () => {
+    const buf = Buffer.from('asdf');
+    const encoded = encoder.encode(buf);
+    const decoded = toUint8Array(decode(encoded));
+    expect(decoded).toStrictEqual(toUint8Array(buf));
+  });
 });
 
 describe('strings', () => {

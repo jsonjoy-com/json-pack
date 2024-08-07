@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.93% </span>
+                <span class="strong">89.74% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>31/33</span>
+                <span class='fraction'>35/39</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.11% </span>
+                <span class="strong">85% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>16/17</span>
+                <span class='fraction'>17/20</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.54% </span>
+                <span class="strong">94.11% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>29/31</span>
+                <span class='fraction'>32/34</span>
             </div>
         
             
@@ -134,7 +134,10 @@
 <a name='L69'></a><a href='#L69'>69</a>
 <a name='L70'></a><a href='#L70'>70</a>
 <a name='L71'></a><a href='#L71'>71</a>
-<a name='L72'></a><a href='#L72'>72</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">12x</span>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-yes">12x</span>
@@ -153,19 +156,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">304152x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">279263x</span>
+<span class="cline-any cline-yes">279337x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9715x</span>
+<span class="cline-any cline-yes">9614x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2211x</span>
+<span class="cline-any cline-yes">2250x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12006x</span>
-<span class="cline-any cline-yes">11063x</span>
-<span class="cline-any cline-yes">11063x</span>
+<span class="cline-any cline-yes">11994x</span>
+<span class="cline-any cline-yes">11031x</span>
+<span class="cline-any cline-yes">11031x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6450x</span>
+<span class="cline-any cline-yes">6427x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4558x</span>
+<span class="cline-any cline-yes">4548x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">42x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -176,6 +179,9 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -189,8 +195,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4230x</span>
-<span class="cline-any cline-yes">4211x</span>
+<span class="cline-any cline-yes">4229x</span>
+<span class="cline-any cline-yes">4210x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -247,6 +253,9 @@ export class CborEncoder&lt;W extends IWriter &amp; IWriterGrowable = IWriter &a
             const buf = (value as JsonPackValue).val;
             return this.writer.buf(buf, buf.length);
           default:
+            if (value instanceof Uint8Array) return this.writeBin(value);
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (Array.isArray(value)) <span class="cstat-no" title="statement not covered" >return this.writeArr(value);</span>
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (value instanceof Map) <span class="cstat-no" title="statement not covered" >return this.writeMap(value);</span>
             return this.writeUnknown(value);
         }
       }
@@ -283,7 +292,7 @@ export class CborEncoder&lt;W extends IWriter &amp; IWriterGrowable = IWriter &a
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-05-08T09:02:13.272Z
+                at 2024-08-07T13:07:23.894Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

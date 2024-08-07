@@ -40,6 +40,9 @@ export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriter
             const buf = (value as JsonPackValue).val;
             return this.writer.buf(buf, buf.length);
           default:
+            if (value instanceof Uint8Array) return this.writeBin(value);
+            if (Array.isArray(value)) return this.writeArr(value);
+            if (value instanceof Map) return this.writeMap(value);
             return this.writeUnknown(value);
         }
       }

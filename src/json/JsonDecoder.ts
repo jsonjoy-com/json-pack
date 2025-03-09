@@ -202,7 +202,7 @@ export class JsonDecoder implements BinaryJsonDecoder {
     const uint8 = reader.uint8;
     const char = uint8[x];
     switch (char) {
-      case 34 /* " */ : {
+      case 34 /* " */: {
         if (uint8[x + 1] === 0x64 /* d */) {
           const bin = this.tryReadBin();
           if (bin) return bin;
@@ -213,13 +213,18 @@ export class JsonDecoder implements BinaryJsonDecoder {
         }
         return this.readStr();
       }
-      case 91 /* [ */ : return this.readArr();
-      case 102 /* f */ : return this.readFalse();
-      case 110 /* n */ : return this.readNull();
-      case 116 /* t */ : return this.readTrue();
-      case 123 /* { */ : return this.readObj();
+      case 91 /* [ */:
+        return this.readArr();
+      case 102 /* f */:
+        return this.readFalse();
+      case 110 /* n */:
+        return this.readNull();
+      case 116 /* t */:
+        return this.readTrue();
+      case 123 /* { */:
+        return this.readObj();
       default:
-        if ((char >= 48 /* 0 */ && char <= 57 /* 9 */) || char === 45 /* - */) return this.readNum();
+        if ((char >= 48 /* 0 */ && char <= 57) /* 9 */ || char === 45 /* - */) return this.readNum();
         throw new Error('Invalid JSON');
     }
   }
@@ -232,10 +237,10 @@ export class JsonDecoder implements BinaryJsonDecoder {
     while (true) {
       char = uint8[x];
       switch (char) {
-        case 32 /* <space> */ :
-        case 9 /* <tab> */ :
-        case 10 /* <line feed> */ :
-        case 13 /* <carriage return> */ :
+        case 32 /* <space> */:
+        case 9 /* <tab> */:
+        case 10 /* <line feed> */:
+        case 13 /* <carriage return> */:
           x++;
           continue;
         default:
@@ -264,9 +269,12 @@ export class JsonDecoder implements BinaryJsonDecoder {
   public readBool(): unknown {
     const reader = this.reader;
     switch (reader.uint8[reader.x]) {
-      case 102 /* f */ : return this.readFalse();
-      case 116 /* t */ : return this.readTrue();
-      default: throw new Error('Invalid JSON');
+      case 102 /* f */:
+        return this.readFalse();
+      case 116 /* t */:
+        return this.readTrue();
+      default:
+        throw new Error('Invalid JSON');
     }
   }
 

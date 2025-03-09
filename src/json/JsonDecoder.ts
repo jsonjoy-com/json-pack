@@ -642,17 +642,17 @@ export class JsonDecoder implements BinaryJsonDecoder {
 
   public readArr(): unknown[] {
     const reader = this.reader;
-    if (reader.u8() !== 0x5b) throw new Error('Invalid JSON');
+    if (reader.u8() !== 0x5b /* [ */) throw new Error('Invalid JSON');
     const arr: unknown[] = [];
     const uint8 = reader.uint8;
     while (true) {
       this.skipWhitespace();
       const char = uint8[reader.x];
-      if (char === 0x5d) return reader.x++, arr; // ]
-      if (char === 0x2c) {
+      if (char === 0x5d /* ] */) return reader.x++, arr;
+      if (char === 0x2c /* , */) {
         reader.x++;
         continue;
-      } // ,
+      }
       arr.push(this.readAny());
     }
   }

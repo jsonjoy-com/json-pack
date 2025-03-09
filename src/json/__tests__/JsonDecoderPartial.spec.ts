@@ -48,4 +48,82 @@ describe('array', () => {
     const value = parse('[true, "asdf",, , 4]');
     expect(value).toEqual([true, 'asdf', 4]);
   });
+
+  test('can parse nested arrays', () => {
+    const value = parse('[[true, false, null]]');
+    expect(value).toEqual([[true, false, null]]);
+  });
+
+  test('can parse nested arrays with missing brace', () => {
+    const value = parse('[[true, false, null]');
+    expect(value).toEqual([[true, false, null]]);
+  });
+
+  test('can parse nested arrays with two missing braces', () => {
+    const value = parse('[[true, false, null');
+    expect(value).toEqual([[true, false, null]]);
+  });
+
+  test('can parse nested arrays with two missing element', () => {
+    const value = parse('[[true, false,');
+    expect(value).toEqual([[true, false]]);
+  });
+});
+
+describe('object', () => {
+  test('can parse valid object', () => {
+    const value = parse('{"foo": 1, "bar": 2}');
+    expect(value).toEqual({foo: 1, bar: 2});
+  });
+
+  test('can parse object with missing brace (trailing space)', () => {
+    const value = parse('{"foo": 1, "bar": 2 ');
+    expect(value).toEqual({foo: 1, bar: 2});
+  });
+
+  test('can parse object with missing brace', () => {
+    const value = parse('{"foo": 1, "bar": 2');
+    expect(value).toEqual({foo: 1, bar: 2});
+  });
+
+  test('can parse object with missing field value', () => {
+    const value1 = parse('{"foo": 1, "bar": ');
+    const value2 = parse('{"foo": 1, "bar":');
+    const value3 = parse('{"foo": 1, "bar"');
+    const value4 = parse('{"foo": 1, "bar');
+    const value5 = parse('{"foo": 1, "b');
+    const value6 = parse('{"foo": 1, "');
+    const value7 = parse('{"foo": 1, ');
+    const value8 = parse('{"foo": 1,');
+    const value9 = parse('{"foo": 1');
+    expect(value1).toEqual({foo: 1});
+    expect(value2).toEqual({foo: 1});
+    expect(value3).toEqual({foo: 1});
+    expect(value4).toEqual({foo: 1});
+    expect(value5).toEqual({foo: 1});
+    expect(value6).toEqual({foo: 1});
+    expect(value7).toEqual({foo: 1});
+    expect(value8).toEqual({foo: 1});
+    expect(value9).toEqual({foo: 1});
+  });
+
+  test('can parse nested object', () => {
+    const value1 = parse('{"a": {"foo": 1, "bar": 2}}');
+    const value2 = parse('{"a": {"foo": 1, "bar": 2} }');
+    const value3 = parse('{"a": {"foo": 1, "bar": 2} ');
+    const value4 = parse('{"a": {"foo": 1, "bar": 2}');
+    const value5 = parse('{"a": {"foo": 1, "bar": 2 ');
+    const value6 = parse('{"a": {"foo": 1, "bar": 2');
+    expect(value1).toEqual({a: {foo: 1, bar: 2}});
+    expect(value2).toEqual({a: {foo: 1, bar: 2}});
+    expect(value3).toEqual({a: {foo: 1, bar: 2}});
+    expect(value4).toEqual({a: {foo: 1, bar: 2}});
+    expect(value5).toEqual({a: {foo: 1, bar: 2}});
+    expect(value6).toEqual({a: {foo: 1, bar: 2}});
+  });
+});
+
+test('simple nested object', () => {
+  const value = parse('{ "name": { "first": "ind", "last": "go');
+  expect(value).toEqual({name: {first: 'ind'}});
 });

@@ -635,15 +635,16 @@ export class JsonDecoder implements BinaryJsonDecoder {
     if (reader.u8() !== 0x5b /* [ */) throw new Error('Invalid JSON');
     const arr: unknown[] = [];
     const uint8 = reader.uint8;
+    let first = true;
     while (true) {
       this.skipWhitespace();
       const char = uint8[reader.x];
       if (char === 0x5d /* ] */) return reader.x++, arr;
-      if (char === 0x2c /* , */) {
-        reader.x++;
-        continue;
-      }
+      if (char === 0x2c /* , */) reader.x++;
+      else if (!first) throw new Error('Invalid JSON');
+      this.skipWhitespace();
       arr.push(this.readAny());
+      first = false;
     }
   }
 
@@ -652,14 +653,14 @@ export class JsonDecoder implements BinaryJsonDecoder {
     if (reader.u8() !== 0x7b /* { */) throw new Error('Invalid JSON');
     const obj: Record<string, unknown> = {};
     const uint8 = reader.uint8;
+    let first = true;
     while (true) {
       this.skipWhitespace();
       let char = uint8[reader.x];
       if (char === 0x7d /* } */) return reader.x++, obj;
-      if (char === 0x2c /* , */) {
-        reader.x++;
-        continue;
-      }
+      if (char === 0x2c /* , */) reader.x++;
+      else if (!first) throw new Error('Invalid JSON');
+      this.skipWhitespace();
       char = uint8[reader.x++];
       if (char !== 0x22 /* " */) throw new Error('Invalid JSON');
       const key = readKey(reader);
@@ -668,6 +669,7 @@ export class JsonDecoder implements BinaryJsonDecoder {
       if (reader.u8() !== 0x3a /* : */) throw new Error('Invalid JSON');
       this.skipWhitespace();
       obj[key] = this.readAny();
+      first = false;
     }
   }
 }

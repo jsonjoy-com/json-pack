@@ -322,6 +322,19 @@ describe('array', () => {
     expect(value).toEqual([1, 2.2, -3.3]);
   });
 
+  test('simple array', () => {
+    const data = Buffer.from('[1, 2, 3]', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toEqual([1, 2, 3]);
+  });
+
+  test('missing comma', () => {
+    const data = Buffer.from('[1, 2 3]', 'utf-8');
+    decoder.reader.reset(data);
+    expect(() => decoder.readAny()).toThrow(new Error('Invalid JSON'));
+  });
+
   test('nested arrays', () => {
     const data = Buffer.from(' \n \r \t [[],\n[ 4,\t5] , [null]] \n \r \t ', 'utf-8');
     decoder.reader.reset(data);
@@ -364,6 +377,19 @@ describe('object', () => {
     decoder.reader.reset(data);
     const value = decoder.readAny();
     expect(value).toEqual({foo: 'bar'});
+  });
+
+  test('simple object', () => {
+    const data = Buffer.from('{"foo": 1, "bar": 2}', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toEqual({foo: 1, bar: 2});
+  });
+
+  test('missing comma', () => {
+    const data = Buffer.from('{"foo": 1 "bar": 2}', 'utf-8');
+    decoder.reader.reset(data);
+    expect(() => decoder.readAny()).toThrow(new Error('Invalid JSON'));
   });
 
   test('nested object', () => {

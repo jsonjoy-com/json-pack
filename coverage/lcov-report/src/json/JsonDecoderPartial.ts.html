@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/resp/RespStreamingDecoder.ts</title>
+    <title>Code coverage report for src/json/JsonDecoderPartial.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/resp</a> RespStreamingDecoder.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/json</a> JsonDecoderPartial.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">70.45% </span>
+                <span class="strong">86.95% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>31/44</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">22.22% </span>
-                <span class="quiet">Branches</span>
-                <span class='fraction'>2/9</span>
+                <span class='fraction'>60/69</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">71.42% </span>
-                <span class="quiet">Functions</span>
-                <span class='fraction'>5/7</span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>15/21</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">73.17% </span>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>4/4</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">92.72% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>30/41</span>
+                <span class='fraction'>51/55</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -166,40 +166,12 @@
 <a name='L101'></a><a href='#L101'>101</a>
 <a name='L102'></a><a href='#L102'>102</a>
 <a name='L103'></a><a href='#L103'>103</a>
-<a name='L104'></a><a href='#L104'>104</a>
-<a name='L105'></a><a href='#L105'>105</a>
-<a name='L106'></a><a href='#L106'>106</a>
-<a name='L107'></a><a href='#L107'>107</a>
-<a name='L108'></a><a href='#L108'>108</a>
-<a name='L109'></a><a href='#L109'>109</a>
-<a name='L110'></a><a href='#L110'>110</a>
-<a name='L111'></a><a href='#L111'>111</a>
-<a name='L112'></a><a href='#L112'>112</a>
-<a name='L113'></a><a href='#L113'>113</a>
-<a name='L114'></a><a href='#L114'>114</a>
-<a name='L115'></a><a href='#L115'>115</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L104'></a><a href='#L104'>104</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-yes">24x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -207,201 +179,196 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7860x</span>
+<span class="cline-any cline-yes">7860x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1857x</span>
+<span class="cline-any cline-yes">1857x</span>
+<span class="cline-any cline-yes">1857x</span>
+<span class="cline-any cline-yes">1857x</span>
+<span class="cline-any cline-yes">1857x</span>
+<span class="cline-any cline-yes">1857x</span>
+<span class="cline-any cline-yes">3495x</span>
+<span class="cline-any cline-yes">3495x</span>
+<span class="cline-any cline-yes">3495x</span>
+<span class="cline-any cline-yes">1649x</span>
+<span class="cline-any cline-yes">1176x</span>
+<span class="cline-any cline-yes">1642x</span>
+<span class="cline-any cline-yes">1642x</span>
+<span class="cline-any cline-yes">1642x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1638x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2739x</span>
+<span class="cline-any cline-yes">2739x</span>
+<span class="cline-any cline-yes">2739x</span>
+<span class="cline-any cline-yes">2739x</span>
+<span class="cline-any cline-yes">2739x</span>
+<span class="cline-any cline-yes">12218x</span>
+<span class="cline-any cline-yes">12218x</span>
+<span class="cline-any cline-yes">12218x</span>
+<span class="cline-any cline-yes">9499x</span>
+<span class="cline-any cline-yes">3434x</span>
+<span class="cline-any cline-yes">3434x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6065x</span>
+<span class="cline-any cline-yes">6065x</span>
+<span class="cline-any cline-yes">6065x</span>
+<span class="cline-any cline-yes">6052x</span>
+<span class="cline-any cline-yes">6052x</span>
+<span class="cline-any cline-yes">6052x</span>
+<span class="cline-any cline-yes">6052x</span>
+<span class="cline-any cline-yes">6048x</span>
+<span class="cline-any cline-yes">6048x</span>
+<span class="cline-any cline-yes">6048x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1580x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1644x</span>
-<span class="cline-any cline-yes">1644x</span>
-<span class="cline-any cline-yes">1640x</span>
-<span class="cline-any cline-yes">1640x</span>
-<span class="cline-any cline-yes">1640x</span>
-<span class="cline-any cline-yes">155x</span>
-<span class="cline-any cline-yes">155x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1485x</span>
-<span class="cline-any cline-yes">1485x</span>
-<span class="cline-any cline-yes">1485x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">70x</span>
-<span class="cline-any cline-yes">70x</span>
-<span class="cline-any cline-yes">70x</span>
-<span class="cline-any cline-yes">70x</span>
-<span class="cline-any cline-yes">70x</span>
-<span class="cline-any cline-yes">70x</span>
-<span class="cline-any cline-yes">70x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {StreamingReader} from '@jsonjoy.com/util/lib/buffers/StreamingReader';
-import {RespDecoder} from './RespDecoder';
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {JsonDecoder, readKey} from './JsonDecoder';
+import type {PackValue} from '../types';
+&nbsp;
+export class DecodeFinishError extends Error {
+  constructor(public readonly value: unknown) {
+    super('DECODE_FINISH');
+  }
+}
 &nbsp;
 /**
- * Streaming decoder for RESP protocol. Can be used to decode data from
- * a stream where messages are arbitrary split into chunks.
+ * This class parses JSON which is mostly correct but not necessarily complete
+ * or with missing parts. It can be used to parse JSON that is being streamed
+ * in chunks or JSON output of an LLM model.
  *
- * Example:
+ * If the end of a nested JSON value (array, object) is missing, this parser
+ * will return the initial correct part for that value, which it was able to
+ * parse, until the point where the JSON is no longer valid.
  *
- * ```ts
- * const decoder = new RespStreamingDecoder();
+ * Examples:
  *
- * decoder.push(new Uint8Array([43, 49, 13, 10]));
+ * ```js
+ * // Missing closing brace
+ * decoder.readAny('[1, 2, 3'); // [1, 2, 3]
  *
- * let val;
- * while ((val = decoder.read()) !== undefined) {
- *   console.log(val);
- * }
+ * // Trailing comma and missing closing brace
+ * decoder.readAny('[1, 2, '); // [1, 2]
+ *
+ * // Corrupt second element and missing closing brace
+ * decoder.readAny('{"foo": 1, "bar":'); // {"foo": 1}
  * ```
  */
-export class RespStreamingDecoder {
-  protected readonly reader = new StreamingReader();
-  protected readonly decoder = new RespDecoder(this.reader);
-&nbsp;
-  /**
-   * When set to true, the decoder will attempt to decode RESP Bulk strings
-   * (which are binary strings, i.e. Uint8Array) as UTF-8 strings. If the
-   * string is not valid UTF-8, it will be returned as a Uint8Array.
-   */
-<span class="fstat-no" title="function not covered" >  public get t</span>ryUtf8(): boolean {
-<span class="cstat-no" title="statement not covered" >    return this.decoder.tryUtf8;</span>
-  }
-<span class="fstat-no" title="function not covered" >  public set t</span>ryUtf8(value: boolean) {
-<span class="cstat-no" title="statement not covered" >    this.decoder.tryUtf8 = value;</span>
-  }
-&nbsp;
-  /**
-   * Add a chunk of data to be decoded.
-   * @param uint8 `Uint8Array` chunk of data to be decoded.
-   */
-  public push(uint8: Uint8Array): void {
-    this.reader.push(uint8);
-  }
-&nbsp;
-  /**
-   * Decode one value from the stream. If `undefined` is returned, then
-   * there is not enough data to decode or the stream is finished.
-   *
-   * There could be multiple values in the stream, so this method should be
-   * called in a loop until `undefined` is returned.
-   *
-   * @return Decoded value or `undefined` if there is not enough data to decode.
-   */
-  public read(): unknown | undefined {
-    const reader = this.reader;
-    if (reader.size() === 0) return undefined;
-    const x = reader.x;
+export class JsonDecoderPartial extends JsonDecoder {
+  public readAny(): unknown {
     try {
-      const val = this.decoder.val();
-      reader.consume();
-      return val;
+      return super.readAny();
     } catch (error) {
-      if (error instanceof RangeError) {
-        reader.x = x;
-        return undefined;
-      } else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="else path not taken" >E</span>throw error;</span>
+      if (error instanceof DecodeFinishError) return error.value;
+      throw error;
     }
   }
 &nbsp;
-  /**
-   * Decode only one RESP command from the stream, if the value is not a
-   * command, an error will be thrown.
-   *
-   * @returns Redis command and its arguments or `undefined` if there is
-   * not enough data to decode.
-   */
-  public readCmd(): [cmd: string, ...args: Uint8Array[]] | undefined {
+  public readArr(): unknown[] {
     const reader = this.reader;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (reader.size() === 0) <span class="cstat-no" title="statement not covered" >return undefined;</span>
-    const x = reader.x;
-    try {
-      const args = this.decoder.readCmd();
-      reader.consume();
-      return args;
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >      if (error instanceof RangeError) {</span>
-<span class="cstat-no" title="statement not covered" >        reader.x = x;</span>
-<span class="cstat-no" title="statement not covered" >        return undefined;</span>
-      } else <span class="cstat-no" title="statement not covered" >throw error;</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (reader.u8() !== 0x5b /* [ */) <span class="cstat-no" title="statement not covered" >throw new Error('Invalid JSON');</span>
+    const arr: unknown[] = [];
+    const uint8 = reader.uint8;
+    let first = true;
+    while (true) {
+      this.skipWhitespace();
+      const char = uint8[reader.x];
+      if (char === 0x5d /* ] */) return reader.x++, arr;
+      if (char === 0x2c /* , */) reader.x++;
+      else if (!first) return arr;
+      this.skipWhitespace();
+      try {
+        arr.push(this.readAny());
+      } catch (error) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (error instanceof DecodeFinishError) <span class="cstat-no" title="statement not covered" >return arr.push(error.value), arr;</span>
+        if (error instanceof Error &amp;&amp; error.message === 'Invalid JSON') throw new DecodeFinishError(arr);
+<span class="cstat-no" title="statement not covered" >        throw error;</span>
+      }
+      first = false;
     }
   }
 &nbsp;
-  /**
-   * Skips one value from the stream. If `undefined` is returned, then
-   * there is not enough data to skip or the stream is finished.
-   * @returns `null` if a value was skipped, `undefined` if there is not
-   * enough data to skip.
-   */
-  public skip(): null | undefined {
+  public readObj(): PackValue | Record&lt;string, unknown&gt; | unknown {
     const reader = this.reader;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (reader.size() === 0) <span class="cstat-no" title="statement not covered" >return undefined;</span>
-    const x = reader.x;
-    try {
-      this.decoder.skipAny();
-      reader.consume();
-      return null;
-    } catch (error) {
-<span class="cstat-no" title="statement not covered" >      if (error instanceof RangeError) {</span>
-<span class="cstat-no" title="statement not covered" >        reader.x = x;</span>
-<span class="cstat-no" title="statement not covered" >        return undefined;</span>
-      } else <span class="cstat-no" title="statement not covered" >throw error;</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (reader.u8() !== 0x7b /* { */) <span class="cstat-no" title="statement not covered" >throw new Error('Invalid JSON');</span>
+    const obj: Record&lt;string, unknown&gt; = {};
+    const uint8 = reader.uint8;
+    while (true) {
+      this.skipWhitespace();
+      let char = uint8[reader.x];
+      if (char === 0x7d /* } */) return reader.x++, obj;
+      if (char === 0x2c /* , */) {
+        reader.x++;
+        continue;
+      }
+      try {
+        char = uint8[reader.x++];
+        if (char !== 0x22 /* " */) throw new Error('Invalid JSON');
+        const key = readKey(reader);
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (key === '__proto__') <span class="cstat-no" title="statement not covered" >throw new Error('Invalid JSON');</span>
+        this.skipWhitespace();
+        if (reader.u8() !== 0x3a /* : */) throw new Error('Invalid JSON');
+        this.skipWhitespace();
+        try {
+          obj[key] = this.readAny();
+        } catch (error) {
+          <span class="missing-if-branch" title="if path not taken" >I</span>if (error instanceof DecodeFinishError) {
+<span class="cstat-no" title="statement not covered" >            obj[key] = error.value;</span>
+<span class="cstat-no" title="statement not covered" >            return obj;</span>
+          }
+          throw error;
+        }
+      } catch (error) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>if (error instanceof DecodeFinishError) <span class="cstat-no" title="statement not covered" >return obj;</span>
+        if (error instanceof Error &amp;&amp; error.message === 'Invalid JSON') throw new DecodeFinishError(obj);
+<span class="cstat-no" title="statement not covered" >        throw error;</span>
+      }
     }
   }
 }

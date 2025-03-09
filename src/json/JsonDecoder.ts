@@ -107,7 +107,7 @@ const isUndefined = (u8: Uint8Array, x: number) =>
 
 const fromCharCode = String.fromCharCode;
 
-const readShortUtf8StrAndUnescape = (reader: Reader): string => {
+export const readKey = (reader: Reader): string => {
   const buf = reader.uint8;
   const len = buf.length;
   const points: number[] = [];
@@ -202,10 +202,8 @@ export class JsonDecoder implements BinaryJsonDecoder {
     const uint8 = reader.uint8;
     const char = uint8[x];
     switch (char) {
-      case 34: {
-        // "
-        if (uint8[x + 1] === 0x64) {
-          // d
+      case 34 /* " */: {
+        if (uint8[x + 1] === 0x64 /* d */) {
           const bin = this.tryReadBin();
           if (bin) return bin;
           if (isUndefined(uint8, x + 2)) {
@@ -215,18 +213,18 @@ export class JsonDecoder implements BinaryJsonDecoder {
         }
         return this.readStr();
       }
-      case 91: // [
+      case 91 /* [ */:
         return this.readArr();
-      case 102: // f
+      case 102 /* f */:
         return this.readFalse();
-      case 110: // n
+      case 110 /* n */:
         return this.readNull();
-      case 116: // t
+      case 116 /* t */:
         return this.readTrue();
-      case 123: // {
+      case 123 /* { */:
         return this.readObj();
       default:
-        if ((char >= 48 && char <= 57) || char === 45) return this.readNum();
+        if ((char >= 48 /* 0 */ && char <= 57) /* 9 */ || char === 45 /* - */) return this.readNum();
         throw new Error('Invalid JSON');
     }
   }
@@ -239,10 +237,10 @@ export class JsonDecoder implements BinaryJsonDecoder {
     while (true) {
       char = uint8[x];
       switch (char) {
-        case 32: // space
-        case 9: // tab
-        case 10: // line feed
-        case 13: // carriage return
+        case 32 /* <space> */:
+        case 9 /* <tab> */:
+        case 10 /* <line feed> */:
+        case 13 /* <carriage return> */:
           x++;
           continue;
         default:
@@ -253,27 +251,27 @@ export class JsonDecoder implements BinaryJsonDecoder {
   }
 
   public readNull(): null {
-    if (this.reader.u32() !== 0x6e756c6c) throw new Error('Invalid JSON');
+    if (this.reader.u32() !== 0x6e756c6c /* null */) throw new Error('Invalid JSON');
     return null;
   }
 
   public readTrue(): true {
-    if (this.reader.u32() !== 0x74727565) throw new Error('Invalid JSON');
+    if (this.reader.u32() !== 0x74727565 /* true */) throw new Error('Invalid JSON');
     return true;
   }
 
   public readFalse(): false {
     const reader = this.reader;
-    if (reader.u8() !== 0x66 || reader.u32() !== 0x616c7365) throw new Error('Invalid JSON');
+    if (reader.u8() !== 0x66 /* f */ || reader.u32() !== 0x616c7365 /* alse */) throw new Error('Invalid JSON');
     return false;
   }
 
   public readBool(): unknown {
     const reader = this.reader;
     switch (reader.uint8[reader.x]) {
-      case 102: // f
+      case 102 /* f */:
         return this.readFalse();
-      case 116: // t
+      case 116 /* t */:
         return this.readTrue();
       default:
         throw new Error('Invalid JSON');
@@ -642,42 +640,44 @@ export class JsonDecoder implements BinaryJsonDecoder {
 
   public readArr(): unknown[] {
     const reader = this.reader;
-    if (reader.u8() !== 0x5b) throw new Error('Invalid JSON');
+    if (reader.u8() !== 0x5b /* [ */) throw new Error('Invalid JSON');
     const arr: unknown[] = [];
     const uint8 = reader.uint8;
+    let first = true;
     while (true) {
       this.skipWhitespace();
       const char = uint8[reader.x];
-      if (char === 0x5d) return reader.x++, arr; // ]
-      if (char === 0x2c) {
-        reader.x++;
-        continue;
-      } // ,
+      if (char === 0x5d /* ] */) return reader.x++, arr;
+      if (char === 0x2c /* , */) reader.x++;
+      else if (!first) throw new Error('Invalid JSON');
+      this.skipWhitespace();
       arr.push(this.readAny());
+      first = false;
     }
   }
 
   public readObj(): PackValue | Record<string, unknown> | unknown {
     const reader = this.reader;
-    if (reader.u8() !== 0x7b) throw new Error('Invalid JSON');
+    if (reader.u8() !== 0x7b /* { */) throw new Error('Invalid JSON');
     const obj: Record<string, unknown> = {};
     const uint8 = reader.uint8;
+    let first = true;
     while (true) {
       this.skipWhitespace();
       let char = uint8[reader.x];
-      if (char === 0x7d) return reader.x++, obj; // }
-      if (char === 0x2c) {
-        reader.x++;
-        continue;
-      } // ,
+      if (char === 0x7d /* } */) return reader.x++, obj;
+      if (char === 0x2c /* , */) reader.x++;
+      else if (!first) throw new Error('Invalid JSON');
+      this.skipWhitespace();
       char = uint8[reader.x++];
-      if (char !== 0x22) throw new Error('Invalid JSON');
-      const key = readShortUtf8StrAndUnescape(reader);
+      if (char !== 0x22 /* " */) throw new Error('Invalid JSON');
+      const key = readKey(reader);
       if (key === '__proto__') throw new Error('Invalid JSON');
       this.skipWhitespace();
-      if (reader.u8() !== 0x3a) throw new Error('Invalid JSON');
+      if (reader.u8() !== 0x3a /* : */) throw new Error('Invalid JSON');
       this.skipWhitespace();
       obj[key] = this.readAny();
+      first = false;
     }
   }
 }

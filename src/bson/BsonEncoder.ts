@@ -20,42 +20,126 @@ export class BsonEncoder implements BinaryJsonEncoder {
   public encode(value: unknown): Uint8Array {
     const writer = this.writer;
     writer.reset();
-    this.writeAny(value);
+    
+    // BSON requires data to be wrapped in a document
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+      // For non-object values, wrap them in an object with a "value" property
+      this.wrapInDocument(value);
+    } else {
+      // For objects, just write them directly
+      this.writeObj(value as Record<string, unknown>);
+    }
+    
     return writer.flush();
+  }
+  
+  /**
+   * Wrap a primitive or array value in a BSON document
+   */
+  private wrapInDocument(value: unknown): void {
+    const writer = this.writer;
+    writer.ensureCapacity(8);
+    const x0 = writer.x0;
+    const dx = writer.x - x0;
+    writer.x += 4; // Reserve space for document size
+    
+    // Write the value with a key of "value"
+    const key = "value";
+    this.writeKey(key, value);
+    
+    writer.u8(0); // End of document marker
+    const x = writer.x0 + dx;
+    const size = writer.x - x;
+    writer.view.setUint32(x, size, true);
   }
 
   public writeAny(value: unknown): void {
     switch (typeof value) {
       case 'object': {
-        if (value === null) throw new Error('NOT_OBJ');
+        if (value === null) {
+          this.writeNull();
+          return;
+        }
+        if (Array.isArray(value)) {
+          this.writeArr(value);
+          return;
+        }
         return this.writeObj(<Record<string, unknown>>value);
       }
+      case 'string': {
+        this.writeStr(value);
+        return;
+      }
+      case 'number': {
+        this.writeNumber(value);
+        return;
+      }
+      case 'boolean': {
+        this.writeBoolean(value);
+        return;
+      }
+      case 'undefined': {
+        this.writeUndef();
+        return;
+      }
     }
-    throw new Error('NOT_OBJ');
+    throw new Error('Unsupported type: ' + typeof value);
   }
 
   public writeNull(): void {
-    throw new Error('Method not implemented.');
+    const writer = this.writer;
+    writer.ensureCapacity(5);
+    writer.u8(0x0A); // Null type
+    writer.utf8("0");
+    writer.u8(0);    // NULL terminator
   }
 
   public writeUndef(): void {
-    throw new Error('Method not implemented.');
+    const writer = this.writer;
+    writer.ensureCapacity(5);
+    writer.u8(0x06); // Undefined type
+    writer.utf8("0");
+    writer.u8(0);    // NULL terminator
   }
 
   public writeBoolean(bool: boolean): void {
-    throw new Error('Method not implemented.');
+    const writer = this.writer;
+    writer.ensureCapacity(6);
+    writer.u8(0x08); // Boolean type
+    writer.utf8("0");
+    writer.u8(0);    // NULL terminator
+    writer.u8(bool ? 1 : 0); // Boolean value
   }
 
   public writeNumber(num: number): void {
-    throw new Error('Method not implemented.');
+    // Check if it's an integer and within 32-bit range
+    if (Number.isInteger(num) && num >= -2147483648 && num <= 2147483647) {
+      this.writeInteger(num);
+    } else if (Number.isInteger(num) && num >= -9007199254740991 && num <= 9007199254740991) {
+      // If it's an integer but outside 32-bit range, use Int64
+      this.writeInt64(num);
+    } else {
+      // Otherwise use Float
+      this.writeFloat(num);
+    }
   }
 
   public writeInteger(int: number): void {
-    throw new Error('Method not implemented.');
+    const writer = this.writer;
+    writer.ensureCapacity(9);
+    writer.u8(0x10); // Int32 type
+    writer.utf8("0");
+    writer.u8(0);    // NULL terminator
+    this.writeInt32(int);
   }
 
   public writeUInteger(uint: number): void {
-    throw new Error('Method not implemented.');
+    // BSON doesn't have an unsigned integer type, so we'll use Int32 or Int64
+    if (uint <= 2147483647) {
+      this.writeInteger(uint);
+    } else {
+      this.writeInt64(uint);
+    }
   }
 
   public writeInt32(int: number): void {
@@ -74,7 +158,7 @@ export class BsonEncoder implements BinaryJsonEncoder {
 
   public writeFloat(float: number): void {
     const writer = this.writer;
-    writer.ensureCapacity(4);
+    writer.ensureCapacity(8); // Correct size for double (Float64)
     writer.view.setFloat64(writer.x, float, true);
     writer.x += 8;
   }
@@ -92,16 +176,47 @@ export class BsonEncoder implements BinaryJsonEncoder {
   }
 
   public writeStr(str: string): void {
-    const writer = this.writer;
-    const length = str.length;
-    const maxSize = 4 + 1 + 4 * length;
-    writer.ensureCapacity(maxSize);
-    const x = writer.x;
-    this.writeInt32(length + 1);
-    const bytesWritten = writer.utf8(str);
-    writer.u8(0);
-    if (bytesWritten !== length) {
-      writer.view.setInt32(x, bytesWritten + 1, true);
+    // For top-level string, we need to wrap it in a BSON document
+    if (this.writer.x === 0) {
+      // Create a simple {0: str} document
+      const docStartPos = this.writer.x;
+      this.writer.x += 4; // Reserve space for document size
+      
+      // Write string element
+      this.writer.u8(0x02); // String type
+      this.writeCString("0"); // Key "0"
+      
+      // Write string value
+      const length = str.length;
+      const maxSize = 4 + 1 + 4 * length;
+      this.writer.ensureCapacity(maxSize);
+      const x = this.writer.x;
+      this.writeInt32(length + 1);
+      const bytesWritten = this.writer.utf8(str);
+      this.writer.u8(0);
+      if (bytesWritten !== length) {
+        this.writer.view.setInt32(x, bytesWritten + 1, true);
+      }
+      
+      // End document
+      this.writer.u8(0);
+      
+      // Write document size
+      const docSize = this.writer.x - docStartPos;
+      this.writer.view.setInt32(docStartPos, docSize, true);
+    } else {
+      // Normal string inside a document
+      const writer = this.writer;
+      const length = str.length;
+      const maxSize = 4 + 1 + 4 * length;
+      writer.ensureCapacity(maxSize);
+      const x = writer.x;
+      this.writeInt32(length + 1);
+      const bytesWritten = writer.utf8(str);
+      writer.u8(0);
+      if (bytesWritten !== length) {
+        writer.view.setInt32(x, bytesWritten + 1, true);
+      }
     }
   }
 
@@ -305,13 +420,13 @@ export class BsonEncoder implements BinaryJsonEncoder {
           case BsonInt64: {
             writer.u8(0x12);
             this.writeCString(key);
-            this.writeInt64((value as BsonInt32).value);
+            this.writeInt64((value as BsonInt64).value);
             break;
           }
           case BsonFloat: {
             writer.u8(0x01);
             this.writeCString(key);
-            this.writeFloat((value as BsonInt32).value);
+            this.writeFloat((value as BsonFloat).value);
             break;
           }
           case BsonTimestamp: {

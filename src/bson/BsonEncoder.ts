@@ -41,7 +41,7 @@ export class BsonEncoder implements BinaryJsonEncoder {
   }
 
   public writeUndef(): void {
-    // Not used directly in BSON - handled in writeKey  
+    // Not used directly in BSON - handled in writeKey
     throw new Error('Use writeKey for BSON encoding');
   }
 
@@ -114,7 +114,7 @@ export class BsonEncoder implements BinaryJsonEncoder {
   }
 
   public writeAsciiStr(str: string): void {
-    // Use writeStr for BSON - it handles UTF-8 properly 
+    // Use writeStr for BSON - it handles UTF-8 properly
     this.writeStr(str);
   }
 

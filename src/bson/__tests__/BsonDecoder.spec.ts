@@ -94,7 +94,10 @@ describe('BsonDecoder', () => {
     });
 
     test('nested array', () => {
-      roundTrip([[1, 2], [3, 4]]);
+      roundTrip([
+        [1, 2],
+        [3, 4],
+      ]);
     });
 
     test('empty object', () => {

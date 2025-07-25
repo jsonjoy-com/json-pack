@@ -57,7 +57,7 @@ export class BsonDecoder implements BinaryJsonDecoder {
   public readCString(): string {
     const reader = this.reader;
     const uint8 = reader.uint8;
-    let x = reader.x;
+    const x = reader.x;
     let length = 0;
 
     // Find the null terminator
@@ -169,8 +169,8 @@ export class BsonDecoder implements BinaryJsonDecoder {
 
   public readArray(): unknown[] {
     const doc = this.readDocument() as Record<string, unknown>;
-    const keys = Object.keys(doc).sort((a, b) => parseInt(a) - parseInt(b));
-    return keys.map(key => doc[key]);
+    const keys = Object.keys(doc).sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    return keys.map((key) => doc[key]);
   }
 
   public readBinary(): BsonBinary | Uint8Array {
@@ -195,13 +195,13 @@ export class BsonDecoder implements BinaryJsonDecoder {
 
     // Timestamp (4 bytes, big-endian)
     const timestamp = (uint8[x] << 24) | (uint8[x + 1] << 16) | (uint8[x + 2] << 8) | uint8[x + 3];
-    
+
     // Process ID (5 bytes) - first 4 bytes are little-endian, then 1 high byte
     const processLo = uint8[x + 4] | (uint8[x + 5] << 8) | (uint8[x + 6] << 16) | (uint8[x + 7] << 24);
     const processHi = uint8[x + 8];
     // Convert to unsigned 32-bit first, then combine with high byte
     const processLoUnsigned = processLo >>> 0; // Convert to unsigned
-    const process = processLoUnsigned + (processHi * 0x100000000);
+    const process = processLoUnsigned + processHi * 0x100000000;
 
     // Counter (3 bytes, big-endian)
     const counter = (uint8[x + 9] << 16) | (uint8[x + 10] << 8) | uint8[x + 11];

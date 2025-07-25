@@ -1,3 +1,44 @@
+# Amazon Ion Binary Codec
+
+This library provides high-performance Amazon Ion binary format encoding and decoding capabilities.
+
+## Usage
+
+```typescript
+import {IonEncoderFast, IonDecoder} from '@jsonjoy.com/json-pack/lib/ion';
+
+const encoder = new IonEncoderFast();
+const decoder = new IonDecoder();
+
+const data = {users: [{name: 'Alice', age: 30}], count: 1};
+const encoded = encoder.encode(data);
+const decoded = decoder.decode(encoded);
+```
+
+## Important Usage Notes
+
+⚠️ **Instance Reuse Limitation**: Due to internal state management with shared UTF-8 decoders, encoder and decoder instances should **not be reused** across multiple encode/decode operations with complex data. For reliable operation, create fresh instances for each encoding/decoding operation:
+
+```typescript
+// ❌ DON'T: Reuse instances for multiple operations
+const encoder = new IonEncoderFast();
+const decoder = new IonDecoder();
+for (const item of items) {
+  const encoded = encoder.encode(item);  // May cause state corruption
+  const decoded = decoder.decode(encoded);
+}
+
+// ✅ DO: Create fresh instances for each operation
+for (const item of items) {
+  const encoder = new IonEncoderFast();
+  const decoder = new IonDecoder();
+  const encoded = encoder.encode(item);
+  const decoded = decoder.decode(encoded);
+}
+```
+
+This limitation primarily affects complex nested objects with many string keys. Simple data structures may work with reused instances, but fresh instances are recommended for guaranteed correctness.
+
 ## Benchmarks
 
 Encoding:

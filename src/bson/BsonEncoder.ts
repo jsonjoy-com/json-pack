@@ -81,7 +81,7 @@ export class BsonEncoder implements BinaryJsonEncoder {
 
   public writeFloat(float: number): void {
     const writer = this.writer;
-    writer.ensureCapacity(4);
+    writer.ensureCapacity(8);
     writer.view.setFloat64(writer.x, float, true);
     writer.x += 8;
   }

@@ -6,7 +6,7 @@ const encoder = new IonEncoderFast();
 const decoder = new IonDecoder();
 
 describe('fuzzing', () => {
-  test('CborEncoderFast', () => {
+  test('Amazon Ion codec', () => {
     for (let i = 0; i < 2000; i++) {
       const value = JSON.parse(JSON.stringify(RandomJson.generate()));
       const encoded = encoder.encode(value);

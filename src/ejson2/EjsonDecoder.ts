@@ -13,31 +13,279 @@ import {
   BsonSymbol,
   BsonTimestamp,
 } from '../bson/values';
+import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
+import {readKey} from '../json/JsonDecoder';
+import type {BinaryJsonDecoder} from '../types';
 
 export interface EjsonDecoderOptions {
   /** Whether to parse legacy Extended JSON formats */
   legacy?: boolean;
 }
 
-export class EjsonDecoder {
+export class EjsonDecoder implements BinaryJsonDecoder {
+  public reader = new Reader();
+
   constructor(private options: EjsonDecoderOptions = {}) {}
 
-  public decode(json: string): unknown {
-    const parsed = JSON.parse(json);
-    return this.transform(parsed);
+  public read(uint8: Uint8Array): unknown {
+    this.reader.reset(uint8);
+    return this.readAny();
   }
 
-  private transform(value: unknown): unknown {
-    if (value === null || typeof value !== 'object') {
-      return value;
-    }
+  public decode(uint8: Uint8Array): unknown {
+    this.reader.reset(uint8);
+    return this.readAny();
+  }
 
-    if (Array.isArray(value)) {
-      return value.map((item) => this.transform(item));
-    }
+  /**
+   * Decode from string (for backward compatibility).
+   * This method maintains the previous API but uses the binary decoder internally.
+   */
+  public decodeFromString(json: string): unknown {
+    const bytes = new TextEncoder().encode(json);
+    return this.decode(bytes);
+  }
 
-    // Check for Extended JSON type wrappers
-    const obj = value as Record<string, unknown>;
+  public readAny(): unknown {
+    this.skipWhitespace();
+    const reader = this.reader;
+    const uint8 = reader.uint8;
+    const char = uint8[reader.x];
+    switch (char) {
+      case 34 /* " */:
+        return this.readStr();
+      case 91 /* [ */:
+        return this.readArr();
+      case 102 /* f */:
+        return this.readFalse();
+      case 110 /* n */:
+        return this.readNull();
+      case 116 /* t */:
+        return this.readTrue();
+      case 123 /* { */:
+        return this.readObjWithEjsonSupport();
+      default:
+        if ((char >= 48 /* 0 */ && char <= 57) /* 9 */ || char === 45 /* - */) return this.readNum();
+        throw new Error('Invalid JSON');
+    }
+  }
+
+  public skipWhitespace(): void {
+    const reader = this.reader;
+    const uint8 = reader.uint8;
+    let x = reader.x;
+    let char: number = 0;
+    while (true) {
+      char = uint8[x];
+      switch (char) {
+        case 32 /* <space> */:
+        case 9 /* <tab> */:
+        case 10 /* <line feed> */:
+        case 13 /* <carriage return> */:
+          x++;
+          continue;
+        default:
+          reader.x = x;
+          return;
+      }
+    }
+  }
+
+  public readNull(): null {
+    if (this.reader.u32() !== 0x6e756c6c /* null */) throw new Error('Invalid JSON');
+    return null;
+  }
+
+  public readTrue(): true {
+    if (this.reader.u32() !== 0x74727565 /* true */) throw new Error('Invalid JSON');
+    return true;
+  }
+
+  public readFalse(): false {
+    const reader = this.reader;
+    if (reader.u8() !== 0x66 /* f */ || reader.u32() !== 0x616c7365 /* alse */) throw new Error('Invalid JSON');
+    return false;
+  }
+
+  public readNum(): number {
+    const reader = this.reader;
+    const uint8 = reader.uint8;
+    let x = reader.x;
+    let c = uint8[x++];
+    const c1 = c;
+    c = uint8[x++];
+    if (!c || ((c < 45 || c > 57) && c !== 43 && c !== 69 && c !== 101)) {
+      reader.x = x - 1;
+      const num = +String.fromCharCode(c1);
+      if (num !== num) throw new Error('Invalid JSON');
+      return num;
+    }
+    const c2 = c;
+    c = uint8[x++];
+    if (!c || ((c < 45 || c > 57) && c !== 43 && c !== 69 && c !== 101)) {
+      reader.x = x - 1;
+      const num = +String.fromCharCode(c1, c2);
+      if (num !== num) throw new Error('Invalid JSON');
+      return num;
+    }
+    // Continue reading for longer numbers (simplified from JsonDecoder)
+    const points: number[] = [c1, c2];
+    while (c && ((c >= 45 && c <= 57) || c === 43 || c === 69 || c === 101)) {
+      points.push(c);
+      c = uint8[x++];
+    }
+    reader.x = x - 1;
+    const num = +String.fromCharCode.apply(String, points);
+    if (num !== num) throw new Error('Invalid JSON');
+    return num;
+  }
+
+  public readStr(): string {
+    const reader = this.reader;
+    const uint8 = reader.uint8;
+    const char = uint8[reader.x++];
+    if (char !== 0x22) throw new Error('Invalid JSON');
+    const x0 = reader.x;
+    let x1 = x0;
+    
+    // Find ending quote (simplified version)
+    while (x1 < uint8.length) {
+      const c = uint8[x1];
+      if (c === 0x22 /* " */ && uint8[x1 - 1] !== 0x5c /* \ */) {
+        break;
+      }
+      x1++;
+    }
+    
+    if (x1 >= uint8.length) throw new Error('Invalid JSON');
+    
+    // Decode UTF-8 string
+    let str = '';
+    for (let i = x0; i < x1; i++) {
+      str += String.fromCharCode(uint8[i]);
+    }
+    
+    // Handle escaped characters (simplified)
+    str = str.replace(/\\(b|f|n|r|t|"|\/|\\)/g, (match, char) => {
+      switch (char) {
+        case 'b': return '\b';
+        case 'f': return '\f';
+        case 'n': return '\n';
+        case 'r': return '\r';
+        case 't': return '\t';
+        case '"': return '"';
+        case '/': return '/';
+        case '\\': return '\\';
+        default: return match;
+      }
+    });
+    
+    reader.x = x1 + 1;
+    return str;
+  }
+
+  public readArr(): unknown[] {
+    const reader = this.reader;
+    if (reader.u8() !== 0x5b /* [ */) throw new Error('Invalid JSON');
+    const arr: unknown[] = [];
+    const uint8 = reader.uint8;
+    let first = true;
+    while (true) {
+      this.skipWhitespace();
+      const char = uint8[reader.x];
+      if (char === 0x5d /* ] */) return reader.x++, arr;
+      if (char === 0x2c /* , */) reader.x++;
+      else if (!first) throw new Error('Invalid JSON');
+      this.skipWhitespace();
+      arr.push(this.readAny()); // Arrays should process EJSON objects recursively
+      first = false;
+    }
+  }
+
+  public readObjWithEjsonSupport(): unknown {
+    const reader = this.reader;
+    if (reader.u8() !== 0x7b /* { */) throw new Error('Invalid JSON');
+    const obj: Record<string, unknown> = {};
+    const uint8 = reader.uint8;
+    let first = true;
+    while (true) {
+      this.skipWhitespace();
+      let char = uint8[reader.x];
+      if (char === 0x7d /* } */) {
+        reader.x++;
+        // Check if this is an EJSON type wrapper
+        return this.transformEjsonObject(obj);
+      }
+      if (char === 0x2c /* , */) reader.x++;
+      else if (!first) throw new Error('Invalid JSON');
+      this.skipWhitespace();
+      char = uint8[reader.x++];
+      if (char !== 0x22 /* " */) throw new Error('Invalid JSON');
+      const key = readKey(reader);
+      if (key === '__proto__') throw new Error('Invalid JSON');
+      this.skipWhitespace();
+      if (reader.u8() !== 0x3a /* : */) throw new Error('Invalid JSON');
+      this.skipWhitespace();
+      
+      // For EJSON type wrapper detection, we need to read nested objects as raw first
+      obj[key] = this.readValue();
+      first = false;
+    }
+  }
+
+  private readValue(): unknown {
+    this.skipWhitespace();
+    const reader = this.reader;
+    const uint8 = reader.uint8;
+    const char = uint8[reader.x];
+    switch (char) {
+      case 34 /* " */:
+        return this.readStr();
+      case 91 /* [ */:
+        return this.readArr();
+      case 102 /* f */:
+        return this.readFalse();
+      case 110 /* n */:
+        return this.readNull();
+      case 116 /* t */:
+        return this.readTrue();
+      case 123 /* { */:
+        return this.readRawObj(); // Read as raw object first
+      default:
+        if ((char >= 48 /* 0 */ && char <= 57) /* 9 */ || char === 45 /* - */) return this.readNum();
+        throw new Error('Invalid JSON');
+    }
+  }
+
+  private readRawObj(): Record<string, unknown> {
+    const reader = this.reader;
+    if (reader.u8() !== 0x7b /* { */) throw new Error('Invalid JSON');
+    const obj: Record<string, unknown> = {};
+    const uint8 = reader.uint8;
+    let first = true;
+    while (true) {
+      this.skipWhitespace();
+      let char = uint8[reader.x];
+      if (char === 0x7d /* } */) {
+        reader.x++;
+        return obj; // Return raw object without transformation
+      }
+      if (char === 0x2c /* , */) reader.x++;
+      else if (!first) throw new Error('Invalid JSON');
+      this.skipWhitespace();
+      char = uint8[reader.x++];
+      if (char !== 0x22 /* " */) throw new Error('Invalid JSON');
+      const key = readKey(reader);
+      if (key === '__proto__') throw new Error('Invalid JSON');
+      this.skipWhitespace();
+      if (reader.u8() !== 0x3a /* : */) throw new Error('Invalid JSON');
+      this.skipWhitespace();
+      obj[key] = this.readValue();
+      first = false;
+    }
+  }
+
+  private transformEjsonObject(obj: Record<string, unknown>): unknown {
     const keys = Object.keys(obj);
 
     // Helper function to validate exact key match
@@ -176,7 +424,7 @@ export class EjsonDecoder {
         const code = obj.$code as string;
         const scope = obj.$scope;
         if (typeof code === 'string' && typeof scope === 'object' && scope !== null) {
-          return new BsonJavascriptCodeWithScope(code, this.transform(scope) as Record<string, unknown>);
+          return new BsonJavascriptCodeWithScope(code, this.transformEjsonObject(scope as Record<string, unknown>) as Record<string, unknown>);
         }
         throw new Error('Invalid CodeWScope format');
       }
@@ -243,7 +491,7 @@ export class EjsonDecoder {
             const ref = dbPointerObj.$ref as string;
             const id = dbPointerObj.$id;
             if (typeof ref === 'string' && id !== undefined) {
-              const transformedId = this.transform(id) as BsonObjectId;
+              const transformedId = this.transformEjsonObject(id as Record<string, unknown>) as BsonObjectId;
               if (transformedId instanceof BsonObjectId) {
                 return new BsonDbPointer(ref, transformedId);
               }
@@ -316,7 +564,7 @@ export class EjsonDecoder {
     // DBRef (not a BSON type, but a convention) - special case, can have additional fields
     if (keys.includes('$ref') && keys.includes('$id')) {
       const ref = obj.$ref as string;
-      const id = this.transform(obj.$id);
+      const id = this.transformEjsonObject(obj.$id as Record<string, unknown>);
       const result: Record<string, unknown> = {$ref: ref, $id: id};
       
       if (keys.includes('$db')) {
@@ -326,21 +574,32 @@ export class EjsonDecoder {
       // Add any other fields
       for (const key of keys) {
         if (key !== '$ref' && key !== '$id' && key !== '$db') {
-          result[key] = this.transform(obj[key]);
+          result[key] = this.transformEjsonObject(obj[key] as Record<string, unknown>);
         }
       }
       
       return result;
     }
 
-    // Regular object - transform all properties
+    // Regular object - transform all properties  
     const result: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(obj)) {
-      result[key] = this.transform(val);
+      if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+        result[key] = this.transformEjsonObject(val as Record<string, unknown>);
+      } else if (Array.isArray(val)) {
+        result[key] = val.map(item => 
+          typeof item === 'object' && item !== null && !Array.isArray(item) 
+            ? this.transformEjsonObject(item as Record<string, unknown>)
+            : item
+        );
+      } else {
+        result[key] = val;
+      }
     }
     return result;
   }
 
+  // Utility methods
   private parseObjectId(hex: string): BsonObjectId {
     // Parse 24-character hex string into ObjectId components
     const timestamp = parseInt(hex.slice(0, 8), 16);

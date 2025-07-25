@@ -13,206 +13,558 @@ import {
   BsonSymbol,
   BsonTimestamp,
 } from '../bson/values';
-import {fromBase64} from '@jsonjoy.com/base64';
+import {toBase64Bin} from '@jsonjoy.com/base64/lib/toBase64Bin';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import type {BinaryJsonEncoder} from '../types';
 
 export interface EjsonEncoderOptions {
   /** Use canonical format (preserves all type information) or relaxed format (more readable) */
   canonical?: boolean;
 }
 
-export class EjsonEncoder {
-  constructor(private options: EjsonEncoderOptions = {}) {}
+export class EjsonEncoder implements BinaryJsonEncoder {
+  constructor(
+    public readonly writer: IWriter & IWriterGrowable,
+    private options: EjsonEncoderOptions = {}
+  ) {}
 
-  public encode(value: unknown): string {
-    return JSON.stringify(this.transform(value));
+  public encode(value: unknown): Uint8Array {
+    const writer = this.writer;
+    writer.reset();
+    this.writeAny(value);
+    return writer.flush();
   }
 
-  private transform(value: unknown): unknown {
+  /**
+   * Encode to string (for backward compatibility).
+   * This method maintains the previous API but uses the binary encoder internally.
+   */
+  public encodeToString(value: unknown): string {
+    const bytes = this.encode(value);
+    return new TextDecoder().decode(bytes);
+  }
+
+  public writeUnknown(value: unknown): void {
+    this.writeNull();
+  }
+
+  public writeAny(value: unknown): void {
     if (value === null || value === undefined) {
       if (value === undefined) {
-        return {$undefined: true};
+        return this.writeUndefinedWrapper();
       }
-      return null;
+      return this.writeNull();
     }
 
     if (typeof value === 'boolean') {
-      return value;
+      return this.writeBoolean(value);
     }
 
     if (typeof value === 'string') {
-      return value;
+      return this.writeStr(value);
     }
 
     if (typeof value === 'number') {
-      if (this.options.canonical) {
-        if (Number.isInteger(value)) {
-          // Determine if it fits in Int32 or needs Int64
-          if (value >= -2147483648 && value <= 2147483647) {
-            return {$numberInt: value.toString()};
-          } else {
-            return {$numberLong: value.toString()};
-          }
-        } else {
-          if (!isFinite(value)) {
-            return {$numberDouble: this.formatNonFinite(value)};
-          }
-          return {$numberDouble: value.toString()};
-        }
-      } else {
-        // Relaxed format
-        if (!isFinite(value)) {
-          return {$numberDouble: this.formatNonFinite(value)};
-        }
-        return value;
-      }
+      return this.writeNumberAsEjson(value);
     }
 
     if (Array.isArray(value)) {
-      return value.map((item) => this.transform(item));
+      return this.writeArr(value);
     }
 
     if (value instanceof Date) {
-      const timestamp = value.getTime();
-      // Check if date is valid
-      if (isNaN(timestamp)) {
-        throw new Error('Invalid Date');
-      }
-      
-      if (this.options.canonical) {
-        return {$date: {$numberLong: timestamp.toString()}};
-      } else {
-        // Use ISO format for dates between 1970-9999 in relaxed mode
-        const year = value.getFullYear();
-        if (year >= 1970 && year <= 9999) {
-          return {$date: value.toISOString()};
-        } else {
-          return {$date: {$numberLong: timestamp.toString()}};
-        }
-      }
+      return this.writeDateAsEjson(value);
     }
 
     if (value instanceof RegExp) {
-      return {
-        $regularExpression: {
-          pattern: value.source,
-          options: this.getRegExpOptions(value),
-        },
-      };
+      return this.writeRegExpAsEjson(value);
     }
 
     // Handle BSON value classes
     if (value instanceof BsonObjectId) {
-      return {$oid: this.objectIdToHex(value)};
+      return this.writeObjectIdAsEjson(value);
     }
 
     if (value instanceof BsonInt32) {
-      if (this.options.canonical) {
-        return {$numberInt: value.value.toString()};
-      } else {
-        return value.value;
-      }
+      return this.writeBsonInt32AsEjson(value);
     }
 
     if (value instanceof BsonInt64) {
-      if (this.options.canonical) {
-        return {$numberLong: value.value.toString()};
-      } else {
-        return value.value;
-      }
+      return this.writeBsonInt64AsEjson(value);
     }
 
     if (value instanceof BsonFloat) {
-      if (this.options.canonical) {
-        if (!isFinite(value.value)) {
-          return {$numberDouble: this.formatNonFinite(value.value)};
-        }
-        return {$numberDouble: value.value.toString()};
-      } else {
-        if (!isFinite(value.value)) {
-          return {$numberDouble: this.formatNonFinite(value.value)};
-        }
-        return value.value;
-      }
+      return this.writeBsonFloatAsEjson(value);
     }
 
     if (value instanceof BsonDecimal128) {
-      // Convert bytes to decimal string representation
-      return {$numberDecimal: this.decimal128ToString(value.data)};
+      return this.writeBsonDecimal128AsEjson(value);
     }
 
     if (value instanceof BsonBinary) {
-      const base64 = this.uint8ArrayToBase64(value.data);
-      const subType = value.subtype.toString(16).padStart(2, '0');
-      return {
-        $binary: {
-          base64,
-          subType,
-        },
-      };
+      return this.writeBsonBinaryAsEjson(value);
     }
 
     if (value instanceof BsonJavascriptCode) {
-      return {$code: value.code};
+      return this.writeBsonCodeAsEjson(value);
     }
 
     if (value instanceof BsonJavascriptCodeWithScope) {
-      return {
-        $code: value.code,
-        $scope: this.transform(value.scope),
-      };
+      return this.writeBsonCodeWScopeAsEjson(value);
     }
 
     if (value instanceof BsonSymbol) {
-      return {$symbol: value.symbol};
+      return this.writeBsonSymbolAsEjson(value);
     }
 
     if (value instanceof BsonTimestamp) {
-      return {
-        $timestamp: {
-          t: value.timestamp,
-          i: value.increment,
-        },
-      };
+      return this.writeBsonTimestampAsEjson(value);
     }
 
     if (value instanceof BsonDbPointer) {
-      return {
-        $dbPointer: {
-          $ref: value.name,
-          $id: this.transform(value.id),
-        },
-      };
+      return this.writeBsonDbPointerAsEjson(value);
     }
 
     if (value instanceof BsonMinKey) {
-      return {$minKey: 1};
+      return this.writeBsonMinKeyAsEjson();
     }
 
     if (value instanceof BsonMaxKey) {
-      return {$maxKey: 1};
+      return this.writeBsonMaxKeyAsEjson();
     }
 
     if (typeof value === 'object' && value !== null) {
-      const result: Record<string, unknown> = {};
-      for (const [key, val] of Object.entries(value)) {
-        result[key] = this.transform(val);
-      }
-      return result;
+      return this.writeObj(value as Record<string, unknown>);
     }
 
     // Fallback for unknown types
-    return value;
+    return this.writeUnknown(value);
   }
+
+  public writeNull(): void {
+    this.writer.u32(0x6e756c6c); // null
+  }
+
+  public writeBoolean(bool: boolean): void {
+    if (bool)
+      this.writer.u32(0x74727565); // true
+    else this.writer.u8u32(0x66, 0x616c7365); // false
+  }
+
+  public writeNumber(num: number): void {
+    const str = num.toString();
+    this.writer.ascii(str);
+  }
+
+  public writeInteger(int: number): void {
+    this.writeNumber(int >> 0 === int ? int : Math.trunc(int));
+  }
+
+  public writeUInteger(uint: number): void {
+    this.writeInteger(uint < 0 ? -uint : uint);
+  }
+
+  public writeFloat(float: number): void {
+    this.writeNumber(float);
+  }
+
+  public writeBin(buf: Uint8Array): void {
+    const writer = this.writer;
+    const length = buf.length;
+    writer.ensureCapacity(38 + 3 + (length << 1));
+    // Write: "data:application/octet-stream;base64,
+    const view = writer.view;
+    let x = writer.x;
+    view.setUint32(x, 0x22_64_61_74); // "dat
+    x += 4;
+    view.setUint32(x, 0x61_3a_61_70); // a:ap
+    x += 4;
+    view.setUint32(x, 0x70_6c_69_63); // plic
+    x += 4;
+    view.setUint32(x, 0x61_74_69_6f); // atio
+    x += 4;
+    view.setUint32(x, 0x6e_2f_6f_63); // n/oc
+    x += 4;
+    view.setUint32(x, 0x74_65_74_2d); // tet-
+    x += 4;
+    view.setUint32(x, 0x73_74_72_65); // stre
+    x += 4;
+    view.setUint32(x, 0x61_6d_3b_62); // am;b
+    x += 4;
+    view.setUint32(x, 0x61_73_65_36); // ase6
+    x += 4;
+    view.setUint16(x, 0x34_2c); // 4,
+    x += 2;
+    x = toBase64Bin(buf, 0, length, view, x);
+    writer.uint8[x++] = 0x22; // "
+    writer.x = x;
+  }
+
+  public writeStr(str: string): void {
+    const writer = this.writer;
+    const length = str.length;
+    writer.ensureCapacity(length * 4 + 2);
+    if (length < 256) {
+      let x = writer.x;
+      const uint8 = writer.uint8;
+      uint8[x++] = 0x22; // "
+      for (let i = 0; i < length; i++) {
+        const code = str.charCodeAt(i);
+        switch (code) {
+          case 34: // "
+          case 92: // \
+            uint8[x++] = 0x5c; // \
+            break;
+        }
+        if (code < 32 || code > 126) {
+          writer.utf8(JSON.stringify(str));
+          return;
+        } else uint8[x++] = code;
+      }
+      uint8[x++] = 0x22; // "
+      writer.x = x;
+      return;
+    }
+    writer.utf8(JSON.stringify(str));
+  }
+
+  public writeAsciiStr(str: string): void {
+    const length = str.length;
+    const writer = this.writer;
+    writer.ensureCapacity(length * 2 + 2);
+    const uint8 = writer.uint8;
+    let x = writer.x;
+    uint8[x++] = 0x22; // "
+    for (let i = 0; i < length; i++) {
+      const code = str.charCodeAt(i);
+      switch (code) {
+        case 34: // "
+        case 92: // \
+          uint8[x++] = 0x5c; // \
+          break;
+      }
+      uint8[x++] = code;
+    }
+    uint8[x++] = 0x22; // "
+    writer.x = x;
+  }
+
+  public writeArr(arr: unknown[]): void {
+    const writer = this.writer;
+    writer.u8(0x5b); // [
+    const length = arr.length;
+    const last = length - 1;
+    for (let i = 0; i < last; i++) {
+      this.writeAny(arr[i]);
+      writer.u8(0x2c); // ,
+    }
+    if (last >= 0) this.writeAny(arr[last]);
+    writer.u8(0x5d); // ]
+  }
+
+  public writeObj(obj: Record<string, unknown>): void {
+    const writer = this.writer;
+    const keys = Object.keys(obj);
+    const length = keys.length;
+    if (!length) return writer.u16(0x7b7d); // {}
+    writer.u8(0x7b); // {
+    for (let i = 0; i < length; i++) {
+      const key = keys[i];
+      const value = obj[key];
+      this.writeStr(key);
+      writer.u8(0x3a); // :
+      this.writeAny(value);
+      writer.u8(0x2c); // ,
+    }
+    writer.uint8[writer.x - 1] = 0x7d; // }
+  }
+
+  // EJSON-specific type wrapper methods
+
+  private writeUndefinedWrapper(): void {
+    // Write {"$undefined":true}
+    const writer = this.writer;
+    writer.ensureCapacity(18);
+    writer.u8(0x7b); // {
+    this.writeStr('$undefined');
+    writer.u8(0x3a); // :
+    writer.u32(0x74727565); // true
+    writer.u8(0x7d); // }
+  }
+
+  private writeNumberAsEjson(value: number): void {
+    if (this.options.canonical) {
+      if (Number.isInteger(value)) {
+        // Determine if it fits in Int32 or needs Int64
+        if (value >= -2147483648 && value <= 2147483647) {
+          this.writeNumberIntWrapper(value);
+        } else {
+          this.writeNumberLongWrapper(value);
+        }
+      } else {
+        this.writeNumberDoubleWrapper(value);
+      }
+    } else {
+      // Relaxed format
+      if (!isFinite(value)) {
+        this.writeNumberDoubleWrapper(value);
+      } else {
+        this.writeNumber(value);
+      }
+    }
+  }
+
+  private writeNumberIntWrapper(value: number): void {
+    // Write {"$numberInt":"value"}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$numberInt');
+    writer.u8(0x3a); // :
+    this.writeStr(value.toString());
+    writer.u8(0x7d); // }
+  }
+
+  private writeNumberLongWrapper(value: number): void {
+    // Write {"$numberLong":"value"}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$numberLong');
+    writer.u8(0x3a); // :
+    this.writeStr(value.toString());
+    writer.u8(0x7d); // }
+  }
+
+  private writeNumberDoubleWrapper(value: number): void {
+    // Write {"$numberDouble":"value"}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$numberDouble');
+    writer.u8(0x3a); // :
+    if (!isFinite(value)) {
+      this.writeStr(this.formatNonFinite(value));
+    } else {
+      this.writeStr(value.toString());
+    }
+    writer.u8(0x7d); // }
+  }
+
+  private writeDateAsEjson(value: Date): void {
+    const timestamp = value.getTime();
+    // Check if date is valid
+    if (isNaN(timestamp)) {
+      throw new Error('Invalid Date');
+    }
+    
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$date');
+    writer.u8(0x3a); // :
+    
+    if (this.options.canonical) {
+      // Write {"$numberLong":"timestamp"}
+      writer.u8(0x7b); // {
+      this.writeStr('$numberLong');
+      writer.u8(0x3a); // :
+      this.writeStr(timestamp.toString());
+      writer.u8(0x7d); // }
+    } else {
+      // Use ISO format for dates between 1970-9999 in relaxed mode
+      const year = value.getFullYear();
+      if (year >= 1970 && year <= 9999) {
+        this.writeStr(value.toISOString());
+      } else {
+        // Write {"$numberLong":"timestamp"}
+        writer.u8(0x7b); // {
+        this.writeStr('$numberLong');
+        writer.u8(0x3a); // :
+        this.writeStr(timestamp.toString());
+        writer.u8(0x7d); // }
+      }
+    }
+    writer.u8(0x7d); // }
+  }
+
+  private writeRegExpAsEjson(value: RegExp): void {
+    // Write {"$regularExpression":{"pattern":"...","options":"..."}}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$regularExpression');
+    writer.u8(0x3a); // :
+    writer.u8(0x7b); // {
+    this.writeStr('pattern');
+    writer.u8(0x3a); // :
+    this.writeStr(value.source);
+    writer.u8(0x2c); // ,
+    this.writeStr('options');
+    writer.u8(0x3a); // :
+    this.writeStr(value.flags);
+    writer.u8(0x7d); // }
+    writer.u8(0x7d); // }
+  }
+
+  private writeObjectIdAsEjson(value: BsonObjectId): void {
+    // Write {"$oid":"hexstring"}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$oid');
+    writer.u8(0x3a); // :
+    this.writeStr(this.objectIdToHex(value));
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonInt32AsEjson(value: BsonInt32): void {
+    if (this.options.canonical) {
+      this.writeNumberIntWrapper(value.value);
+    } else {
+      this.writeNumber(value.value);
+    }
+  }
+
+  private writeBsonInt64AsEjson(value: BsonInt64): void {
+    if (this.options.canonical) {
+      this.writeNumberLongWrapper(value.value);
+    } else {
+      this.writeNumber(value.value);
+    }
+  }
+
+  private writeBsonFloatAsEjson(value: BsonFloat): void {
+    if (this.options.canonical) {
+      this.writeNumberDoubleWrapper(value.value);
+    } else {
+      if (!isFinite(value.value)) {
+        this.writeNumberDoubleWrapper(value.value);
+      } else {
+        this.writeNumber(value.value);
+      }
+    }
+  }
+
+  private writeBsonDecimal128AsEjson(value: BsonDecimal128): void {
+    // Write {"$numberDecimal":"..."}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$numberDecimal');
+    writer.u8(0x3a); // :
+    this.writeStr(this.decimal128ToString(value.data));
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonBinaryAsEjson(value: BsonBinary): void {
+    // Write {"$binary":{"base64":"...","subType":"..."}}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$binary');
+    writer.u8(0x3a); // :
+    writer.u8(0x7b); // {
+    this.writeStr('base64');
+    writer.u8(0x3a); // :
+    this.writeStr(this.uint8ArrayToBase64(value.data));
+    writer.u8(0x2c); // ,
+    this.writeStr('subType');
+    writer.u8(0x3a); // :
+    this.writeStr(value.subtype.toString(16).padStart(2, '0'));
+    writer.u8(0x7d); // }
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonCodeAsEjson(value: BsonJavascriptCode): void {
+    // Write {"$code":"..."}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$code');
+    writer.u8(0x3a); // :
+    this.writeStr(value.code);
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonCodeWScopeAsEjson(value: BsonJavascriptCodeWithScope): void {
+    // Write {"$code":"...","$scope":{...}}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$code');
+    writer.u8(0x3a); // :
+    this.writeStr(value.code);
+    writer.u8(0x2c); // ,
+    this.writeStr('$scope');
+    writer.u8(0x3a); // :
+    this.writeAny(value.scope);
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonSymbolAsEjson(value: BsonSymbol): void {
+    // Write {"$symbol":"..."}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$symbol');
+    writer.u8(0x3a); // :
+    this.writeStr(value.symbol);
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonTimestampAsEjson(value: BsonTimestamp): void {
+    // Write {"$timestamp":{"t":...,"i":...}}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$timestamp');
+    writer.u8(0x3a); // :
+    writer.u8(0x7b); // {
+    this.writeStr('t');
+    writer.u8(0x3a); // :
+    this.writeNumber(value.timestamp);
+    writer.u8(0x2c); // ,
+    this.writeStr('i');
+    writer.u8(0x3a); // :
+    this.writeNumber(value.increment);
+    writer.u8(0x7d); // }
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonDbPointerAsEjson(value: BsonDbPointer): void {
+    // Write {"$dbPointer":{"$ref":"...","$id":{...}}}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$dbPointer');
+    writer.u8(0x3a); // :
+    writer.u8(0x7b); // {
+    this.writeStr('$ref');
+    writer.u8(0x3a); // :
+    this.writeStr(value.name);
+    writer.u8(0x2c); // ,
+    this.writeStr('$id');
+    writer.u8(0x3a); // :
+    this.writeAny(value.id);
+    writer.u8(0x7d); // }
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonMinKeyAsEjson(): void {
+    // Write {"$minKey":1}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$minKey');
+    writer.u8(0x3a); // :
+    this.writeNumber(1);
+    writer.u8(0x7d); // }
+  }
+
+  private writeBsonMaxKeyAsEjson(): void {
+    // Write {"$maxKey":1}
+    const writer = this.writer;
+    writer.u8(0x7b); // {
+    this.writeStr('$maxKey');
+    writer.u8(0x3a); // :
+    this.writeNumber(1);
+    writer.u8(0x7d); // }
+  }
+
+  // Utility methods
 
   private formatNonFinite(value: number): string {
     if (value === Infinity) return 'Infinity';
     if (value === -Infinity) return '-Infinity';
     return 'NaN';
-  }
-
-  private getRegExpOptions(regex: RegExp): string {
-    // Use JavaScript's normalized flags property
-    return regex.flags;
   }
 
   private objectIdToHex(objectId: BsonObjectId): string {

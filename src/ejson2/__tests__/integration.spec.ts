@@ -1,4 +1,5 @@
 import {EjsonEncoder, EjsonDecoder} from '../index';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {
   BsonBinary,
   BsonInt32,
@@ -11,43 +12,45 @@ import {
 
 describe('EJSON v2 Codec Integration', () => {
   describe('Round-trip encoding and decoding', () => {
-    const canonicalEncoder = new EjsonEncoder({canonical: true});
-    const relaxedEncoder = new EjsonEncoder({canonical: false});
+    const canonicalWriter = new Writer();
+    const relaxedWriter = new Writer();
+    const canonicalEncoder = new EjsonEncoder(canonicalWriter, {canonical: true});
+    const relaxedEncoder = new EjsonEncoder(relaxedWriter, {canonical: false});
     const decoder = new EjsonDecoder();
 
     test('round-trip with primitive values', () => {
       const values = [null, true, false, 'hello', undefined];
       
       for (const value of values) {
-        const canonicalJson = canonicalEncoder.encode(value);
-        const relaxedJson = relaxedEncoder.encode(value);
+        const canonicalJson = canonicalEncoder.encodeToString(value);
+        const relaxedJson = relaxedEncoder.encodeToString(value);
         
-        expect(decoder.decode(canonicalJson)).toEqual(value);
-        expect(decoder.decode(relaxedJson)).toEqual(value);
+        expect(decoder.decodeFromString(canonicalJson)).toEqual(value);
+        expect(decoder.decodeFromString(relaxedJson)).toEqual(value);
       }
 
       // Numbers are handled specially
       const numberValue = 42;
-      const canonicalJson = canonicalEncoder.encode(numberValue);
-      const relaxedJson = relaxedEncoder.encode(numberValue);
+      const canonicalJson = canonicalEncoder.encodeToString(numberValue);
+      const relaxedJson = relaxedEncoder.encodeToString(numberValue);
       
       // Canonical format creates BsonInt32
-      const canonicalResult = decoder.decode(canonicalJson) as BsonInt32;
+      const canonicalResult = decoder.decodeFromString(canonicalJson) as BsonInt32;
       expect(canonicalResult).toBeInstanceOf(BsonInt32);
       expect(canonicalResult.value).toBe(42);
       
       // Relaxed format stays as number
-      expect(decoder.decode(relaxedJson)).toBe(42);
+      expect(decoder.decodeFromString(relaxedJson)).toBe(42);
     });
 
     test('round-trip with arrays', () => {
       const array = [1, 'hello', true, null, {nested: 42}];
       
-      const canonicalJson = canonicalEncoder.encode(array);
-      const relaxedJson = relaxedEncoder.encode(array);
+      const canonicalJson = canonicalEncoder.encodeToString(array);
+      const relaxedJson = relaxedEncoder.encodeToString(array);
       
       // For canonical, numbers become BsonInt32
-      const canonicalResult = decoder.decode(canonicalJson) as unknown[];
+      const canonicalResult = decoder.decodeFromString(canonicalJson) as unknown[];
       expect(canonicalResult[0]).toBeInstanceOf(BsonInt32);
       expect((canonicalResult[0] as BsonInt32).value).toBe(1);
       expect(canonicalResult[1]).toBe('hello');
@@ -59,7 +62,7 @@ describe('EJSON v2 Codec Integration', () => {
       expect((nestedObj.nested as BsonInt32).value).toBe(42);
       
       // For relaxed, numbers stay as native JSON numbers
-      const relaxedResult = decoder.decode(relaxedJson);
+      const relaxedResult = decoder.decodeFromString(relaxedJson);
       expect(relaxedResult).toEqual(array);
     });
 
@@ -75,10 +78,10 @@ describe('EJSON v2 Codec Integration', () => {
       const values = [objectId, int32, int64, float, binary, code, timestamp];
       
       for (const value of values) {
-        const canonicalJson = canonicalEncoder.encode(value);
-        const relaxedJson = relaxedEncoder.encode(value);
+        const canonicalJson = canonicalEncoder.encodeToString(value);
+        const relaxedJson = relaxedEncoder.encodeToString(value);
         
-        const canonicalResult = decoder.decode(canonicalJson);
+        const canonicalResult = decoder.decodeFromString(canonicalJson);
         
         // Both should decode to equivalent objects for BSON types
         expect(canonicalResult).toEqual(value);
@@ -87,11 +90,11 @@ describe('EJSON v2 Codec Integration', () => {
         if (value instanceof BsonInt32 || value instanceof BsonInt64 || value instanceof BsonFloat) {
           // These are encoded as native JSON numbers in relaxed mode
           // When decoded from native JSON, they stay as native numbers
-          const relaxedResult = decoder.decode(relaxedJson);
+          const relaxedResult = decoder.decodeFromString(relaxedJson);
           expect(typeof relaxedResult === 'number').toBe(true);
           expect(relaxedResult).toBe(value.value);
         } else {
-          const relaxedResult = decoder.decode(relaxedJson);
+          const relaxedResult = decoder.decodeFromString(relaxedJson);
           expect(relaxedResult).toEqual(value);
         }
       }
@@ -115,11 +118,11 @@ describe('EJSON v2 Codec Integration', () => {
         code: new BsonJavascriptCode('function validate() { return true; }')
       };
       
-      const canonicalJson = canonicalEncoder.encode(complexObj);
-      const relaxedJson = relaxedEncoder.encode(complexObj);
+      const canonicalJson = canonicalEncoder.encodeToString(complexObj);
+      const relaxedJson = relaxedEncoder.encodeToString(complexObj);
       
-      const canonicalResult = decoder.decode(canonicalJson) as Record<string, unknown>;
-      const relaxedResult = decoder.decode(relaxedJson) as Record<string, unknown>;
+      const canonicalResult = decoder.decodeFromString(canonicalJson) as Record<string, unknown>;
+      const relaxedResult = decoder.decodeFromString(relaxedJson) as Record<string, unknown>;
       
       // Check ObjectId
       expect((canonicalResult.metadata as any).id).toBeInstanceOf(BsonObjectId);
@@ -146,11 +149,11 @@ describe('EJSON v2 Codec Integration', () => {
       const values = [Infinity, -Infinity, NaN];
       
       for (const value of values) {
-        const canonicalJson = canonicalEncoder.encode(value);
-        const relaxedJson = relaxedEncoder.encode(value);
+        const canonicalJson = canonicalEncoder.encodeToString(value);
+        const relaxedJson = relaxedEncoder.encodeToString(value);
         
-        const canonicalResult = decoder.decode(canonicalJson) as BsonFloat;
-        const relaxedResult = decoder.decode(relaxedJson) as BsonFloat;
+        const canonicalResult = decoder.decodeFromString(canonicalJson) as BsonFloat;
+        const relaxedResult = decoder.decodeFromString(relaxedJson) as BsonFloat;
         
         expect(canonicalResult).toBeInstanceOf(BsonFloat);
         expect(relaxedResult).toBeInstanceOf(BsonFloat);
@@ -168,11 +171,11 @@ describe('EJSON v2 Codec Integration', () => {
     test('handles regular expressions', () => {
       const regex = /test.*pattern/gim;
       
-      const canonicalJson = canonicalEncoder.encode(regex);
-      const relaxedJson = relaxedEncoder.encode(regex);
+      const canonicalJson = canonicalEncoder.encodeToString(regex);
+      const relaxedJson = relaxedEncoder.encodeToString(regex);
       
-      const canonicalResult = decoder.decode(canonicalJson) as RegExp;
-      const relaxedResult = decoder.decode(relaxedJson) as RegExp;
+      const canonicalResult = decoder.decodeFromString(canonicalJson) as RegExp;
+      const relaxedResult = decoder.decodeFromString(relaxedJson) as RegExp;
       
       expect(canonicalResult).toBeInstanceOf(RegExp);
       expect(relaxedResult).toBeInstanceOf(RegExp);
@@ -195,11 +198,11 @@ describe('EJSON v2 Codec Integration', () => {
         // Skip invalid dates
         if (isNaN(date.getTime())) continue;
         
-        const canonicalJson = canonicalEncoder.encode(date);
-        const relaxedJson = relaxedEncoder.encode(date);
+        const canonicalJson = canonicalEncoder.encodeToString(date);
+        const relaxedJson = relaxedEncoder.encodeToString(date);
         
-        const canonicalResult = decoder.decode(canonicalJson) as Date;
-        const relaxedResult = decoder.decode(relaxedJson) as Date;
+        const canonicalResult = decoder.decodeFromString(canonicalJson) as Date;
+        const relaxedResult = decoder.decodeFromString(relaxedJson) as Date;
         
         expect(canonicalResult).toBeInstanceOf(Date);
         expect(relaxedResult).toBeInstanceOf(Date);
@@ -213,24 +216,24 @@ describe('EJSON v2 Codec Integration', () => {
     const decoder = new EjsonDecoder();
 
     test('throws on malformed JSON', () => {
-      expect(() => decoder.decode('{')).toThrow();
-      expect(() => decoder.decode('invalid json')).toThrow();
+      expect(() => decoder.decodeFromString('{')).toThrow();
+      expect(() => decoder.decodeFromString('invalid json')).toThrow();
     });
 
     test('throws on invalid type wrapper formats', () => {
-      expect(() => decoder.decode('{"$oid": 123}')).toThrow();
-      expect(() => decoder.decode('{"$numberInt": "invalid"}')).toThrow();
-      expect(() => decoder.decode('{"$binary": "not an object"}')).toThrow();
+      expect(() => decoder.decodeFromString('{"$oid": 123}')).toThrow();
+      expect(() => decoder.decodeFromString('{"$numberInt": "invalid"}')).toThrow();
+      expect(() => decoder.decodeFromString('{"$binary": "not an object"}')).toThrow();
     });
 
     test('throws on incomplete type wrappers', () => {
-      expect(() => decoder.decode('{"$binary": {"base64": "data"}}')).toThrow(); // missing subType
-      expect(() => decoder.decode('{"$timestamp": {"t": 123}}')).toThrow(); // missing i
+      expect(() => decoder.decodeFromString('{"$binary": {"base64": "data"}}')).toThrow(); // missing subType
+      expect(() => decoder.decodeFromString('{"$timestamp": {"t": 123}}')).toThrow(); // missing i
     });
 
     test('throws on type wrappers with extra fields', () => {
-      expect(() => decoder.decode('{"$oid": "507f1f77bcf86cd799439011", "extra": "field"}')).toThrow();
-      expect(() => decoder.decode('{"$numberInt": "42", "invalid": true}')).toThrow();
+      expect(() => decoder.decodeFromString('{"$oid": "507f1f77bcf86cd799439011", "extra": "field"}')).toThrow();
+      expect(() => decoder.decodeFromString('{"$numberInt": "42", "invalid": true}')).toThrow();
     });
   });
 });

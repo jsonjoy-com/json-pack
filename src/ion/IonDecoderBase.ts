@@ -76,10 +76,10 @@ export class IonDecoderBase<R extends IReader & IReaderResettable = IReader & IR
   protected readUint(length: number): number | null {
     if (length === 15) return null;
     if (length === 0) return 0;
-    
+
     let value = 0;
     for (let i = 0; i < length; i++) {
-      value = (value * 256) + this.reader.u8();
+      value = value * 256 + this.reader.u8();
     }
     return value;
   }
@@ -87,10 +87,10 @@ export class IonDecoderBase<R extends IReader & IReaderResettable = IReader & IR
   protected readNint(length: number): number | null {
     if (length === 15) return null;
     if (length === 0) throw new Error('Negative zero is illegal');
-    
+
     let value = 0;
     for (let i = 0; i < length; i++) {
-      value = (value * 256) + this.reader.u8();
+      value = value * 256 + this.reader.u8();
     }
     return -value;
   }
@@ -105,78 +105,78 @@ export class IonDecoderBase<R extends IReader & IReaderResettable = IReader & IR
 
   protected readString(length: number): string | null {
     if (length === 15) return null;
-    
+
     let actualLength = length;
     if (length === 14) {
       actualLength = this.readVUint();
     }
-    
+
     if (actualLength === 0) return '';
-    
+
     return this.reader.utf8(actualLength);
   }
 
   protected readBinary(length: number): Uint8Array | null {
     if (length === 15) return null;
-    
+
     let actualLength = length;
     if (length === 14) {
       actualLength = this.readVUint();
     }
-    
+
     if (actualLength === 0) return new Uint8Array(0);
-    
+
     return this.reader.buf(actualLength);
   }
 
   protected readList(length: number): unknown[] | null {
     if (length === 15) return null;
-    
+
     let actualLength = length;
     if (length === 14) {
       actualLength = this.readVUint();
     }
-    
+
     if (actualLength === 0) return [];
-    
+
     const endPos = this.reader.x + actualLength;
     const list: unknown[] = [];
-    
+
     while (this.reader.x < endPos) {
       list.push(this.val());
     }
-    
+
     if (this.reader.x !== endPos) {
       throw new Error('List parsing error: incorrect length');
     }
-    
+
     return list;
   }
 
   protected readStruct(length: number): Record<string, unknown> | null {
     if (length === 15) return null;
-    
+
     let actualLength = length;
     if (length === 14) {
       actualLength = this.readVUint();
     }
-    
+
     if (actualLength === 0) return {};
-    
+
     const endPos = this.reader.x + actualLength;
     const struct: Record<string, unknown> = {};
-    
+
     while (this.reader.x < endPos) {
       const fieldNameId = this.readVUint();
       const fieldName = this.getSymbolText(fieldNameId);
       const fieldValue = this.val();
       struct[fieldName] = fieldValue;
     }
-    
+
     if (this.reader.x !== endPos) {
       throw new Error('Struct parsing error: incorrect length');
     }
-    
+
     return struct;
   }
 
@@ -184,24 +184,24 @@ export class IonDecoderBase<R extends IReader & IReaderResettable = IReader & IR
     if (length < 3) {
       throw new Error('Annotation wrapper must have at least 3 bytes');
     }
-    
+
     let actualLength = length;
     if (length === 14) {
       actualLength = this.readVUint();
     }
-    
+
     const annotLength = this.readVUint();
     const endAnnotPos = this.reader.x + annotLength;
-    
+
     // Skip annotations for now - just read and ignore them
     while (this.reader.x < endAnnotPos) {
       this.readVUint(); // Skip annotation symbol ID
     }
-    
+
     if (this.reader.x !== endAnnotPos) {
       throw new Error('Annotation parsing error: incorrect annotation length');
     }
-    
+
     // Return the actual value, ignoring annotations
     return this.val();
   }
@@ -209,35 +209,35 @@ export class IonDecoderBase<R extends IReader & IReaderResettable = IReader & IR
   protected readVUint(): number {
     let value = 0;
     let byte: number;
-    
+
     do {
       byte = this.reader.u8();
       value = (value << 7) | (byte & 0x7f);
     } while ((byte & 0x80) === 0);
-    
+
     return value;
   }
 
   protected readVInt(): number {
     const firstByte = this.reader.u8();
-    
+
     // Single byte case
     if (firstByte & 0x80) {
-      const sign = (firstByte & 0x40) ? -1 : 1;
+      const sign = firstByte & 0x40 ? -1 : 1;
       const magnitude = firstByte & 0x3f;
       return sign * magnitude;
     }
-    
+
     // Multi-byte case
-    const sign = (firstByte & 0x40) ? -1 : 1;
+    const sign = firstByte & 0x40 ? -1 : 1;
     let magnitude = firstByte & 0x3f;
     let byte: number;
-    
+
     do {
       byte = this.reader.u8();
       magnitude = (magnitude << 7) | (byte & 0x7f);
     } while ((byte & 0x80) === 0);
-    
+
     return sign * magnitude;
   }
 
@@ -245,12 +245,12 @@ export class IonDecoderBase<R extends IReader & IReaderResettable = IReader & IR
     if (!this.symbols) {
       throw new Error('No symbol table available');
     }
-    
+
     const symbol = this.symbols.getText(symbolId);
     if (symbol === undefined) {
       throw new Error(`Unknown symbol ID: ${symbolId}`);
     }
-    
+
     return symbol;
   }
 
@@ -266,16 +266,16 @@ export class IonDecoderBase<R extends IReader & IReaderResettable = IReader & IR
     if (this.reader.x < this.reader.uint8.length) {
       const nextByte = this.reader.peak();
       const type = (nextByte >> 4) & 0xf;
-      
+
       if (type === TYPE.ANNO) {
         // This might be a symbol table annotation
         const annotValue = this.val();
-        
+
         // The annotated value should be a struct with a 'symbols' field
         if (annotValue && typeof annotValue === 'object' && !Array.isArray(annotValue)) {
           const symbolsKey = 'symbols'; // This is what symbol ID 7 maps to
           const obj = annotValue as Record<string, unknown>;
-          
+
           if (symbolsKey in obj && Array.isArray(obj[symbolsKey])) {
             // Update the symbol table with new symbols
             const newSymbols = obj[symbolsKey] as string[];

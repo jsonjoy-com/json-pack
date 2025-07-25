@@ -139,7 +139,10 @@ describe('IonDecoder', () => {
     });
 
     test('nested arrays', () => {
-      testRoundtrip([[1, 2], [3, 4]]);
+      testRoundtrip([
+        [1, 2],
+        [3, 4],
+      ]);
       testRoundtrip([[[1]], [[2]]]);
     });
   });
@@ -161,9 +164,9 @@ describe('IonDecoder', () => {
           name: 'John',
           profile: {
             age: 30,
-            active: true
-          }
-        }
+            active: true,
+          },
+        },
       });
     });
 
@@ -171,12 +174,12 @@ describe('IonDecoder', () => {
       testRoundtrip({
         users: [
           {name: 'John', age: 30},
-          {name: 'Jane', age: 25}
+          {name: 'Jane', age: 25},
         ],
         meta: {
           count: 2,
-          active: true
-        }
+          active: true,
+        },
       });
     });
   });
@@ -188,11 +191,11 @@ describe('IonDecoder', () => {
           level2: {
             level3: {
               level4: {
-                value: 'deep'
-              }
-            }
-          }
-        }
+                value: 'deep',
+              },
+            },
+          },
+        },
       };
       testRoundtrip(deep);
     });
@@ -212,20 +215,7 @@ describe('IonDecoder', () => {
     });
 
     test('array with mixed types', () => {
-      testRoundtrip([
-        null,
-        true,
-        false,
-        0,
-        -1,
-        1,
-        3.14,
-        '',
-        'hello',
-        new Uint8Array([1, 2, 3]),
-        [],
-        {}
-      ]);
+      testRoundtrip([null, true, false, 0, -1, 1, 3.14, '', 'hello', new Uint8Array([1, 2, 3]), [], {}]);
     });
   });
 });

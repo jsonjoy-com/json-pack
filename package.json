@@ -41,7 +41,8 @@
   "typings": "lib/index.d.ts",
   "files": [
     "LICENSE",
-    "lib/"
+    "lib/",
+    "docs/"
   ],
   "scripts": {
     "prettier": "prettier --ignore-path .gitignore --write \"src/**/*.{ts,tsx,js,jsx}\"",

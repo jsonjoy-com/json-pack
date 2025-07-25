@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/json/JsonEncoder.ts</title>
+    <title>Code coverage report for src/ion/IonDecoderBase.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/json</a> JsonEncoder.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/ion</a> IonDecoderBase.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">78.18% </span>
+                <span class="strong">73.61% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>129/165</span>
+                <span class='fraction'>120/163</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">73.33% </span>
+                <span class="strong">56.92% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>22/30</span>
+                <span class='fraction'>37/65</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">35.48% </span>
+                <span class="strong">94.11% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>11/31</span>
+                <span class='fraction'>16/17</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">78.2% </span>
+                <span class="strong">77.3% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>122/156</span>
+                <span class='fraction'>109/141</span>
             </div>
         
             
@@ -347,572 +347,584 @@
 <a name='L282'></a><a href='#L282'>282</a>
 <a name='L283'></a><a href='#L283'>283</a>
 <a name='L284'></a><a href='#L284'>284</a>
-<a name='L285'></a><a href='#L285'>285</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">9x</span>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-yes">16x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2440x</span>
-<span class="cline-any cline-yes">2440x</span>
-<span class="cline-any cline-yes">2440x</span>
-<span class="cline-any cline-yes">2440x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2041x</span>
+<span class="cline-any cline-yes">2041x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">122391x</span>
+<span class="cline-any cline-yes">122391x</span>
+<span class="cline-any cline-yes">122391x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">359630x</span>
+<span class="cline-any cline-yes">122391x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">19942x</span>
+<span class="cline-any cline-yes">2580x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">24212x</span>
+<span class="cline-any cline-yes">5215x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">91858x</span>
+<span class="cline-any cline-yes">2889x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">223614x</span>
-<span class="cline-any cline-yes">216933x</span>
-<span class="cline-any cline-yes">216933x</span>
+<span class="cline-any cline-yes">2559x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">125191x</span>
+<span class="cline-any cline-yes">20401x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">91673x</span>
+<span class="cline-any cline-yes">68168x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">63x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8115x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10428x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2580x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5215x</span>
+<span class="cline-any cline-yes">5215x</span>
+<span class="cline-any cline-yes">2651x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2889x</span>
+<span class="cline-any cline-yes">2889x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2874x</span>
+<span class="cline-any cline-yes">2874x</span>
+<span class="cline-any cline-yes">13369x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2874x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2559x</span>
+<span class="cline-any cline-yes">2559x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2559x</span>
+<span class="cline-any cline-yes">2559x</span>
+<span class="cline-any cline-yes">12633x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2559x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">20401x</span>
+<span class="cline-any cline-yes">20401x</span>
+<span class="cline-any cline-yes">20401x</span>
+<span class="cline-any cline-yes">20401x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">68168x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">68168x</span>
+<span class="cline-any cline-yes">68168x</span>
+<span class="cline-any cline-yes">13271x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">68168x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">68157x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8115x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8115x</span>
+<span class="cline-any cline-yes">8115x</span>
+<span class="cline-any cline-yes">5302x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8115x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6831x</span>
+<span class="cline-any cline-yes">6831x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6831x</span>
+<span class="cline-any cline-yes">65450x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6831x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6831x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10428x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10428x</span>
+<span class="cline-any cline-yes">10428x</span>
+<span class="cline-any cline-yes">7764x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10428x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9399x</span>
+<span class="cline-any cline-yes">9399x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9399x</span>
+<span class="cline-any cline-yes">50739x</span>
+<span class="cline-any cline-yes">50739x</span>
+<span class="cline-any cline-yes">50739x</span>
+<span class="cline-any cline-yes">50739x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9399x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9399x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">2021x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6681x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">2031x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">19942x</span>
-<span class="cline-any cline-yes">18237x</span>
-<span class="cline-any cline-yes">1705x</span>
+<span class="cline-any cline-yes">83160x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">24212x</span>
-<span class="cline-any cline-yes">24212x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">83160x</span>
+<span class="cline-any cline-yes">91778x</span>
+<span class="cline-any cline-yes">91778x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-yes">59x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">374301x</span>
-<span class="cline-any cline-yes">374301x</span>
-<span class="cline-any cline-yes">374301x</span>
-<span class="cline-any cline-yes">374301x</span>
-<span class="cline-any cline-yes">373295x</span>
-<span class="cline-any cline-yes">373295x</span>
-<span class="cline-any cline-yes">373295x</span>
-<span class="cline-any cline-yes">373295x</span>
-<span class="cline-any cline-yes">3439224x</span>
-<span class="cline-any cline-yes">3439224x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5731x</span>
-<span class="cline-any cline-yes">5731x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3439224x</span>
-<span class="cline-any cline-yes">1525x</span>
-<span class="cline-any cline-yes">1525x</span>
-<span class="cline-any cline-yes">3437699x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">371770x</span>
-<span class="cline-any cline-yes">371770x</span>
-<span class="cline-any cline-yes">371770x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1006x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">91673x</span>
-<span class="cline-any cline-yes">91673x</span>
-<span class="cline-any cline-yes">91673x</span>
-<span class="cline-any cline-yes">91673x</span>
-<span class="cline-any cline-yes">91673x</span>
-<span class="cline-any cline-yes">18916x</span>
-<span class="cline-any cline-yes">18916x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">91673x</span>
-<span class="cline-any cline-yes">91673x</span>
+<span class="cline-any cline-yes">83160x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">122474x</span>
-<span class="cline-any cline-yes">122474x</span>
-<span class="cline-any cline-yes">122474x</span>
-<span class="cline-any cline-yes">122474x</span>
-<span class="cline-any cline-yes">116084x</span>
-<span class="cline-any cline-yes">116084x</span>
-<span class="cline-any cline-yes">276422x</span>
-<span class="cline-any cline-yes">276422x</span>
-<span class="cline-any cline-yes">276422x</span>
-<span class="cline-any cline-yes">276422x</span>
-<span class="cline-any cline-yes">276422x</span>
-<span class="cline-any cline-yes">276422x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">116084x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">50739x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">50739x</span>
+<span class="cline-any cline-yes">50739x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">50739x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2140x</span>
+<span class="cline-any cline-yes">2140x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2140x</span>
+<span class="cline-any cline-yes">2140x</span>
+<span class="cline-any cline-yes">2140x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2140x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">2031x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {toBase64Bin} from '@jsonjoy.com/base64/lib/toBase64Bin';
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
-import type {BinaryJsonEncoder, StreamingBinaryJsonEncoder} from '../types';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
+import sharedCachedUtf8Decoder from '@jsonjoy.com/util/lib/buffers/utf8/sharedCachedUtf8Decoder';
+import type {CachedUtf8Decoder} from '@jsonjoy.com/util/lib/buffers/utf8/CachedUtf8Decoder';
+import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
+import {TYPE} from './constants';
+import {Import} from './Import';
 &nbsp;
-export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncoder {
-  constructor(public readonly writer: IWriter &amp; IWriterGrowable) {}
+export class IonDecoderBase&lt;R extends IReader &amp; IReaderResettable = IReader &amp; IReaderResettable&gt; {
+  public readonly reader: R;
+  public readonly utf8Decoder: CachedUtf8Decoder;
+  protected symbols?: Import;
 &nbsp;
-  public encode(value: unknown): Uint8Array {
-    const writer = this.writer;
-    writer.reset();
-    this.writeAny(value);
-    return writer.flush();
+  constructor(reader?: R) {
+    this.reader = (<span class="branch-0 cbranch-no" title="branch not covered" >reader </span>?? new Reader()) as R;
+    this.utf8Decoder = sharedCachedUtf8Decoder;
   }
 &nbsp;
-  /**
-   * Called when the encoder encounters a value that it does not know how to encode.
-   *
-   * @param value Some JavaScript value.
-   */
-  public <span class="fstat-no" title="function not covered" >writeUnknown(</span>value: unknown): void {
-<span class="cstat-no" title="statement not covered" >    this.writeNull();</span>
-  }
+  public val(): unknown {
+    const typedesc = this.reader.u8();
+    const type = (typedesc &gt;&gt; 4) &amp; 0xf;
+    const length = typedesc &amp; 0xf;
 &nbsp;
-  public writeAny(value: unknown): void {
-    switch (typeof value) {
-      case 'boolean':
-        return this.writeBoolean(value);
-      case 'number':
-        return this.writeNumber(value as number);
-      case 'string':
-        return this.writeStr(value);
-      case 'object': {
-        if (value === null) return this.writeNull();
-        const constructor = value.constructor;
-        switch (constructor) {
-          case Object:
-            return this.writeObj(value as Record&lt;string, unknown&gt;);
-          case Array:
-            return this.writeArr(value as unknown[]);
-          case Uint8Array:
-            return this.writeBin(value as Uint8Array);
-          default:
-            if (value instanceof Uint8Array) return this.writeBin(value);
-            <span class="missing-if-branch" title="if path not taken" >I</span>if (Array.isArray(value)) <span class="cstat-no" title="statement not covered" >return this.writeArr(value);</span>
-            return this.writeUnknown(value);
-        }
-      }
-      case 'undefined': {
-        return this.writeUndef();
-      }
-<span class="branch-5 cbranch-no" title="branch not covered" >      default:</span>
-<span class="cstat-no" title="statement not covered" >        return this.writeUnknown(value);</span>
+    switch (type) {
+      case TYPE.NULL:
+        return this.readNull(length);
+      case TYPE.BOOL:
+        return this.readBool(length);
+      case TYPE.UINT:
+        return this.readUint(length);
+      case TYPE.NINT:
+        return this.readNint(length);
+      case TYPE.FLOT:
+        return this.readFloat(length);
+      case TYPE.STRI:
+        return this.readString(length);
+      case TYPE.BINA:
+        return this.readBinary(length);
+      case TYPE.LIST:
+        return this.readList(length);
+      case TYPE.STRU:
+        return this.readStruct(length);
+      case TYPE.ANNO:
+        return this.readAnnotation(length);
+<span class="branch-10 cbranch-no" title="branch not covered" >      default:</span>
+<span class="cstat-no" title="statement not covered" >        throw new Error(`Unknown Ion type: 0x${type.toString(16)}`);</span>
     }
   }
 &nbsp;
-  public writeNull(): void {
-    this.writer.u32(0x6e756c6c); // null
-  }
-&nbsp;
-  public writeUndef(): void {
-    const writer = this.writer;
-    const length = 35;
-    writer.ensureCapacity(length);
-    // Write: "data:application/cbor,base64;9w=="
-    const view = writer.view;
-    let x = writer.x;
-    view.setUint32(x, 0x22_64_61_74); // "dat
-    x += 4;
-    view.setUint32(x, 0x61_3a_61_70); // a:ap
-    x += 4;
-    view.setUint32(x, 0x70_6c_69_63); // plic
-    x += 4;
-    view.setUint32(x, 0x61_74_69_6f); // atio
-    x += 4;
-    view.setUint32(x, 0x6e_2f_63_62); // n/cb
-    x += 4;
-    view.setUint32(x, 0x6f_72_2c_62); // or,b
-    x += 4;
-    view.setUint32(x, 0x61_73_65_36); // ase6
-    x += 4;
-    view.setUint32(x, 0x34_3b_39_77); // 4;9w
-    x += 4;
-    view.setUint16(x, 0x3d_3d); // ==
-    x += 2;
-    writer.uint8[x++] = 0x22; // "
-    writer.x = x;
-  }
-&nbsp;
-  public writeBoolean(bool: boolean): void {
-    if (bool)
-      this.writer.u32(0x74727565); // true
-    else this.writer.u8u32(0x66, 0x616c7365); // false
-  }
-&nbsp;
-  public writeNumber(num: number): void {
-    const str = num.toString();
-    this.writer.ascii(str);
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeInteger(</span>int: number): void {
-<span class="cstat-no" title="statement not covered" >    this.writeNumber(int &gt;&gt; 0 === int ? int : Math.trunc(int));</span>
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeUInteger(</span>uint: number): void {
-<span class="cstat-no" title="statement not covered" >    this.writeInteger(uint &lt; 0 ? -uint : uint);</span>
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeFloat(</span>float: number): void {
-<span class="cstat-no" title="statement not covered" >    this.writeNumber(float);</span>
-  }
-&nbsp;
-  public writeBin(buf: Uint8Array): void {
-    const writer = this.writer;
-    const length = buf.length;
-    writer.ensureCapacity(38 + 3 + (length &lt;&lt; 1));
-    // Write: "data:application/octet-stream;base64, - 22 64 61 74 61 3a 61 70 70 6c 69 63 61 74 69 6f 6e 2f 6f 63 74 65 74 2d 73 74 72 65 61 6d 3b 62 61 73 65 36 34 2c
-    const view = writer.view;
-    let x = writer.x;
-    view.setUint32(x, 0x22_64_61_74); // "dat
-    x += 4;
-    view.setUint32(x, 0x61_3a_61_70); // a:ap
-    x += 4;
-    view.setUint32(x, 0x70_6c_69_63); // plic
-    x += 4;
-    view.setUint32(x, 0x61_74_69_6f); // atio
-    x += 4;
-    view.setUint32(x, 0x6e_2f_6f_63); // n/oc
-    x += 4;
-    view.setUint32(x, 0x74_65_74_2d); // tet-
-    x += 4;
-    view.setUint32(x, 0x73_74_72_65); // stre
-    x += 4;
-    view.setUint32(x, 0x61_6d_3b_62); // am;b
-    x += 4;
-    view.setUint32(x, 0x61_73_65_36); // ase6
-    x += 4;
-    view.setUint16(x, 0x34_2c); // 4,
-    x += 2;
-    x = toBase64Bin(buf, 0, length, view, x);
-    writer.uint8[x++] = 0x22; // "
-    writer.x = x;
-  }
-&nbsp;
-  public writeStr(str: string): void {
-    const writer = this.writer;
-    const length = str.length;
-    writer.ensureCapacity(length * 4 + 2);
-    if (length &lt; 256) {
-      let x = writer.x;
-      const uint8 = writer.uint8;
-      uint8[x++] = 0x22; // "
-      for (let i = 0; i &lt; length; i++) {
-        const code = str.charCodeAt(i);
-        switch (code) {
-          case 34: // "
-          case 92: // \
-            uint8[x++] = 0x5c; // \
-            break;
-        }
-        if (code &lt; 32 || code &gt; 126) {
-          writer.utf8(JSON.stringify(str));
-          return;
-        } else uint8[x++] = code;
-      }
-      uint8[x++] = 0x22; // "
-      writer.x = x;
-      return;
+  protected readNull(length: number): null {
+    if (length === 15) return null;
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 0) {</span>
+      // NOP padding - skip bytes
+<span class="cstat-no" title="statement not covered" >      this.val(); </span>// Read and discard next value
+<span class="cstat-no" title="statement not covered" >      return null;</span>
     }
-    writer.utf8(JSON.stringify(str));
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeAsciiStr(</span>str: string): void {
-    const length = <span class="cstat-no" title="statement not covered" >str.length;</span>
-    const writer = <span class="cstat-no" title="statement not covered" >this.writer;</span>
-<span class="cstat-no" title="statement not covered" >    writer.ensureCapacity(length * 2 + 2);</span>
-    const uint8 = <span class="cstat-no" title="statement not covered" >writer.uint8;</span>
-    let x = <span class="cstat-no" title="statement not covered" >writer.x;</span>
-<span class="cstat-no" title="statement not covered" >    uint8[x++] = 0x22; </span>// "
-<span class="cstat-no" title="statement not covered" >    for (let i = <span class="cstat-no" title="statement not covered" >0;</span> i &lt; length; i++) {</span>
-      const code = <span class="cstat-no" title="statement not covered" >str.charCodeAt(i);</span>
-<span class="cstat-no" title="statement not covered" >      switch (code) {</span>
-        case 34: // "
-        case 92: // \
-<span class="cstat-no" title="statement not covered" >          uint8[x++] = 0x5c; </span>// \
-<span class="cstat-no" title="statement not covered" >          break;</span>
-      }
-<span class="cstat-no" title="statement not covered" >      uint8[x++] = code;</span>
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 14) {</span>
+      // Extended length NOP padding
+      const padLength = <span class="cstat-no" title="statement not covered" >this.readVUint();</span>
+<span class="cstat-no" title="statement not covered" >      this.reader.x += padLength;</span>
+<span class="cstat-no" title="statement not covered" >      this.val(); </span>// Read and discard next value
+<span class="cstat-no" title="statement not covered" >      return null;</span>
     }
-<span class="cstat-no" title="statement not covered" >    uint8[x++] = 0x22; </span>// "
-<span class="cstat-no" title="statement not covered" >    writer.x = x;</span>
+    // Regular NOP padding
+<span class="cstat-no" title="statement not covered" >    this.reader.x += length;</span>
+<span class="cstat-no" title="statement not covered" >    this.val(); </span>// Read and discard next value
+<span class="cstat-no" title="statement not covered" >    return null;</span>
   }
 &nbsp;
-  public writeArr(arr: unknown[]): void {
-    const writer = this.writer;
-    writer.u8(0x5b); // [
-    const length = arr.length;
-    const last = length - 1;
-    for (let i = 0; i &lt; last; i++) {
-      this.writeAny(arr[i]);
-      writer.u8(0x2c); // ,
-    }
-    if (last &gt;= 0) this.writeAny(arr[last]);
-    writer.u8(0x5d); // ]
+  protected readBool(length: number): boolean | null {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
+    if (length === 0) return false;
+    if (length === 1) return true;
+<span class="cstat-no" title="statement not covered" >    throw new Error(`Invalid bool length: ${length}`);</span>
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeArrSeparator(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(0x2c); </span>// ,
-  }
+  protected readUint(length: number): number | null {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
+    if (length === 0) return 0;
 &nbsp;
-  public writeObj(obj: Record&lt;string, unknown&gt;): void {
-    const writer = this.writer;
-    const keys = Object.keys(obj);
-    const length = keys.length;
-    if (!length) return writer.u16(0x7b7d); // {}
-    writer.u8(0x7b); // {
+    let value = 0;
     for (let i = 0; i &lt; length; i++) {
-      const key = keys[i];
-      const value = obj[key];
-      this.writeStr(key);
-      writer.u8(0x3a); // :
-      this.writeAny(value);
-      writer.u8(0x2c); // ,
+      value = value * 256 + this.reader.u8();
     }
-    writer.uint8[writer.x - 1] = 0x7d; // }
+    return value;
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeObjSeparator(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(0x2c); </span>// ,
+  protected readNint(length: number): number | null {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 0) <span class="cstat-no" title="statement not covered" >throw new Error('Negative zero is illegal');</span>
+&nbsp;
+    let value = 0;
+    for (let i = 0; i &lt; length; i++) {
+      value = value * 256 + this.reader.u8();
+    }
+    return -value;
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeObjKeySeparator(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(0x3a); </span>// :
+  protected readFloat(length: number): number | null {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 0) <span class="cstat-no" title="statement not covered" >return 0.0;</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 4) <span class="cstat-no" title="statement not covered" >return this.reader.f32();</span>
+    if (length === 8) return this.reader.f64();
+<span class="cstat-no" title="statement not covered" >    throw new Error(`Unsupported float length: ${length}`);</span>
   }
 &nbsp;
-  // ------------------------------------------------------- Streaming encoding
+  protected readString(length: number): string | null {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeStartStr(</span>): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Method not implemented.');</span>
+    let actualLength = length;
+    if (length === 14) {
+      actualLength = this.readVUint();
+    }
+&nbsp;
+    if (actualLength === 0) return '';
+&nbsp;
+    return this.reader.utf8(actualLength);
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeStrChunk(</span>str: string): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Method not implemented.');</span>
+  protected readBinary(length: number): Uint8Array | null {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
+&nbsp;
+    let actualLength = length;
+    if (length === 14) {
+      actualLength = this.readVUint();
+    }
+&nbsp;
+    if (actualLength === 0) return new Uint8Array(0);
+&nbsp;
+    return this.reader.buf(actualLength);
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeEndStr(</span>): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Method not implemented.');</span>
+  protected readList(length: number): unknown[] | null {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
+&nbsp;
+    let actualLength = length;
+    if (length === 14) {
+      actualLength = this.readVUint();
+    }
+&nbsp;
+    if (actualLength === 0) return [];
+&nbsp;
+    const endPos = this.reader.x + actualLength;
+    const list: unknown[] = [];
+&nbsp;
+    while (this.reader.x &lt; endPos) {
+      list.push(this.val());
+    }
+&nbsp;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.reader.x !== endPos) {
+<span class="cstat-no" title="statement not covered" >      throw new Error('List parsing error: incorrect length');</span>
+    }
+&nbsp;
+    return list;
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeStartBin(</span>): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Method not implemented.');</span>
+  protected readStruct(length: number): Record&lt;string, unknown&gt; | null {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
+&nbsp;
+    let actualLength = length;
+    if (length === 14) {
+      actualLength = this.readVUint();
+    }
+&nbsp;
+    if (actualLength === 0) return {};
+&nbsp;
+    const endPos = this.reader.x + actualLength;
+    const struct: Record&lt;string, unknown&gt; = {};
+&nbsp;
+    while (this.reader.x &lt; endPos) {
+      const fieldNameId = this.readVUint();
+      const fieldName = this.getSymbolText(fieldNameId);
+      const fieldValue = this.val();
+      struct[fieldName] = fieldValue;
+    }
+&nbsp;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.reader.x !== endPos) {
+<span class="cstat-no" title="statement not covered" >      throw new Error('Struct parsing error: incorrect length');</span>
+    }
+&nbsp;
+    return struct;
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeBinChunk(</span>buf: Uint8Array): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Method not implemented.');</span>
+  protected readAnnotation(length: number): unknown {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (length &lt; 3) {
+<span class="cstat-no" title="statement not covered" >      throw new Error('Annotation wrapper must have at least 3 bytes');</span>
+    }
+&nbsp;
+    let actualLength = length;
+    if (length === 14) {
+      actualLength = this.readVUint();
+    }
+&nbsp;
+    const annotLength = this.readVUint();
+    const endAnnotPos = this.reader.x + annotLength;
+&nbsp;
+    // Skip annotations for now - just read and ignore them
+    while (this.reader.x &lt; endAnnotPos) {
+      this.readVUint(); // Skip annotation symbol ID
+    }
+&nbsp;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.reader.x !== endAnnotPos) {
+<span class="cstat-no" title="statement not covered" >      throw new Error('Annotation parsing error: incorrect annotation length');</span>
+    }
+&nbsp;
+    // Return the actual value, ignoring annotations
+    return this.val();
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeEndBin(</span>): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Method not implemented.');</span>
+  protected readVUint(): number {
+    let value = 0;
+    let byte: number;
+&nbsp;
+    do {
+      byte = this.reader.u8();
+      value = (value &lt;&lt; 7) | (byte &amp; 0x7f);
+    } while ((byte &amp; 0x80) === 0);
+&nbsp;
+    return value;
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeStartArr(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(0x5b); </span>// [
+  protected <span class="fstat-no" title="function not covered" >readVInt(</span>): number {
+    const firstByte = <span class="cstat-no" title="statement not covered" >this.reader.u8();</span>
+&nbsp;
+    // Single byte case
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (firstByte &amp; 0x80) {</span>
+      const sign = <span class="cstat-no" title="statement not covered" >firstByte &amp; 0x40 ? -1 : 1;</span>
+      const magnitude = <span class="cstat-no" title="statement not covered" >firstByte &amp; 0x3f;</span>
+<span class="cstat-no" title="statement not covered" >      return sign * magnitude;</span>
+    }
+&nbsp;
+    // Multi-byte case
+    const sign = <span class="cstat-no" title="statement not covered" >firstByte &amp; 0x40 ? -1 : 1;</span>
+    let magnitude = <span class="cstat-no" title="statement not covered" >firstByte &amp; 0x3f;</span>
+    let byte: number;
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    do {</span>
+<span class="cstat-no" title="statement not covered" >      byte = this.reader.u8();</span>
+<span class="cstat-no" title="statement not covered" >      magnitude = (magnitude &lt;&lt; 7) | (byte &amp; 0x7f);</span>
+    } while ((byte &amp; 0x80) === 0);
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return sign * magnitude;</span>
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeArrChunk(</span>item: unknown): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Method not implemented.');</span>
+  protected getSymbolText(symbolId: number): string {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.symbols) {
+<span class="cstat-no" title="statement not covered" >      throw new Error('No symbol table available');</span>
+    }
+&nbsp;
+    const symbol = this.symbols.getText(symbolId);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (symbol === undefined) {
+<span class="cstat-no" title="statement not covered" >      throw new Error(`Unknown symbol ID: ${symbolId}`);</span>
+    }
+&nbsp;
+    return symbol;
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeEndArr(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(0x5d); </span>// ]
+  protected validateBVM(): void {
+    const bvm = this.reader.u32();
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (bvm !== 0xe00100ea) {
+<span class="cstat-no" title="statement not covered" >      throw new Error(`Invalid Ion Binary Version Marker: 0x${bvm.toString(16)}`);</span>
+    }
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeStartObj(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(0x7b); </span>// {
-  }
+  protected readSymbolTable(): void {
+    // Check if there's enough data and if the next byte indicates an annotation
+    if (this.reader.x &lt; this.reader.uint8.length) {
+      const nextByte = this.reader.peak();
+      const type = (nextByte &gt;&gt; 4) &amp; 0xf;
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeObjChunk(</span>key: string, value: unknown): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Method not implemented.');</span>
-  }
+      if (type === TYPE.ANNO) {
+        // This might be a symbol table annotation
+        const annotValue = this.val();
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeEndObj(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(0x7d); </span>// }
+        // The annotated value should be a struct with a 'symbols' field
+        if (annotValue &amp;&amp; typeof annotValue === 'object' &amp;&amp; !Array.isArray(annotValue)) {
+          const symbolsKey = 'symbols'; // This is what symbol ID 7 maps to
+          const obj = annotValue as Record&lt;string, unknown&gt;;
+&nbsp;
+          if (symbolsKey in obj &amp;&amp; Array.isArray(obj[symbolsKey])) {
+            // Update the symbol table with new symbols
+            const newSymbols = obj[symbolsKey] as string[];
+            this.symbols = new Import(this.symbols || <span class="branch-1 cbranch-no" title="branch not covered" >null,</span> newSymbols);
+          }
+        }
+      }
+    }
   }
 }
 &nbsp;</pre></td></tr></table></pre>

@@ -3,7 +3,7 @@ import {IonEncoderFast} from '../IonEncoderFast';
 import {IonDecoder} from '../IonDecoder';
 
 describe('fuzzing', () => {
-  test('Amazon Ion codec', () => {
+  test('Amazon Ion codec with fresh instances', () => {
     for (let i = 0; i < 2000; i++) {
       const value = JSON.parse(JSON.stringify(RandomJson.generate()));
       // Create fresh instances for each iteration to avoid state corruption

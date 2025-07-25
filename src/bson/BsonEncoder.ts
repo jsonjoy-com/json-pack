@@ -6,6 +6,7 @@ import {
   BsonInt32,
   BsonInt64,
   BsonJavascriptCode,
+  BsonJavascriptCodeWithScope,
   BsonMaxKey,
   BsonMinKey,
   BsonObjectId,
@@ -35,27 +36,33 @@ export class BsonEncoder implements BinaryJsonEncoder {
   }
 
   public writeNull(): void {
-    throw new Error('Method not implemented.');
+    // Not used directly in BSON - handled in writeKey
+    throw new Error('Use writeKey for BSON encoding');
   }
 
   public writeUndef(): void {
-    throw new Error('Method not implemented.');
+    // Not used directly in BSON - handled in writeKey
+    throw new Error('Use writeKey for BSON encoding');
   }
 
   public writeBoolean(bool: boolean): void {
-    throw new Error('Method not implemented.');
+    // Not used directly in BSON - handled in writeKey
+    throw new Error('Use writeKey for BSON encoding');
   }
 
   public writeNumber(num: number): void {
-    throw new Error('Method not implemented.');
+    // Not used directly in BSON - handled in writeKey
+    throw new Error('Use writeKey for BSON encoding');
   }
 
   public writeInteger(int: number): void {
-    throw new Error('Method not implemented.');
+    // Not used directly in BSON - handled in writeKey
+    throw new Error('Use writeKey for BSON encoding');
   }
 
   public writeUInteger(uint: number): void {
-    throw new Error('Method not implemented.');
+    // Not used directly in BSON - handled in writeKey
+    throw new Error('Use writeKey for BSON encoding');
   }
 
   public writeInt32(int: number): void {
@@ -74,13 +81,14 @@ export class BsonEncoder implements BinaryJsonEncoder {
 
   public writeFloat(float: number): void {
     const writer = this.writer;
-    writer.ensureCapacity(4);
+    writer.ensureCapacity(8);
     writer.view.setFloat64(writer.x, float, true);
     writer.x += 8;
   }
 
   public writeBigInt(int: bigint): void {
-    throw new Error('Method not implemented.');
+    // Not used directly in BSON - handled in writeKey
+    throw new Error('Use writeKey for BSON encoding');
   }
 
   public writeBin(buf: Uint8Array): void {
@@ -106,7 +114,8 @@ export class BsonEncoder implements BinaryJsonEncoder {
   }
 
   public writeAsciiStr(str: string): void {
-    throw new Error('Method not implemented.');
+    // Use writeStr for BSON - it handles UTF-8 properly
+    this.writeStr(str);
   }
 
   public writeArr(arr: unknown[]): void {
@@ -296,6 +305,18 @@ export class BsonEncoder implements BinaryJsonEncoder {
             this.writeStr((value as BsonJavascriptCode).code);
             break;
           }
+          case BsonJavascriptCodeWithScope: {
+            writer.u8(0x0f);
+            this.writeCString(key);
+            const codeWithScope = value as BsonJavascriptCodeWithScope;
+            const x0 = writer.x;
+            writer.x += 4; // Reserve space for total length
+            this.writeStr(codeWithScope.code);
+            this.writeObj(codeWithScope.scope);
+            const totalLength = writer.x - x0;
+            writer.view.setInt32(x0, totalLength, true);
+            break;
+          }
           case BsonInt32: {
             writer.u8(0x10);
             this.writeCString(key);
@@ -305,13 +326,13 @@ export class BsonEncoder implements BinaryJsonEncoder {
           case BsonInt64: {
             writer.u8(0x12);
             this.writeCString(key);
-            this.writeInt64((value as BsonInt32).value);
+            this.writeInt64((value as BsonInt64).value);
             break;
           }
           case BsonFloat: {
             writer.u8(0x01);
             this.writeCString(key);
-            this.writeFloat((value as BsonInt32).value);
+            this.writeFloat((value as BsonFloat).value);
             break;
           }
           case BsonTimestamp: {

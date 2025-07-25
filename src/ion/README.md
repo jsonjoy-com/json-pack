@@ -1,3 +1,25 @@
+# Amazon Ion
+
+Implementation of [Amazon Ion](https://amazon-ion.github.io/ion-docs/) data format for JavaScript.
+
+Amazon Ion is a richly-typed, self-describing, hierarchical data serialization format offering interchangeable binary and text representations. The binary representation of Ion is efficient to parse, while the text representation is easy to author and debug.
+
+## Features
+
+- **IonEncoderFast** - High-performance encoder for Ion binary format
+- Support for Ion's rich type system including symbols, timestamps, and annotations
+- Self-describing binary format with efficient encoding
+
+## Usage
+
+```ts
+import {IonEncoderFast} from 'json-pack/lib/ion';
+
+const encoder = new IonEncoderFast();
+const data = {name: 'example', value: 42, timestamp: new Date()};
+const encoded = encoder.encode(data);
+```
+
 ## Benchmarks
 
 Encoding:

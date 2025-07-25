@@ -1,3 +1,32 @@
+# JSON Encoder/Decoder
+
+Enhanced JSON implementation with high-performance encoding and decoding capabilities.
+
+## Features
+
+- **JsonEncoder** - High-performance JSON encoder with better performance than native `JSON.stringify`
+- **JsonDecoder** - Fast JSON decoder optimized for specific use cases
+- Support for streaming operations
+- Binary-safe encoding/decoding
+- Optimized for repeated encoding operations
+
+## Usage
+
+```ts
+import {JsonEncoder, JsonDecoder} from 'json-pack/lib/json';
+
+const encoder = new JsonEncoder();
+const decoder = new JsonDecoder();
+
+const data = {hello: 'world', numbers: [1, 2, 3]};
+const encoded = encoder.encode(data);
+const decoded = decoder.decode(encoded);
+```
+
+## Performance
+
+This JSON implementation is optimized for performance and in many cases outperforms the native `JSON.stringify()` and `JSON.parse()` methods, especially for repeated operations.
+
 ## Benchmarks
 
 Encoding:

@@ -38,7 +38,6 @@ for (const item of items) {
 ```
 
 This limitation primarily affects complex nested objects with many string keys. Simple data structures may work with reused instances, but fresh instances are recommended for guaranteed correctness.
-
 ## Benchmarks
 
 Encoding:

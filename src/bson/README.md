@@ -1,8 +1,42 @@
 # BSON
 
-Performant impelementation of [BSON][bson] (Binary JSON) for JavaScript.
+Performant implementation of [BSON][bson] (Binary JSON) for JavaScript.
 
 [bson]: https://bsonspec.org/
+
+## Overview
+
+BSON (Binary JSON) is a binary representation of JSON-like documents. It extends JSON's data model to provide additional data types, ordered fields, and efficient encoding and decoding.
+
+## Features
+
+- High-performance BSON encoding and decoding
+- Support for all BSON data types including:
+  - ObjectId
+  - Binary data
+  - Dates
+  - Regular expressions
+  - JavaScript code
+- MongoDB-compatible implementation
+- Efficient binary representation
+
+## Usage
+
+```ts
+import {BsonEncoder, BsonDecoder} from 'json-pack/lib/bson';
+
+const encoder = new BsonEncoder();
+const decoder = new BsonDecoder();
+
+const data = {
+  name: 'example',
+  created: new Date(),
+  binary: new Uint8Array([1, 2, 3])
+};
+
+const encoded = encoder.encode(data);
+const decoded = decoder.decode(encoded);
+```
 
 
 ## Benchmarks

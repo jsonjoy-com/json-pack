@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/msgpack/MsgPackEncoderStable.ts</title>
+    <title>Code coverage report for src/ejson/index.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/msgpack</a> MsgPackEncoderStable.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/ejson</a> index.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>11/11</span>
+                <span class='fraction'>18/18</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">13.33% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>2/15</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>10/10</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
@@ -81,42 +81,57 @@
 <a name='L16'></a><a href='#L16'>16</a>
 <a name='L17'></a><a href='#L17'>17</a>
 <a name='L18'></a><a href='#L18'>18</a>
-<a name='L19'></a><a href='#L19'>19</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {sort} from '@jsonjoy.com/util/lib/sort/insertion';
-import {MsgPackEncoderFast} from './MsgPackEncoderFast';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {EjsonEncoder, EjsonEncoderOptions} from './EjsonEncoder';
+import {EjsonDecoder, EjsonDecoderOptions} from './EjsonDecoder';
 &nbsp;
-/**
- * @category Encoder
- */
-export class MsgPackEncoderStable extends MsgPackEncoderFast {
-  public writeObj(obj: Record&lt;string, unknown&gt;): void {
-    const keys = sort(Object.keys(obj));
-    const length = keys.length;
-    this.writeObjHdr(length);
-    for (let i = 0; i &lt; length; i++) {
-      const key = keys[i];
-      this.writeStr(key);
-      this.writeAny(obj[key]);
-    }
-  }
-}
+export {EjsonEncoder, type EjsonEncoderOptions} from './EjsonEncoder';
+export {EjsonDecoder, type EjsonDecoderOptions} from './EjsonDecoder';
+&nbsp;
+// Re-export shared BSON value classes for convenience
+export {
+<span class="fstat-no" title="function not covered" >  BsonBinary,</span>
+<span class="fstat-no" title="function not covered" >  BsonDbPointer,</span>
+<span class="fstat-no" title="function not covered" >  BsonDecimal128,</span>
+<span class="fstat-no" title="function not covered" >  BsonFloat,</span>
+<span class="fstat-no" title="function not covered" >  BsonInt32,</span>
+<span class="fstat-no" title="function not covered" >  BsonInt64,</span>
+<span class="fstat-no" title="function not covered" >  BsonJavascriptCode,</span>
+<span class="fstat-no" title="function not covered" >  BsonJavascriptCodeWithScope,</span>
+<span class="fstat-no" title="function not covered" >  BsonMaxKey,</span>
+<span class="fstat-no" title="function not covered" >  BsonMinKey,</span>
+<span class="fstat-no" title="function not covered" >  BsonObjectId,</span>
+<span class="fstat-no" title="function not covered" >  BsonSymbol,</span>
+<span class="fstat-no" title="function not covered" >  BsonTimestamp,</span>
+} from '../bson/values';
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->

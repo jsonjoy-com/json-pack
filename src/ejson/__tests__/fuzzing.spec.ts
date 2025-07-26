@@ -4,7 +4,7 @@ import {EjsonEncoder} from '../EjsonEncoder';
 import {EjsonDecoder} from '../EjsonDecoder';
 
 const writer = new Writer(8);
-const relaxedEncoder = new EjsonEncoder(writer, { canonical: false });
+const relaxedEncoder = new EjsonEncoder(writer, {canonical: false});
 const decoder = new EjsonDecoder();
 
 describe('fuzzing', () => {

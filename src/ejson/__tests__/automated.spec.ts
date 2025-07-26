@@ -6,8 +6,8 @@ import {documents} from '../../__tests__/json-documents';
 import {binaryDocuments} from '../../__tests__/binary-documents';
 
 const writer = new Writer(8);
-const canonicalEncoder = new EjsonEncoder(writer, { canonical: true });
-const relaxedEncoder = new EjsonEncoder(writer, { canonical: false });
+const canonicalEncoder = new EjsonEncoder(writer, {canonical: true});
+const relaxedEncoder = new EjsonEncoder(writer, {canonical: false});
 const decoder = new EjsonDecoder();
 
 const assertEncoder = (value: JsonValue, encoder: EjsonEncoder) => {
@@ -42,7 +42,7 @@ const hasUnicodeIssues = (value: unknown): boolean => {
 };
 
 describe('Sample JSON documents - Canonical Mode (non-numeric, ASCII only)', () => {
-  for (const t of documents.filter(doc => isNonNumeric(doc.json) && !hasUnicodeIssues(doc.json))) {
+  for (const t of documents.filter((doc) => isNonNumeric(doc.json) && !hasUnicodeIssues(doc.json))) {
     (t.only ? test.only : test)(t.name, () => {
       assertEncoder(t.json as any, canonicalEncoder);
     });
@@ -50,7 +50,7 @@ describe('Sample JSON documents - Canonical Mode (non-numeric, ASCII only)', () 
 });
 
 describe('Sample JSON documents - Relaxed Mode (ASCII only)', () => {
-  for (const t of documents.filter(doc => !hasUnicodeIssues(doc.json))) {
+  for (const t of documents.filter((doc) => !hasUnicodeIssues(doc.json))) {
     (t.only ? test.only : test)(t.name, () => {
       assertEncoder(t.json as any, relaxedEncoder);
     });

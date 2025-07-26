@@ -61,8 +61,6 @@ export class EjsonDecoder extends JsonDecoder {
     }
   }
 
-
-
   public readArr(): unknown[] {
     const reader = this.reader;
     if (reader.u8() !== 0x5b /* [ */) throw new Error('Invalid JSON');
@@ -105,7 +103,7 @@ export class EjsonDecoder extends JsonDecoder {
       this.skipWhitespace();
       if (reader.u8() !== 0x3a /* : */) throw new Error('Invalid JSON');
       this.skipWhitespace();
-      
+
       // For EJSON type wrapper detection, we need to read nested objects as raw first
       obj[key] = this.readValue();
       first = false;
@@ -170,12 +168,12 @@ export class EjsonDecoder extends JsonDecoder {
     // Helper function to validate exact key match
     const hasExactKeys = (expectedKeys: string[]): boolean => {
       if (keys.length !== expectedKeys.length) return false;
-      return expectedKeys.every(key => keys.includes(key));
+      return expectedKeys.every((key) => keys.includes(key));
     };
 
     // Check if object has any special $ keys that indicate a type wrapper
-    const specialKeys = keys.filter(key => key.startsWith('$'));
-    
+    const specialKeys = keys.filter((key) => key.startsWith('$'));
+
     if (specialKeys.length > 0) {
       // ObjectId
       if (specialKeys.includes('$oid')) {
@@ -303,7 +301,10 @@ export class EjsonDecoder extends JsonDecoder {
         const code = obj.$code as string;
         const scope = obj.$scope;
         if (typeof code === 'string' && typeof scope === 'object' && scope !== null) {
-          return new BsonJavascriptCodeWithScope(code, this.transformEjsonObject(scope as Record<string, unknown>) as Record<string, unknown>);
+          return new BsonJavascriptCodeWithScope(
+            code,
+            this.transformEjsonObject(scope as Record<string, unknown>) as Record<string, unknown>,
+          );
         }
         throw new Error('Invalid CodeWScope format');
       }
@@ -445,31 +446,31 @@ export class EjsonDecoder extends JsonDecoder {
       const ref = obj.$ref as string;
       const id = this.transformEjsonObject(obj.$id as Record<string, unknown>);
       const result: Record<string, unknown> = {$ref: ref, $id: id};
-      
+
       if (keys.includes('$db')) {
         result.$db = obj.$db;
       }
-      
+
       // Add any other fields
       for (const key of keys) {
         if (key !== '$ref' && key !== '$id' && key !== '$db') {
           result[key] = this.transformEjsonObject(obj[key] as Record<string, unknown>);
         }
       }
-      
+
       return result;
     }
 
-    // Regular object - transform all properties  
+    // Regular object - transform all properties
     const result: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(obj)) {
       if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
         result[key] = this.transformEjsonObject(val as Record<string, unknown>);
       } else if (Array.isArray(val)) {
-        result[key] = val.map(item => 
-          typeof item === 'object' && item !== null && !Array.isArray(item) 
+        result[key] = val.map((item) =>
+          typeof item === 'object' && item !== null && !Array.isArray(item)
             ? this.transformEjsonObject(item as Record<string, unknown>)
-            : item
+            : item,
         );
       } else {
         result[key] = val;

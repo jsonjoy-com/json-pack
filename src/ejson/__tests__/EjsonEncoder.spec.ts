@@ -78,7 +78,9 @@ describe('EjsonEncoder', () => {
       expect(encoder.encodeToString(code)).toBe('{"$code":"function() { return 42; }"}');
 
       const codeWithScope = new BsonJavascriptCodeWithScope('function() { return x; }', {x: 42});
-      expect(encoder.encodeToString(codeWithScope)).toBe('{"$code":"function() { return x; }","$scope":{"x":{"$numberInt":"42"}}}');
+      expect(encoder.encodeToString(codeWithScope)).toBe(
+        '{"$code":"function() { return x; }","$scope":{"x":{"$numberInt":"42"}}}',
+      );
 
       const symbol = new BsonSymbol('mySymbol');
       expect(encoder.encodeToString(symbol)).toBe('{"$symbol":"mySymbol"}');
@@ -87,7 +89,9 @@ describe('EjsonEncoder', () => {
       expect(encoder.encodeToString(timestamp)).toBe('{"$timestamp":{"t":1234567890,"i":12345}}');
 
       const dbPointer = new BsonDbPointer('collection', objectId);
-      expect(encoder.encodeToString(dbPointer)).toBe('{"$dbPointer":{"$ref":"collection","$id":{"$oid":"507f1f77bcf86cd799439011"}}}');
+      expect(encoder.encodeToString(dbPointer)).toBe(
+        '{"$dbPointer":{"$ref":"collection","$id":{"$oid":"507f1f77bcf86cd799439011"}}}',
+      );
 
       const minKey = new BsonMinKey();
       expect(encoder.encodeToString(minKey)).toBe('{"$minKey":1}');
@@ -102,10 +106,11 @@ describe('EjsonEncoder', () => {
         num: 42,
         nested: {
           bool: true,
-          arr: [1, 2, 3]
-        }
+          arr: [1, 2, 3],
+        },
       };
-      const expected = '{"str":"hello","num":{"$numberInt":"42"},"nested":{"bool":true,"arr":[{"$numberInt":"1"},{"$numberInt":"2"},{"$numberInt":"3"}]}}';
+      const expected =
+        '{"str":"hello","num":{"$numberInt":"42"},"nested":{"bool":true,"arr":[{"$numberInt":"1"},{"$numberInt":"2"},{"$numberInt":"3"}]}}';
       expect(encoder.encodeToString(obj)).toBe(expected);
     });
   });

@@ -27,7 +27,7 @@ export interface EjsonEncoderOptions {
 export class EjsonEncoder extends JsonEncoder {
   constructor(
     writer: IWriter & IWriterGrowable,
-    private options: EjsonEncoderOptions = {}
+    private options: EjsonEncoderOptions = {},
   ) {
     super(writer);
   }
@@ -256,7 +256,9 @@ export class EjsonEncoder extends JsonEncoder {
     const writer = this.writer;
     writer.ensureCapacity(18);
     writer.u8(0x7b); // {
-    writer.u32(0x2224756e); writer.u32(0x64656669); writer.u32(0x6e656422); // "$undefined"
+    writer.u32(0x2224756e);
+    writer.u32(0x64656669);
+    writer.u32(0x6e656422); // "$undefined"
     writer.u8(0x3a); // :
     writer.u32(0x74727565); // true
     writer.u8(0x7d); // }
@@ -288,7 +290,9 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$numberInt":"value"}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x496e7422); // "$numberInt"
+    writer.u32(0x22246e75);
+    writer.u32(0x6d626572);
+    writer.u32(0x496e7422); // "$numberInt"
     writer.u8(0x3a); // :
     this.writeStr(value + '');
     writer.u8(0x7d); // }
@@ -298,7 +302,10 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$numberLong":"value"}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u16(0x223a); // "$numberLong":
+    writer.u32(0x22246e75);
+    writer.u32(0x6d626572);
+    writer.u32(0x4c6f6e67);
+    writer.u16(0x223a); // "$numberLong":
     this.writeStr(value + '');
     writer.u8(0x7d); // }
   }
@@ -307,7 +314,11 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$numberDouble":"value"}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x446f7562); writer.u16(0x6c65); writer.u16(0x223a); // "$numberDouble":
+    writer.u32(0x22246e75);
+    writer.u32(0x6d626572);
+    writer.u32(0x446f7562);
+    writer.u16(0x6c65);
+    writer.u16(0x223a); // "$numberDouble":
     if (!isFinite(value)) {
       this.writeStr(this.formatNonFinite(value));
     } else {
@@ -322,15 +333,20 @@ export class EjsonEncoder extends JsonEncoder {
     if (isNaN(timestamp)) {
       throw new Error('Invalid Date');
     }
-    
+
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246461); writer.u16(0x7465); writer.u16(0x223a); // "$date":
-    
+    writer.u32(0x22246461);
+    writer.u16(0x7465);
+    writer.u16(0x223a); // "$date":
+
     if (this.options.canonical) {
       // Write {"$numberLong":"timestamp"}
       writer.u8(0x7b); // {
-      writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u16(0x223a); // "$numberLong":
+      writer.u32(0x22246e75);
+      writer.u32(0x6d626572);
+      writer.u32(0x4c6f6e67);
+      writer.u16(0x223a); // "$numberLong":
       this.writeStr(timestamp + '');
       writer.u8(0x7d); // }
     } else {
@@ -341,7 +357,10 @@ export class EjsonEncoder extends JsonEncoder {
       } else {
         // Write {"$numberLong":"timestamp"}
         writer.u8(0x7b); // {
-        writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u16(0x223a); // "$numberLong":
+        writer.u32(0x22246e75);
+        writer.u32(0x6d626572);
+        writer.u32(0x4c6f6e67);
+        writer.u16(0x223a); // "$numberLong":
         this.writeStr(timestamp + '');
         writer.u8(0x7d); // }
       }
@@ -353,12 +372,20 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$regularExpression":{"pattern":"...","options":"..."}}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22247265); writer.u32(0x67756c61); writer.u32(0x72457870); writer.u32(0x72657373); writer.u32(0x696f6e22); // "$regularExpression"
+    writer.u32(0x22247265);
+    writer.u32(0x67756c61);
+    writer.u32(0x72457870);
+    writer.u32(0x72657373);
+    writer.u32(0x696f6e22); // "$regularExpression"
     writer.u16(0x3a7b); // :{
-    writer.u32(0x22706174); writer.u32(0x7465726e); writer.u16(0x223a); // "pattern":
+    writer.u32(0x22706174);
+    writer.u32(0x7465726e);
+    writer.u16(0x223a); // "pattern":
     this.writeStr(value.source);
     writer.u8(0x2c); // ,
-    writer.u32(0x226f7074); writer.u32(0x696f6e73); writer.u16(0x223a); // "options":
+    writer.u32(0x226f7074);
+    writer.u32(0x696f6e73);
+    writer.u16(0x223a); // "options":
     this.writeStr(value.flags);
     writer.u16(0x7d7d); // }}
   }
@@ -367,7 +394,8 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$oid":"hexstring"}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246f69); writer.u16(0x6422); // "$oid"
+    writer.u32(0x22246f69);
+    writer.u16(0x6422); // "$oid"
     writer.u8(0x3a); // :
     this.writeStr(this.objectIdToHex(value));
     writer.u8(0x7d); // }
@@ -405,7 +433,10 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$numberDecimal":"..."}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x44656369); writer.u32(0x6d616c22); // "$numberDecimal"
+    writer.u32(0x22246e75);
+    writer.u32(0x6d626572);
+    writer.u32(0x44656369);
+    writer.u32(0x6d616c22); // "$numberDecimal"
     writer.u8(0x3a); // :
     this.writeStr(this.decimal128ToString(value.data));
     writer.u8(0x7d); // }
@@ -415,13 +446,18 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$binary":{"base64":"...","subType":"..."}}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246269); writer.u32(0x6e617279); writer.u16(0x223a); // "$binary":
+    writer.u32(0x22246269);
+    writer.u32(0x6e617279);
+    writer.u16(0x223a); // "$binary":
     writer.u8(0x7b); // {
-    writer.u32(0x22626173); writer.u32(0x65363422); // "base64"
+    writer.u32(0x22626173);
+    writer.u32(0x65363422); // "base64"
     writer.u8(0x3a); // :
     this.writeStr(this.uint8ArrayToBase64(value.data));
     writer.u8(0x2c); // ,
-    writer.u32(0x22737562); writer.u32(0x54797065); writer.u16(0x223a); // "subType":
+    writer.u32(0x22737562);
+    writer.u32(0x54797065);
+    writer.u16(0x223a); // "subType":
     this.writeStr(value.subtype.toString(16).padStart(2, '0'));
     writer.u16(0x7d7d); // }}
   }
@@ -430,7 +466,9 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$code":"..."}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x2224636f); writer.u16(0x6465); writer.u16(0x223a); // "$code":
+    writer.u32(0x2224636f);
+    writer.u16(0x6465);
+    writer.u16(0x223a); // "$code":
     this.writeStr(value.code);
     writer.u8(0x7d); // }
   }
@@ -439,10 +477,13 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$code":"...","$scope":{...}}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x2224636f); writer.u16(0x6465); writer.u16(0x223a); // "$code":
+    writer.u32(0x2224636f);
+    writer.u16(0x6465);
+    writer.u16(0x223a); // "$code":
     this.writeStr(value.code);
     writer.u8(0x2c); // ,
-    writer.u32(0x22247363); writer.u32(0x6f706522); // "$scope"
+    writer.u32(0x22247363);
+    writer.u32(0x6f706522); // "$scope"
     writer.u8(0x3a); // :
     this.writeAny(value.scope);
     writer.u8(0x7d); // }
@@ -452,7 +493,9 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$symbol":"..."}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22247379); writer.u32(0x6d626f6c); writer.u16(0x223a); // "$symbol":
+    writer.u32(0x22247379);
+    writer.u32(0x6d626f6c);
+    writer.u16(0x223a); // "$symbol":
     this.writeStr(value.symbol);
     writer.u8(0x7d); // }
   }
@@ -461,12 +504,16 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$timestamp":{"t":...,"i":...}}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22247469); writer.u32(0x6d657374); writer.u32(0x616d7022); // "$timestamp"
+    writer.u32(0x22247469);
+    writer.u32(0x6d657374);
+    writer.u32(0x616d7022); // "$timestamp"
     writer.u16(0x3a7b); // :{
-    writer.u16(0x2274); writer.u16(0x223a); // "t":
+    writer.u16(0x2274);
+    writer.u16(0x223a); // "t":
     this.writeNumber(value.timestamp);
     writer.u8(0x2c); // ,
-    writer.u16(0x2269); writer.u16(0x223a); // "i":
+    writer.u16(0x2269);
+    writer.u16(0x223a); // "i":
     this.writeNumber(value.increment);
     writer.u16(0x7d7d); // }}
   }
@@ -475,13 +522,17 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$dbPointer":{"$ref":"...","$id":{...}}}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246462); writer.u32(0x506f696e); writer.u32(0x74657222); // "$dbPointer"
+    writer.u32(0x22246462);
+    writer.u32(0x506f696e);
+    writer.u32(0x74657222); // "$dbPointer"
     writer.u16(0x3a7b); // :{
-    writer.u32(0x22247265); writer.u16(0x6622); // "$ref"
+    writer.u32(0x22247265);
+    writer.u16(0x6622); // "$ref"
     writer.u8(0x3a); // :
     this.writeStr(value.name);
     writer.u8(0x2c); // ,
-    writer.u32(0x22246964); writer.u16(0x223a); // "$id":
+    writer.u32(0x22246964);
+    writer.u16(0x223a); // "$id":
     this.writeAny(value.id);
     writer.u16(0x7d7d); // }}
   }
@@ -490,7 +541,9 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$minKey":1}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246d69); writer.u32(0x6e4b6579); writer.u16(0x223a); // "$minKey":
+    writer.u32(0x22246d69);
+    writer.u32(0x6e4b6579);
+    writer.u16(0x223a); // "$minKey":
     this.writeNumber(1);
     writer.u8(0x7d); // }
   }
@@ -499,7 +552,9 @@ export class EjsonEncoder extends JsonEncoder {
     // Write {"$maxKey":1}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246d61); writer.u32(0x784b6579); writer.u16(0x223a); // "$maxKey":
+    writer.u32(0x22246d61);
+    writer.u32(0x784b6579);
+    writer.u16(0x223a); // "$maxKey":
     this.writeNumber(1);
     writer.u8(0x7d); // }
   }

@@ -128,7 +128,9 @@ describe('EjsonDecoder', () => {
   });
 
   test('decodes CodeWScope', () => {
-    const result = decoder.decodeFromString('{"$code": "function() { return x; }", "$scope": {"x": 42}}') as BsonJavascriptCodeWithScope;
+    const result = decoder.decodeFromString(
+      '{"$code": "function() { return x; }", "$scope": {"x": 42}}',
+    ) as BsonJavascriptCodeWithScope;
     expect(result).toBeInstanceOf(BsonJavascriptCodeWithScope);
     expect(result.code).toBe('function() { return x; }');
     expect(result.scope).toEqual({x: 42});
@@ -160,7 +162,9 @@ describe('EjsonDecoder', () => {
   });
 
   test('decodes DBPointer', () => {
-    const result = decoder.decodeFromString('{"$dbPointer": {"$ref": "collection", "$id": {"$oid": "507f1f77bcf86cd799439011"}}}') as BsonDbPointer;
+    const result = decoder.decodeFromString(
+      '{"$dbPointer": {"$ref": "collection", "$id": {"$oid": "507f1f77bcf86cd799439011"}}}',
+    ) as BsonDbPointer;
     expect(result).toBeInstanceOf(BsonDbPointer);
     expect(result.name).toBe('collection');
     expect(result.id).toBeInstanceOf(BsonObjectId);
@@ -199,7 +203,9 @@ describe('EjsonDecoder', () => {
   });
 
   test('decodes DBRef', () => {
-    const result = decoder.decodeFromString('{"$ref": "collection", "$id": {"$oid": "507f1f77bcf86cd799439011"}, "$db": "database"}') as Record<string, unknown>;
+    const result = decoder.decodeFromString(
+      '{"$ref": "collection", "$id": {"$oid": "507f1f77bcf86cd799439011"}, "$db": "database"}',
+    ) as Record<string, unknown>;
     expect(result.$ref).toBe('collection');
     expect(result.$id).toBeInstanceOf(BsonObjectId);
     expect(result.$db).toBe('database');
@@ -208,7 +214,7 @@ describe('EjsonDecoder', () => {
   test('decodes nested objects with Extended JSON types', () => {
     const json = '{"name": "test", "count": {"$numberInt": "42"}, "timestamp": {"$date": "2023-01-01T00:00:00.000Z"}}';
     const result = decoder.decodeFromString(json) as Record<string, unknown>;
-    
+
     expect(result.name).toBe('test');
     expect(result.count).toBeInstanceOf(BsonInt32);
     expect((result.count as BsonInt32).value).toBe(42);

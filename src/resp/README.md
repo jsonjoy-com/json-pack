@@ -35,10 +35,10 @@ RESP is the protocol used by Redis to communicate between clients and servers. T
 - Bulk strings  
 - Arrays
 
-## Usage
+## Basic Usage
 
 ```ts
-import {RespEncoder, RespDecoder} from 'json-pack/lib/resp';
+import {RespEncoder, RespDecoder} from '@jsonjoy.com/json-pack/lib/resp';
 
 const encoder = new RespEncoder();
 const decoder = new RespDecoder();

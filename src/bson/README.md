@@ -20,10 +20,10 @@ BSON (Binary JSON) is a binary representation of JSON-like documents. It extends
 - MongoDB-compatible implementation
 - Efficient binary representation
 
-## Usage
+## Basic Usage
 
 ```ts
-import {BsonEncoder, BsonDecoder} from 'json-pack/lib/bson';
+import {BsonEncoder, BsonDecoder} from '@jsonjoy.com/json-pack/lib/bson';
 
 const encoder = new BsonEncoder();
 const decoder = new BsonDecoder();
@@ -36,6 +36,8 @@ const data = {
 
 const encoded = encoder.encode(data);
 const decoded = decoder.decode(encoded);
+
+console.log(decoded); // Original data with BSON types preserved
 ```
 
 

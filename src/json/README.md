@@ -10,10 +10,10 @@ Enhanced JSON implementation with high-performance encoding and decoding capabil
 - Binary-safe encoding/decoding
 - Optimized for repeated encoding operations
 
-## Usage
+## Basic Usage
 
 ```ts
-import {JsonEncoder, JsonDecoder} from 'json-pack/lib/json';
+import {JsonEncoder, JsonDecoder} from '@jsonjoy.com/json-pack/lib/json';
 
 const encoder = new JsonEncoder();
 const decoder = new JsonDecoder();
@@ -21,6 +21,8 @@ const decoder = new JsonDecoder();
 const data = {hello: 'world', numbers: [1, 2, 3]};
 const encoded = encoder.encode(data);
 const decoded = decoder.decode(encoded);
+
+console.log(decoded); // {hello: 'world', numbers: [1, 2, 3]}
 ```
 
 ## Performance

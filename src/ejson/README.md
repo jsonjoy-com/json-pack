@@ -17,11 +17,32 @@ This directory contains the implementation of MongoDB Extended JSON v2 codec, pr
 - Throws descriptive errors for malformed input
 - Supports both canonical and relaxed format parsing
 
-## API
+## Basic Usage
+
+```ts
+import {EjsonEncoder, EjsonDecoder} from '@jsonjoy.com/json-pack/lib/ejson';
+
+const encoder = new EjsonEncoder();
+const decoder = new EjsonDecoder();
+
+const data = {
+  _id: new BsonObjectId(0x507f1f77, 0xbcf86cd799, 0x439011),
+  count: new BsonInt64(9223372036854775807),
+  created: new Date('2023-01-15T10:30:00.000Z')
+};
+
+const encoded = encoder.encode(data);
+const decoded = decoder.decode(encoded);
+
+console.log(decoded); // Original data with BSON types preserved
+```
+
+## Advanced Usage
 
 ### Binary-First API (Recommended for Performance)
+
 ```typescript
-import {EjsonEncoder, EjsonDecoder} from '@jsonjoy.com/json-pack/ejson2';
+import {EjsonEncoder, EjsonDecoder} from '@jsonjoy.com/json-pack/lib/ejson';
 import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 
 const writer = new Writer();
@@ -36,8 +57,9 @@ const result = decoder.decode(bytes);
 ```
 
 ### String API (For Compatibility)
+
 ```typescript
-import {createEjsonEncoder, createEjsonDecoder} from '@jsonjoy.com/json-pack/ejson2';
+import {createEjsonEncoder, createEjsonDecoder} from '@jsonjoy.com/json-pack/lib/ejson';
 
 const encoder = createEjsonEncoder({ canonical: true });
 const decoder = createEjsonDecoder();

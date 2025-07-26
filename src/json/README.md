@@ -12,15 +12,39 @@ Enhanced JSON implementation with high-performance encoding and decoding capabil
 
 ## Usage
 
-```ts
-import {JsonEncoder, JsonDecoder} from 'json-pack/lib/json';
+Note: JsonEncoder requires a Writer instance from the `@jsonjoy.com/util` package. Make sure to install it as a peer dependency:
 
-const encoder = new JsonEncoder();
+```bash
+npm install @jsonjoy.com/util
+```
+
+### Basic Usage
+
+```ts
+import {JsonEncoder, JsonDecoder} from '@jsonjoy.com/json-pack/lib/json';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+
+const writer = new Writer();
+const encoder = new JsonEncoder(writer);
 const decoder = new JsonDecoder();
 
 const data = {hello: 'world', numbers: [1, 2, 3]};
 const encoded = encoder.encode(data);
 const decoded = decoder.decode(encoded);
+
+console.log(decoded); // {hello: 'world', numbers: [1, 2, 3]}
+```
+
+### Alternative: Use simpler codecs
+
+For easier usage without external dependencies, consider using MessagePack or CBOR codecs instead:
+
+```ts
+import {MessagePackEncoder, MessagePackDecoder} from '@jsonjoy.com/json-pack/lib/msgpack';
+
+const encoder = new MessagePackEncoder();
+const decoder = new MessagePackDecoder(); 
+// ... simpler usage
 ```
 
 ## Performance

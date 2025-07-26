@@ -44,14 +44,31 @@ messagepack x 2,740 ops/sec ±10.15% (49 runs sampled), 364983 ns/op
 ```
 
 
-## Usage
+## Basic Usage
+
+Use `MessagePackEncoder` and `MessagePackDecoder` to encode plain JSON values:
+
+```ts
+import {MessagePackEncoder, MessagePackDecoder} from '@jsonjoy.com/json-pack/lib/msgpack';
+
+const encoder = new MessagePackEncoder();
+const decoder = new MessagePackDecoder();
+
+const data = {foo: 'bar'};
+const buffer = encoder.encode(data);
+const obj = decoder.decode(buffer);
+
+console.log(obj); // { foo: 'bar' }
+```
+
+## Advanced Usage
 
 ### Basic usage
 
 Use `Encoder` to encode plain JSON values.
 
 ```ts
-import {Encoder, Decoder} from '{lib,es6,esm}/json-pack';
+import {Encoder, Decoder} from '@jsonjoy.com/json-pack/lib/msgpack';
 
 const encoder = new Encoder();
 const decoder = new Decoder();
@@ -65,7 +82,7 @@ Use `EncoderFull` to encode data that is more complex than plain JSON. For
 example, encode binary data using `ArrayBuffer`:
 
 ```ts
-import {EncoderFull, Decoder} from '{lib,es6,esm}/json-pack';
+import {EncoderFull, Decoder} from '@jsonjoy.com/json-pack/lib/msgpack';
 
 const encoder = new EncoderFull();
 const decoder = new Decoder();
@@ -81,13 +98,13 @@ You might have already encoded MessagePack value, to insert it into a bigger
 MessagePack object as-is use `JsonPackValue` wrapper.
 
 ```ts
-import {EncoderFull, Decoder, JsonPackValue} from '{lib,es6,esm}/json-pack';
+import {EncoderFull, Decoder, JsonPackValue} from '@jsonjoy.com/json-pack/lib/msgpack';
 
 const encoder = new EncoderFull();
 const decoder = new Decoder();
 const buffer = encoder.encode({foo: 'bar'});
 const value = new JsonPackValue(buffer);
-const buffer2 = encode({baz: value});
+const buffer2 = encoder.encode({baz: value});
 
 const obj = decoder.decode(buffer2);
 console.log(obj); // { baz: { foo: 'bar' } }
@@ -98,14 +115,14 @@ console.log(obj); // { baz: { foo: 'bar' } }
 Use `JsonPackExtension` wrapper to encode extensions.
 
 ```ts
-import {EncoderFull, Decoder, JsonPackExtension} from '{lib,es6,esm}/json-pack';
+import {EncoderFull, Decoder, JsonPackExtension} from '@jsonjoy.com/json-pack/lib/msgpack';
 
 const ext = new JsonPackExtension(1, new Uint8Array(8));
 const encoder = new EncoderFull();
 const decoder = new Decoder();
 const buffer = encoder.encode({foo: ext});
 
-const obj = decoder.decode(buffe2);
+const obj = decoder.decode(buffer);
 console.log(obj); // { foo: JsonPackExtension } 
 ```
 
@@ -132,7 +149,7 @@ result in different MessagePack blobs. Use `EncoderStable` to get stable
 MessagePack blobs.
 
 ```ts
-import {EncoderStable} from '{lib,es6,esm}/json-pack';
+import {EncoderStable} from '@jsonjoy.com/json-pack/lib/msgpack';
 
 const encoder = new EncoderStable();
 

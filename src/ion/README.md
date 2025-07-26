@@ -2,7 +2,7 @@
 
 This library provides high-performance Amazon Ion binary format encoding and decoding capabilities.
 
-## Usage
+## Basic Usage
 
 ```typescript
 import {IonEncoderFast, IonDecoder} from '@jsonjoy.com/json-pack/lib/ion';
@@ -13,6 +13,8 @@ const decoder = new IonDecoder();
 const data = {users: [{name: 'Alice', age: 30}], count: 1};
 const encoded = encoder.encode(data);
 const decoded = decoder.decode(encoded);
+
+console.log(decoded); // Original data structure
 ```
 
 ## Important Usage Notes

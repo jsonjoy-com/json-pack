@@ -9,17 +9,11 @@ const decoder = new EjsonDecoder();
 
 describe('fuzzing', () => {
   test('EjsonEncoder - Relaxed Mode (JSON compatibility)', () => {
-    for (let i = 0; i < 100; i++) { // Reduced iterations to avoid Unicode issues in fuzzing
-      const value = JSON.parse(JSON.stringify(RandomJson.generate()));
-      try {
-        const encoded = relaxedEncoder.encode(value);
-        const decoded = decoder.decode(encoded);
-        expect(decoded).toStrictEqual(value);
-      } catch (err) {
-        // Skip this iteration if there are Unicode or other encoding issues
-        // This is expected behavior for a test suite - some random data may not round-trip perfectly
-        continue;
-      }
+    for (let i = 0; i < 200; i++) {
+      const value = RandomJson.generate();
+      const encoded = relaxedEncoder.encode(value);
+      const decoded = decoder.decode(encoded);
+      expect(decoded).toStrictEqual(value);
     }
   });
 });

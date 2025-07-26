@@ -41,6 +41,10 @@ export class EjsonEncoder extends JsonEncoder {
     return new TextDecoder().decode(bytes);
   }
 
+  public writeUnknown(value: unknown): void {
+    this.writeNull();
+  }
+
   public writeAny(value: unknown): void {
     if (value === null || value === undefined) {
       if (value === undefined) {
@@ -420,7 +424,6 @@ export class EjsonEncoder extends JsonEncoder {
     writer.u32(0x22737562); writer.u32(0x54797065); writer.u16(0x223a); // "subType":
     this.writeStr(value.subtype.toString(16).padStart(2, '0'));
     writer.u16(0x7d7d); // }}
-  }
   }
 
   private writeBsonCodeAsEjson(value: BsonJavascriptCode): void {

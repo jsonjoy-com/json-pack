@@ -14,6 +14,7 @@ import {
   BsonTimestamp,
 } from '../bson/values';
 import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
+import {JsonDecoder} from '../json/JsonDecoder';
 import {readKey} from '../json/JsonDecoder';
 import type {BinaryJsonDecoder} from '../types';
 
@@ -22,19 +23,9 @@ export interface EjsonDecoderOptions {
   legacy?: boolean;
 }
 
-export class EjsonDecoder implements BinaryJsonDecoder {
-  public reader = new Reader();
-
-  constructor(private options: EjsonDecoderOptions = {}) {}
-
-  public read(uint8: Uint8Array): unknown {
-    this.reader.reset(uint8);
-    return this.readAny();
-  }
-
-  public decode(uint8: Uint8Array): unknown {
-    this.reader.reset(uint8);
-    return this.readAny();
+export class EjsonDecoder extends JsonDecoder {
+  constructor(private options: EjsonDecoderOptions = {}) {
+    super();
   }
 
   /**

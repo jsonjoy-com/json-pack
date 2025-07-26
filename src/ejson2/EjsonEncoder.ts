@@ -15,6 +15,7 @@ import {
 } from '../bson/values';
 import {toBase64Bin} from '@jsonjoy.com/base64/lib/toBase64Bin';
 import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {JsonEncoder} from '../json/JsonEncoder';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 import type {BinaryJsonEncoder} from '../types';
 
@@ -23,17 +24,12 @@ export interface EjsonEncoderOptions {
   canonical?: boolean;
 }
 
-export class EjsonEncoder implements BinaryJsonEncoder {
+export class EjsonEncoder extends JsonEncoder {
   constructor(
-    public readonly writer: IWriter & IWriterGrowable,
+    writer: IWriter & IWriterGrowable,
     private options: EjsonEncoderOptions = {}
-  ) {}
-
-  public encode(value: unknown): Uint8Array {
-    const writer = this.writer;
-    writer.reset();
-    this.writeAny(value);
-    return writer.flush();
+  ) {
+    super(writer);
   }
 
   /**
@@ -43,10 +39,6 @@ export class EjsonEncoder implements BinaryJsonEncoder {
   public encodeToString(value: unknown): string {
     const bytes = this.encode(value);
     return new TextDecoder().decode(bytes);
-  }
-
-  public writeUnknown(value: unknown): void {
-    this.writeNull();
   }
 
   public writeAny(value: unknown): void {
@@ -140,33 +132,6 @@ export class EjsonEncoder implements BinaryJsonEncoder {
 
     // Fallback for unknown types
     return this.writeUnknown(value);
-  }
-
-  public writeNull(): void {
-    this.writer.u32(0x6e756c6c); // null
-  }
-
-  public writeBoolean(bool: boolean): void {
-    if (bool)
-      this.writer.u32(0x74727565); // true
-    else this.writer.u8u32(0x66, 0x616c7365); // false
-  }
-
-  public writeNumber(num: number): void {
-    const str = num.toString();
-    this.writer.ascii(str);
-  }
-
-  public writeInteger(int: number): void {
-    this.writeNumber(int >> 0 === int ? int : Math.trunc(int));
-  }
-
-  public writeUInteger(uint: number): void {
-    this.writeInteger(uint < 0 ? -uint : uint);
-  }
-
-  public writeFloat(float: number): void {
-    this.writeNumber(float);
   }
 
   public writeBin(buf: Uint8Array): void {
@@ -321,7 +286,7 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     writer.u8(0x7b); // {
     writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x496e7422); // "$numberInt"
     writer.u8(0x3a); // :
-    this.writeStr(value.toString());
+    this.writeStr(value + '');
     writer.u8(0x7d); // }
   }
 
@@ -329,9 +294,8 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     // Write {"$numberLong":"value"}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u8(0x22); // "$numberLong"
-    writer.u8(0x3a); // :
-    this.writeStr(value.toString());
+    writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u16(0x223a); // "$numberLong":
+    this.writeStr(value + '');
     writer.u8(0x7d); // }
   }
 
@@ -339,12 +303,11 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     // Write {"$numberDouble":"value"}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x446f7562); writer.u16(0x6c65); writer.u8(0x22); // "$numberDouble"
-    writer.u8(0x3a); // :
+    writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x446f7562); writer.u16(0x6c65); writer.u16(0x223a); // "$numberDouble":
     if (!isFinite(value)) {
       this.writeStr(this.formatNonFinite(value));
     } else {
-      this.writeStr(value.toString());
+      this.writeStr(value + '');
     }
     writer.u8(0x7d); // }
   }
@@ -358,15 +321,13 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246461); writer.u16(0x7465); writer.u8(0x22); // "$date"
-    writer.u8(0x3a); // :
+    writer.u32(0x22246461); writer.u16(0x7465); writer.u16(0x223a); // "$date":
     
     if (this.options.canonical) {
       // Write {"$numberLong":"timestamp"}
       writer.u8(0x7b); // {
-      writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u8(0x22); // "$numberLong"
-      writer.u8(0x3a); // :
-      this.writeStr(timestamp.toString());
+      writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u16(0x223a); // "$numberLong":
+      this.writeStr(timestamp + '');
       writer.u8(0x7d); // }
     } else {
       // Use ISO format for dates between 1970-9999 in relaxed mode
@@ -376,9 +337,8 @@ export class EjsonEncoder implements BinaryJsonEncoder {
       } else {
         // Write {"$numberLong":"timestamp"}
         writer.u8(0x7b); // {
-        writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u8(0x22); // "$numberLong"
-        writer.u8(0x3a); // :
-        this.writeStr(timestamp.toString());
+        writer.u32(0x22246e75); writer.u32(0x6d626572); writer.u32(0x4c6f6e67); writer.u16(0x223a); // "$numberLong":
+        this.writeStr(timestamp + '');
         writer.u8(0x7d); // }
       }
     }
@@ -390,17 +350,13 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     const writer = this.writer;
     writer.u8(0x7b); // {
     writer.u32(0x22247265); writer.u32(0x67756c61); writer.u32(0x72457870); writer.u32(0x72657373); writer.u32(0x696f6e22); // "$regularExpression"
-    writer.u8(0x3a); // :
-    writer.u8(0x7b); // {
-    writer.u32(0x22706174); writer.u32(0x7465726e); writer.u8(0x22); // "pattern"
-    writer.u8(0x3a); // :
+    writer.u16(0x3a7b); // :{
+    writer.u32(0x22706174); writer.u32(0x7465726e); writer.u16(0x223a); // "pattern":
     this.writeStr(value.source);
     writer.u8(0x2c); // ,
-    writer.u32(0x226f7074); writer.u32(0x696f6e73); writer.u8(0x22); // "options"
-    writer.u8(0x3a); // :
+    writer.u32(0x226f7074); writer.u32(0x696f6e73); writer.u16(0x223a); // "options":
     this.writeStr(value.flags);
-    writer.u8(0x7d); // }
-    writer.u8(0x7d); // }
+    writer.u16(0x7d7d); // }}
   }
 
   private writeObjectIdAsEjson(value: BsonObjectId): void {
@@ -455,26 +411,23 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     // Write {"$binary":{"base64":"...","subType":"..."}}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246269); writer.u32(0x6e617279); writer.u8(0x22); // "$binary"
-    writer.u8(0x3a); // :
+    writer.u32(0x22246269); writer.u32(0x6e617279); writer.u16(0x223a); // "$binary":
     writer.u8(0x7b); // {
     writer.u32(0x22626173); writer.u32(0x65363422); // "base64"
     writer.u8(0x3a); // :
     this.writeStr(this.uint8ArrayToBase64(value.data));
     writer.u8(0x2c); // ,
-    writer.u32(0x22737562); writer.u32(0x54797065); writer.u8(0x22); // "subType"
-    writer.u8(0x3a); // :
+    writer.u32(0x22737562); writer.u32(0x54797065); writer.u16(0x223a); // "subType":
     this.writeStr(value.subtype.toString(16).padStart(2, '0'));
-    writer.u8(0x7d); // }
-    writer.u8(0x7d); // }
+    writer.u16(0x7d7d); // }}
+  }
   }
 
   private writeBsonCodeAsEjson(value: BsonJavascriptCode): void {
     // Write {"$code":"..."}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x2224636f); writer.u16(0x6465); writer.u8(0x22); // "$code"
-    writer.u8(0x3a); // :
+    writer.u32(0x2224636f); writer.u16(0x6465); writer.u16(0x223a); // "$code":
     this.writeStr(value.code);
     writer.u8(0x7d); // }
   }
@@ -483,8 +436,7 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     // Write {"$code":"...","$scope":{...}}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x2224636f); writer.u16(0x6465); writer.u8(0x22); // "$code"
-    writer.u8(0x3a); // :
+    writer.u32(0x2224636f); writer.u16(0x6465); writer.u16(0x223a); // "$code":
     this.writeStr(value.code);
     writer.u8(0x2c); // ,
     writer.u32(0x22247363); writer.u32(0x6f706522); // "$scope"
@@ -497,8 +449,7 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     // Write {"$symbol":"..."}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22247379); writer.u32(0x6d626f6c); writer.u8(0x22); // "$symbol"
-    writer.u8(0x3a); // :
+    writer.u32(0x22247379); writer.u32(0x6d626f6c); writer.u16(0x223a); // "$symbol":
     this.writeStr(value.symbol);
     writer.u8(0x7d); // }
   }
@@ -508,17 +459,13 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     const writer = this.writer;
     writer.u8(0x7b); // {
     writer.u32(0x22247469); writer.u32(0x6d657374); writer.u32(0x616d7022); // "$timestamp"
-    writer.u8(0x3a); // :
-    writer.u8(0x7b); // {
-    writer.u16(0x2274); writer.u8(0x22); // "t"
-    writer.u8(0x3a); // :
+    writer.u16(0x3a7b); // :{
+    writer.u16(0x2274); writer.u16(0x223a); // "t":
     this.writeNumber(value.timestamp);
     writer.u8(0x2c); // ,
-    writer.u16(0x2269); writer.u8(0x22); // "i"
-    writer.u8(0x3a); // :
+    writer.u16(0x2269); writer.u16(0x223a); // "i":
     this.writeNumber(value.increment);
-    writer.u8(0x7d); // }
-    writer.u8(0x7d); // }
+    writer.u16(0x7d7d); // }}
   }
 
   private writeBsonDbPointerAsEjson(value: BsonDbPointer): void {
@@ -526,25 +473,21 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     const writer = this.writer;
     writer.u8(0x7b); // {
     writer.u32(0x22246462); writer.u32(0x506f696e); writer.u32(0x74657222); // "$dbPointer"
-    writer.u8(0x3a); // :
-    writer.u8(0x7b); // {
+    writer.u16(0x3a7b); // :{
     writer.u32(0x22247265); writer.u16(0x6622); // "$ref"
     writer.u8(0x3a); // :
     this.writeStr(value.name);
     writer.u8(0x2c); // ,
-    writer.u32(0x22246964); writer.u8(0x22); // "$id"
-    writer.u8(0x3a); // :
+    writer.u32(0x22246964); writer.u16(0x223a); // "$id":
     this.writeAny(value.id);
-    writer.u8(0x7d); // }
-    writer.u8(0x7d); // }
+    writer.u16(0x7d7d); // }}
   }
 
   private writeBsonMinKeyAsEjson(): void {
     // Write {"$minKey":1}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246d69); writer.u32(0x6e4b6579); writer.u8(0x22); // "$minKey"
-    writer.u8(0x3a); // :
+    writer.u32(0x22246d69); writer.u32(0x6e4b6579); writer.u16(0x223a); // "$minKey":
     this.writeNumber(1);
     writer.u8(0x7d); // }
   }
@@ -553,8 +496,7 @@ export class EjsonEncoder implements BinaryJsonEncoder {
     // Write {"$maxKey":1}
     const writer = this.writer;
     writer.u8(0x7b); // {
-    writer.u32(0x22246d61); writer.u32(0x784b6579); writer.u8(0x22); // "$maxKey"
-    writer.u8(0x3a); // :
+    writer.u32(0x22246d61); writer.u32(0x784b6579); writer.u16(0x223a); // "$maxKey":
     this.writeNumber(1);
     writer.u8(0x7d); // }
   }

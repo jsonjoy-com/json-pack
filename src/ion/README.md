@@ -1,25 +1,43 @@
-# Amazon Ion
+# Amazon Ion Binary Codec
 
-Implementation of [Amazon Ion](https://amazon-ion.github.io/ion-docs/) data format for JavaScript.
-
-Amazon Ion is a richly-typed, self-describing, hierarchical data serialization format offering interchangeable binary and text representations. The binary representation of Ion is efficient to parse, while the text representation is easy to author and debug.
-
-## Features
-
-- **IonEncoderFast** - High-performance encoder for Ion binary format
-- Support for Ion's rich type system including symbols, timestamps, and annotations
-- Self-describing binary format with efficient encoding
+This library provides high-performance Amazon Ion binary format encoding and decoding capabilities.
 
 ## Usage
 
-```ts
-import {IonEncoderFast} from 'json-pack/lib/ion';
+```typescript
+import {IonEncoderFast, IonDecoder} from '@jsonjoy.com/json-pack/lib/ion';
 
 const encoder = new IonEncoderFast();
-const data = {name: 'example', value: 42, timestamp: new Date()};
+const decoder = new IonDecoder();
+
+const data = {users: [{name: 'Alice', age: 30}], count: 1};
 const encoded = encoder.encode(data);
+const decoded = decoder.decode(encoded);
 ```
 
+## Important Usage Notes
+
+⚠️ **Instance Reuse Limitation**: Due to internal state management with shared UTF-8 decoders, encoder and decoder instances should **not be reused** across multiple encode/decode operations with complex data. For reliable operation, create fresh instances for each encoding/decoding operation:
+
+```typescript
+// ❌ DON'T: Reuse instances for multiple operations
+const encoder = new IonEncoderFast();
+const decoder = new IonDecoder();
+for (const item of items) {
+  const encoded = encoder.encode(item);  // May cause state corruption
+  const decoded = decoder.decode(encoded);
+}
+
+// ✅ DO: Create fresh instances for each operation
+for (const item of items) {
+  const encoder = new IonEncoderFast();
+  const decoder = new IonDecoder();
+  const encoded = encoder.encode(item);
+  const decoded = decoder.decode(encoded);
+}
+```
+
+This limitation primarily affects complex nested objects with many string keys. Simple data structures may work with reused instances, but fresh instances are recommended for guaranteed correctness.
 ## Benchmarks
 
 Encoding:

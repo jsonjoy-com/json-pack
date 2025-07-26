@@ -11,12 +11,22 @@ Implements [Bencode][bencode] encoder and decoder.
 - Extensions for additional JavaScript types
 - BitTorrent-compatible implementation
 
-## Basic Usage
+## Usage
+
+Note: BencodeEncoder requires a Writer instance from the `@jsonjoy.com/util` package. Make sure to install it as a peer dependency:
+
+```bash
+npm install @jsonjoy.com/util
+```
+
+### Basic Usage
 
 ```ts
 import {BencodeEncoder, BencodeDecoder} from '@jsonjoy.com/json-pack/lib/bencode';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 
-const encoder = new BencodeEncoder();
+const writer = new Writer();
+const encoder = new BencodeEncoder(writer);
 const decoder = new BencodeDecoder();
 
 const data = {
@@ -29,6 +39,15 @@ const encoded = encoder.encode(data);
 const decoded = decoder.decode(encoded);
 
 console.log(decoded); // Original data structure
+```
+
+### Alternative: Use simpler codecs
+
+For easier usage without external dependencies, consider using MessagePack or CBOR codecs instead:
+
+```ts
+import {MessagePackEncoder, MessagePackDecoder} from '@jsonjoy.com/json-pack/lib/msgpack';
+// ... simpler usage
 ```
 
 ## Type Coercion

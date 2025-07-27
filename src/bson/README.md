@@ -22,10 +22,20 @@ BSON (Binary JSON) is a binary representation of JSON-like documents. It extends
 
 ## Usage
 
-```ts
-import {BsonEncoder, BsonDecoder} from 'json-pack/lib/bson';
+Note: BsonEncoder requires a Writer instance from the `@jsonjoy.com/util` package. Make sure to install it as a peer dependency:
 
-const encoder = new BsonEncoder();
+```bash
+npm install @jsonjoy.com/util
+```
+
+### Basic Usage
+
+```ts
+import {BsonEncoder, BsonDecoder} from '@jsonjoy.com/json-pack/lib/bson';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+
+const writer = new Writer();
+const encoder = new BsonEncoder(writer);
 const decoder = new BsonDecoder();
 
 const data = {
@@ -36,6 +46,17 @@ const data = {
 
 const encoded = encoder.encode(data);
 const decoded = decoder.decode(encoded);
+
+console.log(decoded); // Original data with BSON types preserved
+```
+
+### Alternative: Use simpler codecs
+
+For easier usage without external dependencies, consider using MessagePack or CBOR codecs instead:
+
+```ts
+import {MessagePackEncoder, MessagePackDecoder} from '@jsonjoy.com/json-pack/lib/msgpack';
+// ... simpler usage
 ```
 
 

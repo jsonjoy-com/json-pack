@@ -1,3 +1,53 @@
+# UBJSON Codec
+
+Universal Binary JSON (UBJSON) encoder and decoder with high-performance implementation.
+
+## Features
+
+- High-performance UBJSON encoding and decoding
+- Support for all UBJSON data types
+- About an order of magnitude faster than other implementations
+- Efficient binary representation
+
+## Usage
+
+Note: UbjsonEncoder requires a Writer instance from the `@jsonjoy.com/util` package. Make sure to install it as a peer dependency:
+
+```bash
+npm install @jsonjoy.com/util
+```
+
+### Basic Usage
+
+```ts
+import {UbjsonEncoder, UbjsonDecoder} from '@jsonjoy.com/json-pack/lib/ubjson';
+import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+
+const writer = new Writer();
+const encoder = new UbjsonEncoder(writer);
+const decoder = new UbjsonDecoder();
+
+const data = {
+  name: 'example',
+  numbers: [1, 2, 3],
+  nested: {value: 42}
+};
+
+const encoded = encoder.encode(data);
+const decoded = decoder.decode(encoded);
+
+console.log(decoded); // Original data structure
+```
+
+### Alternative: Use simpler codecs
+
+For easier usage without external dependencies, consider using MessagePack or CBOR codecs instead:
+
+```ts
+import {MessagePackEncoder, MessagePackDecoder} from '@jsonjoy.com/json-pack/lib/msgpack';
+// ... simpler usage
+```
+
 ## Limitations of the UBJSON format
 
 - Does not have a native "binary" type representation. Instead, octets are

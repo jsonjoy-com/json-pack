@@ -8,7 +8,7 @@ export class CsonEncoder implements BinaryJsonEncoder {
 
   constructor(
     public readonly writer: IWriter & IWriterGrowable,
-    options: CsonEncoderOptions = {}
+    options: CsonEncoderOptions = {},
   ) {
     this.options = {
       indent: options.indent ?? 2,
@@ -94,19 +94,19 @@ export class CsonEncoder implements BinaryJsonEncoder {
   }
 
   public writeBin(buf: Uint8Array): void {
-    // Convert binary data to base64 string in CSON format  
+    // Convert binary data to base64 string in CSON format
     const writer = this.writer;
     const length = buf.length;
-    
+
     writer.ascii("Buffer.from('");
-    
+
     // Use the existing base64 utility from the json-pack library
     const tempBuffer = new ArrayBuffer(((length + 2) / 3) * 4);
     const tempView = new DataView(tempBuffer);
     const base64Length = toBase64Bin(buf, 0, length, tempView, 0);
     const base64Array = new Uint8Array(tempBuffer, 0, base64Length);
     const base64String = new TextDecoder().decode(base64Array);
-    
+
     writer.ascii(base64String);
     writer.ascii("', 'base64')");
   }

@@ -15,13 +15,13 @@ describe('CSON Integration', () => {
         config: {
           debug: true,
           timeout: 5000,
-          retries: 3
+          retries: 3,
         },
         metadata: {
           'creation-date': '2023-12-01',
           description: 'A CSON codec implementation',
-          tags: ['serialization', 'coffeescript', 'parsing']
-        }
+          tags: ['serialization', 'coffeescript', 'parsing'],
+        },
       };
 
       // Encode to CSON
@@ -33,11 +33,11 @@ describe('CSON Integration', () => {
       expect(csonText).toContain('features: [');
       expect(csonText).toContain('config:');
       expect(csonText).toContain('debug: true');
-      
+
       // Should use unquoted keys for valid identifiers
       expect(csonText).toContain('name: ');
       expect(csonText).not.toContain("'name':");
-      
+
       // Should quote invalid identifier keys
       expect(csonText).toContain("'creation-date':");
 
@@ -98,18 +98,18 @@ describe('CSON Integration', () => {
       expect(result.server).toHaveProperty('host', 'localhost');
       expect(result.server).toHaveProperty('port', 3000);
       expect(result.server).toHaveProperty('ssl', true);
-      
+
       expect(result).toHaveProperty('database');
       expect(result.database).toHaveProperty('type', 'postgresql');
       expect(result.database.connection).toHaveProperty('host', 'db.example.com');
-      
+
       expect(result).toHaveProperty('description');
       expect(result.description).toContain('complex application');
       expect(result.description).toContain('multiple configuration');
-      
+
       expect(result).toHaveProperty('features');
       expect(result.features).toEqual(['logging', 'monitoring', 'analytics', 'caching']);
-      
+
       expect(result).toHaveProperty('env');
       expect(result.env).toHaveProperty('NODE_ENV', 'production');
       expect(result.env).toHaveProperty('DEBUG', false);
@@ -153,21 +153,21 @@ describe('CSON Integration', () => {
         // Empty structures
         {},
         [],
-        
+
         // Nested empty structures
-        { empty: {}, arr: [] },
-        
+        {empty: {}, arr: []},
+
         // Special strings
-        { quote: "it's working", doubleQuote: 'say "hello"' },
-        
+        {quote: "it's working", doubleQuote: 'say "hello"'},
+
         // Numbers
-        { int: 42, float: 3.14159, negative: -123, zero: 0 },
-        
+        {int: 42, float: 3.14159, negative: -123, zero: 0},
+
         // Mixed arrays
         [null, true, false, 0, '', {}, []],
-        
+
         // Special keys
-        { 'special-key': 'value', '123numeric': 'start', 'key with spaces': true }
+        {'special-key': 'value', '123numeric': 'start', 'key with spaces': true},
       ];
 
       edgeCases.forEach((testCase, index) => {

@@ -23,7 +23,7 @@ describe('CsonEncoder', () => {
     it('should encode boolean values', () => {
       const trueEncoded = encoder.encode(true);
       const falseEncoded = encoder.encode(false);
-      
+
       expect(new TextDecoder().decode(trueEncoded)).toBe('true');
       expect(new TextDecoder().decode(falseEncoded)).toBe('false');
     });
@@ -31,7 +31,7 @@ describe('CsonEncoder', () => {
     it('should encode numbers', () => {
       const intEncoded = encoder.encode(42);
       const floatEncoded = encoder.encode(3.14);
-      
+
       expect(new TextDecoder().decode(intEncoded)).toBe('42');
       expect(new TextDecoder().decode(floatEncoded)).toBe('3.14');
     });
@@ -148,17 +148,17 @@ describe('CsonEncoder', () => {
       const data = {
         abc: ['a', 'b', 'c'],
         a: {
-          b: 'c'
-        }
+          b: 'c',
+        },
       };
-      
+
       const encoded = encoder.encode(data);
       const result = new TextDecoder().decode(encoded);
-      
+
       // Should be parseable by the decoder
       const decoded = decoder.decode(encoded);
       expect(decoded).toEqual(data);
-      
+
       // Should contain CSON-style formatting
       expect(result).toContain('abc: [');
       expect(result).toContain('a: {');

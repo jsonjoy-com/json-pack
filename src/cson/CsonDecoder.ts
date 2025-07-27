@@ -1,8 +1,10 @@
 import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
 import type {BinaryJsonDecoder, PackValue} from '../types';
+import {CsonParser} from './CsonParser';
 
 export class CsonDecoder implements BinaryJsonDecoder {
   public reader = new Reader();
+  private parser = new CsonParser();
 
   public read(uint8: Uint8Array): unknown {
     this.reader.reset(uint8);
@@ -12,11 +14,10 @@ export class CsonDecoder implements BinaryJsonDecoder {
   public decode(uint8: Uint8Array): unknown {
     // Convert Uint8Array to string
     const csonText = new TextDecoder().decode(uint8);
-    
+
     try {
-      // Use the cson-parser library to parse the CSON text
-      const csonParser = require('cson-parser');
-      return csonParser.parse(csonText);
+      // Use our custom CSON parser
+      return this.parser.parse(csonText);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`CSON parsing error: ${errorMessage}`);

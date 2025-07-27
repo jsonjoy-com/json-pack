@@ -67,7 +67,6 @@
   "dependencies": {
     "@jsonjoy.com/base64": "^1.1.1",
     "@jsonjoy.com/util": "^1.1.2",
-    "cson-parser": "^4.0.9",
     "hyperdyperid": "^1.2.0",
     "thingies": "^1.20.0"
   },

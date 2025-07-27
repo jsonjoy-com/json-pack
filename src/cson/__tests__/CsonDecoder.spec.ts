@@ -18,10 +18,10 @@ describe('CsonDecoder', () => {
     it('should decode boolean values', () => {
       const trueText = 'true';
       const falseText = 'false';
-      
+
       const trueEncoded = new TextEncoder().encode(trueText);
       const falseEncoded = new TextEncoder().encode(falseText);
-      
+
       expect(decoder.decode(trueEncoded)).toBe(true);
       expect(decoder.decode(falseEncoded)).toBe(false);
     });
@@ -29,10 +29,10 @@ describe('CsonDecoder', () => {
     it('should decode numbers', () => {
       const intText = '42';
       const floatText = '3.14';
-      
+
       const intEncoded = new TextEncoder().encode(intText);
       const floatEncoded = new TextEncoder().encode(floatText);
-      
+
       expect(decoder.decode(intEncoded)).toBe(42);
       expect(decoder.decode(floatEncoded)).toBe(3.14);
     });
@@ -40,10 +40,10 @@ describe('CsonDecoder', () => {
     it('should decode strings', () => {
       const singleQuoteText = "'hello world'";
       const doubleQuoteText = '"hello world"';
-      
+
       const singleEncoded = new TextEncoder().encode(singleQuoteText);
       const doubleEncoded = new TextEncoder().encode(doubleQuoteText);
-      
+
       expect(decoder.decode(singleEncoded)).toBe('hello world');
       expect(decoder.decode(doubleEncoded)).toBe('hello world');
     });
@@ -94,7 +94,7 @@ describe('CsonDecoder', () => {
       const result = decoder.decode(encoded);
       expect(result).toEqual({
         abc: ['a', 'b', 'c'],
-        a: { b: 'c' }
+        a: {b: 'c'},
       });
     });
 
@@ -107,7 +107,7 @@ describe('CsonDecoder', () => {
       const result = decoder.decode(encoded);
       expect(result).toEqual({
         'invalid-key': 'value',
-        '123key': 'value2'
+        '123key': 'value2',
       });
     });
   });
@@ -124,7 +124,7 @@ describe('CsonDecoder', () => {
       const result = decoder.decode(encoded);
       expect(result).toEqual({
         key: 'value',
-        num: 42
+        num: 42,
       });
     });
 
@@ -160,17 +160,13 @@ describe('CsonDecoder', () => {
           landuse: 'Livestock covers 45% of the earth\\'s total land'
           more: 'http://cowspiracy.com/facts'
       `;
-      
+
       const encoded = new TextEncoder().encode(csonText);
       const result = decoder.decode(encoded) as any;
-      
+
       expect(result).toHaveProperty('greatDocumentaries');
-      expect(result.greatDocumentaries).toEqual([
-        'earthlings.com',
-        'forksoverknives.com', 
-        'cowspiracy.com'
-      ]);
-      
+      expect(result.greatDocumentaries).toEqual(['earthlings.com', 'forksoverknives.com', 'cowspiracy.com']);
+
       expect(result).toHaveProperty('importantFacts');
       expect(result.importantFacts).toHaveProperty('emissions');
       expect(result.importantFacts).toHaveProperty('landuse');
@@ -184,7 +180,7 @@ describe('CsonDecoder', () => {
         key: invalid_value_without_quotes
       }`;
       const encoded = new TextEncoder().encode(invalidCsonText);
-      
+
       expect(() => {
         decoder.decode(encoded);
       }).toThrow('CSON parsing error');

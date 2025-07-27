@@ -17,6 +17,7 @@ This library implements the following serialization formats:
 - **[BSON](./src/bson/README.md)** - Binary JSON format used by MongoDB
 - **[RESP](./src/resp/README.md)** - Redis Serialization Protocol (v2 and v3)
 - **[Bencode](./src/bencode/README.md)** - BitTorrent's encoding format
+- **[CSON](./src/cson/README.md)** - CoffeeScript Object Notation with comments and flexible syntax
 
 Each format comes with optimized encoders and decoders designed for maximum performance.
 

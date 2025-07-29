@@ -1,6 +1,7 @@
 import {CborEncoder} from '../CborEncoder';
 import {CborDecoder} from '../CborDecoder';
 import {TYPED_ARRAY_TAG} from '../constants';
+import type {CborMultiDimensionalArray, CborHomogeneousArray} from '../CborEncoder';
 
 describe('CBOR Typed Arrays (RFC 8746)', () => {
   const encoder = new CborEncoder();
@@ -194,6 +195,122 @@ describe('CBOR Typed Arrays (RFC 8746)', () => {
       const bytes = new Uint8Array([0xd8, TYPED_ARRAY_TAG.FLOAT128_BE, 0x42, 0x00, 0x01]); // tag + dummy byte string
       
       expect(() => decoder.decode(bytes)).toThrow('Unsupported floating point format');
+    });
+  });
+
+  describe('Multi-dimensional arrays (RFC 8746)', () => {
+    test('Row-major multi-dimensional array', () => {
+      const multiDimArray: CborMultiDimensionalArray = {
+        __cbor_multi_dim__: true,
+        dimensions: [2, 3],
+        elements: [1, 2, 3, 4, 5, 6],
+        rowMajor: true
+      };
+      
+      const encoded = encoder.encode(multiDimArray);
+      const decoded = decoder.decode(encoded) as any;
+      
+      expect(decoded.dimensions).toEqual([2, 3]);
+      expect(decoded.elements).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(decoded.order).toBe('row-major');
+    });
+
+    test('Column-major multi-dimensional array', () => {
+      const multiDimArray: CborMultiDimensionalArray = {
+        __cbor_multi_dim__: true,
+        dimensions: [2, 3],
+        elements: [1, 2, 3, 4, 5, 6],
+        rowMajor: false
+      };
+      
+      const encoded = encoder.encode(multiDimArray);
+      const decoded = decoder.decode(encoded) as any;
+      
+      expect(decoded.dimensions).toEqual([2, 3]);
+      expect(decoded.elements).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(decoded.order).toBe('column-major');
+    });
+
+    test('Multi-dimensional with typed array elements', () => {
+      const typedArray = new Int32Array([1, 2, 3, 4, 5, 6]);
+      const multiDimArray: CborMultiDimensionalArray = {
+        __cbor_multi_dim__: true,
+        dimensions: [2, 3],
+        elements: typedArray
+      };
+      
+      const encoded = encoder.encode(multiDimArray);
+      const decoded = decoder.decode(encoded) as any;
+      
+      expect(decoded.dimensions).toEqual([2, 3]);
+      expect(decoded.elements).toBeInstanceOf(Int32Array);
+      expect(Array.from(decoded.elements)).toEqual([1, 2, 3, 4, 5, 6]);
+    });
+  });
+
+  describe('Homogeneous arrays (RFC 8746)', () => {
+    test('Homogeneous array of numbers', () => {
+      const homogeneousArray: CborHomogeneousArray = {
+        __cbor_homogeneous__: true,
+        elements: [1, 2, 3, 4, 5]
+      };
+      
+      const encoded = encoder.encode(homogeneousArray);
+      const decoded = decoder.decode(encoded) as unknown[];
+      
+      expect(Array.isArray(decoded)).toBe(true);
+      expect(decoded).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    test('Homogeneous array of booleans', () => {
+      const homogeneousArray: CborHomogeneousArray = {
+        __cbor_homogeneous__: true,
+        elements: [true, false, true]
+      };
+      
+      const encoded = encoder.encode(homogeneousArray);
+      const decoded = decoder.decode(encoded) as unknown[];
+      
+      expect(Array.isArray(decoded)).toBe(true);
+      expect(decoded).toEqual([true, false, true]);
+    });
+
+    test('Empty homogeneous array', () => {
+      const homogeneousArray: CborHomogeneousArray = {
+        __cbor_homogeneous__: true,
+        elements: []
+      };
+      
+      const encoded = encoder.encode(homogeneousArray);
+      const decoded = decoder.decode(encoded) as unknown[];
+      
+      expect(Array.isArray(decoded)).toBe(true);
+      expect(decoded).toEqual([]);
+    });
+  });
+
+  describe('Helper functions', () => {
+    test('createMultiDimensionalArray helper', () => {
+      const {createMultiDimensionalArray} = require('../index');
+      const multiDimArray = createMultiDimensionalArray([2, 3], [1, 2, 3, 4, 5, 6]);
+      
+      const encoded = encoder.encode(multiDimArray);
+      const decoded = decoder.decode(encoded) as any;
+      
+      expect(decoded.dimensions).toEqual([2, 3]);
+      expect(decoded.elements).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(decoded.order).toBe('row-major');
+    });
+
+    test('createHomogeneousArray helper', () => {
+      const {createHomogeneousArray} = require('../index');
+      const homogeneousArray = createHomogeneousArray([1, 2, 3, 4, 5]);
+      
+      const encoded = encoder.encode(homogeneousArray);
+      const decoded = decoder.decode(encoded) as unknown[];
+      
+      expect(Array.isArray(decoded)).toBe(true);
+      expect(decoded).toEqual([1, 2, 3, 4, 5]);
     });
   });
 });

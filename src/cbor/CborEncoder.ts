@@ -2,9 +2,21 @@ import {isFloat32} from '@jsonjoy.com/util/lib/buffers/isFloat32';
 import {JsonPackExtension} from '../JsonPackExtension';
 import {CborEncoderFast} from './CborEncoderFast';
 import {JsonPackValue} from '../JsonPackValue';
-import {TYPED_ARRAY_TAG} from './constants';
+import {TYPED_ARRAY_TAG, ARRAY_TAG} from './constants';
 import {isLittleEndian} from './shared';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+
+export interface CborMultiDimensionalArray {
+  __cbor_multi_dim__: true;
+  dimensions: number[];
+  elements: unknown;
+  rowMajor?: boolean;
+}
+
+export interface CborHomogeneousArray {
+  __cbor_homogeneous__: true;
+  elements: unknown[];
+}
 
 export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> extends CborEncoderFast<W> {
   /**
@@ -29,6 +41,9 @@ export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriter
         const constructor = value.constructor;
         switch (constructor) {
           case Object:
+            // Check for special CBOR array types first
+            if (this.isCborMultiDimensionalArray(value)) return this.writeMultiDimensionalArray(value);
+            if (this.isCborHomogeneousArray(value)) return this.writeHomogeneousArray(value);
             return this.writeObj(value as Record<string, unknown>);
           case Array:
             return this.writeArr(value as unknown[]);
@@ -65,6 +80,8 @@ export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriter
             if (value instanceof Uint8Array) return this.writeBin(value);
             if (Array.isArray(value)) return this.writeArr(value);
             if (value instanceof Map) return this.writeMap(value);
+            if (this.isCborMultiDimensionalArray(value)) return this.writeMultiDimensionalArray(value);
+            if (this.isCborHomogeneousArray(value)) return this.writeHomogeneousArray(value);
             return this.writeUnknown(value);
         }
       }
@@ -133,5 +150,37 @@ export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriter
       default:
         throw new Error(`Unsupported typed array type: ${constructor.name}`);
     }
+  }
+
+  /**
+   * Check if value is a CBOR multi-dimensional array
+   */
+  private isCborMultiDimensionalArray(value: unknown): value is CborMultiDimensionalArray {
+    return typeof value === 'object' && value !== null && 
+           '__cbor_multi_dim__' in value && (value as any).__cbor_multi_dim__ === true;
+  }
+
+  /**
+   * Check if value is a CBOR homogeneous array
+   */
+  private isCborHomogeneousArray(value: unknown): value is CborHomogeneousArray {
+    return typeof value === 'object' && value !== null && 
+           '__cbor_homogeneous__' in value && (value as any).__cbor_homogeneous__ === true;
+  }
+
+  /**
+   * Write a multi-dimensional array using RFC 8746 tags
+   */
+  private writeMultiDimensionalArray(value: CborMultiDimensionalArray): void {
+    const tag = value.rowMajor !== false ? ARRAY_TAG.MULTI_DIM_ROW_MAJOR : ARRAY_TAG.MULTI_DIM_COLUMN_MAJOR;
+    const data = [value.dimensions, value.elements];
+    this.writeTag(tag, data);
+  }
+
+  /**
+   * Write a homogeneous array using RFC 8746 tag
+   */
+  private writeHomogeneousArray(value: CborHomogeneousArray): void {
+    this.writeTag(ARRAY_TAG.HOMOGENEOUS, value.elements);
   }
 }

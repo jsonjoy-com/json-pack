@@ -1,7 +1,7 @@
 import {CONST, ERROR, MAJOR} from './constants';
 import {CborDecoderBase} from './CborDecoderBase';
 import {JsonPackValue} from '../JsonPackValue';
-import {TYPED_ARRAY_TAG} from './constants';
+import {TYPED_ARRAY_TAG, ARRAY_TAG} from './constants';
 import type {Path} from '../json-pointer';
 import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
 
@@ -206,6 +206,16 @@ export class CborDecoder<
       return this.readTypedArrayTag(tag);
     }
     
+    // Handle RFC 8746 additional array tags
+    switch (tag) {
+      case ARRAY_TAG.MULTI_DIM_ROW_MAJOR:
+        return this.readMultiDimensionalArray(true);
+      case ARRAY_TAG.MULTI_DIM_COLUMN_MAJOR:
+        return this.readMultiDimensionalArray(false);
+      case ARRAY_TAG.HOMOGENEOUS:
+        return this.readHomogeneousArray();
+    }
+    
     // Default behavior for other tags
     return super.readTagRaw(tag);
   }
@@ -345,6 +355,46 @@ export class CborDecoder<
     for (let i = 0; i < array.length; i++) {
       array[i] = view.getFloat64(i * 8, littleEndian);
     }
+    return array;
+  }
+
+  /**
+   * Read a multi-dimensional array (tag 40 or 1040)
+   */
+  private readMultiDimensionalArray(rowMajor: boolean): unknown {
+    const data = this.val() as unknown[];
+    if (!Array.isArray(data) || data.length !== 2) {
+      throw new Error('Multi-dimensional array must contain exactly 2 elements');
+    }
+    
+    const dimensions = data[0] as number[];
+    const elements = data[1];
+    
+    if (!Array.isArray(dimensions) || dimensions.some(d => typeof d !== 'number' || d <= 0)) {
+      throw new Error('Multi-dimensional array dimensions must be positive integers');
+    }
+    
+    // For now, we return the original structure as-is
+    // In a more sophisticated implementation, you might want to reshape the data
+    return {
+      dimensions,
+      elements,
+      order: rowMajor ? 'row-major' : 'column-major'
+    };
+  }
+
+  /**
+   * Read a homogeneous array (tag 41)
+   */
+  private readHomogeneousArray(): unknown[] {
+    const array = this.val();
+    if (!Array.isArray(array)) {
+      throw new Error('Homogeneous array must contain an array');
+    }
+    
+    // For now, we just return the array as-is
+    // In a more sophisticated implementation, you might want to validate homogeneity
+    // or create a specialized data structure
     return array;
   }
 

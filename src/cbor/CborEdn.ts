@@ -5,7 +5,7 @@ export interface EdnOptions {
   /** Show encoding indicators (e.g., _1, _2, _3, _i, _) */
   showEncodingIndicators?: boolean;
   /** Custom formatting options */
-  customFormatters?: Map<Function, (value: any) => string>;
+  customFormatters?: Map<new (...args: any[]) => any, (value: any) => string>;
 }
 
 /**

@@ -1,6 +1,7 @@
 import {CONST, ERROR, MAJOR} from './constants';
 import {CborDecoderBase} from './CborDecoderBase';
 import {JsonPackValue} from '../JsonPackValue';
+import {TYPED_ARRAY_TAG} from './constants';
 import type {Path} from '../json-pointer';
 import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
 
@@ -195,6 +196,156 @@ export class CborDecoder<
     const length = this.skipMinorLen(minor);
     if (length < 0) throw ERROR.UNEXPECTED_MINOR;
     this.skipAny();
+  }
+
+  // ----------------------------------------------------------- Tag reading override
+
+  public readTagRaw(tag: number): unknown {
+    // Handle RFC 8746 typed array tags (64-87)
+    if (tag >= TYPED_ARRAY_TAG.UINT8 && tag <= TYPED_ARRAY_TAG.FLOAT128_LE) {
+      return this.readTypedArrayTag(tag);
+    }
+    
+    // Default behavior for other tags
+    return super.readTagRaw(tag);
+  }
+
+  /**
+   * Decode a typed array from CBOR tag and byte string
+   */
+  private readTypedArrayTag(tag: number): ArrayBufferView {
+    const bytes = this.val() as Uint8Array;
+    
+    switch (tag) {
+      case TYPED_ARRAY_TAG.UINT8:
+        return new Uint8Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+      case TYPED_ARRAY_TAG.UINT8_CLAMPED:
+        return new Uint8ClampedArray(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+      case TYPED_ARRAY_TAG.SINT8:
+        return new Int8Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+      
+      // 16-bit arrays
+      case TYPED_ARRAY_TAG.UINT16_BE:
+        return this.createUint16Array(bytes, false);
+      case TYPED_ARRAY_TAG.UINT16_LE:
+        return this.createUint16Array(bytes, true);
+      case TYPED_ARRAY_TAG.SINT16_BE:
+        return this.createInt16Array(bytes, false);
+      case TYPED_ARRAY_TAG.SINT16_LE:
+        return this.createInt16Array(bytes, true);
+      
+      // 32-bit arrays  
+      case TYPED_ARRAY_TAG.UINT32_BE:
+        return this.createUint32Array(bytes, false);
+      case TYPED_ARRAY_TAG.UINT32_LE:
+        return this.createUint32Array(bytes, true);
+      case TYPED_ARRAY_TAG.SINT32_BE:
+        return this.createInt32Array(bytes, false);
+      case TYPED_ARRAY_TAG.SINT32_LE:
+        return this.createInt32Array(bytes, true);
+      
+      // 64-bit arrays
+      case TYPED_ARRAY_TAG.UINT64_BE:
+        return this.createBigUint64Array(bytes, false);
+      case TYPED_ARRAY_TAG.UINT64_LE:
+        return this.createBigUint64Array(bytes, true);
+      case TYPED_ARRAY_TAG.SINT64_BE:
+        return this.createBigInt64Array(bytes, false);
+      case TYPED_ARRAY_TAG.SINT64_LE:
+        return this.createBigInt64Array(bytes, true);
+      
+      // Float arrays
+      case TYPED_ARRAY_TAG.FLOAT32_BE:
+        return this.createFloat32Array(bytes, false);
+      case TYPED_ARRAY_TAG.FLOAT32_LE:
+        return this.createFloat32Array(bytes, true);
+      case TYPED_ARRAY_TAG.FLOAT64_BE:
+        return this.createFloat64Array(bytes, false);
+      case TYPED_ARRAY_TAG.FLOAT64_LE:
+        return this.createFloat64Array(bytes, true);
+      
+      // 16-bit and 128-bit floats are not supported by JavaScript
+      case TYPED_ARRAY_TAG.FLOAT16_BE:
+      case TYPED_ARRAY_TAG.FLOAT16_LE:
+      case TYPED_ARRAY_TAG.FLOAT128_BE:
+      case TYPED_ARRAY_TAG.FLOAT128_LE:
+        throw new Error(`Unsupported floating point format: tag ${tag}`);
+      
+      default:
+        throw new Error(`Unknown typed array tag: ${tag}`);
+    }
+  }
+
+  private createUint16Array(bytes: Uint8Array, littleEndian: boolean): Uint16Array {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const array = new Uint16Array(bytes.byteLength / 2);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = view.getUint16(i * 2, littleEndian);
+    }
+    return array;
+  }
+
+  private createInt16Array(bytes: Uint8Array, littleEndian: boolean): Int16Array {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const array = new Int16Array(bytes.byteLength / 2);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = view.getInt16(i * 2, littleEndian);
+    }
+    return array;
+  }
+
+  private createUint32Array(bytes: Uint8Array, littleEndian: boolean): Uint32Array {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const array = new Uint32Array(bytes.byteLength / 4);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = view.getUint32(i * 4, littleEndian);
+    }
+    return array;
+  }
+
+  private createInt32Array(bytes: Uint8Array, littleEndian: boolean): Int32Array {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const array = new Int32Array(bytes.byteLength / 4);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = view.getInt32(i * 4, littleEndian);
+    }
+    return array;
+  }
+
+  private createBigUint64Array(bytes: Uint8Array, littleEndian: boolean): BigUint64Array {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const array = new BigUint64Array(bytes.byteLength / 8);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = view.getBigUint64(i * 8, littleEndian);
+    }
+    return array;
+  }
+
+  private createBigInt64Array(bytes: Uint8Array, littleEndian: boolean): BigInt64Array {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const array = new BigInt64Array(bytes.byteLength / 8);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = view.getBigInt64(i * 8, littleEndian);
+    }
+    return array;
+  }
+
+  private createFloat32Array(bytes: Uint8Array, littleEndian: boolean): Float32Array {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const array = new Float32Array(bytes.byteLength / 4);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = view.getFloat32(i * 4, littleEndian);
+    }
+    return array;
+  }
+
+  private createFloat64Array(bytes: Uint8Array, littleEndian: boolean): Float64Array {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const array = new Float64Array(bytes.byteLength / 8);
+    for (let i = 0; i < array.length; i++) {
+      array[i] = view.getFloat64(i * 8, littleEndian);
+    }
+    return array;
   }
 
   // ----------------------------------------------------------- Token skipping

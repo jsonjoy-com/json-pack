@@ -21,6 +21,10 @@ export class FlexBuffersDecoder implements BinaryJsonDecoder {
     return this.readRoot();
   }
 
+  public readAny(): PackValue {
+    return this.readRoot();
+  }
+
   private readRoot(): PackValue {
     const reader = this.reader;
     const uint8 = reader.uint8;
@@ -30,28 +34,53 @@ export class FlexBuffersDecoder implements BinaryJsonDecoder {
       throw new Error('FlexBuffer too short');
     }
     
-    // Read from the end
-    const rootBitWidth = uint8[length - 1] as BitWidth;
+    // Read from the end - the last byte is the width in bytes of the root (not BitWidth enum)
+    const rootByteWidth = uint8[length - 1]; // This is actual byte size (1, 2, 4, 8)
     const rootTypeByte = uint8[length - 2];
     const rootType = unpackType(rootTypeByte);
     const rootTypeBitWidth = unpackBitWidth(rootTypeByte);
     
-    // Calculate root value position  
-    const rootSize = bitWidthToByteSize(rootBitWidth);
-    const rootPos = length - 2 - rootSize;
+    // Convert byte width to BitWidth enum
+    const rootBitWidth = this.byteSizeToBitWidth(rootByteWidth);
     
-    console.log('Root decoding:', {
-      rootBitWidth,
-      rootTypeByte: rootTypeByte.toString(16),
-      rootType,
-      rootTypeBitWidth,
-      rootSize,
-      rootPos,
-      length
-    });
+    // For scalar values, the root value occupies bytes before the type and bit width
+    const rootPos = length - 2 - rootByteWidth;
     
-    // Read root value - use the bit width from the type byte, not the root bit width
-    return this.readValueAt(rootType, rootTypeBitWidth, rootPos);
+    if (rootPos < 0) {
+      throw new Error('Invalid FlexBuffer format');
+    }
+    
+    // Read root value using the root bit width for scalars
+    // For inline types, the bit width in the type byte is unused
+    if (this.isInlineType(rootType)) {
+      return this.readValueAt(rootType, rootBitWidth, rootPos);
+    } else {
+      // For offset types, use the type bit width
+      return this.readValueAt(rootType, rootTypeBitWidth, rootPos);
+    }
+  }
+  
+  private byteSizeToBitWidth(byteSize: number): BitWidth {
+    switch (byteSize) {
+      case 1: return BitWidth.W8;
+      case 2: return BitWidth.W16;
+      case 4: return BitWidth.W32;
+      case 8: return BitWidth.W64;
+      default: throw new Error(`Invalid byte size: ${byteSize}`);
+    }
+  }
+  
+  private isInlineType(type: FlexBufferType): boolean {
+    switch (type) {
+      case FlexBufferType.NULL:
+      case FlexBufferType.BOOL:
+      case FlexBufferType.INT:
+      case FlexBufferType.UINT:
+      case FlexBufferType.FLOAT:
+        return true;
+      default:
+        return false;
+    }
   }
 
   private readValueAt(type: FlexBufferType, bitWidth: BitWidth, pos: number): PackValue {

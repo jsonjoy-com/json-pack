@@ -45,7 +45,8 @@ export class FlexBuffersEncoder implements BinaryJsonEncoder, StreamingBinaryJso
   }
 
   private encodeNull(): {type: FlexBufferType; bitWidth: BitWidth} {
-    // For null, we don't write any data, just return type info
+    // For null, write a zero byte
+    this.writer.u8(0);
     return {type: FlexBufferType.NULL, bitWidth: BitWidth.W8};
   }
 

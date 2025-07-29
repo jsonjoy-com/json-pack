@@ -9,7 +9,24 @@ import {
   decodeFloat64,
   shouldAvoidReference,
 } from './util';
-import type {SmileDecoderOptions, SmileReader, SmileHeader} from './types';
+import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
+
+export interface SmileDecoderOptions {
+  /**
+   * Maximum size for shared string tables.
+   * Default: 1024
+   */
+  maxSharedReferences?: number;
+}
+
+export interface SmileHeader {
+  version: number;
+  sharedStringValues: boolean;
+  sharedPropertyNames: boolean;
+  rawBinaryEnabled: boolean;
+}
+
+export type SmileReader = IReader & IReaderResettable;
 
 export class SmileDecoder<R extends SmileReader = SmileReader> {
   protected reader: R;

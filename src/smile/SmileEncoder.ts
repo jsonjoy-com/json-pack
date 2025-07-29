@@ -11,7 +11,34 @@ import {
   shouldAvoidReference,
   isStringShareable,
 } from './util';
-import type {SmileEncoderOptions, SmileWriter} from './types';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+
+export interface SmileEncoderOptions {
+  /**
+   * Whether to enable shared string value checking during encoding.
+   * When enabled, the encoder will track string values and create back-references
+   * to previously seen strings to reduce output size.
+   * Default: false
+   */
+  sharedStringValues?: boolean;
+
+  /**
+   * Whether to enable shared property name checking during encoding.
+   * When enabled, the encoder will track object property names and create
+   * back-references to previously seen names to reduce output size.
+   * Default: true
+   */
+  sharedPropertyNames?: boolean;
+
+  /**
+   * Whether to allow raw binary data in the output.
+   * When enabled, binary data can contain any byte values including reserved ones.
+   * Default: false
+   */
+  rawBinaryEnabled?: boolean;
+}
+
+export type SmileWriter = IWriter & IWriterGrowable;
 
 export class SmileEncoder<W extends SmileWriter = SmileWriter> {
   protected writer: W;

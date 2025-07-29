@@ -32,6 +32,45 @@ const decoded = decoder.decode(encoded);
 console.log(decoded); // Original data structure
 ```
 
+## Extended Diagnostic Notation (EDN)
+
+CBOR Extended Diagnostic Notation (EDN) is a human-readable text format for CBOR data. The `CborEdn` class provides functionality to export CBOR data to EDN strings.
+
+```ts
+import {CborEdn} from '@jsonjoy.com/json-pack/lib/cbor';
+
+const edn = new CborEdn();
+
+// Format JavaScript values as EDN
+console.log(edn.encode(42)); // "42"
+console.log(edn.encode("hello")); // '"hello"'
+console.log(edn.encode([1, 2, 3])); // "[1, 2, 3]"
+console.log(edn.encode({a: 1, b: 2})); // '{"a": 1, "b": 2}'
+
+// Format byte strings
+console.log(edn.encode(new Uint8Array([0x01, 0x02, 0x03]))); // "h'010203'"
+
+// Format CBOR tags
+import {JsonPackExtension} from '@jsonjoy.com/json-pack/lib/JsonPackExtension';
+const tagged = new JsonPackExtension(1, 1363896240); // timestamp tag
+console.log(edn.encode(tagged)); // "1(1363896240)"
+
+// Format CBOR-encoded data directly
+const encoder = new CborEncoder();
+const decoder = new CborDecoder();
+const data = {name: "Alice", age: 30};
+const cborBytes = encoder.encode(data);
+console.log(edn.formatCbor(cborBytes, decoder)); // '{"name": "Alice", "age": 30}'
+```
+
+EDN supports all CBOR data types including:
+- Numbers (integers, floats, special values like NaN/Infinity)
+- Text strings with proper escaping
+- Byte strings (displayed as hex with `h'...'` notation)
+- Arrays and maps (including maps with non-string keys)
+- CBOR tags (displayed as `tag(content)`)
+- Simple values (true, false, null, undefined, custom simple values)
+
 ## Advanced Usage
 
 To get started you need to import `CborEncoder` and `CborDecoder` classes like

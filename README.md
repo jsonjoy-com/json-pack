@@ -2,8 +2,6 @@
 
 High performance JSON serialization and deserialization library for JavaScript, Node.js, browser.
 
-`json-pack` contains implementations of various JSON codecs into binary formats, such as MessagePack, CBOR and other formats.
-
 ## Supported Formats
 
 This library implements the following serialization formats:

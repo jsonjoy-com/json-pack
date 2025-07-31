@@ -96,4 +96,56 @@ describe('FlexBuffersEncoder', () => {
       expect(encoded.length).toBeGreaterThan(0);
     });
   });
+
+  describe('known byte values (non-roundtrip)', () => {
+    test('null encodes to [0, 0, 1]', () => {
+      const encoded = encoder.encode(null);
+      expect(Array.from(encoded)).toEqual([0, 0, 1]);
+    });
+
+    test('true encodes to [1, 108, 1]', () => {
+      const encoded = encoder.encode(true);
+      expect(Array.from(encoded)).toEqual([1, 108, 1]);
+    });
+
+    test('false encodes to [0, 108, 1]', () => {
+      const encoded = encoder.encode(false);
+      expect(Array.from(encoded)).toEqual([0, 108, 1]);
+    });
+
+    test('integer 0 encodes to [0, 8, 1]', () => {
+      const encoded = encoder.encode(0);
+      expect(Array.from(encoded)).toEqual([0, 8, 1]);
+    });
+
+    test('integer 1 encodes to [1, 8, 1]', () => {
+      const encoded = encoder.encode(1);
+      expect(Array.from(encoded)).toEqual([1, 8, 1]);
+    });
+
+    test('integer 42 encodes to [42, 8, 1]', () => {
+      const encoded = encoder.encode(42);
+      expect(Array.from(encoded)).toEqual([42, 8, 1]);
+    });
+
+    test('integer -1 encodes to [255, 4, 1]', () => {
+      const encoded = encoder.encode(-1);
+      expect(Array.from(encoded)).toEqual([255, 4, 1]);
+    });
+
+    test('float 123.5 encodes to [0, 0, 0, 0, 0, 224, 94, 64, 15, 8]', () => {
+      const encoded = encoder.encode(123.5);
+      expect(Array.from(encoded)).toEqual([0, 0, 0, 0, 0, 224, 94, 64, 15, 8]);
+    });
+
+    test('empty string encodes to [0, 0, 24, 1]', () => {
+      const encoded = encoder.encode('');
+      expect(Array.from(encoded)).toEqual([0, 0, 24, 1]);
+    });
+
+    test('string "hello" encodes to [104, 101, 108, 108, 111, 0, 5, 24, 1]', () => {
+      const encoded = encoder.encode('hello');
+      expect(Array.from(encoded)).toEqual([104, 101, 108, 108, 111, 0, 5, 24, 1]);
+    });
+  });
 });

@@ -2,7 +2,7 @@
 // https://raw.githubusercontent.com/google/flatbuffers/refs/heads/master/include/flatbuffers/flexbuffers.h
 
 // Type flags - 6 bits for type, 2 bits for bit width
-export enum FlexBufferType {
+export const enum FlexBufferType {
   // Scalar types
   NULL = 0,
   INT = 1,
@@ -39,7 +39,7 @@ export enum FlexBufferType {
 }
 
 // Bit width constants for the lower 2 bits
-export enum BitWidth {
+export const enum BitWidth {
   W8 = 0,   // 8-bit
   W16 = 1,  // 16-bit
   W32 = 2,  // 32-bit

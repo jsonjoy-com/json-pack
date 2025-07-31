@@ -209,8 +209,8 @@ export class FlexBuffersDecoder implements BinaryJsonDecoder {
     // Move back to read the string data (stored before size)
     reader.x -= size + 2; // -1 for size, -1 for null terminator
     
-    // Read string data
-    const stringData = reader.buf(size);
+    // Read string using utf8 method
+    const result = reader.utf8(size);
     
     // Skip null terminator
     reader.x++;
@@ -218,7 +218,7 @@ export class FlexBuffersDecoder implements BinaryJsonDecoder {
     // Skip size (we already read it)
     reader.x++;
     
-    return new TextDecoder().decode(stringData);
+    return result;
   }
 
   private readBlob(): Uint8Array {

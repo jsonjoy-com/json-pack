@@ -1,5 +1,5 @@
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
-import type {BinaryJsonEncoder, StreamingBinaryJsonEncoder} from '../types';
+import type {BinaryJsonEncoder} from '../types';
 import {
   FlexBufferType,
   BitWidth,
@@ -7,7 +7,7 @@ import {
   bitWidthToByteSize,
 } from './constants';
 
-export class FlexBuffersEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncoder {
+export class FlexBuffersEncoder implements BinaryJsonEncoder {
   constructor(public readonly writer: IWriter & IWriterGrowable) {}
 
   public encode(value: unknown): Uint8Array {

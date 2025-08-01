@@ -121,20 +121,20 @@ export class AvroEncoder implements BinaryJsonEncoder {
     const writer = this.writer;
     const maxSize = str.length * 4; // Max UTF-8 bytes for string
     writer.ensureCapacity(5 + maxSize); // 5 bytes max for varint length
-    
+
     // Reserve space for length (we'll come back to fill this)
     const lengthOffset = writer.x;
     writer.x += 5; // Max varint size
-    
+
     // Write the string and get actual byte count
     const bytesWritten = writer.utf8(str);
     const endPos = writer.x;
-    
+
     // Go back to encode the actual length
     writer.x = lengthOffset;
     this.writeVarIntUnsigned(bytesWritten);
     const actualLengthSize = writer.x - lengthOffset;
-    
+
     // If we reserved more space than needed, shift the string data
     if (actualLengthSize < 5) {
       const stringStart = lengthOffset + 5;
@@ -266,7 +266,7 @@ export class AvroEncoder implements BinaryJsonEncoder {
     let n = value;
     const mask = BigInt(0x7f);
     const shift = BigInt(7);
-    
+
     while (n >= BigInt(0x80)) {
       writer.u8(Number((n & mask) | BigInt(0x80)));
       n >>= shift;

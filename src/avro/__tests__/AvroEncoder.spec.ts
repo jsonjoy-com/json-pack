@@ -196,14 +196,14 @@ describe('AvroEncoder', () => {
       expect(result).toEqual(new Uint8Array([84])); // 42 zigzag encoded
 
       writer.reset();
-      
+
       // Integer outside int range
       encoder.writeNumber(3000000000);
       result = writer.flush();
       expect(result.length).toBeGreaterThan(1);
 
       writer.reset();
-      
+
       // Float
       encoder.writeNumber(3.14);
       result = writer.flush();

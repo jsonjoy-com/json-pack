@@ -97,16 +97,16 @@ export class AvroSchemaValidator {
   private validateUnionSchema(schema: AvroUnionSchema): boolean {
     if (schema.length === 0) return false;
     const typeSet = new Set<string>();
-    
+
     for (const subSchema of schema) {
       if (!this.validateSchemaInternal(subSchema)) return false;
-      
+
       // Union types must be unique
       const typeName = this.getSchemaTypeName(subSchema);
       if (typeSet.has(typeName)) return false;
       typeSet.add(typeName);
     }
-    
+
     return true;
   }
 
@@ -144,7 +144,7 @@ export class AvroSchemaValidator {
 
   private validateRecordSchema(schema: AvroRecordSchema): boolean {
     if (schema.type !== 'record' || !schema.name || !Array.isArray(schema.fields)) return false;
-    
+
     const fullName = this.getFullName(schema.name, schema.namespace);
     if (this.namedSchemas.has(fullName)) return false;
     this.namedSchemas.set(fullName, schema);
@@ -160,16 +160,12 @@ export class AvroSchemaValidator {
   }
 
   private validateRecordField(field: AvroRecordField): boolean {
-    return (
-      typeof field.name === 'string' &&
-      field.name.length > 0 &&
-      this.validateSchemaInternal(field.type)
-    );
+    return typeof field.name === 'string' && field.name.length > 0 && this.validateSchemaInternal(field.type);
   }
 
   private validateEnumSchema(schema: AvroEnumSchema): boolean {
     if (schema.type !== 'enum' || !schema.name || !Array.isArray(schema.symbols)) return false;
-    
+
     const fullName = this.getFullName(schema.name, schema.namespace);
     if (this.namedSchemas.has(fullName)) return false;
     this.namedSchemas.set(fullName, schema);
@@ -198,7 +194,7 @@ export class AvroSchemaValidator {
   private validateFixedSchema(schema: AvroFixedSchema): boolean {
     if (schema.type !== 'fixed' || !schema.name || typeof schema.size !== 'number') return false;
     if (schema.size < 0) return false;
-    
+
     const fullName = this.getFullName(schema.name, schema.namespace);
     if (this.namedSchemas.has(fullName)) return false;
     this.namedSchemas.set(fullName, schema);
@@ -213,7 +209,7 @@ export class AvroSchemaValidator {
 
     if (Array.isArray(schema)) {
       // Union - value must match one of the schemas
-      return schema.some(subSchema => this.validateValueAgainstSchema(value, subSchema));
+      return schema.some((subSchema) => this.validateValueAgainstSchema(value, subSchema));
     }
 
     if (typeof schema === 'object' && schema !== null) {
@@ -294,13 +290,13 @@ export class AvroSchemaValidator {
 
   private validateValueAgainstArray(value: unknown, schema: AvroArraySchema): boolean {
     if (!Array.isArray(value)) return false;
-    return value.every(item => this.validateValueAgainstSchema(item, schema.items));
+    return value.every((item) => this.validateValueAgainstSchema(item, schema.items));
   }
 
   private validateValueAgainstMap(value: unknown, schema: AvroMapSchema): boolean {
     if (typeof value !== 'object' || value === null) return false;
     const obj = value as Record<string, unknown>;
-    return Object.values(obj).every(val => this.validateValueAgainstSchema(val, schema.values));
+    return Object.values(obj).every((val) => this.validateValueAgainstSchema(val, schema.values));
   }
 
   private validateValueAgainstFixed(value: unknown, schema: AvroFixedSchema): boolean {

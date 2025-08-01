@@ -249,7 +249,7 @@ describe('AvroSchemaEncoder', () => {
 
     test('encodes union value with explicit index', () => {
       const schema: AvroUnionSchema = ['null', 'string'];
-      
+
       const result = encoder.encode('hello', schema, 1);
       expect(result[0]).toBe(2); // index 1 zigzag encoded is 2
     });

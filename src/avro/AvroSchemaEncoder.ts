@@ -34,25 +34,25 @@ export class AvroSchemaEncoder {
   public encode(value: unknown, schema: AvroSchema, selectedIndex?: number): Uint8Array {
     this.writer.reset();
     this.namedSchemas.clear();
-    
+
     // Validate schema first
     if (!this.validator.validateSchema(schema)) {
       throw new Error('Invalid Avro schema');
     }
-    
+
     // Validate value against schema
     if (!this.validator.validateValue(value, schema)) {
       throw new Error('Value does not conform to schema');
     }
-    
+
     this.collectNamedSchemas(schema);
-    
+
     if (Array.isArray(schema) && selectedIndex !== undefined) {
       this.writeUnion(value, schema, selectedIndex);
     } else {
       this.writeValue(value, schema);
     }
-    
+
     return this.writer.flush();
   }
 
@@ -130,7 +130,7 @@ export class AvroSchemaEncoder {
     if (typeof schema === 'object' && schema.type !== 'record') {
       throw new Error('Schema is not a record schema');
     }
-    
+
     const recordSchema = this.resolveSchema(schema) as AvroRecordSchema;
     if (recordSchema.type !== 'record') {
       throw new Error('Schema is not a record schema');
@@ -156,7 +156,7 @@ export class AvroSchemaEncoder {
     if (typeof schema === 'object' && schema.type !== 'enum') {
       throw new Error('Schema is not an enum schema');
     }
-    
+
     const enumSchema = this.resolveSchema(schema) as AvroEnumSchema;
     if (enumSchema.type !== 'enum') {
       throw new Error('Schema is not an enum schema');
@@ -166,7 +166,7 @@ export class AvroSchemaEncoder {
     if (index === -1) {
       throw new Error(`Invalid enum value: ${value}`);
     }
-    
+
     this.writeVarIntSigned(this.encodeZigZag32(index));
   }
 
@@ -177,7 +177,7 @@ export class AvroSchemaEncoder {
     if (typeof schema === 'object' && schema.type !== 'array') {
       throw new Error('Schema is not an array schema');
     }
-    
+
     const arraySchema = this.resolveSchema(schema) as AvroArraySchema;
     if (arraySchema.type !== 'array') {
       throw new Error('Schema is not an array schema');
@@ -185,13 +185,13 @@ export class AvroSchemaEncoder {
 
     // Write array length
     this.writeVarIntUnsigned(value.length);
-    
+
     // Write array items
     const length = value.length;
     for (let i = 0; i < length; i++) {
       this.writeValue(value[i], arraySchema.items);
     }
-    
+
     // Write end-of-array marker
     this.writeVarIntUnsigned(0);
   }
@@ -203,17 +203,17 @@ export class AvroSchemaEncoder {
     if (typeof schema === 'object' && schema.type !== 'map') {
       throw new Error('Schema is not a map schema');
     }
-    
+
     const mapSchema = this.resolveSchema(schema) as AvroMapSchema;
     if (mapSchema.type !== 'map') {
       throw new Error('Schema is not a map schema');
     }
 
     const entries = Object.entries(value);
-    
+
     // Write map length
     this.writeVarIntUnsigned(entries.length);
-    
+
     // Write map entries
     const length = entries.length;
     for (let i = 0; i < length; i++) {
@@ -221,7 +221,7 @@ export class AvroSchemaEncoder {
       this.encoder.writeStr(entry[0]);
       this.writeValue(entry[1], mapSchema.values);
     }
-    
+
     // Write end-of-map marker
     this.writeVarIntUnsigned(0);
   }
@@ -237,7 +237,7 @@ export class AvroSchemaEncoder {
     let index = selectedIndex;
     if (index === undefined) {
       // Find the first matching schema in the union
-      index = schema.findIndex(subSchema => this.validator.validateValue(value, subSchema));
+      index = schema.findIndex((subSchema) => this.validator.validateValue(value, subSchema));
       if (index === -1) {
         throw new Error('Value does not match any schema in the union');
       }
@@ -249,7 +249,7 @@ export class AvroSchemaEncoder {
 
     // Write union index
     this.writeVarIntSigned(this.encodeZigZag32(index));
-    
+
     // Write the value according to the selected schema
     this.writeValue(value, schema[index]);
   }
@@ -261,7 +261,7 @@ export class AvroSchemaEncoder {
     if (typeof schema === 'object' && schema.type !== 'fixed') {
       throw new Error('Schema is not a fixed schema');
     }
-    
+
     const fixedSchema = this.resolveSchema(schema) as AvroFixedSchema;
     if (fixedSchema.type !== 'fixed') {
       throw new Error('Schema is not a fixed schema');
@@ -270,7 +270,7 @@ export class AvroSchemaEncoder {
     if (value.length !== fixedSchema.size) {
       throw new Error(`Fixed value length ${value.length} does not match schema size ${fixedSchema.size}`);
     }
-    
+
     this.writer.buf(value, value.length);
   }
 
@@ -279,12 +279,13 @@ export class AvroSchemaEncoder {
    */
   public writeNumber(value: number, schema: AvroSchema): void {
     const resolvedSchema = this.resolveSchema(schema);
-    const schemaType = typeof resolvedSchema === 'string' 
-      ? resolvedSchema 
-      : Array.isArray(resolvedSchema) 
-        ? 'union' 
-        : resolvedSchema.type;
-    
+    const schemaType =
+      typeof resolvedSchema === 'string'
+        ? resolvedSchema
+        : Array.isArray(resolvedSchema)
+          ? 'union'
+          : resolvedSchema.type;
+
     switch (schemaType) {
       case 'int':
         this.writeInt(value, schema);
@@ -369,12 +370,13 @@ export class AvroSchemaEncoder {
 
   private validateSchemaType(schema: AvroSchema, expectedType: string): void {
     const resolvedSchema = this.resolveSchema(schema);
-    const actualType = typeof resolvedSchema === 'string' 
-      ? resolvedSchema 
-      : Array.isArray(resolvedSchema) 
-        ? 'union' 
-        : resolvedSchema.type;
-    
+    const actualType =
+      typeof resolvedSchema === 'string'
+        ? resolvedSchema
+        : Array.isArray(resolvedSchema)
+          ? 'union'
+          : resolvedSchema.type;
+
     if (actualType !== expectedType) {
       throw new Error(`Expected schema type ${expectedType}, got ${actualType}`);
     }
@@ -399,7 +401,7 @@ export class AvroSchemaEncoder {
           const recordSchema = schema as AvroRecordSchema;
           const recordFullName = this.getFullName(recordSchema.name, recordSchema.namespace);
           this.namedSchemas.set(recordFullName, recordSchema);
-          recordSchema.fields.forEach(field => this.collectNamedSchemas(field.type));
+          recordSchema.fields.forEach((field) => this.collectNamedSchemas(field.type));
           break;
         case 'enum':
           const enumSchema = schema as AvroEnumSchema;

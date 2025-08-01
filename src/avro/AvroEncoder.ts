@@ -90,18 +90,20 @@ export class AvroEncoder implements BinaryJsonEncoder {
    * Writes an Avro float value using IEEE 754 single-precision.
    */
   public writeFloatAvro(float: number): void {
-    this.writer.ensureCapacity(4);
-    this.writer.view.setFloat32(this.writer.x, float, true); // little-endian
-    this.writer.move(4);
+    const writer = this.writer;
+    writer.ensureCapacity(4);
+    writer.view.setFloat32(writer.x, float, true); // little-endian
+    writer.move(4);
   }
 
   /**
    * Writes an Avro double value using IEEE 754 double-precision.
    */
   public writeDouble(double: number): void {
-    this.writer.ensureCapacity(8);
-    this.writer.view.setFloat64(this.writer.x, double, true); // little-endian
-    this.writer.move(8);
+    const writer = this.writer;
+    writer.ensureCapacity(8);
+    writer.view.setFloat64(writer.x, double, true); // little-endian
+    writer.move(8);
   }
 
   /**
@@ -116,9 +118,32 @@ export class AvroEncoder implements BinaryJsonEncoder {
    * Writes an Avro string value with UTF-8 encoding and length prefix.
    */
   public writeStr(str: string): void {
-    const bytes = new TextEncoder().encode(str);
-    this.writeVarIntUnsigned(bytes.length);
-    this.writer.buf(bytes, bytes.length);
+    const writer = this.writer;
+    const maxSize = str.length * 4; // Max UTF-8 bytes for string
+    writer.ensureCapacity(5 + maxSize); // 5 bytes max for varint length
+    
+    // Reserve space for length (we'll come back to fill this)
+    const lengthOffset = writer.x;
+    writer.x += 5; // Max varint size
+    
+    // Write the string and get actual byte count
+    const bytesWritten = writer.utf8(str);
+    const endPos = writer.x;
+    
+    // Go back to encode the actual length
+    writer.x = lengthOffset;
+    this.writeVarIntUnsigned(bytesWritten);
+    const actualLengthSize = writer.x - lengthOffset;
+    
+    // If we reserved more space than needed, shift the string data
+    if (actualLengthSize < 5) {
+      const stringStart = lengthOffset + 5;
+      const stringData = writer.uint8.slice(stringStart, endPos);
+      writer.x = lengthOffset + actualLengthSize;
+      writer.buf(stringData, stringData.length);
+    } else {
+      writer.x = endPos;
+    }
   }
 
   /**
@@ -126,8 +151,9 @@ export class AvroEncoder implements BinaryJsonEncoder {
    */
   public writeArr(arr: unknown[]): void {
     this.writeVarIntUnsigned(arr.length);
-    for (const item of arr) {
-      this.writeAny(item);
+    const length = arr.length;
+    for (let i = 0; i < length; i++) {
+      this.writeAny(arr[i]);
     }
     this.writeVarIntUnsigned(0); // End of array marker
   }
@@ -137,10 +163,12 @@ export class AvroEncoder implements BinaryJsonEncoder {
    */
   public writeObj(obj: Record<string, unknown>): void {
     const entries = Object.entries(obj);
-    this.writeVarIntUnsigned(entries.length);
-    for (const [key, value] of entries) {
-      this.writeStr(key);
-      this.writeAny(value);
+    const length = entries.length;
+    this.writeVarIntUnsigned(length);
+    for (let i = 0; i < length; i++) {
+      const entry = entries[i];
+      this.writeStr(entry[0]);
+      this.writeAny(entry[1]);
     }
     this.writeVarIntUnsigned(0); // End of map marker
   }
@@ -187,16 +215,19 @@ export class AvroEncoder implements BinaryJsonEncoder {
    * Writes a float value using IEEE 754 single-precision.
    */
   private writeFloatValue(float: number): void {
-    this.writer.ensureCapacity(4);
-    this.writer.view.setFloat32(this.writer.x, float, true); // little-endian
-    this.writer.move(4);
+    const writer = this.writer;
+    writer.ensureCapacity(4);
+    writer.view.setFloat32(writer.x, float, true); // little-endian
+    writer.move(4);
   }
 
   /**
    * Writes an ASCII string (same as regular string in Avro)
    */
   public writeAsciiStr(str: string): void {
-    this.writeStr(str);
+    const writer = this.writer;
+    this.writeVarIntUnsigned(str.length);
+    writer.ascii(str);
   }
 
   // Utility methods for Avro encoding
@@ -205,39 +236,42 @@ export class AvroEncoder implements BinaryJsonEncoder {
    * Encodes a variable-length integer (for signed values with zigzag)
    */
   private writeVarIntSigned(value: number): void {
+    const writer = this.writer;
     let n = value >>> 0; // Convert to unsigned 32-bit
     while (n >= 0x80) {
-      this.writer.u8((n & 0x7f) | 0x80);
+      writer.u8((n & 0x7f) | 0x80);
       n >>>= 7;
     }
-    this.writer.u8(n & 0x7f);
+    writer.u8(n & 0x7f);
   }
 
   /**
    * Encodes a variable-length integer (for unsigned values like lengths)
    */
   private writeVarIntUnsigned(value: number): void {
+    const writer = this.writer;
     let n = value >>> 0; // Convert to unsigned 32-bit
     while (n >= 0x80) {
-      this.writer.u8((n & 0x7f) | 0x80);
+      writer.u8((n & 0x7f) | 0x80);
       n >>>= 7;
     }
-    this.writer.u8(n & 0x7f);
+    writer.u8(n & 0x7f);
   }
 
   /**
    * Encodes a variable-length long using Avro's encoding
    */
   private writeVarLong(value: bigint): void {
+    const writer = this.writer;
     let n = value;
     const mask = BigInt(0x7f);
     const shift = BigInt(7);
     
     while (n >= BigInt(0x80)) {
-      this.writer.u8(Number((n & mask) | BigInt(0x80)));
+      writer.u8(Number((n & mask) | BigInt(0x80)));
       n >>= shift;
     }
-    this.writer.u8(Number(n & mask));
+    writer.u8(Number(n & mask));
   }
 
   /**

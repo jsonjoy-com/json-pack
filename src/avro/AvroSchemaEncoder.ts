@@ -10,6 +10,7 @@ import type {
   AvroUnionSchema,
   AvroFixedSchema,
   AvroNamedSchema,
+  AvroNullSchema,
 } from './types';
 
 /**
@@ -58,7 +59,7 @@ export class AvroSchemaEncoder {
   /**
    * Writes a null value with schema validation.
    */
-  public writeNull(schema: AvroSchema): void {
+  public writeNull(schema: AvroNullSchema | AvroSchema): void {
     this.validateSchemaType(schema, 'null');
     this.encoder.writeNull();
   }
@@ -135,7 +136,8 @@ export class AvroSchemaEncoder {
       throw new Error('Schema is not a record schema');
     }
 
-    for (const field of recordSchema.fields) {
+    for (let i = 0; i < recordSchema.fields.length; i++) {
+      const field = recordSchema.fields[i];
       const fieldValue = value[field.name];
       if (fieldValue !== undefined) {
         this.writeValue(fieldValue, field.type);
@@ -185,8 +187,9 @@ export class AvroSchemaEncoder {
     this.writeVarIntUnsigned(value.length);
     
     // Write array items
-    for (const item of value) {
-      this.writeValue(item, arraySchema.items);
+    const length = value.length;
+    for (let i = 0; i < length; i++) {
+      this.writeValue(value[i], arraySchema.items);
     }
     
     // Write end-of-array marker
@@ -212,9 +215,11 @@ export class AvroSchemaEncoder {
     this.writeVarIntUnsigned(entries.length);
     
     // Write map entries
-    for (const [key, val] of entries) {
-      this.encoder.writeStr(key);
-      this.writeValue(val, mapSchema.values);
+    const length = entries.length;
+    for (let i = 0; i < length; i++) {
+      const entry = entries[i];
+      this.encoder.writeStr(entry[0]);
+      this.writeValue(entry[1], mapSchema.values);
     }
     
     // Write end-of-map marker
@@ -424,24 +429,26 @@ export class AvroSchemaEncoder {
    * Writes a variable-length integer using Avro's encoding (for lengths)
    */
   private writeVarIntUnsigned(value: number): void {
+    const writer = this.writer;
     let n = value >>> 0; // Convert to unsigned 32-bit
     while (n >= 0x80) {
-      this.writer.u8((n & 0x7f) | 0x80);
+      writer.u8((n & 0x7f) | 0x80);
       n >>>= 7;
     }
-    this.writer.u8(n & 0x7f);
+    writer.u8(n & 0x7f);
   }
 
   /**
    * Writes a variable-length integer using Avro's encoding (for signed values with zigzag)
    */
   private writeVarIntSigned(value: number): void {
+    const writer = this.writer;
     let n = value >>> 0; // Convert to unsigned 32-bit
     while (n >= 0x80) {
-      this.writer.u8((n & 0x7f) | 0x80);
+      writer.u8((n & 0x7f) | 0x80);
       n >>>= 7;
     }
-    this.writer.u8(n & 0x7f);
+    writer.u8(n & 0x7f);
   }
 
   /**

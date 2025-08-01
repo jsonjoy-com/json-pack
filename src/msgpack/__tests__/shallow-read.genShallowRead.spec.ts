@@ -1,7 +1,7 @@
 import {genShallowReader} from '../shallow-read';
 import {MsgPackEncoder} from '../MsgPackEncoder';
 import {MsgPackDecoder} from '../MsgPackDecoder';
-import {Path} from '../../json-pointer';
+import {Path} from '@jsonjoy.com/json-pointer';
 
 const assetShallowRead = (doc: unknown, path: Path): void => {
   const encoder = new MsgPackEncoder();

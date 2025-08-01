@@ -1,4 +1,4 @@
-import {Path} from '../json-pointer';
+import {Path} from '@jsonjoy.com/json-pointer';
 import {Codegen} from '@jsonjoy.com/util/lib/codegen/Codegen';
 import type {MsgPackDecoder} from './MsgPackDecoder';
 

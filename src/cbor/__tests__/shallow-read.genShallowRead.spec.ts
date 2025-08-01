@@ -1,7 +1,7 @@
 import {genShallowReader} from '../../msgpack/shallow-read';
 import {CborEncoder} from '../CborEncoder';
 import {CborDecoder} from '../CborDecoder';
-import {Path} from '../../json-pointer';
+import {Path} from '@jsonjoy.com/json-pointer';
 import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 
 const assetShallowRead = (doc: unknown, path: Path): void => {

@@ -6,3 +6,4 @@ export * from './CborEncoderDag';
 export * from './CborDecoderBase';
 export * from './CborDecoder';
 export * from './CborDecoderDag';
+export * from './CborEdn';

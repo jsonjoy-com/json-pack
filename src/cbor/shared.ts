@@ -1,11 +1,10 @@
-import {CborEncoder} from './CborEncoder';
-import {CborDecoder} from './CborDecoder';
 import {CborUint8Array} from './types';
 
 export type {CborUint8Array};
 
-export const encoder = new CborEncoder();
-export const decoder = new CborDecoder();
-
-export const encode = <T>(data: T): CborUint8Array<T> => encoder.encode(data) as CborUint8Array<T>;
-export const decode = <T>(blob: CborUint8Array<T>): T => decoder.read(blob) as T;
+// Utility to detect system endianness
+export const isLittleEndian = (() => {
+  const buffer = new ArrayBuffer(2);
+  new DataView(buffer).setInt16(0, 256, true);
+  return new Int16Array(buffer)[0] === 256;
+})();

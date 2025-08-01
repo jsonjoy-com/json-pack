@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/cbor/CborEncoderFast.ts</title>
+    <title>Code coverage report for src/avro/AvroSchemaValidator.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/cbor</a> CborEncoderFast.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/avro</a> AvroSchemaValidator.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">77.83% </span>
+                <span class="strong">84.56% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>158/203</span>
+                <span class='fraction'>126/149</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">74.15% </span>
+                <span class="strong">73.55% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>66/89</span>
+                <span class='fraction'>89/121</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">62.22% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>28/45</span>
+                <span class='fraction'>32/32</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">78.44% </span>
+                <span class="strong">90.32% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>131/167</span>
+                <span class='fraction'>112/124</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -378,338 +378,248 @@
 <a name='L313'></a><a href='#L313'>313</a>
 <a name='L314'></a><a href='#L314'>314</a>
 <a name='L315'></a><a href='#L315'>315</a>
-<a name='L316'></a><a href='#L316'>316</a>
-<a name='L317'></a><a href='#L317'>317</a>
-<a name='L318'></a><a href='#L318'>318</a>
-<a name='L319'></a><a href='#L319'>319</a>
-<a name='L320'></a><a href='#L320'>320</a>
-<a name='L321'></a><a href='#L321'>321</a>
-<a name='L322'></a><a href='#L322'>322</a>
-<a name='L323'></a><a href='#L323'>323</a>
-<a name='L324'></a><a href='#L324'>324</a>
-<a name='L325'></a><a href='#L325'>325</a>
-<a name='L326'></a><a href='#L326'>326</a>
-<a name='L327'></a><a href='#L327'>327</a>
-<a name='L328'></a><a href='#L328'>328</a>
-<a name='L329'></a><a href='#L329'>329</a>
-<a name='L330'></a><a href='#L330'>330</a>
-<a name='L331'></a><a href='#L331'>331</a>
-<a name='L332'></a><a href='#L332'>332</a>
-<a name='L333'></a><a href='#L333'>333</a>
-<a name='L334'></a><a href='#L334'>334</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">12x</span>
+<a name='L316'></a><a href='#L316'>316</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">49x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3477x</span>
-<span class="cline-any cline-yes">3475x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10448x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2839x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3161x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">687x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">78x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3761x</span>
-<span class="cline-any cline-yes">3445x</span>
-<span class="cline-any cline-yes">3445x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1394x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2051x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">74x</span>
+<span class="cline-any cline-yes">74x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">89x</span>
+<span class="cline-any cline-yes">89x</span>
+<span class="cline-any cline-yes">89x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">33x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">293x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">185x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">108x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">24x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">84x</span>
+<span class="cline-any cline-yes">84x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">282198x</span>
-<span class="cline-any cline-yes">8494x</span>
-<span class="cline-any cline-yes">8494x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">953x</span>
-<span class="cline-any cline-yes">515x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">438x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">23x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">515x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">273704x</span>
-<span class="cline-any cline-yes">1765x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">272371x</span>
-<span class="cline-any cline-yes">272371x</span>
-<span class="cline-any cline-yes">272371x</span>
-<span class="cline-any cline-yes">272371x</span>
-<span class="cline-any cline-yes">272371x</span>
-<span class="cline-any cline-yes">270142x</span>
-<span class="cline-any cline-yes">2229x</span>
-<span class="cline-any cline-yes">589x</span>
-<span class="cline-any cline-yes">589x</span>
-<span class="cline-any cline-yes">1640x</span>
-<span class="cline-any cline-yes">469x</span>
-<span class="cline-any cline-yes">469x</span>
-<span class="cline-any cline-yes">469x</span>
-<span class="cline-any cline-yes">1171x</span>
-<span class="cline-any cline-yes">308x</span>
-<span class="cline-any cline-yes">308x</span>
-<span class="cline-any cline-yes">308x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">863x</span>
-<span class="cline-any cline-yes">863x</span>
-<span class="cline-any cline-yes">863x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">272371x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2276x</span>
-<span class="cline-any cline-yes">2276x</span>
-<span class="cline-any cline-yes">2276x</span>
-<span class="cline-any cline-yes">2276x</span>
-<span class="cline-any cline-yes">2276x</span>
-<span class="cline-any cline-yes">2276x</span>
-<span class="cline-any cline-yes">289x</span>
-<span class="cline-any cline-yes">1987x</span>
-<span class="cline-any cline-yes">441x</span>
-<span class="cline-any cline-yes">441x</span>
-<span class="cline-any cline-yes">1546x</span>
-<span class="cline-any cline-yes">428x</span>
-<span class="cline-any cline-yes">428x</span>
-<span class="cline-any cline-yes">428x</span>
-<span class="cline-any cline-yes">1118x</span>
-<span class="cline-any cline-yes">235x</span>
-<span class="cline-any cline-yes">235x</span>
-<span class="cline-any cline-yes">235x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">883x</span>
-<span class="cline-any cline-yes">883x</span>
-<span class="cline-any cline-yes">883x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2276x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2152x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">49x</span>
-<span class="cline-any cline-yes">49x</span>
-<span class="cline-any cline-yes">49x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">49x</span>
-<span class="cline-any cline-yes">49x</span>
 <span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">14749x</span>
-<span class="cline-any cline-yes">14725x</span>
-<span class="cline-any cline-yes">14725x</span>
-<span class="cline-any cline-yes">14725x</span>
+<span class="cline-any cline-yes">185x</span>
+<span class="cline-any cline-yes">185x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">24x</span>
-<span class="cline-any cline-yes">24x</span>
-<span class="cline-any cline-yes">24x</span>
-<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-yes">23x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">22150x</span>
-<span class="cline-any cline-yes">14749x</span>
-<span class="cline-any cline-yes">24x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">23x</span>
+<span class="cline-any cline-yes">57x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6005x</span>
-<span class="cline-any cline-yes">6005x</span>
-<span class="cline-any cline-yes">280067x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6005x</span>
-<span class="cline-any cline-yes">6005x</span>
-<span class="cline-any cline-yes">18x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4310x</span>
-<span class="cline-any cline-yes">4310x</span>
-<span class="cline-any cline-yes">4310x</span>
-<span class="cline-any cline-yes">4310x</span>
-<span class="cline-any cline-yes">15715x</span>
-<span class="cline-any cline-yes">15715x</span>
-<span class="cline-any cline-yes">15715x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8434x</span>
-<span class="cline-any cline-yes">8434x</span>
+<span class="cline-any cline-yes">57x</span>
+<span class="cline-any cline-yes">57x</span>
 <span class="cline-any cline-yes">56x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-yes">20x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">25x</span>
-<span class="cline-any cline-yes">25x</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">48x</span>
-<span class="cline-any cline-yes">48x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">23x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">46x</span>
+<span class="cline-any cline-yes">46x</span>
+<span class="cline-any cline-yes">45x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">46x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">37x</span>
+<span class="cline-any cline-yes">36x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">151x</span>
+<span class="cline-any cline-yes">103x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">48x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">36x</span>
+<span class="cline-any cline-yes">36x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -718,348 +628,384 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">103x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">33x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">32x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
-import {CONST, MAJOR_OVERLAY} from './constants';
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
-import type {BinaryJsonEncoder, StreamingBinaryJsonEncoder, TlvBinaryJsonEncoder} from '../types';
-import type {Slice} from '@jsonjoy.com/util/lib/buffers/Slice';
-&nbsp;
-const isSafeInteger = Number.isSafeInteger;
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">57x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">46x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type {
+  AvroSchema,
+  AvroNullSchema,
+  AvroBooleanSchema,
+  AvroIntSchema,
+  AvroLongSchema,
+  AvroFloatSchema,
+  AvroDoubleSchema,
+  AvroBytesSchema,
+  AvroStringSchema,
+  AvroRecordSchema,
+  AvroEnumSchema,
+  AvroArraySchema,
+  AvroMapSchema,
+  AvroUnionSchema,
+  AvroFixedSchema,
+  AvroRecordField,
+  AvroNamedSchema,
+} from './types';
 &nbsp;
 /**
- * Fast CBOR encoder supports only JSON values. Use regular `CborEncoder` if
- * you need ability to encode all CBOR value types.
+ * Validates Apache Avro schemas according to the specification.
+ * Based on https://avro.apache.org/docs/1.12.0/specification/
  */
-export class CborEncoderFast&lt;W extends IWriter &amp; IWriterGrowable = IWriter &amp; IWriterGrowable&gt;
-  implements BinaryJsonEncoder, StreamingBinaryJsonEncoder, TlvBinaryJsonEncoder
-{
-  constructor(public readonly writer: W = new Writer() as any) {}
+export class AvroSchemaValidator {
+  private namedSchemas = new Map&lt;string, AvroNamedSchema&gt;();
 &nbsp;
-  public encode(value: unknown): Uint8Array {
-    this.writeAny(value);
-    return this.writer.flush();
+  /**
+   * Validates an Avro schema and resolves named schema references.
+   */
+  public validateSchema(schema: AvroSchema): boolean {
+    this.namedSchemas.clear();
+    return this.validateSchemaInternal(schema);
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >encodeToSlice(</span>value: unknown): Slice {
-<span class="cstat-no" title="statement not covered" >    this.writeAny(value);</span>
-<span class="cstat-no" title="statement not covered" >    return this.writer.flushSlice();</span>
+  /**
+   * Validates that a value conforms to the given Avro schema.
+   */
+  public validateValue(value: unknown, schema: AvroSchema): boolean {
+    this.namedSchemas.clear();
+    this.validateSchemaInternal(schema);
+    return this.validateValueAgainstSchema(value, schema);
   }
 &nbsp;
-  public writeAny(value: unknown): void {
-    switch (typeof value) {
-      case 'number':
-        return this.writeNumber(value as number);
-      case 'string':
-        return this.writeStr(value);
-      case 'boolean':
-        return this.writer.u8(0xf4 + +value);
-      case 'object': {
-        if (!value) return this.writer.u8(0xf6);
-        const constructor = value.constructor;
-        switch (constructor) {
-          case Array:
-            return this.writeArr(value as unknown[]);
-          default:
-            return this.writeObj(value as Record&lt;string, unknown&gt;);
-        }
+  private validateSchemaInternal(schema: AvroSchema): boolean {
+    if (typeof schema === 'string') {
+      // String schema references (either primitive type or named type)
+      return this.validateStringSchema(schema);
+    }
+&nbsp;
+    if (Array.isArray(schema)) {
+      // Union schema
+      return this.validateUnionSchema(schema);
+    }
+&nbsp;
+    if (typeof schema === 'object' &amp;&amp; schema !== null) {
+      switch (schema.type) {
+        case 'null':
+          return this.validateNullSchema(schema as AvroNullSchema);
+        case 'boolean':
+          return this.validateBooleanSchema(schema as AvroBooleanSchema);
+        case 'int':
+          return this.validateIntSchema(schema as AvroIntSchema);
+        case 'long':
+          return this.validateLongSchema(schema as AvroLongSchema);
+        case 'float':
+          return this.validateFloatSchema(schema as AvroFloatSchema);
+        case 'double':
+          return this.validateDoubleSchema(schema as AvroDoubleSchema);
+        case 'bytes':
+          return this.validateBytesSchema(schema as AvroBytesSchema);
+        case 'string':
+          return this.validateStringTypeSchema(schema as AvroStringSchema);
+        case 'record':
+          return this.validateRecordSchema(schema as AvroRecordSchema);
+        case 'enum':
+          return this.validateEnumSchema(schema as AvroEnumSchema);
+        case 'array':
+          return this.validateArraySchema(schema as AvroArraySchema);
+        case 'map':
+          return this.validateMapSchema(schema as AvroMapSchema);
+        case 'fixed':
+          return this.validateFixedSchema(schema as AvroFixedSchema);
+        default:
+          return false;
       }
     }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return false;</span>
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeCbor(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8u16(0xd9, 0xd9f7);</span>
+  private validateStringSchema(schema: string): boolean {
+    const primitiveTypes = ['null', 'boolean', 'int', 'long', 'float', 'double', 'bytes', 'string'];
+    return primitiveTypes.includes(schema) || <span class="branch-1 cbranch-no" title="branch not covered" >this.namedSchemas.has(schema);</span>
   }
 &nbsp;
-  public writeEnd(): void {
-    this.writer.u8(CONST.END);
-  }
+  private validateUnionSchema(schema: AvroUnionSchema): boolean {
+    if (schema.length === 0) return false;
+    const typeSet = new Set&lt;string&gt;();
 &nbsp;
-  public writeNull(): void {
-    this.writer.u8(0xf6);
-  }
+    for (const subSchema of schema) {
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.validateSchemaInternal(subSchema)) <span class="cstat-no" title="statement not covered" >return false;</span>
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeBoolean(</span>bool: boolean): void {
-<span class="cstat-no" title="statement not covered" >    if (bool) <span class="cstat-no" title="statement not covered" >this.writer.u8(0xf5);</span></span>
-    else <span class="cstat-no" title="statement not covered" >this.writer.u8(0xf4);</span>
-  }
-&nbsp;
-  public writeNumber(num: number): void {
-    if (isSafeInteger(num)) this.writeInteger(num);
-    else <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof num === 'bigint') <span class="cstat-no" title="statement not covered" >this.writeBigInt(num);</span>
-    else this.writeFloat(num);
-  }
-&nbsp;
-  public writeBigInt(int: bigint): void {
-    if (int &gt;= 0) this.writeBigUint(int);
-    else this.writeBigSint(int);
-  }
-&nbsp;
-  public writeBigUint(uint: bigint): void {
-    if (uint &lt;= Number.MAX_SAFE_INTEGER) return this.writeUInteger(Number(uint));
-    this.writer.u8u64(0x1b, uint);
-  }
-&nbsp;
-  public writeBigSint(int: bigint): void {
-    if (int &gt;= Number.MIN_SAFE_INTEGER) return this.encodeNint(Number(int));
-    const uint = -BigInt(1) - int;
-    this.writer.u8u64(0x3b, uint);
-  }
-&nbsp;
-  public writeInteger(int: number): void {
-    if (int &gt;= 0) this.writeUInteger(int);
-    else this.encodeNint(int);
-  }
-&nbsp;
-  public writeUInteger(uint: number): void {
-    const writer = this.writer;
-    writer.ensureCapacity(9);
-    const uint8 = writer.uint8;
-    let x = writer.x;
-    if (uint &lt;= 23) {
-      uint8[x++] = MAJOR_OVERLAY.UIN + uint;
-    } else if (uint &lt;= 0xff) {
-      uint8[x++] = 0x18;
-      uint8[x++] = uint;
-    } else if (uint &lt;= 0xffff) {
-      uint8[x++] = 0x19;
-      writer.view.setUint16(x, uint);
-      x += 2;
-    } else if (uint &lt;= 0xffffffff) {
-      uint8[x++] = 0x1a;
-      writer.view.setUint32(x, uint);
-      x += 4;
-    } else {
-      uint8[x++] = 0x1b;
-      writer.view.setBigUint64(x, BigInt(uint));
-      x += 8;
+      // Union types must be unique
+      const typeName = this.getSchemaTypeName(subSchema);
+      if (typeSet.has(typeName)) return false;
+      typeSet.add(typeName);
     }
-    writer.x = x;
+&nbsp;
+    return true;
   }
 &nbsp;
-  /** @deprecated Remove and use `writeNumber` instead. */
-  public <span class="fstat-no" title="function not covered" >encodeNumber(</span>num: number): void {
-<span class="cstat-no" title="statement not covered" >    this.writeNumber(num);</span>
+  private validateNullSchema(schema: AvroNullSchema): boolean {
+    return schema.type === 'null';
   }
 &nbsp;
-  /** @deprecated Remove and use `writeInteger` instead. */
-  public <span class="fstat-no" title="function not covered" >encodeInteger(</span>int: number): void {
-<span class="cstat-no" title="statement not covered" >    this.writeInteger(int);</span>
+  private validateBooleanSchema(schema: AvroBooleanSchema): boolean {
+    return schema.type === 'boolean';
   }
 &nbsp;
-  /** @deprecated */
-  public <span class="fstat-no" title="function not covered" >encodeUint(</span>uint: number): void {
-<span class="cstat-no" title="statement not covered" >    this.writeUInteger(uint);</span>
+  private validateIntSchema(schema: AvroIntSchema): boolean {
+    return schema.type === 'int';
   }
 &nbsp;
-  public encodeNint(int: number): void {
-    const uint = -1 - int;
-    const writer = this.writer;
-    writer.ensureCapacity(9);
-    const uint8 = writer.uint8;
-    let x = writer.x;
-    if (uint &lt; 24) {
-      uint8[x++] = MAJOR_OVERLAY.NIN + uint;
-    } else if (uint &lt;= 0xff) {
-      uint8[x++] = 0x38;
-      uint8[x++] = uint;
-    } else if (uint &lt;= 0xffff) {
-      uint8[x++] = 0x39;
-      writer.view.setUint16(x, uint);
-      x += 2;
-    } else if (uint &lt;= 0xffffffff) {
-      uint8[x++] = 0x3a;
-      writer.view.setUint32(x, uint);
-      x += 4;
-    } else {
-      uint8[x++] = 0x3b;
-      writer.view.setBigUint64(x, BigInt(uint));
-      x += 8;
+  private validateLongSchema(schema: AvroLongSchema): boolean {
+    return schema.type === 'long';
+  }
+&nbsp;
+  private validateFloatSchema(schema: AvroFloatSchema): boolean {
+    return schema.type === 'float';
+  }
+&nbsp;
+  private validateDoubleSchema(schema: AvroDoubleSchema): boolean {
+    return schema.type === 'double';
+  }
+&nbsp;
+  private validateBytesSchema(schema: AvroBytesSchema): boolean {
+    return schema.type === 'bytes';
+  }
+&nbsp;
+  private validateStringTypeSchema(schema: AvroStringSchema): boolean {
+    return schema.type === 'string';
+  }
+&nbsp;
+  private validateRecordSchema(schema: AvroRecordSchema): boolean {
+    if (schema.type !== 'record' || !schema.name || !Array.isArray(schema.fields)) return false;
+&nbsp;
+    const fullName = this.getFullName(schema.name, schema.namespace);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.namedSchemas.has(fullName)) <span class="cstat-no" title="statement not covered" >return false;</span>
+    this.namedSchemas.set(fullName, schema);
+&nbsp;
+    const fieldNames = new Set&lt;string&gt;();
+    for (const field of schema.fields) {
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.validateRecordField(field)) <span class="cstat-no" title="statement not covered" >return false;</span>
+      if (fieldNames.has(field.name)) return false;
+      fieldNames.add(field.name);
     }
-    writer.x = x;
+&nbsp;
+    return true;
   }
 &nbsp;
-  public writeFloat(float: number): void {
-    this.writer.u8f64(0xfb, float);
+  private validateRecordField(field: AvroRecordField): boolean {
+    return typeof field.name === 'string' &amp;&amp; field.name.length &gt; 0 &amp;&amp; this.validateSchemaInternal(field.type);
   }
 &nbsp;
-  public writeBin(buf: Uint8Array): void {
-    const length = buf.length;
-    this.writeBinHdr(length);
-    this.writer.buf(buf, length);
-  }
+  private validateEnumSchema(schema: AvroEnumSchema): boolean {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (schema.type !== 'enum' || !schema.name || !Array.isArray(schema.symbols)) <span class="cstat-no" title="statement not covered" >return false;</span>
 &nbsp;
-  public writeBinHdr(length: number): void {
-    const writer = this.writer;
-    if (length &lt;= 23) writer.u8(MAJOR_OVERLAY.BIN + length);
-    else if (length &lt;= 0xff) writer.u16((0x58 &lt;&lt; 8) + length);
-    else if (length &lt;= 0xffff) writer.u8u16(0x59, length);
-    else if (length &lt;= 0xffffffff) writer.u8u32(0x5a, length);
-    else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="else path not taken" >E</span>writer.u8u64(0x5b, length);</span>
-  }
+    const fullName = this.getFullName(schema.name, schema.namespace);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.namedSchemas.has(fullName)) <span class="cstat-no" title="statement not covered" >return false;</span>
+    this.namedSchemas.set(fullName, schema);
 &nbsp;
-  public writeStr(str: string): void {
-    const writer = this.writer;
-    const length = str.length;
-    const maxSize = length * 4;
-    writer.ensureCapacity(5 + maxSize);
-    const uint8 = writer.uint8;
-    let lengthOffset: number = writer.x;
-    if (maxSize &lt;= 23) writer.x++;
-    else if (maxSize &lt;= 0xff) {
-      uint8[writer.x++] = 0x78;
-      lengthOffset = writer.x;
-      writer.x++;
-    } else if (maxSize &lt;= 0xffff) {
-      uint8[writer.x++] = 0x79;
-      lengthOffset = writer.x;
-      writer.x += 2;
-    } else <span class="missing-if-branch" title="else path not taken" >E</span>{
-<span class="cstat-no" title="statement not covered" >      uint8[writer.x++] = 0x7a;</span>
-<span class="cstat-no" title="statement not covered" >      lengthOffset = writer.x;</span>
-<span class="cstat-no" title="statement not covered" >      writer.x += 4;</span>
+    if (schema.symbols.length === 0) return false;
+    const symbolSet = new Set&lt;string&gt;();
+    for (const symbol of schema.symbols) {
+      if (typeof symbol !== 'string' || symbolSet.has(symbol)) return false;
+      symbolSet.add(symbol);
     }
-    const bytesWritten = writer.utf8(str);
-    if (maxSize &lt;= 23) uint8[lengthOffset] = MAJOR_OVERLAY.STR + bytesWritten;
-    else if (maxSize &lt;= 0xff) uint8[lengthOffset] = bytesWritten;
-    else if (maxSize &lt;= 0xffff) writer.view.setUint16(lengthOffset, bytesWritten);
-    else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="else path not taken" >E</span>writer.view.setUint32(lengthOffset, bytesWritten);</span>
+&nbsp;
+    // Default symbol must be in symbols array if provided
+    if (schema.default !== undefined &amp;&amp; !schema.symbols.includes(schema.default)) return false;
+&nbsp;
+    return true;
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeStrHdr(</span>length: number): void {
-    const writer = <span class="cstat-no" title="statement not covered" >this.writer;</span>
-<span class="cstat-no" title="statement not covered" >    if (length &lt;= 23) <span class="cstat-no" title="statement not covered" >writer.u8(MAJOR_OVERLAY.STR + length);</span></span>
-    else <span class="cstat-no" title="statement not covered" >if (length &lt;= 0xff) <span class="cstat-no" title="statement not covered" >writer.u16((0x78 &lt;&lt; 8) + length);</span></span>
-    else <span class="cstat-no" title="statement not covered" >if (length &lt;= 0xffff) <span class="cstat-no" title="statement not covered" >writer.u8u16(0x79, length);</span></span>
-    else <span class="cstat-no" title="statement not covered" >writer.u8u32(0x7a, length);</span>
+  private validateArraySchema(schema: AvroArraySchema): boolean {
+    return schema.type === 'array' &amp;&amp; this.validateSchemaInternal(schema.items);
   }
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >writeAsciiStr(</span>str: string): void {
-<span class="cstat-no" title="statement not covered" >    this.writeStrHdr(str.length);</span>
-<span class="cstat-no" title="statement not covered" >    this.writer.ascii(str);</span>
+  private validateMapSchema(schema: AvroMapSchema): boolean {
+    return schema.type === 'map' &amp;&amp; this.validateSchemaInternal(schema.values);
   }
 &nbsp;
-  public writeArr(arr: unknown[]): void {
-    const length = arr.length;
-    this.writeArrHdr(length);
-    for (let i = 0; i &lt; length; i++) this.writeAny(arr[i]);
+  private validateFixedSchema(schema: AvroFixedSchema): boolean {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (schema.type !== 'fixed' || !schema.name || typeof schema.size !== 'number') <span class="cstat-no" title="statement not covered" >return false;</span>
+    if (schema.size &lt; 0) return false;
+&nbsp;
+    const fullName = this.getFullName(schema.name, schema.namespace);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.namedSchemas.has(fullName)) <span class="cstat-no" title="statement not covered" >return false;</span>
+    this.namedSchemas.set(fullName, schema);
+&nbsp;
+    return true;
   }
 &nbsp;
-  public writeArrHdr(length: number): void {
-    const writer = this.writer;
-    if (length &lt;= 23) writer.u8(MAJOR_OVERLAY.ARR + length);
-    else if (length &lt;= 0xff) writer.u16((0x98 &lt;&lt; 8) + length);
-    else if (length &lt;= 0xffff) writer.u8u16(0x99, length);
-    else if (length &lt;= 0xffffffff) writer.u8u32(0x9a, length);
-    else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="else path not taken" >E</span>writer.u8u64(0x9b, length);</span>
+  private validateValueAgainstSchema(value: unknown, schema: AvroSchema): boolean {
+    if (typeof schema === 'string') {
+      return this.validateValueAgainstStringSchema(value, schema);
+    }
+&nbsp;
+    if (Array.isArray(schema)) {
+      // Union - value must match one of the schemas
+      return schema.some((subSchema) =&gt; this.validateValueAgainstSchema(value, subSchema));
+    }
+&nbsp;
+    if (typeof schema === 'object' &amp;&amp; schema !== null) {
+      switch (schema.type) {
+<span class="branch-0 cbranch-no" title="branch not covered" >        case 'null':</span>
+<span class="cstat-no" title="statement not covered" >          return value === null;</span>
+<span class="branch-1 cbranch-no" title="branch not covered" >        case 'boolean':</span>
+<span class="cstat-no" title="statement not covered" >          return typeof value === 'boolean';</span>
+<span class="branch-2 cbranch-no" title="branch not covered" >        case 'int':</span>
+<span class="cstat-no" title="statement not covered" >          return typeof value === 'number' &amp;&amp; Number.isInteger(value) &amp;&amp; value &gt;= -2147483648 &amp;&amp; value &lt;= 2147483647;</span>
+<span class="branch-3 cbranch-no" title="branch not covered" >        case 'long':</span>
+<span class="cstat-no" title="statement not covered" >          return (typeof value === 'number' &amp;&amp; Number.isInteger(value)) || typeof value === 'bigint';</span>
+<span class="branch-4 cbranch-no" title="branch not covered" >        case 'float':</span>
+<span class="branch-5 cbranch-no" title="branch not covered" >        case 'double':</span>
+<span class="cstat-no" title="statement not covered" >          return typeof value === 'number';</span>
+<span class="branch-6 cbranch-no" title="branch not covered" >        case 'bytes':</span>
+<span class="cstat-no" title="statement not covered" >          return value instanceof Uint8Array;</span>
+<span class="branch-7 cbranch-no" title="branch not covered" >        case 'string':</span>
+<span class="cstat-no" title="statement not covered" >          return typeof value === 'string';</span>
+        case 'record':
+          return this.validateValueAgainstRecord(value, schema as AvroRecordSchema);
+        case 'enum':
+          return this.validateValueAgainstEnum(value, schema as AvroEnumSchema);
+        case 'array':
+          return this.validateValueAgainstArray(value, schema as AvroArraySchema);
+        case 'map':
+          return this.validateValueAgainstMap(value, schema as AvroMapSchema);
+        case 'fixed':
+          return this.validateValueAgainstFixed(value, schema as AvroFixedSchema);
+<span class="branch-13 cbranch-no" title="branch not covered" >        default:</span>
+<span class="cstat-no" title="statement not covered" >          return false;</span>
+      }
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    return false;</span>
   }
 &nbsp;
-  public writeObj(obj: Record&lt;string, unknown&gt;): void {
-    const keys = Object.keys(obj);
-    const length = keys.length;
-    this.writeObjHdr(length);
-    for (let i = 0; i &lt; length; i++) {
-      const key = keys[i];
-      this.writeStr(key);
-      this.writeAny(obj[key]);
+  private validateValueAgainstStringSchema(value: unknown, schema: string): boolean {
+    switch (schema) {
+      case 'null':
+        return value === null;
+      case 'boolean':
+        return typeof value === 'boolean';
+      case 'int':
+        return typeof value === 'number' &amp;&amp; Number.isInteger(value) &amp;&amp; value &gt;= -2147483648 &amp;&amp; value &lt;= 2147483647;
+      case 'long':
+        return (typeof value === 'number' &amp;&amp; Number.isInteger(value)) || typeof value === 'bigint';
+      case 'float':
+      case 'double':
+        return typeof value === 'number';
+      case 'bytes':
+        return value instanceof Uint8Array;
+      case 'string':
+        return typeof value === 'string';
+<span class="branch-8 cbranch-no" title="branch not covered" >      default:</span>
+        // Named schema reference
+        const namedSchema = <span class="cstat-no" title="statement not covered" >this.namedSchemas.get(schema);</span>
+<span class="cstat-no" title="statement not covered" >        return namedSchema ? this.validateValueAgainstSchema(value, namedSchema) : false;</span>
     }
   }
 &nbsp;
-  public writeObjHdr(length: number): void {
-    const writer = this.writer;
-    if (length &lt;= 23) writer.u8(MAJOR_OVERLAY.MAP + length);
-    else if (length &lt;= 0xff) writer.u16((0xb8 &lt;&lt; 8) + length);
-    else if (length &lt;= 0xffff) writer.u8u16(0xb9, length);
-    else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="else path not taken" >E</span>if (length &lt;= 0xffffffff) <span class="cstat-no" title="statement not covered" >writer.u8u32(0xba, length);</span></span>
-    else <span class="cstat-no" title="statement not covered" >writer.u8u64(0xbb, length);</span>
+  private validateValueAgainstRecord(value: unknown, schema: AvroRecordSchema): boolean {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof value !== 'object' || value === null) <span class="cstat-no" title="statement not covered" >return false;</span>
+    const obj = value as Record&lt;string, unknown&gt;;
+&nbsp;
+    for (const field of schema.fields) {
+      const fieldValue = obj[field.name];
+      if (fieldValue === undefined &amp;&amp; field.default === undefined) return false;
+      if (fieldValue !== undefined &amp;&amp; !this.validateValueAgainstSchema(fieldValue, field.type)) return false;
+    }
+&nbsp;
+    return true;
   }
 &nbsp;
-  public writeMapHdr(length: number): void {
-    this.writeObjHdr(length);
+  private validateValueAgainstEnum(value: unknown, schema: AvroEnumSchema): boolean {
+    return typeof value === 'string' &amp;&amp; schema.symbols.includes(value);
   }
 &nbsp;
-  public writeStartMap(): void {
-    this.writer.u8(0xbf);
+  private validateValueAgainstArray(value: unknown, schema: AvroArraySchema): boolean {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!Array.isArray(value)) <span class="cstat-no" title="statement not covered" >return false;</span>
+    return value.every((item) =&gt; this.validateValueAgainstSchema(item, schema.items));
   }
 &nbsp;
-  public writeTag(tag: number, value: unknown): void {
-    this.writeTagHdr(tag);
-    this.writeAny(value);
+  private validateValueAgainstMap(value: unknown, schema: AvroMapSchema): boolean {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof value !== 'object' || value === null) <span class="cstat-no" title="statement not covered" >return false;</span>
+    const obj = value as Record&lt;string, unknown&gt;;
+    return Object.values(obj).every((val) =&gt; this.validateValueAgainstSchema(val, schema.values));
   }
 &nbsp;
-  public writeTagHdr(tag: number): void {
-    const writer = this.writer;
-    if (tag &lt;= 23) writer.u8(MAJOR_OVERLAY.TAG + tag);
-    else if (tag &lt;= 0xff) writer.u16((0xd8 &lt;&lt; 8) + tag);
-    else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="else path not taken" >E</span>if (tag &lt;= 0xffff) <span class="cstat-no" title="statement not covered" >writer.u8u16(0xd9, tag);</span></span>
-    else <span class="cstat-no" title="statement not covered" >if (tag &lt;= 0xffffffff) <span class="cstat-no" title="statement not covered" >writer.u8u32(0xda, tag);</span></span>
-    else <span class="cstat-no" title="statement not covered" >writer.u8u64(0xdb, tag);</span>
+  private validateValueAgainstFixed(value: unknown, schema: AvroFixedSchema): boolean {
+    return value instanceof Uint8Array &amp;&amp; value.length === schema.size;
   }
 &nbsp;
-  public writeTkn(value: number): void {
-    const writer = this.writer;
-    if (value &lt;= 23) writer.u8(MAJOR_OVERLAY.TKN + value);
-    else <span class="cstat-no" title="statement not covered" ><span class="missing-if-branch" title="if path not taken" >I</span><span class="missing-if-branch" title="else path not taken" >E</span>if (value &lt;= 0xff) <span class="cstat-no" title="statement not covered" >writer.u16((0xf8 &lt;&lt; 8) + value);</span></span>
+  private getSchemaTypeName(schema: AvroSchema): string {
+    if (typeof schema === 'string') return schema;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (Array.isArray(schema)) <span class="cstat-no" title="statement not covered" >return 'union';</span>
+    return schema.type;
   }
 &nbsp;
-  // ------------------------------------------------------- Streaming encoding
-&nbsp;
-  public writeStartStr(): void {
-    this.writer.u8(0x7f);
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeStrChunk(</span>str: string): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Not implemented');</span>
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeEndStr(</span>): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Not implemented');</span>
-  }
-&nbsp;
-  public writeStartBin(): void {
-    this.writer.u8(0x5f);
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeBinChunk(</span>buf: Uint8Array): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Not implemented');</span>
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeEndBin(</span>): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Not implemented');</span>
-  }
-&nbsp;
-  public writeStartArr(): void {
-    this.writer.u8(0x9f);
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeArrChunk(</span>item: unknown): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Not implemented');</span>
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeEndArr(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(CONST.END);</span>
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeStartObj(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(0xbf);</span>
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeObjChunk(</span>key: string, value: unknown): void {
-<span class="cstat-no" title="statement not covered" >    throw new Error('Not implemented');</span>
-  }
-&nbsp;
-  public <span class="fstat-no" title="function not covered" >writeEndObj(</span>): void {
-<span class="cstat-no" title="statement not covered" >    this.writer.u8(CONST.END);</span>
+  private getFullName(name: string, namespace?: string): string {
+    return namespace ? <span class="branch-0 cbranch-no" title="branch not covered" >`${namespace}.${name}` </span>: name;
   }
 }
 &nbsp;</pre></td></tr></table></pre>

@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/bson/BsonDecoder.ts</title>
+    <title>Code coverage report for src/avro/AvroEncoder.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/bson</a> BsonDecoder.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/avro</a> AvroEncoder.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">95.86% </span>
+                <span class="strong">96.19% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>116/121</span>
+                <span class='fraction'>101/105</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">89.28% </span>
+                <span class="strong">91.66% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>25/28</span>
+                <span class='fraction'>22/24</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.11% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>16/17</span>
+                <span class='fraction'>25/25</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.61% </span>
+                <span class="strong">96.07% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>114/118</span>
+                <span class='fraction'>98/102</span>
             </div>
         
             
@@ -311,222 +311,272 @@
 <a name='L246'></a><a href='#L246'>246</a>
 <a name='L247'></a><a href='#L247'>247</a>
 <a name='L248'></a><a href='#L248'>248</a>
-<a name='L249'></a><a href='#L249'>249</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a>
+<a name='L271'></a><a href='#L271'>271</a>
+<a name='L272'></a><a href='#L272'>272</a>
+<a name='L273'></a><a href='#L273'>273</a>
+<a name='L274'></a><a href='#L274'>274</a>
+<a name='L275'></a><a href='#L275'>275</a>
+<a name='L276'></a><a href='#L276'>276</a>
+<a name='L277'></a><a href='#L277'>277</a>
+<a name='L278'></a><a href='#L278'>278</a>
+<a name='L279'></a><a href='#L279'>279</a>
+<a name='L280'></a><a href='#L280'>280</a>
+<a name='L281'></a><a href='#L281'>281</a>
+<a name='L282'></a><a href='#L282'>282</a>
+<a name='L283'></a><a href='#L283'>283</a>
+<a name='L284'></a><a href='#L284'>284</a>
+<a name='L285'></a><a href='#L285'>285</a>
+<a name='L286'></a><a href='#L286'>286</a>
+<a name='L287'></a><a href='#L287'>287</a>
+<a name='L288'></a><a href='#L288'>288</a>
+<a name='L289'></a><a href='#L289'>289</a>
+<a name='L290'></a><a href='#L290'>290</a>
+<a name='L291'></a><a href='#L291'>291</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1123x</span>
-<span class="cline-any cline-yes">1123x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8598x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">236783x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35958x</span>
-<span class="cline-any cline-yes">35958x</span>
-<span class="cline-any cline-yes">35958x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11163x</span>
-<span class="cline-any cline-yes">11163x</span>
-<span class="cline-any cline-yes">11163x</span>
-<span class="cline-any cline-yes">11163x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11163x</span>
-<span class="cline-any cline-yes">11163x</span>
-<span class="cline-any cline-yes">11163x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10312x</span>
-<span class="cline-any cline-yes">10312x</span>
-<span class="cline-any cline-yes">10312x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11159x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3884x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3590x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">72x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2812x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1398x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1117x</span>
-<span class="cline-any cline-yes">1117x</span>
-<span class="cline-any cline-yes">1117x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1655x</span>
-<span class="cline-any cline-yes">1655x</span>
-<span class="cline-any cline-yes">1655x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3590x</span>
-<span class="cline-any cline-yes">7508x</span>
-<span class="cline-any cline-yes">10282x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -536,275 +586,351 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
-import {
-  BsonBinary,
-  BsonDbPointer,
-  BsonDecimal128,
-  BsonFloat,
-  BsonInt32,
-  BsonInt64,
-  BsonJavascriptCode,
-  BsonJavascriptCodeWithScope,
-  BsonMaxKey,
-  BsonMinKey,
-  BsonObjectId,
-  BsonTimestamp,
-} from './values';
-import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
-import type {BinaryJsonDecoder} from '../types';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">51x</span>
+<span class="cline-any cline-yes">51x</span>
+<span class="cline-any cline-yes">51x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">51x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">23x</span>
+<span class="cline-any cline-yes">23x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import type {BinaryJsonEncoder} from '../types';
 &nbsp;
-export class BsonDecoder implements BinaryJsonDecoder {
-  public constructor(public reader: IReader &amp; IReaderResettable = new Reader()) {}
+/**
+ * Apache Avro binary encoder for basic value encoding.
+ * Implements the Avro binary encoding specification without schema validation.
+ * Based on https://avro.apache.org/docs/1.12.0/specification/
+ */
+export class AvroEncoder implements BinaryJsonEncoder {
+  constructor(public readonly writer: IWriter &amp; IWriterGrowable) {}
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >read(</span>uint8: Uint8Array): unknown {
-<span class="cstat-no" title="statement not covered" >    this.reader.reset(uint8);</span>
-<span class="cstat-no" title="statement not covered" >    return this.readDocument();</span>
+  public encode(value: unknown): Uint8Array {
+    const writer = this.writer;
+    writer.reset();
+    this.writeAny(value);
+    return writer.flush();
   }
 &nbsp;
-  public decode(uint8: Uint8Array): unknown {
-    this.reader.reset(uint8);
-    return this.readDocument();
+  /**
+   * Called when the encoder encounters a value that it does not know how to encode.
+   */
+  public writeUnknown(value: unknown): void {
+    this.writeNull();
   }
 &nbsp;
-  public readDocument(): Record&lt;string, unknown&gt; {
-    const reader = this.reader;
-    const documentSize = reader.view.getInt32(reader.x, true); // true = little-endian
-    reader.x += 4;
-    const startPos = reader.x; // Position after reading the size
-    const endPos = startPos + documentSize - 4 - 1; // End position before the terminating null
-    const obj: Record&lt;string, unknown&gt; = {};
-&nbsp;
-    while (reader.x &lt; endPos) {
-      const elementType = reader.u8();
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (elementType === 0) <span class="cstat-no" title="statement not covered" >break; </span>// End of document
-&nbsp;
-      const key = this.readCString();
-      const value = this.readElementValue(elementType);
-      obj[key] = value;
+  public writeAny(value: unknown): void {
+    switch (typeof value) {
+      case 'boolean':
+        return this.writeBoolean(value);
+      case 'number':
+        return this.writeNumber(value);
+      case 'string':
+        return this.writeStr(value);
+      case 'object': {
+        if (value === null) return this.writeNull();
+        const constructor = value.constructor;
+        switch (constructor) {
+          case Object:
+            return this.writeObj(value as Record&lt;string, unknown&gt;);
+          case Array:
+            return this.writeArr(value as unknown[]);
+          case Uint8Array:
+            return this.writeBin(value as Uint8Array);
+          default:
+            return this.writeUnknown(value);
+        }
+      }
+      case 'bigint':
+        return this.writeLong(value);
+      case 'undefined':
+        return this.writeNull();
+<span class="branch-6 cbranch-no" title="branch not covered" >      default:</span>
+<span class="cstat-no" title="statement not covered" >        return this.writeUnknown(value);</span>
     }
-&nbsp;
-    // Skip to the end of document (including the terminating null if we haven't read it)
-    if (reader.x &lt;= endPos) {
-      reader.x = startPos + documentSize - 4; // Move to just after the terminating null
-    }
-&nbsp;
-    return obj;
   }
 &nbsp;
-  public readCString(): string {
-    const reader = this.reader;
-    const uint8 = reader.uint8;
-    const x = reader.x;
-    let length = 0;
-&nbsp;
-    // Find the null terminator
-    while (uint8[x + length] !== 0) {
-      length++;
-    }
-&nbsp;
-    if (length === 0) {
-      reader.x++; // Skip the null byte
-      return '';
-    }
-&nbsp;
-    const str = reader.utf8(length);
-    reader.x++; // Skip the null terminator
-    return str;
+  /**
+   * Writes an Avro null value.
+   */
+  public writeNull(): void {
+    // Null values are encoded as zero bytes
   }
 &nbsp;
-  public readString(): string {
-    const reader = this.reader;
-    const length = reader.view.getInt32(reader.x, true); // true = little-endian
-    reader.x += 4;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length &lt;= 0) {
-<span class="cstat-no" title="statement not covered" >      throw new Error('Invalid string length');</span>
-    }
-    const str = reader.utf8(length - 1); // Length includes null terminator
-    reader.x++; // Skip null terminator
-    return str;
+  /**
+   * Writes an Avro boolean value.
+   */
+  public writeBoolean(bool: boolean): void {
+    this.writer.u8(bool ? 1 : 0);
   }
 &nbsp;
-  public readElementValue(type: number): unknown {
-    const reader = this.reader;
+  /**
+   * Writes an Avro int value using zigzag encoding.
+   */
+  public writeInt(int: number): void {
+    this.writeVarIntSigned(this.encodeZigZag32(Math.trunc(int)));
+  }
 &nbsp;
-    switch (type) {
-      case 0x01: // double - 64-bit binary floating point
-        const doubleVal = reader.view.getFloat64(reader.x, true);
-        reader.x += 8;
-        return doubleVal;
-&nbsp;
-      case 0x02: // string - UTF-8 string
-        return this.readString();
-&nbsp;
-      case 0x03: // document - Embedded document
-        return this.readDocument();
-&nbsp;
-      case 0x04: // array - Array
-        return this.readArray();
-&nbsp;
-      case 0x05: // binary - Binary data
-        return this.readBinary();
-&nbsp;
-      case 0x06: // undefined (deprecated)
-        return undefined;
-&nbsp;
-      case 0x07: // ObjectId
-        return this.readObjectId();
-&nbsp;
-      case 0x08: // boolean
-        return reader.u8() === 1;
-&nbsp;
-      case 0x09: // UTC datetime
-        const dateVal = reader.view.getBigInt64(reader.x, true);
-        reader.x += 8;
-        return new Date(Number(dateVal));
-&nbsp;
-      case 0x0a: // null
-        return null;
-&nbsp;
-      case 0x0b: // regex
-        return this.readRegex();
-&nbsp;
-      case 0x0c: // DBPointer (deprecated)
-        return this.readDbPointer();
-&nbsp;
-      case 0x0d: // JavaScript code
-        return new BsonJavascriptCode(this.readString());
-&nbsp;
-      case 0x0e: // Symbol (deprecated)
-        return Symbol(this.readString());
-&nbsp;
-      case 0x0f: // JavaScript code with scope (deprecated)
-        return this.readCodeWithScope();
-&nbsp;
-      case 0x10: // 32-bit integer
-        const int32Val = reader.view.getInt32(reader.x, true);
-        reader.x += 4;
-        return int32Val;
-&nbsp;
-      case 0x11: // Timestamp
-        return this.readTimestamp();
-&nbsp;
-      case 0x12: // 64-bit integer
-        const int64Val = reader.view.getBigInt64(reader.x, true);
-        reader.x += 8;
-        return Number(int64Val);
-&nbsp;
-      case 0x13: // 128-bit decimal floating point
-        return this.readDecimal128();
-&nbsp;
-      case 0xff: // Min key
-        return new BsonMinKey();
-&nbsp;
-      case 0x7f: // Max key
-        return new BsonMaxKey();
-&nbsp;
-<span class="branch-21 cbranch-no" title="branch not covered" >      default:</span>
-<span class="cstat-no" title="statement not covered" >        throw new Error(`Unsupported BSON type: 0x${type.toString(16)}`);</span>
+  /**
+   * Writes an Avro long value using zigzag encoding.
+   */
+  public writeLong(long: number | bigint): void {
+    if (typeof long === 'bigint') {
+      this.writeVarLong(this.encodeZigZag64(long));
+    } else {
+      this.writeVarLong(this.encodeZigZag64(BigInt(Math.trunc(long))));
     }
   }
 &nbsp;
-  public readArray(): unknown[] {
-    const doc = this.readDocument() as Record&lt;string, unknown&gt;;
-    const keys = Object.keys(doc).sort((a, b) =&gt; parseInt(a, 10) - parseInt(b, 10));
-    return keys.map((key) =&gt; doc[key]);
+  /**
+   * Writes an Avro float value using IEEE 754 single-precision.
+   */
+  public writeFloatAvro(float: number): void {
+    const writer = this.writer;
+    writer.ensureCapacity(4);
+    writer.view.setFloat32(writer.x, float, true); // little-endian
+    writer.move(4);
   }
 &nbsp;
-  public readBinary(): BsonBinary | Uint8Array {
-    const reader = this.reader;
-    const length = reader.view.getInt32(reader.x, true);
-    reader.x += 4;
-    const subtype = reader.u8();
-    const data = reader.buf(length);
+  /**
+   * Writes an Avro double value using IEEE 754 double-precision.
+   */
+  public writeDouble(double: number): void {
+    const writer = this.writer;
+    writer.ensureCapacity(8);
+    writer.view.setFloat64(writer.x, double, true); // little-endian
+    writer.move(8);
+  }
 &nbsp;
-    // For generic binary subtype, return Uint8Array for compatibility
-    if (subtype === 0) {
-      return data;
+  /**
+   * Writes an Avro bytes value with length-prefixed encoding.
+   */
+  public writeBin(bytes: Uint8Array): void {
+    this.writeVarIntUnsigned(bytes.length);
+    this.writer.buf(bytes, bytes.length);
+  }
+&nbsp;
+  /**
+   * Writes an Avro string value with UTF-8 encoding and length prefix.
+   */
+  public writeStr(str: string): void {
+    const writer = this.writer;
+    const maxSize = str.length * 4; // Max UTF-8 bytes for string
+    writer.ensureCapacity(5 + maxSize); // 5 bytes max for varint length
+&nbsp;
+    // Reserve space for length (we'll come back to fill this)
+    const lengthOffset = writer.x;
+    writer.x += 5; // Max varint size
+&nbsp;
+    // Write the string and get actual byte count
+    const bytesWritten = writer.utf8(str);
+    const endPos = writer.x;
+&nbsp;
+    // Go back to encode the actual length
+    writer.x = lengthOffset;
+    this.writeVarIntUnsigned(bytesWritten);
+    const actualLengthSize = writer.x - lengthOffset;
+&nbsp;
+    // If we reserved more space than needed, shift the string data
+    if (actualLengthSize &lt; 5) {
+      const stringStart = lengthOffset + 5;
+      const stringData = writer.uint8.slice(stringStart, endPos);
+      writer.x = lengthOffset + actualLengthSize;
+      writer.buf(stringData, stringData.length);
+    } else <span class="missing-if-branch" title="else path not taken" >E</span>{
+<span class="cstat-no" title="statement not covered" >      writer.x = endPos;</span>
     }
-&nbsp;
-    return new BsonBinary(subtype, data);
   }
 &nbsp;
-  public readObjectId(): BsonObjectId {
-    const reader = this.reader;
-    const uint8 = reader.uint8;
-    const x = reader.x;
-&nbsp;
-    // Timestamp (4 bytes, big-endian)
-    const timestamp = (uint8[x] &lt;&lt; 24) | (uint8[x + 1] &lt;&lt; 16) | (uint8[x + 2] &lt;&lt; 8) | uint8[x + 3];
-&nbsp;
-    // Process ID (5 bytes) - first 4 bytes are little-endian, then 1 high byte
-    const processLo = uint8[x + 4] | (uint8[x + 5] &lt;&lt; 8) | (uint8[x + 6] &lt;&lt; 16) | (uint8[x + 7] &lt;&lt; 24);
-    const processHi = uint8[x + 8];
-    // Convert to unsigned 32-bit first, then combine with high byte
-    const processLoUnsigned = processLo &gt;&gt;&gt; 0; // Convert to unsigned
-    const process = processLoUnsigned + processHi * 0x100000000;
-&nbsp;
-    // Counter (3 bytes, big-endian)
-    const counter = (uint8[x + 9] &lt;&lt; 16) | (uint8[x + 10] &lt;&lt; 8) | uint8[x + 11];
-&nbsp;
-    reader.x += 12;
-    return new BsonObjectId(timestamp, process, counter);
+  /**
+   * Writes an Avro array with length-prefixed encoding.
+   */
+  public writeArr(arr: unknown[]): void {
+    this.writeVarIntUnsigned(arr.length);
+    const length = arr.length;
+    for (let i = 0; i &lt; length; i++) {
+      this.writeAny(arr[i]);
+    }
+    this.writeVarIntUnsigned(0); // End of array marker
   }
 &nbsp;
-  public readRegex(): RegExp {
-    const pattern = this.readCString();
-    const flags = this.readCString();
-    return new RegExp(pattern, flags);
+  /**
+   * Writes an Avro map with length-prefixed encoding.
+   */
+  public writeObj(obj: Record&lt;string, unknown&gt;): void {
+    const entries = Object.entries(obj);
+    const length = entries.length;
+    this.writeVarIntUnsigned(length);
+    for (let i = 0; i &lt; length; i++) {
+      const entry = entries[i];
+      this.writeStr(entry[0]);
+      this.writeAny(entry[1]);
+    }
+    this.writeVarIntUnsigned(0); // End of map marker
   }
 &nbsp;
-  public readDbPointer(): BsonDbPointer {
-    const name = this.readString();
-    const id = this.readObjectId();
-    return new BsonDbPointer(name, id);
+  // BinaryJsonEncoder interface methods
+&nbsp;
+  /**
+   * Generic number writing - determines type based on value
+   */
+  public writeNumber(num: number): void {
+    if (Number.isInteger(num)) {
+      if (num &gt;= -2147483648 &amp;&amp; num &lt;= 2147483647) {
+        this.writeInt(num);
+      } else {
+        this.writeLong(num);
+      }
+    } else {
+      this.writeDouble(num);
+    }
   }
 &nbsp;
-  public readCodeWithScope(): BsonJavascriptCodeWithScope {
-    const reader = this.reader;
-    const totalLength = reader.view.getInt32(reader.x, true);
-    reader.x += 4;
-    const code = this.readString();
-    const scope = this.readDocument() as Record&lt;string, unknown&gt;;
-    return new BsonJavascriptCodeWithScope(code, scope);
+  /**
+   * Writes an integer value
+   */
+  public writeInteger(int: number): void {
+    this.writeInt(int);
   }
 &nbsp;
-  public readTimestamp(): BsonTimestamp {
-    const reader = this.reader;
-    const increment = reader.view.getInt32(reader.x, true);
-    reader.x += 4;
-    const timestamp = reader.view.getInt32(reader.x, true);
-    reader.x += 4;
-    return new BsonTimestamp(increment, timestamp);
+  /**
+   * Writes an unsigned integer value
+   */
+  public writeUInteger(uint: number): void {
+    this.writeInt(uint);
   }
 &nbsp;
-  public readDecimal128(): BsonDecimal128 {
-    const reader = this.reader;
-    const data = reader.buf(16);
-    return new BsonDecimal128(data);
+  /**
+   * Writes a float value (interface method)
+   */
+  public writeFloat(float: number): void {
+    this.writeFloatValue(float);
+  }
+&nbsp;
+  /**
+   * Writes a float value using IEEE 754 single-precision.
+   */
+  private writeFloatValue(float: number): void {
+    const writer = this.writer;
+    writer.ensureCapacity(4);
+    writer.view.setFloat32(writer.x, float, true); // little-endian
+    writer.move(4);
+  }
+&nbsp;
+  /**
+   * Writes an ASCII string (same as regular string in Avro)
+   */
+  public writeAsciiStr(str: string): void {
+    const writer = this.writer;
+    this.writeVarIntUnsigned(str.length);
+    writer.ascii(str);
+  }
+&nbsp;
+  // Utility methods for Avro encoding
+&nbsp;
+  /**
+   * Encodes a variable-length integer (for signed values with zigzag)
+   */
+  private writeVarIntSigned(value: number): void {
+    const writer = this.writer;
+    let n = value &gt;&gt;&gt; 0; // Convert to unsigned 32-bit
+    while (n &gt;= 0x80) {
+      writer.u8((n &amp; 0x7f) | 0x80);
+      n &gt;&gt;&gt;= 7;
+    }
+    writer.u8(n &amp; 0x7f);
+  }
+&nbsp;
+  /**
+   * Encodes a variable-length integer (for unsigned values like lengths)
+   */
+  private writeVarIntUnsigned(value: number): void {
+    const writer = this.writer;
+    let n = value &gt;&gt;&gt; 0; // Convert to unsigned 32-bit
+    while (n &gt;= 0x80) {
+<span class="cstat-no" title="statement not covered" >      writer.u8((n &amp; 0x7f) | 0x80);</span>
+<span class="cstat-no" title="statement not covered" >      n &gt;&gt;&gt;= 7;</span>
+    }
+    writer.u8(n &amp; 0x7f);
+  }
+&nbsp;
+  /**
+   * Encodes a variable-length long using Avro's encoding
+   */
+  private writeVarLong(value: bigint): void {
+    const writer = this.writer;
+    let n = value;
+    const mask = BigInt(0x7f);
+    const shift = BigInt(7);
+&nbsp;
+    while (n &gt;= BigInt(0x80)) {
+      writer.u8(Number((n &amp; mask) | BigInt(0x80)));
+      n &gt;&gt;= shift;
+    }
+    writer.u8(Number(n &amp; mask));
+  }
+&nbsp;
+  /**
+   * Encodes a 32-bit integer using zigzag encoding
+   */
+  private encodeZigZag32(value: number): number {
+    return (value &lt;&lt; 1) ^ (value &gt;&gt; 31);
+  }
+&nbsp;
+  /**
+   * Encodes a 64-bit integer using zigzag encoding
+   */
+  private encodeZigZag64(value: bigint): bigint {
+    return (value &lt;&lt; BigInt(1)) ^ (value &gt;&gt; BigInt(63));
   }
 }
 &nbsp;</pre></td></tr></table></pre>

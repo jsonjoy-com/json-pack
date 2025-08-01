@@ -2,6 +2,7 @@ import {isFloat32} from '@jsonjoy.com/util/lib/buffers/isFloat32';
 import {JsonPackExtension} from '../JsonPackExtension';
 import {CborEncoderFast} from './CborEncoderFast';
 import {JsonPackValue} from '../JsonPackValue';
+import {dateToDaysSinceEpoch, dateToRfc3339String} from './dates';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
 export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> extends CborEncoderFast<W> {
@@ -39,6 +40,8 @@ export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriter
           case JsonPackValue:
             const buf = (value as JsonPackValue).val;
             return this.writer.buf(buf, buf.length);
+          case Date:
+            return this.writeDate(value as Date);
           default:
             if (value instanceof Uint8Array) return this.writeBin(value);
             if (Array.isArray(value)) return this.writeArr(value);
@@ -66,6 +69,26 @@ export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriter
       this.writeAny(key);
       this.writeAny(value);
     });
+  }
+
+  /**
+   * Encodes a JavaScript Date object as a CBOR date tag.
+   * Uses tag 100 (days since epoch) for most dates, or tag 1004 (RFC 3339 string) 
+   * when needed for better precision or compatibility.
+   * 
+   * For now, we'll default to tag 100 (days since epoch) as it's more compact.
+   * 
+   * @param date - The Date object to encode
+   */
+  public writeDate(date: Date): void {
+    // Validate that the date is valid
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid Date object');
+    }
+
+    // Use tag 100 (days since epoch) by default for compactness
+    const daysSinceEpoch = dateToDaysSinceEpoch(date);
+    this.writeTag(100, daysSinceEpoch);
   }
 
   public writeUndef(): void {

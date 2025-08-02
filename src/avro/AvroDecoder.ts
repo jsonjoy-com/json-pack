@@ -55,7 +55,7 @@ export class AvroDecoder implements BinaryJsonDecoder {
   public readLong(): number | bigint {
     const zigzag = this.readVarLong();
     const decoded = this.decodeZigZag64(zigzag);
-    
+
     // Return number if it fits in safe integer range, otherwise bigint
     if (decoded >= BigInt(Number.MIN_SAFE_INTEGER) && decoded <= BigInt(Number.MAX_SAFE_INTEGER)) {
       return Number(decoded);
@@ -106,16 +106,16 @@ export class AvroDecoder implements BinaryJsonDecoder {
    */
   public readArray<T>(itemReader: () => T): T[] {
     const result: T[] = [];
-    
+
     while (true) {
       const count = this.readVarIntUnsigned();
       if (count === 0) break; // End of array marker
-      
+
       for (let i = 0; i < count; i++) {
         result.push(itemReader());
       }
     }
-    
+
     return result;
   }
 
@@ -125,18 +125,18 @@ export class AvroDecoder implements BinaryJsonDecoder {
    */
   public readMap<T>(valueReader: () => T): Record<string, T> {
     const result: Record<string, T> = {};
-    
+
     while (true) {
       const count = this.readVarIntUnsigned();
       if (count === 0) break; // End of map marker
-      
+
       for (let i = 0; i < count; i++) {
         const key = this.readString();
         if (key === '__proto__') throw new Error('INVALID_KEY');
         result[key] = valueReader();
       }
     }
-    
+
     return result;
   }
 
@@ -149,7 +149,7 @@ export class AvroDecoder implements BinaryJsonDecoder {
     if (index < 0 || index >= schemaReaders.length) {
       throw new Error(`Invalid union index: ${index}`);
     }
-    
+
     const value = schemaReaders[index]();
     return {index, value};
   }
@@ -193,19 +193,19 @@ export class AvroDecoder implements BinaryJsonDecoder {
     const reader = this.reader;
     let result = 0;
     let shift = 0;
-    
+
     while (true) {
       const byte = reader.u8();
       result |= (byte & 0x7f) << shift;
-      
+
       if ((byte & 0x80) === 0) break;
-      
+
       shift += 7;
       if (shift >= 32) {
         throw new Error('Variable-length integer is too long');
       }
     }
-    
+
     return result >>> 0; // Convert to unsigned 32-bit
   }
 
@@ -216,19 +216,19 @@ export class AvroDecoder implements BinaryJsonDecoder {
     const reader = this.reader;
     let result = BigInt(0);
     let shift = BigInt(0);
-    
+
     while (true) {
       const byte = BigInt(reader.u8());
       result |= (byte & BigInt(0x7f)) << shift;
-      
+
       if ((byte & BigInt(0x80)) === BigInt(0)) break;
-      
+
       shift += BigInt(7);
       if (shift >= BigInt(64)) {
         throw new Error('Variable-length long is too long');
       }
     }
-    
+
     return result;
   }
 

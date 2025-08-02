@@ -12,18 +12,16 @@ import type {
 } from '../types';
 
 describe('AvroSchemaDecoder', () => {
-  let writer: Writer;
-  let encoder: AvroSchemaEncoder;
-  let decoder: AvroSchemaDecoder;
-
-  beforeEach(() => {
-    writer = new Writer();
-    encoder = new AvroSchemaEncoder(writer);
-    decoder = new AvroSchemaDecoder();
-  });
+  const setup = () => {
+    const writer = new Writer();
+    const encoder = new AvroSchemaEncoder(writer);
+    const decoder = new AvroSchemaDecoder();
+    return {writer, encoder, decoder};
+  };
 
   describe('primitive types with schema validation', () => {
     test('decodes null with null schema', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'null';
       const value = null;
       const encoded = encoder.encode(value, schema);
@@ -32,6 +30,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes boolean with boolean schema', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'boolean';
       const value = true;
       const encoded = encoder.encode(value, schema);
@@ -40,6 +39,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes int with int schema', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'int';
       const value = 42;
       const encoded = encoder.encode(value, schema);
@@ -48,6 +48,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes long with long schema', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'long';
       const value = BigInt(1000000);
       const encoded = encoder.encode(value, schema);
@@ -56,6 +57,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes large long as bigint', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'long';
       const value = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1);
       const encoded = encoder.encode(value, schema);
@@ -64,6 +66,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes float with float schema', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'float';
       const value = 3.14159;
       const encoded = encoder.encode(value, schema);
@@ -72,6 +75,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes double with double schema', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'double';
       const value = Math.PI;
       const encoded = encoder.encode(value, schema);
@@ -80,6 +84,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes bytes with bytes schema', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'bytes';
       const value = new Uint8Array([1, 2, 3, 4, 5]);
       const encoded = encoder.encode(value, schema);
@@ -88,6 +93,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes string with string schema', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroSchema = 'string';
       const value = 'Hello, Avro!';
       const encoded = encoder.encode(value, schema);
@@ -98,6 +104,7 @@ describe('AvroSchemaDecoder', () => {
 
   describe('record schemas', () => {
     test('decodes simple record', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroRecordSchema = {
         type: 'record',
         name: 'User',
@@ -114,6 +121,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes record with default values', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroRecordSchema = {
         type: 'record',
         name: 'User',
@@ -129,6 +137,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes nested record', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroRecordSchema = {
         type: 'record',
         name: 'Person',
@@ -159,6 +168,7 @@ describe('AvroSchemaDecoder', () => {
 
   describe('enum schemas', () => {
     test('decodes valid enum value', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroEnumSchema = {
         type: 'enum',
         name: 'Color',
@@ -171,12 +181,13 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('throws on invalid enum index during decoding', () => {
+      const {writer, encoder, decoder} = setup();
       const schema: AvroEnumSchema = {
         type: 'enum',
         name: 'Color',
         symbols: ['RED', 'GREEN', 'BLUE'],
       };
-      
+
       // Manually create invalid enum data (index 5)
       writer.reset();
       const invalidIndex = 5;
@@ -188,13 +199,14 @@ describe('AvroSchemaDecoder', () => {
       }
       writer.u8(n & 0x7f);
       const invalidData = writer.flush();
-      
+
       expect(() => decoder.decode(invalidData, schema)).toThrow('Invalid enum index 5');
     });
   });
 
   describe('array schemas', () => {
     test('decodes array of primitives', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroArraySchema = {
         type: 'array',
         items: 'int',
@@ -206,6 +218,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes empty array', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroArraySchema = {
         type: 'array',
         items: 'string',
@@ -217,6 +230,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes nested arrays', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroArraySchema = {
         type: 'array',
         items: {
@@ -233,6 +247,7 @@ describe('AvroSchemaDecoder', () => {
 
   describe('map schemas', () => {
     test('decodes map of primitives', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroMapSchema = {
         type: 'map',
         values: 'string',
@@ -244,6 +259,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes empty map', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroMapSchema = {
         type: 'map',
         values: 'int',
@@ -255,6 +271,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes complex map', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroMapSchema = {
         type: 'map',
         values: {
@@ -272,6 +289,7 @@ describe('AvroSchemaDecoder', () => {
 
   describe('union schemas', () => {
     test('decodes union value - null', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroUnionSchema = ['null', 'string'];
       const value = null;
       const encoded = encoder.encode(value, schema);
@@ -280,6 +298,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes union value - string', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroUnionSchema = ['null', 'string'];
       const value = 'hello';
       const encoded = encoder.encode(value, schema);
@@ -288,6 +307,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('decodes complex union', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroUnionSchema = [
         'null',
         'int',
@@ -306,6 +326,7 @@ describe('AvroSchemaDecoder', () => {
 
   describe('fixed schemas', () => {
     test('decodes fixed-length data', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroFixedSchema = {
         type: 'fixed',
         name: 'MD5',
@@ -320,12 +341,14 @@ describe('AvroSchemaDecoder', () => {
 
   describe('schema validation during decoding', () => {
     test('throws on invalid schema', () => {
+      const {encoder, decoder} = setup();
       const invalidSchema = {type: 'invalid'} as any;
       const data = new Uint8Array([0]);
       expect(() => decoder.decode(data, invalidSchema)).toThrow('Invalid Avro schema');
     });
 
     test('validates schema type in typed read methods', () => {
+      const {encoder, decoder} = setup();
       decoder.reader.reset(new Uint8Array([1])); // boolean true
       expect(() => decoder.readBoolean('boolean')).not.toThrow();
       expect(() => decoder.readBoolean('int')).toThrow('Expected schema type boolean, got int');
@@ -334,6 +357,7 @@ describe('AvroSchemaDecoder', () => {
 
   describe('round-trip compatibility', () => {
     test('encodes and decodes complex nested data', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroRecordSchema = {
         type: 'record',
         name: 'ComplexData',
@@ -379,6 +403,7 @@ describe('AvroSchemaDecoder', () => {
     });
 
     test('handles all primitive types in single record', () => {
+      const {encoder, decoder} = setup();
       const schema: AvroRecordSchema = {
         type: 'record',
         name: 'AllTypes',

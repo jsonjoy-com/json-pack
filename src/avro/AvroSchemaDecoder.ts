@@ -98,7 +98,7 @@ export class AvroSchemaDecoder {
    */
   private readRecord(schema: AvroRecordSchema): Record<string, unknown> {
     const result: Record<string, unknown> = {};
-    
+
     for (let i = 0; i < schema.fields.length; i++) {
       const field = schema.fields[i];
       try {
@@ -107,7 +107,7 @@ export class AvroSchemaDecoder {
         throw new Error(`Error reading field '${field.name}': ${(error as Error).message}`);
       }
     }
-    
+
     return result;
   }
 
@@ -116,11 +116,11 @@ export class AvroSchemaDecoder {
    */
   private readEnum(schema: AvroEnumSchema): string {
     const index = this.decoder.readEnum();
-    
+
     if (index < 0 || index >= schema.symbols.length) {
       throw new Error(`Invalid enum index ${index} for enum with ${schema.symbols.length} symbols`);
     }
-    
+
     return schema.symbols[index];
   }
 
@@ -142,7 +142,7 @@ export class AvroSchemaDecoder {
    * Reads a union value according to the union schema.
    */
   private readUnion(schema: AvroUnionSchema): unknown {
-    const schemaReaders = schema.map(subSchema => () => this.readValue(subSchema));
+    const schemaReaders = schema.map((subSchema) => () => this.readValue(subSchema));
     const result = this.decoder.readUnion(schemaReaders);
     return result.value;
   }

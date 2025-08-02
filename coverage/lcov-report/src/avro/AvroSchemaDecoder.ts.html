@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/bson/BsonDecoder.ts</title>
+    <title>Code coverage report for src/avro/AvroSchemaDecoder.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/bson</a> BsonDecoder.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/avro</a> AvroSchemaDecoder.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">95.86% </span>
+                <span class="strong">81.48% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>116/121</span>
+                <span class='fraction'>88/108</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">89.28% </span>
+                <span class="strong">78.72% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>25/28</span>
+                <span class='fraction'>37/47</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.11% </span>
+                <span class="strong">73.07% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>16/17</span>
+                <span class='fraction'>19/26</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">96.61% </span>
+                <span class="strong">80.39% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>114/118</span>
+                <span class='fraction'>82/102</span>
             </div>
         
             
@@ -311,9 +311,133 @@
 <a name='L246'></a><a href='#L246'>246</a>
 <a name='L247'></a><a href='#L247'>247</a>
 <a name='L248'></a><a href='#L248'>248</a>
-<a name='L249'></a><a href='#L249'>249</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<a name='L249'></a><a href='#L249'>249</a>
+<a name='L250'></a><a href='#L250'>250</a>
+<a name='L251'></a><a href='#L251'>251</a>
+<a name='L252'></a><a href='#L252'>252</a>
+<a name='L253'></a><a href='#L253'>253</a>
+<a name='L254'></a><a href='#L254'>254</a>
+<a name='L255'></a><a href='#L255'>255</a>
+<a name='L256'></a><a href='#L256'>256</a>
+<a name='L257'></a><a href='#L257'>257</a>
+<a name='L258'></a><a href='#L258'>258</a>
+<a name='L259'></a><a href='#L259'>259</a>
+<a name='L260'></a><a href='#L260'>260</a>
+<a name='L261'></a><a href='#L261'>261</a>
+<a name='L262'></a><a href='#L262'>262</a>
+<a name='L263'></a><a href='#L263'>263</a>
+<a name='L264'></a><a href='#L264'>264</a>
+<a name='L265'></a><a href='#L265'>265</a>
+<a name='L266'></a><a href='#L266'>266</a>
+<a name='L267'></a><a href='#L267'>267</a>
+<a name='L268'></a><a href='#L268'>268</a>
+<a name='L269'></a><a href='#L269'>269</a>
+<a name='L270'></a><a href='#L270'>270</a>
+<a name='L271'></a><a href='#L271'>271</a>
+<a name='L272'></a><a href='#L272'>272</a>
+<a name='L273'></a><a href='#L273'>273</a>
+<a name='L274'></a><a href='#L274'>274</a>
+<a name='L275'></a><a href='#L275'>275</a>
+<a name='L276'></a><a href='#L276'>276</a>
+<a name='L277'></a><a href='#L277'>277</a>
+<a name='L278'></a><a href='#L278'>278</a>
+<a name='L279'></a><a href='#L279'>279</a>
+<a name='L280'></a><a href='#L280'>280</a>
+<a name='L281'></a><a href='#L281'>281</a>
+<a name='L282'></a><a href='#L282'>282</a>
+<a name='L283'></a><a href='#L283'>283</a>
+<a name='L284'></a><a href='#L284'>284</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27x</span>
+<span class="cline-any cline-yes">27x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">79x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">79x</span>
+<span class="cline-any cline-yes">51x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -321,8 +445,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -330,7 +464,46 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -338,473 +511,405 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1123x</span>
-<span class="cline-any cline-yes">1123x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8515x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">235155x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35959x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35958x</span>
-<span class="cline-any cline-yes">35958x</span>
-<span class="cline-any cline-yes">35958x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11300x</span>
-<span class="cline-any cline-yes">11300x</span>
-<span class="cline-any cline-yes">11300x</span>
-<span class="cline-any cline-yes">11300x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11300x</span>
-<span class="cline-any cline-yes">11300x</span>
-<span class="cline-any cline-yes">11300x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">35957x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10262x</span>
-<span class="cline-any cline-yes">10262x</span>
-<span class="cline-any cline-yes">10262x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">11296x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3887x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3504x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2805x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1374x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1139x</span>
-<span class="cline-any cline-yes">1139x</span>
-<span class="cline-any cline-yes">1139x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1660x</span>
-<span class="cline-any cline-yes">1660x</span>
-<span class="cline-any cline-yes">1660x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3504x</span>
-<span class="cline-any cline-yes">7430x</span>
-<span class="cline-any cline-yes">10112x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">16x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">16x</span>
-<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">81x</span>
+<span class="cline-any cline-yes">53x</span>
+<span class="cline-any cline-yes">53x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">28x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">59x</span>
+<span class="cline-any cline-yes">39x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-yes">20x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">24x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">11x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
-import {
-  BsonBinary,
-  BsonDbPointer,
-  BsonDecimal128,
-  BsonFloat,
-  BsonInt32,
-  BsonInt64,
-  BsonJavascriptCode,
-  BsonJavascriptCodeWithScope,
-  BsonMaxKey,
-  BsonMinKey,
-  BsonObjectId,
-  BsonTimestamp,
-} from './values';
-import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
-import type {BinaryJsonDecoder} from '../types';
+import {AvroDecoder} from './AvroDecoder';
+import {AvroSchemaValidator} from './AvroSchemaValidator';
+import type {
+  AvroSchema,
+  AvroRecordSchema,
+  AvroEnumSchema,
+  AvroArraySchema,
+  AvroMapSchema,
+  AvroUnionSchema,
+  AvroFixedSchema,
+  AvroNamedSchema,
+} from './types';
 &nbsp;
-export class BsonDecoder implements BinaryJsonDecoder {
-  public constructor(public reader: IReader &amp; IReaderResettable = new Reader()) {}
+/**
+ * Apache Avro binary decoder with schema validation and decoding.
+ * Decodes values according to provided Avro schemas with proper validation.
+ * Based on https://avro.apache.org/docs/1.12.0/specification/
+ */
+export class AvroSchemaDecoder {
+  private decoder: AvroDecoder;
+  private validator: AvroSchemaValidator;
+  private namedSchemas = new Map&lt;string, AvroNamedSchema&gt;();
 &nbsp;
-  public <span class="fstat-no" title="function not covered" >read(</span>uint8: Uint8Array): unknown {
-<span class="cstat-no" title="statement not covered" >    this.reader.reset(uint8);</span>
-<span class="cstat-no" title="statement not covered" >    return this.readDocument();</span>
+  constructor(public readonly reader: Reader = new Reader()) {
+    this.decoder = new AvroDecoder();
+    this.decoder.reader = reader;
+    this.validator = new AvroSchemaValidator();
   }
 &nbsp;
-  public decode(uint8: Uint8Array): unknown {
-    this.reader.reset(uint8);
-    return this.readDocument();
+  /**
+   * Decodes a value according to the provided schema.
+   */
+  public decode(data: Uint8Array, schema: AvroSchema): unknown {
+    this.reader.reset(data);
+    this.namedSchemas.clear();
+&nbsp;
+    // Validate schema first
+    if (!this.validator.validateSchema(schema)) {
+      throw new Error('Invalid Avro schema');
+    }
+&nbsp;
+    this.collectNamedSchemas(schema);
+    return this.readValue(schema);
   }
 &nbsp;
-  public readDocument(): Record&lt;string, unknown&gt; {
-    const reader = this.reader;
-    const documentSize = reader.view.getInt32(reader.x, true); // true = little-endian
-    reader.x += 4;
-    const startPos = reader.x; // Position after reading the size
-    const endPos = startPos + documentSize - 4 - 1; // End position before the terminating null
-    const obj: Record&lt;string, unknown&gt; = {};
+  /**
+   * Reads a value according to its schema.
+   */
+  private readValue(schema: AvroSchema): unknown {
+    const resolvedSchema = this.resolveSchema(schema);
 &nbsp;
-    while (reader.x &lt; endPos) {
-      const elementType = reader.u8();
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (elementType === 0) <span class="cstat-no" title="statement not covered" >break; </span>// End of document
-&nbsp;
-      const key = this.readCString();
-      const value = this.readElementValue(elementType);
-      obj[key] = value;
+    if (typeof resolvedSchema === 'string') {
+      switch (resolvedSchema) {
+        case 'null':
+          return this.decoder.readNull();
+        case 'boolean':
+          return this.decoder.readBoolean();
+        case 'int':
+          return this.decoder.readInt();
+        case 'long':
+          return this.decoder.readLong();
+        case 'float':
+          return this.decoder.readFloat();
+        case 'double':
+          return this.decoder.readDouble();
+        case 'bytes':
+          return this.decoder.readBytes();
+        case 'string':
+          return this.decoder.readString();
+<span class="branch-8 cbranch-no" title="branch not covered" >        default:</span>
+<span class="cstat-no" title="statement not covered" >          throw new Error(`Unknown primitive type: ${resolvedSchema}`);</span>
+      }
     }
 &nbsp;
-    // Skip to the end of document (including the terminating null if we haven't read it)
-    if (reader.x &lt;= endPos) {
-      reader.x = startPos + documentSize - 4; // Move to just after the terminating null
+    if (Array.isArray(resolvedSchema)) {
+      return this.readUnion(resolvedSchema);
     }
 &nbsp;
-    return obj;
-  }
-&nbsp;
-  public readCString(): string {
-    const reader = this.reader;
-    const uint8 = reader.uint8;
-    const x = reader.x;
-    let length = 0;
-&nbsp;
-    // Find the null terminator
-    while (uint8[x + length] !== 0) {
-      length++;
-    }
-&nbsp;
-    if (length === 0) {
-      reader.x++; // Skip the null byte
-      return '';
-    }
-&nbsp;
-    const str = reader.utf8(length);
-    reader.x++; // Skip the null terminator
-    return str;
-  }
-&nbsp;
-  public readString(): string {
-    const reader = this.reader;
-    const length = reader.view.getInt32(reader.x, true); // true = little-endian
-    reader.x += 4;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length &lt;= 0) {
-<span class="cstat-no" title="statement not covered" >      throw new Error('Invalid string length');</span>
-    }
-    const str = reader.utf8(length - 1); // Length includes null terminator
-    reader.x++; // Skip null terminator
-    return str;
-  }
-&nbsp;
-  public readElementValue(type: number): unknown {
-    const reader = this.reader;
-&nbsp;
-    switch (type) {
-      case 0x01: // double - 64-bit binary floating point
-        const doubleVal = reader.view.getFloat64(reader.x, true);
-        reader.x += 8;
-        return doubleVal;
-&nbsp;
-      case 0x02: // string - UTF-8 string
-        return this.readString();
-&nbsp;
-      case 0x03: // document - Embedded document
-        return this.readDocument();
-&nbsp;
-      case 0x04: // array - Array
-        return this.readArray();
-&nbsp;
-      case 0x05: // binary - Binary data
-        return this.readBinary();
-&nbsp;
-      case 0x06: // undefined (deprecated)
-        return undefined;
-&nbsp;
-      case 0x07: // ObjectId
-        return this.readObjectId();
-&nbsp;
-      case 0x08: // boolean
-        return reader.u8() === 1;
-&nbsp;
-      case 0x09: // UTC datetime
-        const dateVal = reader.view.getBigInt64(reader.x, true);
-        reader.x += 8;
-        return new Date(Number(dateVal));
-&nbsp;
-      case 0x0a: // null
-        return null;
-&nbsp;
-      case 0x0b: // regex
-        return this.readRegex();
-&nbsp;
-      case 0x0c: // DBPointer (deprecated)
-        return this.readDbPointer();
-&nbsp;
-      case 0x0d: // JavaScript code
-        return new BsonJavascriptCode(this.readString());
-&nbsp;
-      case 0x0e: // Symbol (deprecated)
-        return Symbol(this.readString());
-&nbsp;
-      case 0x0f: // JavaScript code with scope (deprecated)
-        return this.readCodeWithScope();
-&nbsp;
-      case 0x10: // 32-bit integer
-        const int32Val = reader.view.getInt32(reader.x, true);
-        reader.x += 4;
-        return int32Val;
-&nbsp;
-      case 0x11: // Timestamp
-        return this.readTimestamp();
-&nbsp;
-      case 0x12: // 64-bit integer
-        const int64Val = reader.view.getBigInt64(reader.x, true);
-        reader.x += 8;
-        return Number(int64Val);
-&nbsp;
-      case 0x13: // 128-bit decimal floating point
-        return this.readDecimal128();
-&nbsp;
-      case 0xff: // Min key
-        return new BsonMinKey();
-&nbsp;
-      case 0x7f: // Max key
-        return new BsonMaxKey();
-&nbsp;
-<span class="branch-21 cbranch-no" title="branch not covered" >      default:</span>
-<span class="cstat-no" title="statement not covered" >        throw new Error(`Unsupported BSON type: 0x${type.toString(16)}`);</span>
+    switch (resolvedSchema.type) {
+      case 'record':
+        return this.readRecord(resolvedSchema);
+      case 'enum':
+        return this.readEnum(resolvedSchema);
+      case 'array':
+        return this.readArray(resolvedSchema);
+      case 'map':
+        return this.readMap(resolvedSchema);
+      case 'fixed':
+        return this.readFixed(resolvedSchema);
+<span class="branch-5 cbranch-no" title="branch not covered" >      default:</span>
+<span class="cstat-no" title="statement not covered" >        throw new Error(`Unknown schema type: ${(resolvedSchema as any).type}`);</span>
     }
   }
 &nbsp;
-  public readArray(): unknown[] {
-    const doc = this.readDocument() as Record&lt;string, unknown&gt;;
-    const keys = Object.keys(doc).sort((a, b) =&gt; parseInt(a, 10) - parseInt(b, 10));
-    return keys.map((key) =&gt; doc[key]);
-  }
+  /**
+   * Reads a record value according to the record schema.
+   */
+  private readRecord(schema: AvroRecordSchema): Record&lt;string, unknown&gt; {
+    const result: Record&lt;string, unknown&gt; = {};
 &nbsp;
-  public readBinary(): BsonBinary | Uint8Array {
-    const reader = this.reader;
-    const length = reader.view.getInt32(reader.x, true);
-    reader.x += 4;
-    const subtype = reader.u8();
-    const data = reader.buf(length);
-&nbsp;
-    // For generic binary subtype, return Uint8Array for compatibility
-    if (subtype === 0) {
-      return data;
+    for (let i = 0; i &lt; schema.fields.length; i++) {
+      const field = schema.fields[i];
+      try {
+        result[field.name] = this.readValue(field.type);
+      } catch (error) {
+<span class="cstat-no" title="statement not covered" >        throw new Error(`Error reading field '${field.name}': ${(error as Error).message}`);</span>
+      }
     }
 &nbsp;
-    return new BsonBinary(subtype, data);
+    return result;
   }
 &nbsp;
-  public readObjectId(): BsonObjectId {
-    const reader = this.reader;
-    const uint8 = reader.uint8;
-    const x = reader.x;
+  /**
+   * Reads an enum value according to the enum schema.
+   */
+  private readEnum(schema: AvroEnumSchema): string {
+    const index = this.decoder.readEnum();
 &nbsp;
-    // Timestamp (4 bytes, big-endian)
-    const timestamp = (uint8[x] &lt;&lt; 24) | (uint8[x + 1] &lt;&lt; 16) | (uint8[x + 2] &lt;&lt; 8) | uint8[x + 3];
+    if (index &lt; 0 || index &gt;= schema.symbols.length) {
+      throw new Error(`Invalid enum index ${index} for enum with ${schema.symbols.length} symbols`);
+    }
 &nbsp;
-    // Process ID (5 bytes) - first 4 bytes are little-endian, then 1 high byte
-    const processLo = uint8[x + 4] | (uint8[x + 5] &lt;&lt; 8) | (uint8[x + 6] &lt;&lt; 16) | (uint8[x + 7] &lt;&lt; 24);
-    const processHi = uint8[x + 8];
-    // Convert to unsigned 32-bit first, then combine with high byte
-    const processLoUnsigned = processLo &gt;&gt;&gt; 0; // Convert to unsigned
-    const process = processLoUnsigned + processHi * 0x100000000;
-&nbsp;
-    // Counter (3 bytes, big-endian)
-    const counter = (uint8[x + 9] &lt;&lt; 16) | (uint8[x + 10] &lt;&lt; 8) | uint8[x + 11];
-&nbsp;
-    reader.x += 12;
-    return new BsonObjectId(timestamp, process, counter);
+    return schema.symbols[index];
   }
 &nbsp;
-  public readRegex(): RegExp {
-    const pattern = this.readCString();
-    const flags = this.readCString();
-    return new RegExp(pattern, flags);
+  /**
+   * Reads an array value according to the array schema.
+   */
+  private readArray(schema: AvroArraySchema): unknown[] {
+    return this.decoder.readArray(() =&gt; this.readValue(schema.items));
   }
 &nbsp;
-  public readDbPointer(): BsonDbPointer {
-    const name = this.readString();
-    const id = this.readObjectId();
-    return new BsonDbPointer(name, id);
+  /**
+   * Reads a map value according to the map schema.
+   */
+  private readMap(schema: AvroMapSchema): Record&lt;string, unknown&gt; {
+    return this.decoder.readMap(() =&gt; this.readValue(schema.values));
   }
 &nbsp;
-  public readCodeWithScope(): BsonJavascriptCodeWithScope {
-    const reader = this.reader;
-    const totalLength = reader.view.getInt32(reader.x, true);
-    reader.x += 4;
-    const code = this.readString();
-    const scope = this.readDocument() as Record&lt;string, unknown&gt;;
-    return new BsonJavascriptCodeWithScope(code, scope);
+  /**
+   * Reads a union value according to the union schema.
+   */
+  private readUnion(schema: AvroUnionSchema): unknown {
+    const schemaReaders = schema.map((subSchema) =&gt; () =&gt; this.readValue(subSchema));
+    const result = this.decoder.readUnion(schemaReaders);
+    return result.value;
   }
 &nbsp;
-  public readTimestamp(): BsonTimestamp {
-    const reader = this.reader;
-    const increment = reader.view.getInt32(reader.x, true);
-    reader.x += 4;
-    const timestamp = reader.view.getInt32(reader.x, true);
-    reader.x += 4;
-    return new BsonTimestamp(increment, timestamp);
+  /**
+   * Reads a fixed value according to the fixed schema.
+   */
+  private readFixed(schema: AvroFixedSchema): Uint8Array {
+    return this.decoder.readFixed(schema.size);
   }
 &nbsp;
-  public readDecimal128(): BsonDecimal128 {
-    const reader = this.reader;
-    const data = reader.buf(16);
-    return new BsonDecimal128(data);
+  /**
+   * Reads a null value with schema validation.
+   */
+  public <span class="fstat-no" title="function not covered" >readNull(</span>schema: AvroSchema): null {
+<span class="cstat-no" title="statement not covered" >    this.validateSchemaType(schema, 'null');</span>
+<span class="cstat-no" title="statement not covered" >    return this.decoder.readNull();</span>
+  }
+&nbsp;
+  /**
+   * Reads a boolean value with schema validation.
+   */
+  public readBoolean(schema: AvroSchema): boolean {
+    this.validateSchemaType(schema, 'boolean');
+    return this.decoder.readBoolean();
+  }
+&nbsp;
+  /**
+   * Reads an int value with schema validation.
+   */
+  public <span class="fstat-no" title="function not covered" >readInt(</span>schema: AvroSchema): number {
+<span class="cstat-no" title="statement not covered" >    this.validateSchemaType(schema, 'int');</span>
+    const value = <span class="cstat-no" title="statement not covered" >this.decoder.readInt();</span>
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!Number.isInteger(value) || value &lt; -2147483648 || value &gt; 2147483647) {</span>
+<span class="cstat-no" title="statement not covered" >      throw new Error('Decoded value is not a valid 32-bit integer');</span>
+    }
+<span class="cstat-no" title="statement not covered" >    return value;</span>
+  }
+&nbsp;
+  /**
+   * Reads a long value with schema validation.
+   */
+  public <span class="fstat-no" title="function not covered" >readLong(</span>schema: AvroSchema): number | bigint {
+<span class="cstat-no" title="statement not covered" >    this.validateSchemaType(schema, 'long');</span>
+<span class="cstat-no" title="statement not covered" >    return this.decoder.readLong();</span>
+  }
+&nbsp;
+  /**
+   * Reads a float value with schema validation.
+   */
+  public <span class="fstat-no" title="function not covered" >readFloat(</span>schema: AvroSchema): number {
+<span class="cstat-no" title="statement not covered" >    this.validateSchemaType(schema, 'float');</span>
+<span class="cstat-no" title="statement not covered" >    return this.decoder.readFloat();</span>
+  }
+&nbsp;
+  /**
+   * Reads a double value with schema validation.
+   */
+  public <span class="fstat-no" title="function not covered" >readDouble(</span>schema: AvroSchema): number {
+<span class="cstat-no" title="statement not covered" >    this.validateSchemaType(schema, 'double');</span>
+<span class="cstat-no" title="statement not covered" >    return this.decoder.readDouble();</span>
+  }
+&nbsp;
+  /**
+   * Reads a bytes value with schema validation.
+   */
+  public <span class="fstat-no" title="function not covered" >readBytes(</span>schema: AvroSchema): Uint8Array {
+<span class="cstat-no" title="statement not covered" >    this.validateSchemaType(schema, 'bytes');</span>
+<span class="cstat-no" title="statement not covered" >    return this.decoder.readBytes();</span>
+  }
+&nbsp;
+  /**
+   * Reads a string value with schema validation.
+   */
+  public <span class="fstat-no" title="function not covered" >readString(</span>schema: AvroSchema): string {
+<span class="cstat-no" title="statement not covered" >    this.validateSchemaType(schema, 'string');</span>
+<span class="cstat-no" title="statement not covered" >    return this.decoder.readString();</span>
+  }
+&nbsp;
+  private validateSchemaType(schema: AvroSchema, expectedType: string): void {
+    const resolvedSchema = this.resolveSchema(schema);
+    const actualType =
+      typeof resolvedSchema === 'string'
+        ? resolvedSchema
+        : <span class="branch-1 cbranch-no" title="branch not covered" >Array.isArray(resolvedSchema)</span>
+          ? 'union'
+          : resolvedSchema.type;
+&nbsp;
+    if (actualType !== expectedType) {
+      throw new Error(`Expected schema type ${expectedType}, got ${actualType}`);
+    }
+  }
+&nbsp;
+  private resolveSchema(schema: AvroSchema): AvroSchema {
+    if (typeof schema === 'string') {
+      const namedSchema = this.namedSchemas.get(schema);
+      return namedSchema || schema;
+    }
+    return schema;
+  }
+&nbsp;
+  private collectNamedSchemas(schema: AvroSchema): void {
+    if (typeof schema === 'string' || Array.isArray(schema)) {
+      return;
+    }
+&nbsp;
+    if (typeof schema === 'object' &amp;&amp; schema !== null) {
+      switch (schema.type) {
+        case 'record':
+          const recordSchema = schema as AvroRecordSchema;
+          const recordFullName = this.getFullName(recordSchema.name, recordSchema.namespace);
+          this.namedSchemas.set(recordFullName, recordSchema);
+          recordSchema.fields.forEach((field) =&gt; this.collectNamedSchemas(field.type));
+          break;
+        case 'enum':
+          const enumSchema = schema as AvroEnumSchema;
+          const enumFullName = this.getFullName(enumSchema.name, enumSchema.namespace);
+          this.namedSchemas.set(enumFullName, enumSchema);
+          break;
+        case 'fixed':
+          const fixedSchema = schema as AvroFixedSchema;
+          const fixedFullName = this.getFullName(fixedSchema.name, fixedSchema.namespace);
+          this.namedSchemas.set(fixedFullName, fixedSchema);
+          break;
+        case 'array':
+          this.collectNamedSchemas((schema as AvroArraySchema).items);
+          break;
+        case 'map':
+          this.collectNamedSchemas((schema as AvroMapSchema).values);
+          break;
+      }
+    }
+  }
+&nbsp;
+  private getFullName(name: string, namespace?: string): string {
+    return namespace ? <span class="branch-0 cbranch-no" title="branch not covered" >`${namespace}.${name}` </span>: name;
   }
 }
 &nbsp;</pre></td></tr></table></pre>

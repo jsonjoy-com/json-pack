@@ -4,6 +4,7 @@ import {JsonPackExtension} from '../JsonPackExtension';
 import {JsonPackValue} from '../JsonPackValue';
 import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
 import sharedCachedUtf8Decoder from '@jsonjoy.com/util/lib/buffers/utf8/sharedCachedUtf8Decoder';
+import {daysSinceEpochToDate, rfc3339StringToDate} from './dates';
 import type {CachedUtf8Decoder} from '@jsonjoy.com/util/lib/buffers/utf8/CachedUtf8Decoder';
 import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
 import type {BinaryJsonDecoder, PackValue} from '../types';
@@ -314,7 +315,38 @@ export class CborDecoderBase<R extends IReader & IReaderResettable = IReader & I
   }
 
   public readTagRaw(tag: number): JsonPackExtension<unknown> | unknown {
-    return new JsonPackExtension<unknown>(tag, this.val());
+    const value = this.val();
+    
+    // Handle CBOR date tags as defined in RFC 8943
+    switch (tag) {
+      case 100: {
+        // Tag 100: Number of days since the epoch date 1970-01-01
+        if (typeof value === 'number') {
+          try {
+            return daysSinceEpochToDate(value);
+          } catch (error) {
+            // If conversion fails, return as JsonPackExtension
+            return new JsonPackExtension<unknown>(tag, value);
+          }
+        }
+        break;
+      }
+      case 1004: {
+        // Tag 1004: RFC 3339 full-date string
+        if (typeof value === 'string') {
+          try {
+            return rfc3339StringToDate(value);
+          } catch (error) {
+            // If conversion fails, return as JsonPackExtension
+            return new JsonPackExtension<unknown>(tag, value);
+          }
+        }
+        break;
+      }
+    }
+    
+    // For all other tags, return as JsonPackExtension
+    return new JsonPackExtension<unknown>(tag, value);
   }
 
   // ------------------------------------------------------------ Token reading

@@ -65,6 +65,74 @@ shallow decoding features, like skipping, one level at-a-time decoding.
 - Half-precision `f16` floats are decoded to JavaScript `number`, however,
   encoder does not support half-precision floats&mdash;floats are encoded as
   `f32` or `f64`.
+- **Date support**: JavaScript `Date` objects are automatically encoded using 
+  CBOR date tags as defined in [RFC 8943](https://tools.ietf.org/rfc/rfc8943.txt):
+  - Tag 100: Number of days since the epoch date 1970-01-01 (default encoding)
+  - Tag 1004: RFC 3339 full-date string (supported for decoding)
+  - Only the date component is preserved (time is ignored)
+  - Encoded dates are automatically decoded back to JavaScript `Date` objects
+
+## Date Support
+
+The CBOR codec includes built-in support for JavaScript `Date` objects following 
+[RFC 8943](https://tools.ietf.org/rfc/rfc8943.txt) "Tags for Date" specification.
+
+### Encoding Dates
+
+JavaScript `Date` objects are automatically encoded using tag 100 (days since epoch):
+
+```ts
+import {CborEncoder, CborDecoder} from '@jsonjoy.com/json-pack/lib/cbor';
+
+const encoder = new CborEncoder();
+const decoder = new CborDecoder();
+
+const data = {
+  event: 'Birthday',
+  date: new Date(1940, 9, 9), // October 9, 1940
+  participants: ['John', 'Paul']
+};
+
+const encoded = encoder.encode(data);
+const decoded = decoder.decode(encoded);
+
+console.log(decoded.date instanceof Date); // true
+console.log(decoded.date.toDateString()); // "Wed Oct 09 1940"
+```
+
+### Supported Date Tags
+
+- **Tag 100**: Days since 1970-01-01 (compact integer representation)
+  - Used by default when encoding `Date` objects
+  - Example: October 9, 1940 → -10676 days
+- **Tag 1004**: RFC 3339 full-date string (YYYY-MM-DD format)
+  - Supported for decoding tagged strings
+  - Example: "1940-10-09"
+
+### Date Utilities
+
+The codec also exports utility functions for manual date conversion:
+
+```ts
+import {
+  dateToDaysSinceEpoch,
+  daysSinceEpochToDate,
+  dateToRfc3339String,
+  rfc3339StringToDate
+} from '@jsonjoy.com/json-pack/lib/cbor';
+
+// Convert Date to days since epoch
+const days = dateToDaysSinceEpoch(new Date(1940, 9, 9)); // -10676
+
+// Convert days back to Date
+const date = daysSinceEpochToDate(-10676); // October 9, 1940
+
+// Convert Date to RFC 3339 string
+const dateString = dateToRfc3339String(new Date(1940, 9, 9)); // "1940-10-09"
+
+// Parse RFC 3339 string to Date
+const parsedDate = rfc3339StringToDate("1940-10-09"); // October 9, 1940
+```
 
 
 ## Benchmarks

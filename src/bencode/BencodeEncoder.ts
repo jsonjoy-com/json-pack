@@ -113,7 +113,7 @@ export class BencodeEncoder implements BinaryJsonEncoder {
     const length = utf8Size(str);
     writer.ascii(length + '');
     writer.u8(0x3a); // ':'
-    writer.ensureCapacity(length);
+    writer.ensureCapacity(str.length * 4);
     writer.utf8(str);
   }
 

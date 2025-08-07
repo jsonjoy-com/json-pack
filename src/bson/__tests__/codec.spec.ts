@@ -1,7 +1,7 @@
 import {BSON} from 'bson';
 import {documents} from '../../__tests__/json-documents';
 import {BsonEncoder} from '../BsonEncoder';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 
 const run = (encoder: BsonEncoder) => {
   describe('JSON documents', () => {

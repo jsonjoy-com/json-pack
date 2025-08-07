@@ -1,6 +1,6 @@
 import {utf8Size} from '@jsonjoy.com/util/lib/strings/utf8';
 import {sort} from '@jsonjoy.com/util/lib/sort/insertion';
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
 import type {BinaryJsonEncoder} from '../types';
 
 export class BencodeEncoder implements BinaryJsonEncoder {

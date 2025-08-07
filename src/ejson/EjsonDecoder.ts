@@ -13,7 +13,7 @@ import {
   BsonSymbol,
   BsonTimestamp,
 } from '../bson/values';
-import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {JsonDecoder} from '../json/JsonDecoder';
 import {readKey} from '../json/JsonDecoder';
 import type {BinaryJsonDecoder} from '../types';

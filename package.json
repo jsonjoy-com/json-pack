@@ -63,11 +63,13 @@
     "tslib": "2"
   },
   "dependencies": {
-    "@jsonjoy.com/base64": "^1.1.1",
+    "@jsonjoy.com/base64": "^1.1.2",
+    "@jsonjoy.com/buffers": "^1.0.0",
+    "@jsonjoy.com/codegen": "^1.0.0",
     "@jsonjoy.com/json-pointer": "^1.0.1",
-    "@jsonjoy.com/util": "^1.1.2",
+    "@jsonjoy.com/util": "^1.9.0",
     "hyperdyperid": "^1.2.0",
-    "thingies": "^1.20.0"
+    "thingies": "^2.5.0"
   },
   "devDependencies": {
     "@msgpack/msgpack": "^3.0.0-beta2",

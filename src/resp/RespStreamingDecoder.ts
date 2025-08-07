@@ -1,4 +1,4 @@
-import {StreamingReader} from '@jsonjoy.com/util/lib/buffers/StreamingReader';
+import {StreamingReader} from '@jsonjoy.com/buffers/lib/StreamingReader';
 import {RespDecoder} from './RespDecoder';
 
 /**

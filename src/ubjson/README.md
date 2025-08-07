@@ -21,7 +21,7 @@ npm install @jsonjoy.com/util
 
 ```ts
 import {UbjsonEncoder, UbjsonDecoder} from '@jsonjoy.com/json-pack/lib/ubjson';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 
 const writer = new Writer();
 const encoder = new UbjsonEncoder(writer);

@@ -14,9 +14,9 @@ import {
   BsonTimestamp,
 } from '../bson/values';
 import {toBase64Bin} from '@jsonjoy.com/base64/lib/toBase64Bin';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {JsonEncoder} from '../json/JsonEncoder';
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
 import type {BinaryJsonEncoder} from '../types';
 
 export interface EjsonEncoderOptions {

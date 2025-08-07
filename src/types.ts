@@ -1,4 +1,4 @@
-import type {IReader, IReaderResettable, IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import type {IReader, IReaderResettable, IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
 import type {JsonPackExtension} from './JsonPackExtension';
 import type {JsonPackValue} from './JsonPackValue';
 

@@ -1,8 +1,8 @@
-import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {IonDecoderBase} from './IonDecoderBase';
 import {Import} from './Import';
 import {systemSymbolImport} from './symbols';
-import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
+import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
 
 export class IonDecoder<R extends IReader & IReaderResettable = IReader & IReaderResettable> extends IonDecoderBase<R> {
   constructor(reader?: R) {

@@ -1,7 +1,7 @@
 import {CborDecoder} from '../cbor/CborDecoder';
 import {CborEncoder} from '../cbor/CborEncoder';
 import {EncodingFormat} from '../constants';
-import type {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import type {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import type {JsonValueCodec} from './types';
 
 export class CborJsonValueCodec implements JsonValueCodec {

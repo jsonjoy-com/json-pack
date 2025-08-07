@@ -1,4 +1,4 @@
-import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {AvroDecoder} from './AvroDecoder';
 import {AvroSchemaValidator} from './AvroSchemaValidator';
 import type {

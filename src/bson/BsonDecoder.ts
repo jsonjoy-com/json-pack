@@ -1,4 +1,4 @@
-import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {
   BsonBinary,
   BsonDbPointer,
@@ -13,7 +13,7 @@ import {
   BsonObjectId,
   BsonTimestamp,
 } from './values';
-import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
+import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
 import type {BinaryJsonDecoder} from '../types';
 
 export class BsonDecoder implements BinaryJsonDecoder {

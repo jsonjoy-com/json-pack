@@ -5,7 +5,7 @@ import {JsonEncoder} from '../json/JsonEncoder';
 import {UbjsonEncoder} from '../ubjson/UbjsonEncoder';
 import {CborEncoderFast} from '../cbor/CborEncoderFast';
 import {CborEncoder} from '../cbor/CborEncoder';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {payloads} from '../__bench__/payloads';
 import {MsgPackEncoderFast} from '../msgpack';
 

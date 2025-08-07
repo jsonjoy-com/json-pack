@@ -1,5 +1,5 @@
 import {BSON} from 'bson';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {BsonEncoder} from '../BsonEncoder';
 
 const writer = new Writer(8);

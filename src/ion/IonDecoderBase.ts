@@ -1,7 +1,7 @@
-import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
-import sharedCachedUtf8Decoder from '@jsonjoy.com/util/lib/buffers/utf8/sharedCachedUtf8Decoder';
-import type {CachedUtf8Decoder} from '@jsonjoy.com/util/lib/buffers/utf8/CachedUtf8Decoder';
-import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
+import sharedCachedUtf8Decoder from '@jsonjoy.com/buffers/lib/utf8/sharedCachedUtf8Decoder';
+import type {CachedUtf8Decoder} from '@jsonjoy.com/buffers/lib/utf8/CachedUtf8Decoder';
+import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
 import {TYPE} from './constants';
 import {Import} from './Import';
 

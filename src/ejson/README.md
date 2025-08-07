@@ -43,7 +43,7 @@ console.log(decoded); // Original data with BSON types preserved
 
 ```typescript
 import {EjsonEncoder, EjsonDecoder} from '@jsonjoy.com/json-pack/lib/ejson';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 
 const writer = new Writer();
 const encoder = new EjsonEncoder(writer, { canonical: true });
@@ -80,7 +80,7 @@ The implementation supports all BSON types as per the MongoDB specification:
 - **Decimal128**: `{"$numberDecimal": "123.456"}`
 - **Binary & UUID**: Full base64 encoding with subtype support
 - **Code & CodeWScope**: JavaScript code with optional scope
-- **Dates**: ISO-8601 format (relaxed) or timestamp (canonical)  
+- **Dates**: ISO-8601 format (relaxed) or timestamp (canonical)
 - **RegExp**: Pattern and options preservation
 - **Special types**: MinKey, MaxKey, Undefined, DBPointer, Symbol, Timestamp
 

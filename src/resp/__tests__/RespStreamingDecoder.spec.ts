@@ -1,8 +1,8 @@
 import {RespStreamingDecoder} from '../RespStreamingDecoder';
 import {RespEncoder} from '../RespEncoder';
-import {concatList} from '@jsonjoy.com/util/lib/buffers/concat';
+import {concatList} from '@jsonjoy.com/buffers/lib/concat';
 import {documents} from '../../__tests__/json-documents';
-import {utf8} from '@jsonjoy.com/util/lib/buffers/strings';
+import {utf8} from '@jsonjoy.com/buffers/lib/strings';
 
 const encoder = new RespEncoder();
 

@@ -1,5 +1,5 @@
 import {EjsonEncoder, EjsonDecoder} from '../index';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {
   BsonBinary,
   BsonDbPointer,

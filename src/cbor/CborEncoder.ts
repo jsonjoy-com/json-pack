@@ -1,8 +1,8 @@
-import {isFloat32} from '@jsonjoy.com/util/lib/buffers/isFloat32';
+import {isFloat32} from '@jsonjoy.com/buffers/lib/isFloat32';
 import {JsonPackExtension} from '../JsonPackExtension';
 import {CborEncoderFast} from './CborEncoderFast';
 import {JsonPackValue} from '../JsonPackValue';
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
 
 export class CborEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> extends CborEncoderFast<W> {
   /**

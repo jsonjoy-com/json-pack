@@ -1,9 +1,9 @@
 import {MsgPackEncoderFast} from './MsgPackEncoderFast';
-import {isUint8Array} from '@jsonjoy.com/util/lib/buffers/isUint8Array';
+import {isUint8Array} from '@jsonjoy.com/buffers/lib/isUint8Array';
 import {JsonPackExtension} from '../JsonPackExtension';
 import {JsonPackValue} from '../JsonPackValue';
 import {MSGPACK} from './constants';
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
 
 /**
  * @category Encoder

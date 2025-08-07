@@ -1,4 +1,4 @@
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {EjsonEncoder, EjsonEncoderOptions} from './EjsonEncoder';
 import {EjsonDecoder, EjsonDecoderOptions} from './EjsonDecoder';
 

@@ -23,7 +23,7 @@ npm install @jsonjoy.com/util
 
 ```ts
 import {BencodeEncoder, BencodeDecoder} from '@jsonjoy.com/json-pack/lib/bencode';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 
 const writer = new Writer();
 const encoder = new BencodeEncoder(writer);

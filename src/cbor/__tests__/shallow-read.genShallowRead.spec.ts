@@ -2,7 +2,7 @@ import {genShallowReader} from '../../msgpack/shallow-read';
 import {CborEncoder} from '../CborEncoder';
 import {CborDecoder} from '../CborDecoder';
 import type {Path} from '@jsonjoy.com/json-pointer';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 
 const assetShallowRead = (doc: unknown, path: Path): void => {
   const writer = new Writer(1);

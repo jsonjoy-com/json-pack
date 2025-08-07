@@ -1,9 +1,9 @@
-import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {RESP} from './constants';
 import {RespAttributes, RespPush} from './extensions';
-import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
+import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
 import type {BinaryJsonDecoder, PackValue} from '../types';
-import {isUtf8} from '@jsonjoy.com/util/lib/buffers/utf8/isUtf8';
+import {isUtf8} from '@jsonjoy.com/buffers/lib/utf8/isUtf8';
 
 export class RespDecoder<R extends IReader & IReaderResettable = IReader & IReaderResettable>
   implements BinaryJsonDecoder

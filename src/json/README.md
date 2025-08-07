@@ -22,7 +22,7 @@ npm install @jsonjoy.com/util
 
 ```ts
 import {JsonEncoder, JsonDecoder} from '@jsonjoy.com/json-pack/lib/json';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 
 const writer = new Writer();
 const encoder = new JsonEncoder(writer);
@@ -43,7 +43,7 @@ For easier usage without external dependencies, consider using MessagePack or CB
 import {MessagePackEncoder, MessagePackDecoder} from '@jsonjoy.com/json-pack/lib/msgpack';
 
 const encoder = new MessagePackEncoder();
-const decoder = new MessagePackDecoder(); 
+const decoder = new MessagePackDecoder();
 // ... simpler usage
 ```
 

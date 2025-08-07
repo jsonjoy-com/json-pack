@@ -1,5 +1,5 @@
 import {RandomJson} from '@jsonjoy.com/util/lib/json-random';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {EjsonEncoder} from '../EjsonEncoder';
 import {EjsonDecoder} from '../EjsonDecoder';
 

@@ -1,11 +1,11 @@
 import {CONST, ERROR, MAJOR} from './constants';
-import {decodeF16} from '@jsonjoy.com/util/lib/buffers/f16';
+import {decodeF16} from '@jsonjoy.com/buffers/lib/f16';
 import {JsonPackExtension} from '../JsonPackExtension';
 import {JsonPackValue} from '../JsonPackValue';
-import {Reader} from '@jsonjoy.com/util/lib/buffers/Reader';
-import sharedCachedUtf8Decoder from '@jsonjoy.com/util/lib/buffers/utf8/sharedCachedUtf8Decoder';
-import type {CachedUtf8Decoder} from '@jsonjoy.com/util/lib/buffers/utf8/CachedUtf8Decoder';
-import type {IReader, IReaderResettable} from '@jsonjoy.com/util/lib/buffers';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
+import sharedCachedUtf8Decoder from '@jsonjoy.com/buffers/lib/utf8/sharedCachedUtf8Decoder';
+import type {CachedUtf8Decoder} from '@jsonjoy.com/buffers/lib/utf8/CachedUtf8Decoder';
+import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
 import type {BinaryJsonDecoder, PackValue} from '../types';
 
 export class CborDecoderBase<R extends IReader & IReaderResettable = IReader & IReaderResettable>

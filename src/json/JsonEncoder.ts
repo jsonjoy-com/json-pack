@@ -1,5 +1,5 @@
 import {toBase64Bin} from '@jsonjoy.com/base64/lib/toBase64Bin';
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
 import type {BinaryJsonEncoder, StreamingBinaryJsonEncoder} from '../types';
 
 export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncoder {

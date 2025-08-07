@@ -1,4 +1,4 @@
-import {bufferToUint8Array} from '@jsonjoy.com/util/lib/buffers/bufferToUint8Array';
+import {bufferToUint8Array} from '@jsonjoy.com/buffers/lib/bufferToUint8Array';
 import {RespEncoder} from '../RespEncoder';
 import {RespVerbatimString} from '../extensions';
 const Parser = require('redis-parser');

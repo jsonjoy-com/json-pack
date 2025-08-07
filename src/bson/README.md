@@ -32,7 +32,7 @@ npm install @jsonjoy.com/util
 
 ```ts
 import {BsonEncoder, BsonDecoder} from '@jsonjoy.com/json-pack/lib/bson';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 
 const writer = new Writer();
 const encoder = new BsonEncoder(writer);

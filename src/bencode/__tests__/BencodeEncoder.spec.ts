@@ -1,5 +1,5 @@
-import {utf8} from '@jsonjoy.com/util/lib/buffers/strings';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {utf8} from '@jsonjoy.com/buffers/lib/strings';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {BencodeEncoder} from '../BencodeEncoder';
 
 const writer = new Writer(32);

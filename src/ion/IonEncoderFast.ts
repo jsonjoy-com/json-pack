@@ -1,5 +1,5 @@
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {
   AnnotationAstNode,
   ArrAstNode,
@@ -182,6 +182,7 @@ export class IonEncoderFast {
       writer.u8(TYPE_OVERLAY.STRI + 14);
       this.writeVUint(length);
     }
+    writer.ensureCapacity(length * 4);
     writer.utf8(str);
   }
 

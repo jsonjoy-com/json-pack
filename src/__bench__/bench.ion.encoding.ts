@@ -2,7 +2,7 @@
 
 import {runBenchmark, IBenchmark} from '../__bench__/runBenchmark';
 import {IonEncoderFast} from '../ion/IonEncoderFast';
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {payloads} from '../__bench__/payloads';
 import {load, makeBinaryWriter, dom} from 'ion-js';
 import {deepEqual} from '@jsonjoy.com/util/lib/json-equal/deepEqual';

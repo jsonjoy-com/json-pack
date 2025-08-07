@@ -1,7 +1,7 @@
 import {EncodingFormat} from '../constants';
 import {JsonEncoder} from '../json/JsonEncoder';
 import {JsonDecoder} from '../json/JsonDecoder';
-import type {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import type {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import type {JsonValueCodec} from './types';
 
 export class JsonJsonValueCodec implements JsonValueCodec {

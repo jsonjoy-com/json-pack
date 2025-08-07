@@ -2,6 +2,7 @@
 
 The fastest JSON serialization and deserialization library for JavaScript, Node.js, browser.
 
+
 ## Supported Formats
 
 This library implements the following serialization formats:
@@ -17,6 +18,7 @@ This library implements the following serialization formats:
 - **[Bencode](./src/bencode/README.md)** - BitTorrent's encoding format
 
 Each format comes with optimized encoders and decoders designed for maximum performance.
+
 
 ## Installation
 
@@ -38,13 +40,6 @@ const restored = decoder.decode(binary);
 
 console.log(restored); // {hello: 'world', numbers: [1, 2, 3]}
 ```
-
-## Documentation
-
-For detailed documentation on each codec, refer to the individual README files in their respective folders:
-
-- Individual codec documentation is available in each `src/<codec>/README.md` file
-- Each codec includes comprehensive usage examples, API documentation, and performance benchmarks
 
 
 ## Benchmarks

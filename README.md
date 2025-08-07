@@ -1,14 +1,14 @@
 # json-pack
 
-High performance JSON serialization and deserialization library for JavaScript, Node.js, browser.
+The fastest JSON serialization and deserialization library for JavaScript, Node.js, browser.
 
 ## Supported Formats
 
 This library implements the following serialization formats:
 
-- **[MessagePack](./src/msgpack/README.md)** - Fast and lean implementation of MessagePack codec
+- **[MessagePack](./src/msgpack/README.md)** - The classic, *MessagePack*
 - **[CBOR](./src/cbor/README.md)** - Concise Binary Object Representation codec
-- **[UBJSON](./src/ubjson/README.md)** - Universal Binary JSON codec  
+- **[UBJSON](./src/ubjson/README.md)** - Universal Binary JSON codec
 - **[JSON](./src/json/README.md)** - Enhanced JSON encoder/decoder with additional features
 - **[JSON Binary](./src/json-binary/README.md)** - JSON with binary data support using Uint8Array
 - **[Amazon Ion](./src/ion/README.md)** - Amazon's Ion data serialization format
@@ -52,7 +52,7 @@ For detailed documentation on each codec, refer to the individual README files i
 Encoding:
 
 ```
-npx ts-node benchmarks/json-pack/bench.encoding.ts 
+npx ts-node benchmarks/json-pack/bench.encoding.ts
 =============================================================================== Benchmark: Encoding
 Warmup: 1000x , Node.js: v20.0.0 , Arch: arm64 , CPU: Apple M1
 ---------------------------------------------------------------------------- Small object, 44 bytes

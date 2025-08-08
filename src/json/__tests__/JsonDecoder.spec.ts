@@ -152,6 +152,14 @@ describe('number', () => {
     const value = decoder.readAny();
     expect(value).toBe(5.6);
   });
+
+  test('small float with many digits', () => {
+    const smallFloat = 0.0000040357127006276845;
+    const data = Buffer.from(JSON.stringify(smallFloat), 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toBe(smallFloat);
+  });
 });
 
 describe('string', () => {

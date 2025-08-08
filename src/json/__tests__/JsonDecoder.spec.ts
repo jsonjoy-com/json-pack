@@ -160,6 +160,70 @@ describe('number', () => {
     const value = decoder.readAny();
     expect(value).toBe(smallFloat);
   });
+
+  test('large float with e+ notation - Number.MAX_VALUE', () => {
+    const data = Buffer.from('1.7976931348623157e+308', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toBe(1.7976931348623157e+308);
+    expect(value).toBe(Number.MAX_VALUE);
+  });
+
+  test('large float with E+ notation - uppercase', () => {
+    const data = Buffer.from('1.7976931348623157E+308', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toBe(1.7976931348623157e+308);
+  });
+
+  test('large float without explicit + sign', () => {
+    const data = Buffer.from('1.7976931348623157e308', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toBe(1.7976931348623157e+308);
+  });
+
+  test('infinity with e+ notation', () => {
+    const data = Buffer.from('2e+308', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toBe(Infinity);
+  });
+
+  test('medium large float with e+ notation', () => {
+    const data = Buffer.from('1.2345e+50', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toBe(1.2345e+50);
+  });
+
+  test('very small float with e- notation', () => {
+    const data = Buffer.from('5e-324', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toBe(5e-324);
+  });
+
+  test('smallest normal positive float', () => {
+    const data = Buffer.from('2.2250738585072014e-308', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toBe(2.2250738585072014e-308);
+  });
+
+  test('large float in JSON array', () => {
+    const data = Buffer.from('[1.7976931348623157e+308]', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toEqual([1.7976931348623157e+308]);
+  });
+
+  test('large float in JSON object', () => {
+    const data = Buffer.from('{"value": 1.7976931348623157e+308}', 'utf-8');
+    decoder.reader.reset(data);
+    const value = decoder.readAny();
+    expect(value).toEqual({value: 1.7976931348623157e+308});
+  });
 });
 
 describe('string', () => {

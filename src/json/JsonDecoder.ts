@@ -584,6 +584,7 @@ export class JsonDecoder implements BinaryJsonDecoder {
         c20,
         c21,
         c22,
+        c23,
         c24,
       );
       if (num !== num) throw new Error('Invalid JSON');

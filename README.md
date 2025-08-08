@@ -26,6 +26,7 @@ Each format comes with optimized encoders and decoders designed for maximum perf
 npm install @jsonjoy.com/json-pack
 ```
 
+
 ## Quick Start
 
 ```ts

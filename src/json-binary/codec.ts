@@ -1,4 +1,5 @@
-import {JsonPackExtension, JsonPackValue} from '../msgpack';
+import {JsonPackExtension} from '../JsonPackExtension';
+import {JsonPackValue} from '../JsonPackValue';
 import {fromBase64} from '@jsonjoy.com/base64/lib/fromBase64';
 import {toBase64} from '@jsonjoy.com/base64/lib/toBase64';
 import {isUint8Array} from '@jsonjoy.com/buffers/lib/isUint8Array';

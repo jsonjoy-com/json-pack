@@ -168,7 +168,14 @@ describe('shallow reading values, without parsing the document', () => {
     expect(decoded2).toBe(2);
 
     decoder.reader.reset(encoded);
-    const decoded3 = decoder.findKey('a').findKey('b').findKey('c').findKey('hmm').findIndex(0).findKey('foo').readAny();
+    const decoded3 = decoder
+      .findKey('a')
+      .findKey('b')
+      .findKey('c')
+      .findKey('hmm')
+      .findIndex(0)
+      .findKey('foo')
+      .readAny();
     expect(decoded3).toBe('bar');
   });
 

@@ -67,7 +67,7 @@ describe('only extension = 42 is permitted', () => {
 
   class IpfsCborDecoder extends CborDecoderDag {
     public readTagRaw(tag: number): CID | unknown {
-      if (tag === 42) return new CID(this.val() as any);
+      if (tag === 42) return new CID(this.readAny() as any);
       throw new Error('UNKNOWN_TAG');
     }
   }

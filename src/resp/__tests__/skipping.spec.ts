@@ -19,7 +19,7 @@ describe('skipping', () => {
         const encoded = encoder.writer.flush();
         decoder.reader.reset(encoded);
         decoder.skipAny();
-        const decoded = decoder.val();
+        const decoded = decoder.readAny();
         expect(decoded).toEqual({foo: 'bar'});
       });
     }

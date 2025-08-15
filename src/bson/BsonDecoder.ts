@@ -29,6 +29,10 @@ export class BsonDecoder implements BinaryJsonDecoder {
     return this.readDocument();
   }
 
+  public readAny(): unknown {
+    return this.readDocument();
+  }
+
   public readDocument(): Record<string, unknown> {
     const reader = this.reader;
     const documentSize = reader.view.getInt32(reader.x, true); // true = little-endian

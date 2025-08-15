@@ -133,7 +133,7 @@ export class MsgPackDecoder extends MsgPackDecoderFast<Reader> {
       for (let i = 0; i < size; i++) arr.push(this.primitive());
       return arr;
     }
-    return this.val();
+    return this.readAny();
   }
 
   /**
@@ -151,7 +151,7 @@ export class MsgPackDecoder extends MsgPackDecoderFast<Reader> {
       const buf = reader.buf(length);
       return new JsonPackValue(buf);
     }
-    return this.val();
+    return this.readAny();
   }
 
   protected skip(length: number): number {

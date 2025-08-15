@@ -30,8 +30,8 @@ export class CborDecoder<
   public readMapRaw(length: number): Map<unknown, unknown> {
     const map: Map<unknown, unknown> = new Map();
     for (let i = 0; i < length; i++) {
-      const key = this.val();
-      const value = this.val();
+      const key = this.readAny();
+      const value = this.readAny();
       map.set(key, value);
     }
     return map;
@@ -40,9 +40,9 @@ export class CborDecoder<
   public readMapIndef(): Map<unknown, unknown> {
     const map: Map<unknown, unknown> = new Map();
     while (this.reader.peak() !== CONST.END) {
-      const key = this.val();
+      const key = this.readAny();
       if (this.reader.peak() === CONST.END) throw ERROR.UNEXPECTED_OBJ_BREAK;
-      const value = this.val();
+      const value = this.readAny();
       map.set(key, value);
     }
     this.reader.x++;
@@ -282,7 +282,7 @@ export class CborDecoder<
       case MAJOR.MAP:
         return this.readAsValue();
       default:
-        return this.val();
+        return this.readAny();
     }
   }
 

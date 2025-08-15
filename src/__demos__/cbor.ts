@@ -42,13 +42,13 @@ console.log(decoded);
 console.log('--------------------------------------------------');
 console.log('Retrieving values without parsing:');
 decoder.reader.reset(encoded);
-const id = decoder.find(['id']).val();
+const id = decoder.find(['id']).readAny();
 decoder.reader.reset(encoded);
-const foo = decoder.find(['foo']).val();
+const foo = decoder.find(['foo']).readAny();
 decoder.reader.reset(encoded);
-const secondTag = decoder.find(['tags', 1]).val();
+const secondTag = decoder.find(['tags', 1]).readAny();
 decoder.reader.reset(encoded);
-const nested = decoder.find(['nested', 'level2', 'c']).val();
+const nested = decoder.find(['nested', 'level2', 'c']).readAny();
 console.log('id:', id, 'foo:', foo, 'secondTag:', secondTag, 'nested:', nested);
 
 console.log('--------------------------------------------------');

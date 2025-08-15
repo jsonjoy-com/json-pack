@@ -56,7 +56,7 @@ export class RespStreamingDecoder {
     if (reader.size() === 0) return undefined;
     const x = reader.x;
     try {
-      const val = this.decoder.val();
+      const val = this.decoder.readAny();
       reader.consume();
       return val;
     } catch (error) {

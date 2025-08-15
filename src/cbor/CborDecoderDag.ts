@@ -3,7 +3,7 @@ import {CborDecoder} from './CborDecoder';
 
 export class CborDecoderDag extends CborDecoder {
   public readTagRaw(tag: number): JsonPackExtension<unknown> | unknown {
-    const value = this.val();
+    const value = this.readAny();
     return tag === 42 ? new JsonPackExtension<unknown>(tag, value) : value;
   }
 }

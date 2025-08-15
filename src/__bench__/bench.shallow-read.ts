@@ -82,7 +82,7 @@ const benchmark = {
         const decoder = new MsgPackDecoder();
         return () => {
           decoder.reader.reset(doc);
-          return decoder.findIndex(5).findKey('value').findKey('json').findKey('tags').findIndex(1).val();
+          return decoder.findIndex(5).findKey('value').findKey('json').findKey('tags').findIndex(1).readAny();
         };
       },
     },
@@ -94,7 +94,7 @@ const benchmark = {
         const decoder = new MsgPackDecoder();
         return () => {
           decoder.reader.reset(doc);
-          return decoder.find([5, 'value', 'json', 'tags', 1]).val();
+          return decoder.find([5, 'value', 'json', 'tags', 1]).readAny();
         };
       },
     },
@@ -108,7 +108,7 @@ const benchmark = {
         return () => {
           decoder.reader.reset(doc);
           fn(decoder);
-          return decoder.val();
+          return decoder.readAny();
         };
       },
     },

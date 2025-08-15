@@ -17,15 +17,19 @@ export class MsgPackDecoderFast<R extends Reader> implements BinaryJsonDecoder {
   /** @deprecated */
   public decode(uint8: Uint8Array): unknown {
     this.reader.reset(uint8);
-    return this.val();
+    return this.readAny();
   }
 
   public read(uint8: Uint8Array): PackValue {
     this.reader.reset(uint8);
-    return this.val() as PackValue;
+    return this.readAny() as PackValue;
   }
 
   public val(): unknown {
+    return this.readAny();
+  }
+
+  public readAny(): unknown {
     const reader = this.reader;
     const byte = reader.u8();
     if (byte >= 0xe0) return byte - 0x100; // 0xe0
@@ -123,7 +127,7 @@ export class MsgPackDecoderFast<R extends Reader> implements BinaryJsonDecoder {
     for (let i = 0; i < size; i++) {
       const key = this.key();
       if (key === '__proto__') throw ERROR.UNEXPECTED_OBJ_KEY;
-      obj[key] = this.val();
+      obj[key] = this.readAny();
     }
     return obj;
   }
@@ -161,7 +165,7 @@ export class MsgPackDecoderFast<R extends Reader> implements BinaryJsonDecoder {
   /** @ignore */
   protected arr(size: number): unknown[] {
     const arr: unknown[] = [];
-    for (let i = 0; i < size; i++) arr.push(this.val());
+    for (let i = 0; i < size; i++) arr.push(this.readAny());
     return arr;
   }
 

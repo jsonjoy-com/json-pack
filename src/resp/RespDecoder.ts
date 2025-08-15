@@ -22,18 +22,22 @@ export class RespDecoder<R extends IReader & IReaderResettable = IReader & IRead
 
   public read(uint8: Uint8Array): PackValue {
     this.reader.reset(uint8);
-    return this.val() as PackValue;
+    return this.readAny() as PackValue;
   }
 
   /** @deprecated */
   public decode(uint8: Uint8Array): unknown {
     this.reader.reset(uint8);
-    return this.val();
+    return this.readAny();
   }
 
   // -------------------------------------------------------- Any value reading
 
   public val(): unknown {
+    return this.readAny();
+  }
+
+  public readAny(): unknown {
     const reader = this.reader;
     const type = reader.u8();
     switch (type) {
@@ -261,14 +265,14 @@ export class RespDecoder<R extends IReader & IReaderResettable = IReader & IRead
     }
     const length = this.readLength();
     const arr: unknown[] = [];
-    for (let i = 0; i < length; i++) arr.push(this.val());
+    for (let i = 0; i < length; i++) arr.push(this.readAny());
     return arr;
   }
 
   public readSet(): Set<unknown> {
     const length = this.readLength();
     const set = new Set();
-    for (let i = 0; i < length; i++) set.add(this.val());
+    for (let i = 0; i < length; i++) set.add(this.readAny());
     return set;
   }
 
@@ -278,8 +282,8 @@ export class RespDecoder<R extends IReader & IReaderResettable = IReader & IRead
     const length = this.readLength();
     const obj: Record<string, unknown> = {};
     for (let i = 0; i < length; i++) {
-      const key = this.val() + '';
-      obj[key] = this.val();
+      const key = this.readAny() + '';
+      obj[key] = this.readAny();
     }
     return obj;
   }

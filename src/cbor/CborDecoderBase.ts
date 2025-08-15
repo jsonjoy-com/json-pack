@@ -18,17 +18,21 @@ export class CborDecoderBase<R extends IReader & IReaderResettable = IReader & I
 
   public read(uint8: Uint8Array): PackValue {
     this.reader.reset(uint8);
-    return this.val() as PackValue;
+    return this.readAny() as PackValue;
   }
 
   public decode(uint8: Uint8Array): unknown {
     this.reader.reset(uint8);
-    return this.val();
+    return this.readAny();
   }
 
   // -------------------------------------------------------- Any value reading
 
   public val(): unknown {
+    return this.readAny();
+  }
+
+  public readAny(): unknown {
     const reader = this.reader;
     const octet = reader.u8();
     const major = octet >> 5;
@@ -218,13 +222,13 @@ export class CborDecoderBase<R extends IReader & IReaderResettable = IReader & I
 
   public readArrRaw(length: number): unknown[] {
     const arr: unknown[] = [];
-    for (let i = 0; i < length; i++) arr.push(this.val());
+    for (let i = 0; i < length; i++) arr.push(this.readAny());
     return arr;
   }
 
   public readArrIndef(): unknown[] {
     const arr: unknown[] = [];
-    while (this.reader.peak() !== CONST.END) arr.push(this.val());
+    while (this.reader.peak() !== CONST.END) arr.push(this.readAny());
     this.reader.x++;
     return arr;
   }
@@ -252,7 +256,7 @@ export class CborDecoderBase<R extends IReader & IReaderResettable = IReader & I
       for (let i = 0; i < length; i++) {
         const key = this.key();
         if (key === '__proto__') throw ERROR.UNEXPECTED_OBJ_KEY;
-        const value = this.val();
+        const value = this.readAny();
         obj[key] = value;
       }
       return obj;
@@ -265,7 +269,7 @@ export class CborDecoderBase<R extends IReader & IReaderResettable = IReader & I
     const obj: Record<string, unknown> = {};
     for (let i = 0; i < length; i++) {
       const key = this.key();
-      const value = this.val();
+      const value = this.readAny();
       obj[key] = value;
     }
     return obj;
@@ -276,7 +280,7 @@ export class CborDecoderBase<R extends IReader & IReaderResettable = IReader & I
     while (this.reader.peak() !== CONST.END) {
       const key = this.key();
       if (this.reader.peak() === CONST.END) throw ERROR.UNEXPECTED_OBJ_BREAK;
-      const value = this.val();
+      const value = this.readAny();
       obj[key] = value;
     }
     this.reader.x++;
@@ -314,7 +318,7 @@ export class CborDecoderBase<R extends IReader & IReaderResettable = IReader & I
   }
 
   public readTagRaw(tag: number): JsonPackExtension<unknown> | unknown {
-    return new JsonPackExtension<unknown>(tag, this.val());
+    return new JsonPackExtension<unknown>(tag, this.readAny());
   }
 
   // ------------------------------------------------------------ Token reading

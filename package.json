@@ -31,7 +31,9 @@
     "resp3",
     "redis",
     "resp-3",
-    "resp2"
+    "resp2",
+    "cson",
+    "coffeescript"
   ],
   "engines": {
     "node": ">=10.0"

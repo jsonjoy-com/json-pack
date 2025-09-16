@@ -25,7 +25,7 @@ describe('XdrSchemaDecoder', () => {
     test('decodes void with void schema', () => {
       const schema: XdrSchema = {type: 'void'};
       const encoded = schemaEncoder.encode(null, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBeUndefined();
     });
@@ -34,7 +34,7 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'int'};
       const value = 42;
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBe(value);
     });
@@ -43,18 +43,18 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'unsigned_int'};
       const value = 4294967295;
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBe(value);
     });
 
     test('decodes boolean with boolean schema', () => {
       const schema: XdrSchema = {type: 'boolean'};
-      
+
       let encoded = schemaEncoder.encode(true, schema);
       let result = decoder.decode(encoded, schema);
       expect(result).toBe(true);
-      
+
       encoded = schemaEncoder.encode(false, schema);
       result = decoder.decode(encoded, schema);
       expect(result).toBe(false);
@@ -64,7 +64,7 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'hyper'};
       const value = BigInt('0x123456789abcdef0');
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBe(value);
     });
@@ -73,7 +73,7 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'unsigned_hyper'};
       const value = BigInt('0xffffffffffffffff');
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBe(value);
     });
@@ -82,7 +82,7 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'float'};
       const value = 3.14;
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBeCloseTo(value, 6);
     });
@@ -91,7 +91,7 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'double'};
       const value = Math.PI;
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBeCloseTo(value, 15);
     });
@@ -99,7 +99,7 @@ describe('XdrSchemaDecoder', () => {
     test('throws on quadruple with quadruple schema', () => {
       const schema: XdrSchema = {type: 'quadruple'};
       const value = 1.0;
-      
+
       expect(() => schemaEncoder.encode(value, schema)).toThrow('not implemented');
     });
   });
@@ -111,7 +111,7 @@ describe('XdrSchemaDecoder', () => {
         values: {RED: 0, GREEN: 1, BLUE: 2},
       };
       const encoded = schemaEncoder.encode('GREEN', schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBe('GREEN');
     });
@@ -121,11 +121,11 @@ describe('XdrSchemaDecoder', () => {
         type: 'enum',
         values: {RED: 0, GREEN: 1, BLUE: 2},
       };
-      
+
       // Manually encode a value that's not in the enum
       encoder.writeInt(99);
       const encoded = writer.flush();
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBe(99);
     });
@@ -136,7 +136,7 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'opaque', size: 5};
       const value = new Uint8Array([1, 2, 3, 4, 5]);
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -145,7 +145,7 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'vopaque'};
       const value = new Uint8Array([1, 2, 3, 4, 5]);
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -154,19 +154,19 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'vopaque', size: 10};
       const value = new Uint8Array([1, 2, 3, 4, 5]);
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
 
     test('throws on variable-length opaque data too large', () => {
       const schema: XdrSchema = {type: 'vopaque', size: 3};
-      
+
       // Manually encode data larger than limit
       const data = new Uint8Array([1, 2, 3, 4, 5]);
       encoder.writeVarlenOpaque(data);
       const encoded = writer.flush();
-      
+
       expect(() => decoder.decode(encoded, schema)).toThrow('exceeds maximum 3');
     });
   });
@@ -176,7 +176,7 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'string'};
       const value = 'Hello, XDR!';
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBe(value);
     });
@@ -185,19 +185,19 @@ describe('XdrSchemaDecoder', () => {
       const schema: XdrSchema = {type: 'string', size: 20};
       const value = 'Hello';
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toBe(value);
     });
 
     test('throws on string too long', () => {
       const schema: XdrSchema = {type: 'string', size: 3};
-      
+
       // Manually encode a string longer than limit
       const str = 'toolong';
       encoder.writeStr(str);
       const encoded = writer.flush();
-      
+
       expect(() => decoder.decode(encoded, schema)).toThrow('exceeds maximum 3');
     });
   });
@@ -211,7 +211,7 @@ describe('XdrSchemaDecoder', () => {
       };
       const value = [1, 2, 3];
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -223,7 +223,7 @@ describe('XdrSchemaDecoder', () => {
       };
       const value = [1, 2, 3, 4];
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -235,7 +235,7 @@ describe('XdrSchemaDecoder', () => {
       };
       const value: number[] = [];
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -246,13 +246,13 @@ describe('XdrSchemaDecoder', () => {
         elements: {type: 'int'},
         size: 2,
       };
-      
+
       // Manually encode array larger than limit
       const values = [1, 2, 3];
       encoder.writeUnsignedInt(values.length);
-      values.forEach(v => encoder.writeInt(v));
+      values.forEach((v) => encoder.writeInt(v));
       const encoded = writer.flush();
-      
+
       expect(() => decoder.decode(encoded, schema)).toThrow('exceeds maximum 2');
     });
 
@@ -266,9 +266,12 @@ describe('XdrSchemaDecoder', () => {
         },
         size: 2,
       };
-      const value = [[1, 2], [3, 4]];
+      const value = [
+        [1, 2],
+        [3, 4],
+      ];
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -285,7 +288,7 @@ describe('XdrSchemaDecoder', () => {
       };
       const value = {id: 42, name: 'test'};
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -312,7 +315,7 @@ describe('XdrSchemaDecoder', () => {
         name: {first: 'John', last: 'Doe'},
       };
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -324,7 +327,7 @@ describe('XdrSchemaDecoder', () => {
       };
       const value = {};
       const encoded = schemaEncoder.encode(value, schema);
-      
+
       const result = decoder.decode(encoded, schema);
       expect(result).toEqual(value);
     });
@@ -339,14 +342,14 @@ describe('XdrSchemaDecoder', () => {
           [1, {type: 'string'}],
         ],
       };
-      
+
       // Test first arm
       let encoded = schemaEncoder.encode(new XdrUnion(0, 42), schema);
       let result = decoder.decode(encoded, schema) as XdrUnion;
       expect(result).toBeInstanceOf(XdrUnion);
       expect(result.discriminant).toBe(0);
       expect(result.value).toBe(42);
-      
+
       // Test second arm
       encoded = schemaEncoder.encode(new XdrUnion(1, 'hello'), schema);
       result = decoder.decode(encoded, schema) as XdrUnion;
@@ -364,12 +367,12 @@ describe('XdrSchemaDecoder', () => {
         ],
         default: {type: 'boolean'},
       };
-      
+
       // Manually encode unknown discriminant
       encoder.writeInt(99); // discriminant
       encoder.writeBoolean(true); // default value
       const encoded = writer.flush();
-      
+
       const result = decoder.decode(encoded, schema) as XdrUnion;
       expect(result).toBeInstanceOf(XdrUnion);
       expect(result.discriminant).toBe(99);
@@ -384,12 +387,12 @@ describe('XdrSchemaDecoder', () => {
           [1, {type: 'string'}],
         ],
       };
-      
+
       // Manually encode unknown discriminant without default
       encoder.writeInt(99);
       encoder.writeInt(42); // some value
       const encoded = writer.flush();
-      
+
       expect(() => decoder.decode(encoded, schema)).toThrow('No matching union arm for discriminant: 99');
     });
   });
@@ -398,7 +401,7 @@ describe('XdrSchemaDecoder', () => {
     test('throws on unknown schema type', () => {
       const schema = {type: 'invalid'} as any;
       const encoded = new Uint8Array([0, 0, 0, 42]);
-      
+
       expect(() => decoder.decode(encoded, schema)).toThrow('Unknown schema type: invalid');
     });
   });
@@ -453,7 +456,7 @@ describe('XdrSchemaDecoder', () => {
 
       const encoded = schemaEncoder.encode(value, schema);
       const result = decoder.decode(encoded, schema) as any;
-      
+
       expect(result.version).toBe(1);
       expect(result.items).toHaveLength(2);
       expect(result.items[0].name).toBe('item1');

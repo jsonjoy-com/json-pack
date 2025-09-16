@@ -20,7 +20,7 @@ describe('XdrDecoder', () => {
     test('decodes void', () => {
       encoder.writeVoid();
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readVoid();
       expect(result).toBeUndefined();
@@ -29,7 +29,7 @@ describe('XdrDecoder', () => {
     test('decodes boolean true', () => {
       encoder.writeBoolean(true);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readBoolean();
       expect(result).toBe(true);
@@ -38,7 +38,7 @@ describe('XdrDecoder', () => {
     test('decodes boolean false', () => {
       encoder.writeBoolean(false);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readBoolean();
       expect(result).toBe(false);
@@ -48,7 +48,7 @@ describe('XdrDecoder', () => {
       const value = 42;
       encoder.writeInt(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readInt();
       expect(result).toBe(value);
@@ -58,7 +58,7 @@ describe('XdrDecoder', () => {
       const value = -1;
       encoder.writeInt(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readInt();
       expect(result).toBe(value);
@@ -68,7 +68,7 @@ describe('XdrDecoder', () => {
       const value = 0x12345678;
       encoder.writeInt(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readInt();
       expect(result).toBe(value);
@@ -78,7 +78,7 @@ describe('XdrDecoder', () => {
       const value = 0xffffffff;
       encoder.writeUnsignedInt(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readUnsignedInt();
       expect(result).toBe(value);
@@ -88,7 +88,7 @@ describe('XdrDecoder', () => {
       const value = BigInt('0x123456789abcdef0');
       encoder.writeHyper(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readHyper();
       expect(result).toBe(value);
@@ -98,7 +98,7 @@ describe('XdrDecoder', () => {
       const value = -BigInt('0x123456789abcdef0');
       encoder.writeHyper(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readHyper();
       expect(result).toBe(value);
@@ -108,7 +108,7 @@ describe('XdrDecoder', () => {
       const value = BigInt('0xffffffffffffffff');
       encoder.writeUnsignedHyper(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readUnsignedHyper();
       expect(result).toBe(value);
@@ -118,7 +118,7 @@ describe('XdrDecoder', () => {
       const value = 3.14;
       encoder.writeFloat(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readFloat();
       expect(result).toBeCloseTo(value, 6);
@@ -128,7 +128,7 @@ describe('XdrDecoder', () => {
       const value = Math.PI;
       encoder.writeDouble(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readDouble();
       expect(result).toBeCloseTo(value, 15);
@@ -144,7 +144,7 @@ describe('XdrDecoder', () => {
       const data = new Uint8Array([1, 2, 3, 4, 5]);
       encoder.writeOpaque(data);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readOpaque(data.length);
       expect(result).toEqual(data);
@@ -154,7 +154,7 @@ describe('XdrDecoder', () => {
       const data = new Uint8Array([1, 2, 3]); // 3 bytes -> 4 bytes with padding
       encoder.writeOpaque(data);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readOpaque(data.length);
       expect(result).toEqual(data);
@@ -164,7 +164,7 @@ describe('XdrDecoder', () => {
       const data = new Uint8Array([1, 2, 3, 4, 5]);
       encoder.writeVarlenOpaque(data);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readVarlenOpaque();
       expect(result).toEqual(data);
@@ -174,7 +174,7 @@ describe('XdrDecoder', () => {
       const data = new Uint8Array([]);
       encoder.writeVarlenOpaque(data);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readVarlenOpaque();
       expect(result).toEqual(data);
@@ -186,7 +186,7 @@ describe('XdrDecoder', () => {
       const value = 'hello';
       encoder.writeStr(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readString();
       expect(result).toBe(value);
@@ -196,7 +196,7 @@ describe('XdrDecoder', () => {
       const value = '';
       encoder.writeStr(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readString();
       expect(result).toBe(value);
@@ -206,7 +206,7 @@ describe('XdrDecoder', () => {
       const value = '🚀 Hello, 世界!';
       encoder.writeStr(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readString();
       expect(result).toBe(value);
@@ -216,7 +216,7 @@ describe('XdrDecoder', () => {
       const value = 'test'; // 4 bytes
       encoder.writeStr(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readString();
       expect(result).toBe(value);
@@ -228,7 +228,7 @@ describe('XdrDecoder', () => {
       const value = 42;
       encoder.writeInt(value);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readEnum();
       expect(result).toBe(value);
@@ -238,9 +238,9 @@ describe('XdrDecoder', () => {
   describe('arrays', () => {
     test('decodes fixed-size array', () => {
       const values = [1, 2, 3];
-      values.forEach(v => encoder.writeInt(v));
+      values.forEach((v) => encoder.writeInt(v));
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readArray(values.length, () => decoder.readInt());
       expect(result).toEqual(values);
@@ -248,7 +248,7 @@ describe('XdrDecoder', () => {
 
     test('decodes empty fixed-size array', () => {
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readArray(0, () => decoder.readInt());
       expect(result).toEqual([]);
@@ -257,9 +257,9 @@ describe('XdrDecoder', () => {
     test('decodes variable-length array', () => {
       const values = [1, 2, 3, 4];
       encoder.writeUnsignedInt(values.length);
-      values.forEach(v => encoder.writeInt(v));
+      values.forEach((v) => encoder.writeInt(v));
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readVarlenArray(() => decoder.readInt());
       expect(result).toEqual(values);
@@ -268,7 +268,7 @@ describe('XdrDecoder', () => {
     test('decodes empty variable-length array', () => {
       encoder.writeUnsignedInt(0);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readVarlenArray(() => decoder.readInt());
       expect(result).toEqual([]);
@@ -290,12 +290,12 @@ describe('XdrDecoder', () => {
   describe('edge cases', () => {
     test('handles 32-bit integer boundaries', () => {
       const values = [-2147483648, 2147483647, 0];
-      
+
       for (const value of values) {
         writer.reset();
         encoder.writeInt(value);
         const encoded = writer.flush();
-        
+
         reader.reset(encoded);
         const result = decoder.readInt();
         expect(result).toBe(value);
@@ -304,12 +304,12 @@ describe('XdrDecoder', () => {
 
     test('handles 32-bit unsigned integer boundaries', () => {
       const values = [0, 4294967295];
-      
+
       for (const value of values) {
         writer.reset();
         encoder.writeUnsignedInt(value);
         const encoded = writer.flush();
-        
+
         reader.reset(encoded);
         const result = decoder.readUnsignedInt();
         expect(result).toBe(value);
@@ -318,12 +318,12 @@ describe('XdrDecoder', () => {
 
     test('handles special float values', () => {
       const values = [0, -0, Infinity, -Infinity];
-      
+
       for (const value of values) {
         writer.reset();
         encoder.writeFloat(value);
         const encoded = writer.flush();
-        
+
         reader.reset(encoded);
         const result = decoder.readFloat();
         expect(result).toBe(value);
@@ -334,7 +334,7 @@ describe('XdrDecoder', () => {
       writer.reset();
       encoder.writeFloat(NaN);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readFloat();
       expect(result).toBeNaN();
@@ -342,12 +342,12 @@ describe('XdrDecoder', () => {
 
     test('handles special double values', () => {
       const values = [0, -0, Infinity, -Infinity];
-      
+
       for (const value of values) {
         writer.reset();
         encoder.writeDouble(value);
         const encoded = writer.flush();
-        
+
         reader.reset(encoded);
         const result = decoder.readDouble();
         expect(result).toBe(value);
@@ -358,7 +358,7 @@ describe('XdrDecoder', () => {
       writer.reset();
       encoder.writeDouble(NaN);
       const encoded = writer.flush();
-      
+
       reader.reset(encoded);
       const result = decoder.readDouble();
       expect(result).toBeNaN();

@@ -92,14 +92,14 @@ export class XdrSchemaDecoder {
    */
   private readEnum(schema: XdrEnumSchema): string | number {
     const value = this.decoder.readEnum();
-    
+
     // Find the enum name for this value
     for (const [name, enumValue] of Object.entries(schema.values)) {
       if (enumValue === value) {
         return name;
       }
     }
-    
+
     // If no matching name found, return the numeric value
     return value;
   }
@@ -116,12 +116,12 @@ export class XdrSchemaDecoder {
    */
   private readVarlenOpaque(schema: XdrVarlenOpaqueSchema): Uint8Array {
     const data = this.decoder.readVarlenOpaque();
-    
+
     // Check size constraint if specified
     if (schema.size !== undefined && data.length > schema.size) {
       throw new Error(`Variable-length opaque data size ${data.length} exceeds maximum ${schema.size}`);
     }
-    
+
     return data;
   }
 
@@ -130,12 +130,12 @@ export class XdrSchemaDecoder {
    */
   private readString(schema: XdrStringSchema): string {
     const str = this.decoder.readString();
-    
+
     // Check size constraint if specified
     if (schema.size !== undefined && str.length > schema.size) {
       throw new Error(`String length ${str.length} exceeds maximum ${schema.size}`);
     }
-    
+
     return str;
   }
 
@@ -151,12 +151,12 @@ export class XdrSchemaDecoder {
    */
   private readVarlenArray(schema: XdrVarlenArraySchema): unknown[] {
     const array = this.decoder.readVarlenArray(() => this.readValue(schema.elements));
-    
+
     // Check size constraint if specified
     if (schema.size !== undefined && array.length > schema.size) {
       throw new Error(`Variable-length array size ${array.length} exceeds maximum ${schema.size}`);
     }
-    
+
     return array;
   }
 
@@ -165,11 +165,11 @@ export class XdrSchemaDecoder {
    */
   private readStruct(schema: XdrStructSchema): Record<string, unknown> {
     const struct: Record<string, unknown> = {};
-    
+
     for (const [fieldSchema, fieldName] of schema.fields) {
       struct[fieldName] = this.readValue(fieldSchema);
     }
-    
+
     return struct;
   }
 
@@ -179,7 +179,7 @@ export class XdrSchemaDecoder {
   private readUnion(schema: XdrUnionSchema): XdrUnion {
     // Read discriminant
     const discriminant = this.decoder.readInt();
-    
+
     // Find matching arm
     for (const [armDiscriminant, armSchema] of schema.arms) {
       if (armDiscriminant === discriminant) {
@@ -187,13 +187,13 @@ export class XdrSchemaDecoder {
         return new XdrUnion(discriminant, value);
       }
     }
-    
+
     // If no matching arm found, try default
     if (schema.default) {
       const value = this.readValue(schema.default);
       return new XdrUnion(discriminant, value);
     }
-    
+
     throw new Error(`No matching union arm for discriminant: ${discriminant}`);
   }
 }

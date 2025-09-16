@@ -123,17 +123,17 @@ export class XdrDecoder<R extends IReader & IReaderResettable = IReader & IReade
   public readOpaque(size: number): Uint8Array {
     const reader = this.reader;
     const data = new Uint8Array(size);
-    
+
     // Read actual data
     for (let i = 0; i < size; i++) {
       data[i] = reader.u8();
     }
-    
+
     // Skip padding bytes to reach 4-byte boundary
     const paddedSize = Math.ceil(size / 4) * 4;
     const padding = paddedSize - size;
     reader.skip(padding);
-    
+
     return data;
   }
 
@@ -153,18 +153,18 @@ export class XdrDecoder<R extends IReader & IReaderResettable = IReader & IReade
   public readString(): string {
     const size = this.readUnsignedInt();
     const reader = this.reader;
-    
+
     // Read UTF-8 bytes
     const utf8Bytes = new Uint8Array(size);
     for (let i = 0; i < size; i++) {
       utf8Bytes[i] = reader.u8();
     }
-    
+
     // Skip padding bytes to reach 4-byte boundary
     const paddedSize = Math.ceil(size / 4) * 4;
     const padding = paddedSize - size;
     reader.skip(padding);
-    
+
     // Decode UTF-8 to string
     return new TextDecoder('utf-8').decode(utf8Bytes);
   }

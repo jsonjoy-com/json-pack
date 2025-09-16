@@ -9,3 +9,4 @@ export * from './types';
 export * from './XdrEncoder';
 export * from './XdrSchemaEncoder';
 export * from './XdrSchemaValidator';
+export * from './XdrUnion';

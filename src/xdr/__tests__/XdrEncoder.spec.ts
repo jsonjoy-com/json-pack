@@ -48,13 +48,13 @@ describe('XdrEncoder', () => {
     });
 
     test('encodes unsigned int', () => {
-      encoder.writeUnsignedInt(0xFFFFFFFF);
+      encoder.writeUnsignedInt(0xffffffff);
       const result = writer.flush();
       expect(result).toEqual(new Uint8Array([255, 255, 255, 255])); // big-endian 32-bit max uint
     });
 
     test('encodes hyper from number', () => {
-      encoder.writeHyper(0x123456789ABCDEF0);
+      encoder.writeHyper(0x123456789abcdef0);
       const result = writer.flush();
       // JavaScript loses precision for large numbers, but we test what we can
       expect(result.length).toBe(8);
@@ -63,7 +63,7 @@ describe('XdrEncoder', () => {
     test('encodes hyper from bigint', () => {
       encoder.writeHyper(BigInt('0x123456789ABCDEF0'));
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]));
+      expect(result).toEqual(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0]));
     });
 
     test('encodes negative hyper from bigint', () => {
@@ -75,7 +75,7 @@ describe('XdrEncoder', () => {
     test('encodes unsigned hyper from bigint', () => {
       encoder.writeUnsignedHyper(BigInt('0x123456789ABCDEF0'));
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]));
+      expect(result).toEqual(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0]));
     });
 
     test('encodes float', () => {
@@ -97,9 +97,7 @@ describe('XdrEncoder', () => {
     });
 
     test('encodes quadruple', () => {
-      encoder.writeQuadruple(3.14159);
-      const result = writer.flush();
-      expect(result.length).toBe(16); // Two doubles for now
+      expect(() => encoder.writeQuadruple(3.14159)).toThrow('not implemented');
     });
   });
 
@@ -127,10 +125,18 @@ describe('XdrEncoder', () => {
       const data = new Uint8Array([1, 2, 3]);
       encoder.writeVarlenOpaque(data);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 3, // length
-        1, 2, 3, 0  // data + padding
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          3, // length
+          1,
+          2,
+          3,
+          0, // data + padding
+        ]),
+      );
     });
 
     test('encodes empty variable-length opaque data', () => {
@@ -145,10 +151,22 @@ describe('XdrEncoder', () => {
     test('encodes simple string', () => {
       encoder.writeStr('hello');
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 5,           // length
-        104, 101, 108, 108, 111, 0, 0, 0  // 'hello' + padding
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          5, // length
+          104,
+          101,
+          108,
+          108,
+          111,
+          0,
+          0,
+          0, // 'hello' + padding
+        ]),
+      );
     });
 
     test('encodes empty string', () => {
@@ -161,69 +179,39 @@ describe('XdrEncoder', () => {
       encoder.writeStr('café');
       const result = writer.flush();
       // 'café' in UTF-8 is [99, 97, 102, 195, 169] (5 bytes)
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 5,           // length
-        99, 97, 102, 195, 169, 0, 0, 0  // UTF-8 bytes + padding
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          5, // length
+          99,
+          97,
+          102,
+          195,
+          169,
+          0,
+          0,
+          0, // UTF-8 bytes + padding
+        ]),
+      );
     });
 
     test('encodes string that fits exactly in 4-byte boundary', () => {
       encoder.writeStr('test'); // 4 bytes
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 4,           // length
-        116, 101, 115, 116   // 'test' (no padding needed)
-      ]));
-    });
-  });
-
-  describe('arrays', () => {
-    test('encodes empty array', () => {
-      encoder.writeArr([]);
-      const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([0, 0, 0, 0])); // just length
-    });
-
-    test('encodes array of integers', () => {
-      encoder.writeArr([1, 2, 3]);
-      const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 3,           // length
-        0, 0, 0, 1,           // 1
-        0, 0, 0, 2,           // 2
-        0, 0, 0, 3            // 3
-      ]));
-    });
-
-    test('encodes array of mixed types', () => {
-      encoder.writeArr([42, 'test']);
-      const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 2,           // length
-        0, 0, 0, 42,          // 42
-        0, 0, 0, 4,           // string length
-        116, 101, 115, 116   // 'test'
-      ]));
-    });
-  });
-
-  describe('objects', () => {
-    test('encodes empty object', () => {
-      encoder.writeObj({});
-      const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([0, 0, 0, 0])); // just length
-    });
-
-    test('encodes simple object', () => {
-      encoder.writeObj({name: 'test', value: 42});
-      const result = writer.flush();
-      // Note: Object.entries() order may vary, but let's test the structure
-      expect(result.length).toBeGreaterThan(20); // Should contain length + 2 key-value pairs
-      
-      // Check that we have correct length at start
-      const view = new DataView(result.buffer);
-      const entryCount = view.getUint32(0, false);
-      expect(entryCount).toBe(2);
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          4, // length
+          116,
+          101,
+          115,
+          116, // 'test' (no padding needed)
+        ]),
+      );
     });
   });
 
@@ -250,10 +238,18 @@ describe('XdrEncoder', () => {
 
     test('handles string', () => {
       const result = encoder.encode('hi');
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 2,           // length
-        104, 105, 0, 0        // 'hi' + padding
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          2, // length
+          104,
+          105,
+          0,
+          0, // 'hi' + padding
+        ]),
+      );
     });
 
     test('handles bigint', () => {
@@ -263,10 +259,18 @@ describe('XdrEncoder', () => {
 
     test('handles Uint8Array', () => {
       const result = encoder.encode(new Uint8Array([1, 2]));
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 2,     // length
-        1, 2, 0, 0      // data + padding
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          2, // length
+          1,
+          2,
+          0,
+          0, // data + padding
+        ]),
+      );
     });
 
     test('handles unknown types', () => {
@@ -312,19 +316,35 @@ describe('XdrEncoder', () => {
     test('writeBin', () => {
       encoder.writeBin(new Uint8Array([1, 2, 3]));
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 3,     // length
-        1, 2, 3, 0      // data + padding
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          3, // length
+          1,
+          2,
+          3,
+          0, // data + padding
+        ]),
+      );
     });
 
     test('writeAsciiStr', () => {
       encoder.writeAsciiStr('test');
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 4,           // length
-        116, 101, 115, 116   // 'test'
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          4, // length
+          116,
+          101,
+          115,
+          116, // 'test'
+        ]),
+      );
     });
   });
 
@@ -395,11 +415,11 @@ describe('XdrEncoder', () => {
       const longString = 'a'.repeat(1000);
       encoder.writeStr(longString);
       const result = writer.flush();
-      
+
       // Check length prefix
       const view = new DataView(result.buffer);
       expect(view.getUint32(0, false)).toBe(1000);
-      
+
       // Check total length (1000 + padding to 4-byte boundary + 4-byte length prefix)
       const expectedPaddedLength = Math.ceil(1000 / 4) * 4;
       expect(result.length).toBe(4 + expectedPaddedLength);

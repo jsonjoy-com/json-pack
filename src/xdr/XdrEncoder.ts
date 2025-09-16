@@ -4,7 +4,7 @@ import type {BinaryJsonEncoder} from '../types';
 /**
  * XDR (External Data Representation) binary encoder for basic value encoding.
  * Implements XDR binary encoding according to RFC 4506.
- * 
+ *
  * Key XDR encoding principles:
  * - All data types are aligned to 4-byte boundaries
  * - Multi-byte quantities are transmitted in big-endian byte order
@@ -40,10 +40,6 @@ export class XdrEncoder implements BinaryJsonEncoder {
         if (value === null) return this.writeVoid();
         const constructor = value.constructor;
         switch (constructor) {
-          case Object:
-            return this.writeObj(value as Record<string, unknown>);
-          case Array:
-            return this.writeArr(value as unknown[]);
           case Uint8Array:
             return this.writeBin(value as Uint8Array);
           default:
@@ -106,11 +102,11 @@ export class XdrEncoder implements BinaryJsonEncoder {
   public writeHyper(hyper: number | bigint): void {
     const writer = this.writer;
     writer.ensureCapacity(8);
-    
+
     if (typeof hyper === 'bigint') {
       // Convert bigint to two 32-bit values for big-endian encoding
-      const high = Number((hyper >> BigInt(32)) & BigInt(0xFFFFFFFF));
-      const low = Number(hyper & BigInt(0xFFFFFFFF));
+      const high = Number((hyper >> BigInt(32)) & BigInt(0xffffffff));
+      const low = Number(hyper & BigInt(0xffffffff));
       writer.view.setInt32(writer.x, high, false); // high 32 bits
       writer.view.setUint32(writer.x + 4, low, false); // low 32 bits
     } else {
@@ -129,11 +125,11 @@ export class XdrEncoder implements BinaryJsonEncoder {
   public writeUnsignedHyper(uhyper: number | bigint): void {
     const writer = this.writer;
     writer.ensureCapacity(8);
-    
+
     if (typeof uhyper === 'bigint') {
       // Convert bigint to two 32-bit values for big-endian encoding
-      const high = Number((uhyper >> BigInt(32)) & BigInt(0xFFFFFFFF));
-      const low = Number(uhyper & BigInt(0xFFFFFFFF));
+      const high = Number((uhyper >> BigInt(32)) & BigInt(0xffffffff));
+      const low = Number(uhyper & BigInt(0xffffffff));
       writer.view.setUint32(writer.x, high, false); // high 32 bits
       writer.view.setUint32(writer.x + 4, low, false); // low 32 bits
     } else {
@@ -168,12 +164,10 @@ export class XdrEncoder implements BinaryJsonEncoder {
 
   /**
    * Writes an XDR quadruple value (128-bit float).
-   * Note: JavaScript doesn't have native 128-bit float support, so this is a placeholder.
+   * Note: JavaScript doesn't have native 128-bit float support.
    */
   public writeQuadruple(quad: number): void {
-    // Write as two doubles for now (this is not standard XDR)
-    this.writeDouble(quad);
-    this.writeDouble(0); // padding
+    throw new Error('not implemented');
   }
 
   /**
@@ -184,14 +178,14 @@ export class XdrEncoder implements BinaryJsonEncoder {
     if (data.length !== size) {
       throw new Error(`Opaque data length ${data.length} does not match expected size ${size}`);
     }
-    
+
     const writer = this.writer;
-    const paddedSize = this.getPaddedSize(size);
+    const paddedSize = Math.ceil(size / 4) * 4;
     writer.ensureCapacity(paddedSize);
-    
+
     // Write data
     writer.buf(data, size);
-    
+
     // Write padding bytes
     const padding = paddedSize - size;
     for (let i = 0; i < padding; i++) {
@@ -205,14 +199,14 @@ export class XdrEncoder implements BinaryJsonEncoder {
    */
   public writeVarlenOpaque(data: Uint8Array): void {
     this.writeUnsignedInt(data.length);
-    
+
     const writer = this.writer;
-    const paddedSize = this.getPaddedSize(data.length);
+    const paddedSize = Math.ceil(data.length / 4) * 4;
     writer.ensureCapacity(paddedSize);
-    
+
     // Write data
     writer.buf(data, data.length);
-    
+
     // Write padding bytes
     const padding = paddedSize - data.length;
     for (let i = 0; i < padding; i++) {
@@ -226,47 +220,32 @@ export class XdrEncoder implements BinaryJsonEncoder {
    */
   public writeStr(str: string): void {
     const writer = this.writer;
-    const encoder = new TextEncoder();
-    const utf8Bytes = encoder.encode(str);
-    
-    // Write length
-    this.writeUnsignedInt(utf8Bytes.length);
-    
-    // Write string data with padding
-    const paddedSize = this.getPaddedSize(utf8Bytes.length);
-    writer.ensureCapacity(paddedSize);
-    
-    // Write UTF-8 bytes
-    writer.buf(utf8Bytes, utf8Bytes.length);
-    
-    // Write padding bytes
-    const padding = paddedSize - utf8Bytes.length;
+
+    // Write string using writer's UTF-8 method and get actual byte count
+    const lengthOffset = writer.x;
+    writer.x += 4; // Reserve space for length
+    const bytesWritten = writer.utf8(str);
+
+    // Calculate and write padding
+    const paddedSize = Math.ceil(bytesWritten / 4) * 4;
+    const padding = paddedSize - bytesWritten;
     for (let i = 0; i < padding; i++) {
       writer.u8(0);
     }
+
+    // Go back and write the actual byte length
+    const currentPos = writer.x;
+    writer.x = lengthOffset;
+    this.writeUnsignedInt(bytesWritten);
+    writer.x = currentPos;
   }
 
-  /**
-   * Writes XDR variable-length array.
-   * Length is written first, followed by array elements.
-   */
   public writeArr(arr: unknown[]): void {
-    this.writeUnsignedInt(arr.length);
-    for (const item of arr) {
-      this.writeAny(item);
-    }
+    throw new Error('writeArr not implemented in XDR encoder');
   }
 
-  /**
-   * Writes XDR structure as a simple mapping (not standard XDR, for compatibility).
-   */
   public writeObj(obj: Record<string, unknown>): void {
-    const entries = Object.entries(obj);
-    this.writeUnsignedInt(entries.length);
-    for (const [key, value] of entries) {
-      this.writeStr(key);
-      this.writeAny(value);
-    }
+    throw new Error('writeObj not implemented in XDR encoder');
   }
 
   // BinaryJsonEncoder interface methods
@@ -312,12 +291,5 @@ export class XdrEncoder implements BinaryJsonEncoder {
    */
   public writeAsciiStr(str: string): void {
     this.writeStr(str);
-  }
-
-  /**
-   * Calculates the padded size for 4-byte alignment.
-   */
-  private getPaddedSize(size: number): number {
-    return Math.ceil(size / 4) * 4;
   }
 }

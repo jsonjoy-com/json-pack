@@ -148,7 +148,7 @@ export class XdrSchemaValidator {
       }
 
       const [fieldSchema, fieldName] = field;
-      
+
       if (typeof fieldName !== 'string' || fieldName === '') {
         return false;
       }
@@ -178,7 +178,7 @@ export class XdrSchemaValidator {
       }
 
       const [discriminant, armSchema] = arm;
-      
+
       // Check for duplicate discriminants
       if (discriminants.has(discriminant)) {
         return false;
@@ -221,8 +221,10 @@ export class XdrSchemaValidator {
         return (typeof value === 'number' && Number.isInteger(value)) || typeof value === 'bigint';
 
       case 'unsigned_hyper':
-        return ((typeof value === 'number' && Number.isInteger(value) && value >= 0) || 
-                (typeof value === 'bigint' && value >= BigInt(0)));
+        return (
+          (typeof value === 'number' && Number.isInteger(value) && value >= 0) ||
+          (typeof value === 'bigint' && value >= BigInt(0))
+        );
 
       case 'float':
       case 'double':
@@ -239,25 +241,27 @@ export class XdrSchemaValidator {
 
       case 'vopaque':
         const vopaqueSchema = schema as XdrVarlenOpaqueSchema;
-        return value instanceof Uint8Array && 
-               (!vopaqueSchema.size || value.length <= vopaqueSchema.size);
+        return value instanceof Uint8Array && (!vopaqueSchema.size || value.length <= vopaqueSchema.size);
 
       case 'string':
         const stringSchema = schema as XdrStringSchema;
-        return typeof value === 'string' && 
-               (!stringSchema.size || value.length <= stringSchema.size);
+        return typeof value === 'string' && (!stringSchema.size || value.length <= stringSchema.size);
 
       case 'array':
         const arraySchema = schema as XdrArraySchema;
-        return Array.isArray(value) && 
-               value.length === arraySchema.size &&
-               value.every(item => this.validateValueInternal(item, arraySchema.elements));
+        return (
+          Array.isArray(value) &&
+          value.length === arraySchema.size &&
+          value.every((item) => this.validateValueInternal(item, arraySchema.elements))
+        );
 
       case 'varray':
         const varraySchema = schema as XdrVarlenArraySchema;
-        return Array.isArray(value) && 
-               (!varraySchema.size || value.length <= varraySchema.size) &&
-               value.every(item => this.validateValueInternal(item, varraySchema.elements));
+        return (
+          Array.isArray(value) &&
+          (!varraySchema.size || value.length <= varraySchema.size) &&
+          value.every((item) => this.validateValueInternal(item, varraySchema.elements))
+        );
 
       case 'struct':
         const structSchema = schema as XdrStructSchema;
@@ -265,8 +269,9 @@ export class XdrSchemaValidator {
           return false;
         }
         const valueObj = value as Record<string, unknown>;
-        return structSchema.fields.every(([fieldSchema, fieldName]) => 
-          fieldName in valueObj && this.validateValueInternal(valueObj[fieldName], fieldSchema)
+        return structSchema.fields.every(
+          ([fieldSchema, fieldName]) =>
+            fieldName in valueObj && this.validateValueInternal(valueObj[fieldName], fieldSchema),
         );
 
       case 'union':

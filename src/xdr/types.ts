@@ -3,10 +3,7 @@
  * based on RFC 4506 specification.
  * Specification: https://datatracker.ietf.org/doc/html/rfc4506
  */
-export type XdrSchema =
-  | XdrPrimitiveSchema
-  | XdrWidePrimitiveSchema
-  | XdrCompositeSchema;
+export type XdrSchema = XdrPrimitiveSchema | XdrWidePrimitiveSchema | XdrCompositeSchema;
 
 // Primitive type schemas
 
@@ -37,10 +34,7 @@ export type XdrQuadrupleSchema = XdrBaseSchema<'quadruple'>;
 
 // Wide primitive type schemas
 
-export type XdrWidePrimitiveSchema =
-  | XdrOpaqueSchema
-  | XdrVarlenOpaqueSchema
-  | XdrStringSchema;
+export type XdrWidePrimitiveSchema = XdrOpaqueSchema | XdrVarlenOpaqueSchema | XdrStringSchema;
 
 export interface XdrOpaqueSchema extends XdrBaseSchema<'opaque'> {
   size: number;
@@ -56,11 +50,7 @@ export interface XdrStringSchema extends XdrBaseSchema<'string'> {
 
 // Composite type schemas
 
-export type XdrCompositeSchema =
-  | XdrArraySchema
-  | XdrVarlenArraySchema
-  | XdrStructSchema
-  | XdrUnionSchema;
+export type XdrCompositeSchema = XdrArraySchema | XdrVarlenArraySchema | XdrStructSchema | XdrUnionSchema;
 
 export interface XdrArraySchema extends XdrBaseSchema<'array'> {
   /** Schema of array elements */

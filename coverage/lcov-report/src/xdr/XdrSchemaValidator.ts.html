@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/ion/IonDecoderBase.ts</title>
+    <title>Code coverage report for src/xdr/XdrSchemaValidator.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/ion</a> IonDecoderBase.ts</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">src/xdr</a> XdrSchemaValidator.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">73.61% </span>
+                <span class="strong">92.45% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>120/163</span>
+                <span class='fraction'>98/106</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">56.92% </span>
+                <span class="strong">95.55% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>37/65</span>
+                <span class='fraction'>129/135</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.11% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>16/17</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">77.3% </span>
+                <span class="strong">92.3% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>109/141</span>
+                <span class='fraction'>96/104</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -351,579 +351,582 @@
 <a name='L286'></a><a href='#L286'>286</a>
 <a name='L287'></a><a href='#L287'>287</a>
 <a name='L288'></a><a href='#L288'>288</a>
-<a name='L289'></a><a href='#L289'>289</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
+<a name='L289'></a><a href='#L289'>289</a>
+<a name='L290'></a><a href='#L290'>290</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2041x</span>
-<span class="cline-any cline-yes">2041x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">122921x</span>
-<span class="cline-any cline-yes">122921x</span>
-<span class="cline-any cline-yes">122921x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">122921x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2574x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5293x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2788x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2614x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20689x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">68466x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8001x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10460x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2574x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5293x</span>
-<span class="cline-any cline-yes">5293x</span>
-<span class="cline-any cline-yes">2728x</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2788x</span>
-<span class="cline-any cline-yes">2788x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2773x</span>
-<span class="cline-any cline-yes">2773x</span>
-<span class="cline-any cline-yes">12713x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2773x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2614x</span>
-<span class="cline-any cline-yes">2614x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2614x</span>
-<span class="cline-any cline-yes">2614x</span>
-<span class="cline-any cline-yes">12956x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2614x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">20689x</span>
-<span class="cline-any cline-yes">20689x</span>
-<span class="cline-any cline-yes">20689x</span>
-<span class="cline-any cline-yes">20689x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">68466x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">68466x</span>
-<span class="cline-any cline-yes">68466x</span>
-<span class="cline-any cline-yes">13311x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">68466x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">68455x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">47x</span>
+<span class="cline-any cline-yes">47x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">68x</span>
+<span class="cline-any cline-yes">68x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">70x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">66x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8001x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8001x</span>
-<span class="cline-any cline-yes">8001x</span>
-<span class="cline-any cline-yes">5235x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8001x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6730x</span>
-<span class="cline-any cline-yes">6730x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6730x</span>
-<span class="cline-any cline-yes">65477x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6730x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6730x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10460x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10460x</span>
-<span class="cline-any cline-yes">10460x</span>
-<span class="cline-any cline-yes">7850x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">10460x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9495x</span>
-<span class="cline-any cline-yes">9495x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9495x</span>
-<span class="cline-any cline-yes">51242x</span>
-<span class="cline-any cline-yes">51242x</span>
-<span class="cline-any cline-yes">51242x</span>
-<span class="cline-any cline-yes">51242x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9495x</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9495x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-yes">2021x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">83722x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">83722x</span>
-<span class="cline-any cline-yes">92360x</span>
-<span class="cline-any cline-yes">92360x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">83722x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">51242x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">51242x</span>
-<span class="cline-any cline-yes">51242x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">51242x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2140x</span>
-<span class="cline-any cline-yes">2140x</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2140x</span>
-<span class="cline-any cline-yes">2140x</span>
-<span class="cline-any cline-yes">2140x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2140x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2031x</span>
-<span class="cline-any cline-yes">2031x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">96x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
-import sharedCachedUtf8Decoder from '@jsonjoy.com/buffers/lib/utf8/sharedCachedUtf8Decoder';
-import type {CachedUtf8Decoder} from '@jsonjoy.com/buffers/lib/utf8/CachedUtf8Decoder';
-import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
-import {TYPE} from './constants';
-import {Import} from './Import';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type {
+  XdrSchema,
+  XdrPrimitiveSchema,
+  XdrWidePrimitiveSchema,
+  XdrCompositeSchema,
+  XdrEnumSchema,
+  XdrOpaqueSchema,
+  XdrVarlenOpaqueSchema,
+  XdrStringSchema,
+  XdrArraySchema,
+  XdrVarlenArraySchema,
+  XdrStructSchema,
+  XdrUnionSchema,
+} from './types';
 &nbsp;
-export class IonDecoderBase&lt;R extends IReader &amp; IReaderResettable = IReader &amp; IReaderResettable&gt; {
-  public readonly reader: R;
-  public readonly utf8Decoder: CachedUtf8Decoder;
-  protected symbols?: Import;
-&nbsp;
-  constructor(reader?: R) {
-    this.reader = (<span class="branch-0 cbranch-no" title="branch not covered" >reader </span>?? new Reader()) as R;
-    this.utf8Decoder = sharedCachedUtf8Decoder;
-  }
-&nbsp;
-  public val(): unknown {
-    const typedesc = this.reader.u8();
-    const type = (typedesc &gt;&gt; 4) &amp; 0xf;
-    const length = typedesc &amp; 0xf;
-&nbsp;
-    switch (type) {
-      case TYPE.NULL:
-        return this.readNull(length);
-      case TYPE.BOOL:
-        return this.readBool(length);
-      case TYPE.UINT:
-        return this.readUint(length);
-      case TYPE.NINT:
-        return this.readNint(length);
-      case TYPE.FLOT:
-        return this.readFloat(length);
-      case TYPE.STRI:
-        return this.readString(length);
-      case TYPE.BINA:
-        return this.readBinary(length);
-      case TYPE.LIST:
-        return this.readList(length);
-      case TYPE.STRU:
-        return this.readStruct(length);
-      case TYPE.ANNO:
-        return this.readAnnotation(length);
-<span class="branch-10 cbranch-no" title="branch not covered" >      default:</span>
-<span class="cstat-no" title="statement not covered" >        throw new Error(`Unknown Ion type: 0x${type.toString(16)}`);</span>
-    }
-  }
-&nbsp;
-  protected readNull(length: number): null {
-    if (length === 15) return null;
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 0) {</span>
-      // NOP padding - skip bytes
-<span class="cstat-no" title="statement not covered" >      this.val(); </span>// Read and discard next value
-<span class="cstat-no" title="statement not covered" >      return null;</span>
-    }
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 14) {</span>
-      // Extended length NOP padding
-      const padLength = <span class="cstat-no" title="statement not covered" >this.readVUint();</span>
-<span class="cstat-no" title="statement not covered" >      this.reader.x += padLength;</span>
-<span class="cstat-no" title="statement not covered" >      this.val(); </span>// Read and discard next value
-<span class="cstat-no" title="statement not covered" >      return null;</span>
-    }
-    // Regular NOP padding
-<span class="cstat-no" title="statement not covered" >    this.reader.x += length;</span>
-<span class="cstat-no" title="statement not covered" >    this.val(); </span>// Read and discard next value
-<span class="cstat-no" title="statement not covered" >    return null;</span>
-  }
-&nbsp;
-  protected readBool(length: number): boolean | null {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
-    if (length === 0) return false;
-    if (length === 1) return true;
-<span class="cstat-no" title="statement not covered" >    throw new Error(`Invalid bool length: ${length}`);</span>
-  }
-&nbsp;
-  protected readUint(length: number): number | null {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
-    if (length === 0) return 0;
-&nbsp;
-    let value = 0;
-    for (let i = 0; i &lt; length; i++) {
-      value = value * 256 + this.reader.u8();
-    }
-    return value;
-  }
-&nbsp;
-  protected readNint(length: number): number | null {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 0) <span class="cstat-no" title="statement not covered" >throw new Error('Negative zero is illegal');</span>
-&nbsp;
-    let value = 0;
-    for (let i = 0; i &lt; length; i++) {
-      value = value * 256 + this.reader.u8();
-    }
-    return -value;
-  }
-&nbsp;
-  protected readFloat(length: number): number | null {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 0) <span class="cstat-no" title="statement not covered" >return 0.0;</span>
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 4) <span class="cstat-no" title="statement not covered" >return this.reader.f32();</span>
-    if (length === 8) return this.reader.f64();
-<span class="cstat-no" title="statement not covered" >    throw new Error(`Unsupported float length: ${length}`);</span>
-  }
-&nbsp;
-  protected readString(length: number): string | null {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
-&nbsp;
-    let actualLength = length;
-    if (length === 14) {
-      actualLength = this.readVUint();
-    }
-&nbsp;
-    if (actualLength === 0) return '';
-&nbsp;
-    return this.reader.utf8(actualLength);
-  }
-&nbsp;
-  protected readBinary(length: number): Uint8Array | null {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
-&nbsp;
-    let actualLength = length;
-    if (length === 14) {
-      actualLength = this.readVUint();
-    }
-&nbsp;
-    if (actualLength === 0) return new Uint8Array(0);
-&nbsp;
-    return this.reader.buf(actualLength);
-  }
-&nbsp;
-  protected readList(length: number): unknown[] | null {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
-&nbsp;
-    let actualLength = length;
-    if (length === 14) {
-      actualLength = this.readVUint();
-    }
-&nbsp;
-    if (actualLength === 0) return [];
-&nbsp;
-    const endPos = this.reader.x + actualLength;
-    const list: unknown[] = [];
-&nbsp;
-    while (this.reader.x &lt; endPos) {
-      list.push(this.val());
-    }
-&nbsp;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.reader.x !== endPos) {
-<span class="cstat-no" title="statement not covered" >      throw new Error('List parsing error: incorrect length');</span>
-    }
-&nbsp;
-    return list;
-  }
-&nbsp;
-  protected readStruct(length: number): Record&lt;string, unknown&gt; | null {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length === 15) <span class="cstat-no" title="statement not covered" >return null;</span>
-&nbsp;
-    let actualLength = length;
-    if (length === 14) {
-      actualLength = this.readVUint();
-    }
-&nbsp;
-    if (actualLength === 0) return {};
-&nbsp;
-    const endPos = this.reader.x + actualLength;
-    const struct: Record&lt;string, unknown&gt; = {};
-&nbsp;
-    while (this.reader.x &lt; endPos) {
-      const fieldNameId = this.readVUint();
-      const fieldName = this.getSymbolText(fieldNameId);
-      const fieldValue = this.val();
-      struct[fieldName] = fieldValue;
-    }
-&nbsp;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.reader.x !== endPos) {
-<span class="cstat-no" title="statement not covered" >      throw new Error('Struct parsing error: incorrect length');</span>
-    }
-&nbsp;
-    return struct;
-  }
-&nbsp;
-  protected readAnnotation(length: number): unknown {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (length &lt; 3) {
-<span class="cstat-no" title="statement not covered" >      throw new Error('Annotation wrapper must have at least 3 bytes');</span>
-    }
-&nbsp;
-    let actualLength = length;
-    if (length === 14) {
-      actualLength = this.readVUint();
-    }
-&nbsp;
-    const annotLength = this.readVUint();
-    const endAnnotPos = this.reader.x + annotLength;
-&nbsp;
-    // Skip annotations for now - just read and ignore them
-    while (this.reader.x &lt; endAnnotPos) {
-      this.readVUint(); // Skip annotation symbol ID
-    }
-&nbsp;
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (this.reader.x !== endAnnotPos) {
-<span class="cstat-no" title="statement not covered" >      throw new Error('Annotation parsing error: incorrect annotation length');</span>
-    }
-&nbsp;
-    // Return the actual value, ignoring annotations
-    return this.val();
-  }
-&nbsp;
-  protected readVUint(): number {
-    let value = 0;
-    let byte: number;
-&nbsp;
-    do {
-      byte = this.reader.u8();
-      value = (value &lt;&lt; 7) | (byte &amp; 0x7f);
-    } while ((byte &amp; 0x80) === 0);
-&nbsp;
-    return value;
-  }
-&nbsp;
-  protected <span class="fstat-no" title="function not covered" >readVInt(</span>): number {
-    const firstByte = <span class="cstat-no" title="statement not covered" >this.reader.u8();</span>
-&nbsp;
-    // Single byte case
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (firstByte &amp; 0x80) {</span>
-      const sign = <span class="cstat-no" title="statement not covered" >firstByte &amp; 0x40 ? -1 : 1;</span>
-      const magnitude = <span class="cstat-no" title="statement not covered" >firstByte &amp; 0x3f;</span>
-<span class="cstat-no" title="statement not covered" >      return sign * magnitude;</span>
-    }
-&nbsp;
-    // Multi-byte case
-    const sign = <span class="cstat-no" title="statement not covered" >firstByte &amp; 0x40 ? -1 : 1;</span>
-    let magnitude = <span class="cstat-no" title="statement not covered" >firstByte &amp; 0x3f;</span>
-    let byte: number;
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    do {</span>
-<span class="cstat-no" title="statement not covered" >      byte = this.reader.u8();</span>
-<span class="cstat-no" title="statement not covered" >      magnitude = (magnitude &lt;&lt; 7) | (byte &amp; 0x7f);</span>
-    } while ((byte &amp; 0x80) === 0);
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    return sign * magnitude;</span>
-  }
-&nbsp;
-  protected getSymbolText(symbolId: number): string {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.symbols) {
-<span class="cstat-no" title="statement not covered" >      throw new Error('No symbol table available');</span>
-    }
-&nbsp;
-    const symbol = this.symbols.getText(symbolId);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (symbol === undefined) {
-<span class="cstat-no" title="statement not covered" >      throw new Error(`Unknown symbol ID: ${symbolId}`);</span>
-    }
-&nbsp;
-    return symbol;
-  }
-&nbsp;
-  protected validateBVM(): void {
-    const bvm = this.reader.u32();
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (bvm !== 0xe00100ea) {
-<span class="cstat-no" title="statement not covered" >      throw new Error(`Invalid Ion Binary Version Marker: 0x${bvm.toString(16)}`);</span>
+/**
+ * XDR schema validator for validating XDR schemas and values according to RFC 4506.
+ */
+export class XdrSchemaValidator {
+  /**
+   * Validates an XDR schema structure.
+   */
+  public validateSchema(schema: XdrSchema): boolean {
+    try {
+      return this.validateSchemaInternal(schema);
+    } catch {
+<span class="cstat-no" title="statement not covered" >      return false;</span>
     }
   }
 &nbsp;
-  protected readSymbolTable(): void {
-    // Check if there's enough data and if the next byte indicates an annotation
-    if (this.reader.x &lt; this.reader.uint8.length) {
-      const nextByte = this.reader.peak();
-      const type = (nextByte &gt;&gt; 4) &amp; 0xf;
+  /**
+   * Validates if a value conforms to the given XDR schema.
+   */
+  public validateValue(value: unknown, schema: XdrSchema): boolean {
+    try {
+      return this.validateValueInternal(value, schema);
+    } catch {
+<span class="cstat-no" title="statement not covered" >      return false;</span>
+    }
+  }
 &nbsp;
-      if (type === TYPE.ANNO) {
-        // This might be a symbol table annotation
-        const annotValue = this.val();
+  private validateSchemaInternal(schema: XdrSchema): boolean {
+    if (!schema || typeof schema !== 'object' || !schema.type) {
+      return false;
+    }
 &nbsp;
-        // The annotated value should be a struct with a 'symbols' field
-        if (annotValue &amp;&amp; typeof annotValue === 'object' &amp;&amp; !Array.isArray(annotValue)) {
-          const symbolsKey = 'symbols'; // This is what symbol ID 7 maps to
-          const obj = annotValue as Record&lt;string, unknown&gt;;
+    switch (schema.type) {
+      // Primitive types
+      case 'void':
+      case 'int':
+      case 'unsigned_int':
+      case 'boolean':
+      case 'hyper':
+      case 'unsigned_hyper':
+      case 'float':
+      case 'double':
+      case 'quadruple':
+        return true;
 &nbsp;
-          if (symbolsKey in obj &amp;&amp; Array.isArray(obj[symbolsKey])) {
-            // Update the symbol table with new symbols
-            const newSymbols = obj[symbolsKey] as string[];
-            this.symbols = new Import(this.symbols || <span class="branch-1 cbranch-no" title="branch not covered" >null,</span> newSymbols);
-          }
-        }
+      case 'enum':
+        return this.validateEnumSchema(schema as XdrEnumSchema);
+&nbsp;
+      // Wide primitive types
+      case 'opaque':
+        return this.validateOpaqueSchema(schema as XdrOpaqueSchema);
+&nbsp;
+      case 'vopaque':
+        return this.validateVarlenOpaqueSchema(schema as XdrVarlenOpaqueSchema);
+&nbsp;
+      case 'string':
+        return this.validateStringSchema(schema as XdrStringSchema);
+&nbsp;
+      // Composite types
+      case 'array':
+        return this.validateArraySchema(schema as XdrArraySchema);
+&nbsp;
+      case 'varray':
+        return this.validateVarlenArraySchema(schema as XdrVarlenArraySchema);
+&nbsp;
+      case 'struct':
+        return this.validateStructSchema(schema as XdrStructSchema);
+&nbsp;
+      case 'union':
+        return this.validateUnionSchema(schema as XdrUnionSchema);
+&nbsp;
+      default:
+        return false;
+    }
+  }
+&nbsp;
+  private validateEnumSchema(schema: XdrEnumSchema): boolean {
+    if (!schema.values || typeof schema.values !== 'object') {
+      return false;
+    }
+&nbsp;
+    const values = Object.values(schema.values);
+    const uniqueValues = new Set(values);
+&nbsp;
+    // Check for duplicate values
+    if (values.length !== uniqueValues.size) {
+      return false;
+    }
+&nbsp;
+    // Check that all values are integers
+    return values.every((value) =&gt; Number.isInteger(value));
+  }
+&nbsp;
+  private validateOpaqueSchema(schema: XdrOpaqueSchema): boolean {
+    return typeof schema.size === 'number' &amp;&amp; Number.isInteger(schema.size) &amp;&amp; schema.size &gt;= 0;
+  }
+&nbsp;
+  private validateVarlenOpaqueSchema(schema: XdrVarlenOpaqueSchema): boolean {
+    return !schema.size || (typeof schema.size === 'number' &amp;&amp; Number.isInteger(schema.size) &amp;&amp; schema.size &gt;= 0);
+  }
+&nbsp;
+  private validateStringSchema(schema: XdrStringSchema): boolean {
+    return !schema.size || (typeof schema.size === 'number' &amp;&amp; Number.isInteger(schema.size) &amp;&amp; schema.size &gt;= 0);
+  }
+&nbsp;
+  private validateArraySchema(schema: XdrArraySchema): boolean {
+    if (!schema.elements || typeof schema.size !== 'number' || !Number.isInteger(schema.size) || schema.size &lt; 0) {
+      return false;
+    }
+    return this.validateSchemaInternal(schema.elements);
+  }
+&nbsp;
+  private validateVarlenArraySchema(schema: XdrVarlenArraySchema): boolean {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (!schema.elements) {
+<span class="cstat-no" title="statement not covered" >      return false;</span>
+    }
+    if (schema.size !== undefined) {
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof schema.size !== 'number' || !Number.isInteger(schema.size) || schema.size &lt; 0) {
+<span class="cstat-no" title="statement not covered" >        return false;</span>
       }
+    }
+    return this.validateSchemaInternal(schema.elements);
+  }
+&nbsp;
+  private validateStructSchema(schema: XdrStructSchema): boolean {
+    if (!Array.isArray(schema.fields)) {
+      return false;
+    }
+&nbsp;
+    const fieldNames = new Set&lt;string&gt;();
+    for (const field of schema.fields) {
+      if (!Array.isArray(field) || field.length !== 2) {
+        return false;
+      }
+&nbsp;
+      const [fieldSchema, fieldName] = field;
+&nbsp;
+      if (typeof fieldName !== 'string' || fieldName === '') {
+        return false;
+      }
+&nbsp;
+      if (fieldNames.has(fieldName)) {
+        return false; // Duplicate field name
+      }
+      fieldNames.add(fieldName);
+&nbsp;
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.validateSchemaInternal(fieldSchema)) {
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+      }
+    }
+&nbsp;
+    return true;
+  }
+&nbsp;
+  private validateUnionSchema(schema: XdrUnionSchema): boolean {
+    if (!Array.isArray(schema.arms) || schema.arms.length === 0) {
+      return false;
+    }
+&nbsp;
+    const discriminants = new Set();
+    for (const arm of schema.arms) {
+      if (!Array.isArray(arm) || arm.length !== 2) {
+        return false;
+      }
+&nbsp;
+      const [discriminant, armSchema] = arm;
+&nbsp;
+      // Check for duplicate discriminants
+      if (discriminants.has(discriminant)) {
+        return false;
+      }
+      discriminants.add(discriminant);
+&nbsp;
+      // Validate discriminant type
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof discriminant !== 'number' &amp;&amp; typeof discriminant !== 'string' &amp;&amp; typeof discriminant !== 'boolean') {
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+      }
+&nbsp;
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (!this.validateSchemaInternal(armSchema)) {
+<span class="cstat-no" title="statement not covered" >        return false;</span>
+      }
+    }
+&nbsp;
+    // Validate default schema if present
+    if (schema.default &amp;&amp; !this.validateSchemaInternal(schema.default)) {
+      return false;
+    }
+&nbsp;
+    return true;
+  }
+&nbsp;
+  private validateValueInternal(value: unknown, schema: XdrSchema): boolean {
+    switch (schema.type) {
+      case 'void':
+        return value === null || value === undefined;
+&nbsp;
+      case 'int':
+        return typeof value === 'number' &amp;&amp; Number.isInteger(value) &amp;&amp; value &gt;= -2147483648 &amp;&amp; value &lt;= 2147483647;
+&nbsp;
+      case 'unsigned_int':
+        return typeof value === 'number' &amp;&amp; Number.isInteger(value) &amp;&amp; value &gt;= 0 &amp;&amp; value &lt;= 4294967295;
+&nbsp;
+      case 'boolean':
+        return typeof value === 'boolean';
+&nbsp;
+      case 'hyper':
+        return (typeof value === 'number' &amp;&amp; Number.isInteger(value)) || typeof value === 'bigint';
+&nbsp;
+      case 'unsigned_hyper':
+        return (
+          (typeof value === 'number' &amp;&amp; Number.isInteger(value) &amp;&amp; value &gt;= 0) ||
+          (typeof value === 'bigint' &amp;&amp; value &gt;= BigInt(0))
+        );
+&nbsp;
+      case 'float':
+      case 'double':
+      case 'quadruple':
+        return typeof value === 'number';
+&nbsp;
+      case 'enum':
+        const enumSchema = schema as XdrEnumSchema;
+        return typeof value === 'string' &amp;&amp; value in enumSchema.values;
+&nbsp;
+      case 'opaque':
+        const opaqueSchema = schema as XdrOpaqueSchema;
+        return value instanceof Uint8Array &amp;&amp; value.length === opaqueSchema.size;
+&nbsp;
+      case 'vopaque':
+        const vopaqueSchema = schema as XdrVarlenOpaqueSchema;
+        return value instanceof Uint8Array &amp;&amp; (!vopaqueSchema.size || value.length &lt;= vopaqueSchema.size);
+&nbsp;
+      case 'string':
+        const stringSchema = schema as XdrStringSchema;
+        return typeof value === 'string' &amp;&amp; (!stringSchema.size || value.length &lt;= stringSchema.size);
+&nbsp;
+      case 'array':
+        const arraySchema = schema as XdrArraySchema;
+        return (
+          Array.isArray(value) &amp;&amp;
+          value.length === arraySchema.size &amp;&amp;
+          value.every((item) =&gt; this.validateValueInternal(item, arraySchema.elements))
+        );
+&nbsp;
+      case 'varray':
+        const varraySchema = schema as XdrVarlenArraySchema;
+        return (
+          Array.isArray(value) &amp;&amp;
+          (!varraySchema.size || value.length &lt;= varraySchema.size) &amp;&amp;
+          value.every((item) =&gt; this.validateValueInternal(item, varraySchema.elements))
+        );
+&nbsp;
+      case 'struct':
+        const structSchema = schema as XdrStructSchema;
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+          return false;
+        }
+        const valueObj = value as Record&lt;string, unknown&gt;;
+        return structSchema.fields.every(
+          ([fieldSchema, fieldName]) =&gt;
+            fieldName in valueObj &amp;&amp; this.validateValueInternal(valueObj[fieldName], fieldSchema),
+        );
+&nbsp;
+      case 'union':
+        const unionSchema = schema as XdrUnionSchema;
+        // For union validation, we need additional context about which arm is selected
+        // This is a simplified validation - in practice, the discriminant would be known
+        const matchesArm = unionSchema.arms.some(([, armSchema]) =&gt; this.validateValueInternal(value, armSchema));
+        const matchesDefault = unionSchema.default ? this.validateValueInternal(value, unionSchema.default) : false;
+        return matchesArm || matchesDefault;
+&nbsp;
+<span class="branch-17 cbranch-no" title="branch not covered" >      default:</span>
+<span class="cstat-no" title="statement not covered" >        return false;</span>
     }
   }
 }

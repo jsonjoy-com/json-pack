@@ -1,6 +1,5 @@
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
 import {XdrEncoder} from './XdrEncoder';
-import {XdrSchemaValidator} from './XdrSchemaValidator';
 import {XdrUnion} from './XdrUnion';
 import type {
   XdrSchema,
@@ -16,11 +15,9 @@ import type {
 
 export class XdrSchemaEncoder {
   private encoder: XdrEncoder;
-  private validator: XdrSchemaValidator;
 
   constructor(public readonly writer: IWriter & IWriterGrowable) {
     this.encoder = new XdrEncoder(writer);
-    this.validator = new XdrSchemaValidator();
   }
 
   public encode(value: unknown, schema: XdrSchema): Uint8Array {
@@ -104,7 +101,7 @@ export class XdrSchemaEncoder {
       throw new Error(`Opaque data length ${value.length} does not match schema size ${schema.size}`);
     }
 
-    this.encoder.writeOpaque(value, schema.size);
+    this.encoder.writeOpaque(value);
   }
 
   public writeVarlenOpaque(value: Uint8Array, schema: XdrVarlenOpaqueSchema): void {

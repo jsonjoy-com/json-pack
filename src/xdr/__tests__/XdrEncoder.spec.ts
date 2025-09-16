@@ -104,21 +104,16 @@ describe('XdrEncoder', () => {
   describe('opaque data', () => {
     test('encodes fixed opaque data', () => {
       const data = new Uint8Array([1, 2, 3]);
-      encoder.writeOpaque(data, 3);
+      encoder.writeOpaque(data);
       const result = writer.flush();
       expect(result).toEqual(new Uint8Array([1, 2, 3, 0])); // padded to 4 bytes
     });
 
     test('encodes fixed opaque data with exact 4-byte boundary', () => {
       const data = new Uint8Array([1, 2, 3, 4]);
-      encoder.writeOpaque(data, 4);
+      encoder.writeOpaque(data);
       const result = writer.flush();
       expect(result).toEqual(new Uint8Array([1, 2, 3, 4])); // no padding needed
-    });
-
-    test('throws error for mismatched opaque size', () => {
-      const data = new Uint8Array([1, 2, 3]);
-      expect(() => encoder.writeOpaque(data, 5)).toThrow('Opaque data length 3 does not match expected size 5');
     });
 
     test('encodes variable-length opaque data', () => {

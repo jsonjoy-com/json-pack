@@ -104,11 +104,7 @@ export class XdrEncoder implements BinaryJsonEncoder {
     writer.ensureCapacity(8);
 
     if (typeof hyper === 'bigint') {
-      // Convert bigint to two 32-bit values for big-endian encoding
-      const high = Number((hyper >> BigInt(32)) & BigInt(0xffffffff));
-      const low = Number(hyper & BigInt(0xffffffff));
-      writer.view.setInt32(writer.x, high, false); // high 32 bits
-      writer.view.setUint32(writer.x + 4, low, false); // low 32 bits
+      writer.view.setBigInt64(writer.x, hyper, false); // big-endian
     } else {
       const truncated = Math.trunc(hyper);
       const high = Math.floor(truncated / 0x100000000);
@@ -127,11 +123,7 @@ export class XdrEncoder implements BinaryJsonEncoder {
     writer.ensureCapacity(8);
 
     if (typeof uhyper === 'bigint') {
-      // Convert bigint to two 32-bit values for big-endian encoding
-      const high = Number((uhyper >> BigInt(32)) & BigInt(0xffffffff));
-      const low = Number(uhyper & BigInt(0xffffffff));
-      writer.view.setUint32(writer.x, high, false); // high 32 bits
-      writer.view.setUint32(writer.x + 4, low, false); // low 32 bits
+      writer.view.setBigUint64(writer.x, uhyper, false); // big-endian
     } else {
       const truncated = Math.trunc(Math.abs(uhyper));
       const high = Math.floor(truncated / 0x100000000);
@@ -174,11 +166,8 @@ export class XdrEncoder implements BinaryJsonEncoder {
    * Writes XDR opaque data with fixed length.
    * Data is padded to 4-byte boundary.
    */
-  public writeOpaque(data: Uint8Array, size: number): void {
-    if (data.length !== size) {
-      throw new Error(`Opaque data length ${data.length} does not match expected size ${size}`);
-    }
-
+  public writeOpaque(data: Uint8Array): void {
+    const size = data.length;
     const writer = this.writer;
     const paddedSize = Math.ceil(size / 4) * 4;
     writer.ensureCapacity(paddedSize);
@@ -199,19 +188,7 @@ export class XdrEncoder implements BinaryJsonEncoder {
    */
   public writeVarlenOpaque(data: Uint8Array): void {
     this.writeUnsignedInt(data.length);
-
-    const writer = this.writer;
-    const paddedSize = Math.ceil(data.length / 4) * 4;
-    writer.ensureCapacity(paddedSize);
-
-    // Write data
-    writer.buf(data, data.length);
-
-    // Write padding bytes
-    const padding = paddedSize - data.length;
-    for (let i = 0; i < padding; i++) {
-      writer.u8(0);
-    }
+    this.writeOpaque(data);
   }
 
   /**
@@ -241,11 +218,11 @@ export class XdrEncoder implements BinaryJsonEncoder {
   }
 
   public writeArr(arr: unknown[]): void {
-    throw new Error('writeArr not implemented in XDR encoder');
+    throw new Error('not implemented');
   }
 
   public writeObj(obj: Record<string, unknown>): void {
-    throw new Error('writeObj not implemented in XDR encoder');
+    throw new Error('not implemented');
   }
 
   // BinaryJsonEncoder interface methods

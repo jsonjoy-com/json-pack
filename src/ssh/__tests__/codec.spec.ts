@@ -48,7 +48,7 @@ describe('SSH codec round-trip', () => {
 
   describe('uint32', () => {
     test('round-trips various uint32 values', () => {
-      const values = [0, 1, 127, 128, 255, 256, 65535, 65536, 0xFFFFFFFF];
+      const values = [0, 1, 127, 128, 255, 256, 65535, 65536, 0xffffffff];
       for (const value of values) {
         encoder.writeUint32(value);
       }
@@ -113,7 +113,7 @@ describe('SSH codec round-trip', () => {
         new Uint8Array([]),
         new Uint8Array([0]),
         new Uint8Array([1, 2, 3, 4, 5]),
-        new Uint8Array([0xFF, 0xFE, 0xFD]),
+        new Uint8Array([0xff, 0xfe, 0xfd]),
       ];
       for (const bin of binaries) {
         encoder.writeBinStr(bin);

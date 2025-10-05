@@ -43,12 +43,12 @@ describe('SshDecoder', () => {
     });
 
     test('decodes uint32 max value', () => {
-      reader.reset(new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF]));
-      expect(decoder.readUint32()).toBe(0xFFFFFFFF);
+      reader.reset(new Uint8Array([0xff, 0xff, 0xff, 0xff]));
+      expect(decoder.readUint32()).toBe(0xffffffff);
     });
 
     test('decodes uint64', () => {
-      reader.reset(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]));
+      reader.reset(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0]));
       expect(decoder.readUint64()).toBe(BigInt('0x123456789ABCDEF0'));
     });
 
@@ -66,8 +66,17 @@ describe('SshDecoder', () => {
 
     test('decodes ASCII string "testing" (UTF-8)', () => {
       const data = new Uint8Array([
-        0, 0, 0, 7, // length
-        0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67 // "testing"
+        0,
+        0,
+        0,
+        7, // length
+        0x74,
+        0x65,
+        0x73,
+        0x74,
+        0x69,
+        0x6e,
+        0x67, // "testing"
       ]);
       reader.reset(data);
       expect(decoder.readStr()).toBe('testing');
@@ -75,8 +84,14 @@ describe('SshDecoder', () => {
 
     test('decodes ASCII string', () => {
       const data = new Uint8Array([
-        0, 0, 0, 4, // length
-        0x74, 0x65, 0x73, 0x74 // "test"
+        0,
+        0,
+        0,
+        4, // length
+        0x74,
+        0x65,
+        0x73,
+        0x74, // "test"
       ]);
       reader.reset(data);
       expect(decoder.readAsciiStr()).toBe('test');
@@ -84,8 +99,13 @@ describe('SshDecoder', () => {
 
     test('decodes binary string', () => {
       const data = new Uint8Array([
-        0, 0, 0, 3, // length
-        0x01, 0x02, 0x03
+        0,
+        0,
+        0,
+        3, // length
+        0x01,
+        0x02,
+        0x03,
       ]);
       reader.reset(data);
       const result = decoder.readBinStr();
@@ -100,8 +120,13 @@ describe('SshDecoder', () => {
 
     test('readBin is alias for readBinStr', () => {
       const data = new Uint8Array([
-        0, 0, 0, 3, // length
-        0x01, 0x02, 0x03
+        0,
+        0,
+        0,
+        3, // length
+        0x01,
+        0x02,
+        0x03,
       ]);
       reader.reset(data);
       const result = decoder.readBin();
@@ -119,8 +144,18 @@ describe('SshDecoder', () => {
 
     test('decodes mpint 0x9a378f9b2e332a7', () => {
       const data = new Uint8Array([
-        0, 0, 0, 8, // length
-        0x09, 0xa3, 0x78, 0xf9, 0xb2, 0xe3, 0x32, 0xa7
+        0,
+        0,
+        0,
+        8, // length
+        0x09,
+        0xa3,
+        0x78,
+        0xf9,
+        0xb2,
+        0xe3,
+        0x32,
+        0xa7,
       ]);
       reader.reset(data);
       const mpint = decoder.readMpint();
@@ -129,8 +164,12 @@ describe('SshDecoder', () => {
 
     test('decodes mpint 0x80', () => {
       const data = new Uint8Array([
-        0, 0, 0, 2, // length
-        0x00, 0x80
+        0,
+        0,
+        0,
+        2, // length
+        0x00,
+        0x80,
       ]);
       reader.reset(data);
       const mpint = decoder.readMpint();
@@ -139,8 +178,12 @@ describe('SshDecoder', () => {
 
     test('decodes mpint -1234', () => {
       const data = new Uint8Array([
-        0, 0, 0, 2, // length
-        0xfb, 0x2e
+        0,
+        0,
+        0,
+        2, // length
+        0xfb,
+        0x2e,
       ]);
       reader.reset(data);
       const mpint = decoder.readMpint();
@@ -149,8 +192,15 @@ describe('SshDecoder', () => {
 
     test('decodes mpint -0xdeadbeef', () => {
       const data = new Uint8Array([
-        0, 0, 0, 5, // length
-        0xff, 0x21, 0x52, 0x41, 0x11
+        0,
+        0,
+        0,
+        5, // length
+        0xff,
+        0x21,
+        0x52,
+        0x41,
+        0x11,
       ]);
       reader.reset(data);
       const mpint = decoder.readMpint();
@@ -166,8 +216,14 @@ describe('SshDecoder', () => {
 
     test('decodes single name "zlib"', () => {
       const data = new Uint8Array([
-        0, 0, 0, 4, // length
-        0x7a, 0x6c, 0x69, 0x62 // "zlib"
+        0,
+        0,
+        0,
+        4, // length
+        0x7a,
+        0x6c,
+        0x69,
+        0x62, // "zlib"
       ]);
       reader.reset(data);
       expect(decoder.readNameList()).toEqual(['zlib']);
@@ -175,8 +231,19 @@ describe('SshDecoder', () => {
 
     test('decodes name-list "zlib,none"', () => {
       const data = new Uint8Array([
-        0, 0, 0, 9, // length
-        0x7a, 0x6c, 0x69, 0x62, 0x2c, 0x6e, 0x6f, 0x6e, 0x65 // "zlib,none"
+        0,
+        0,
+        0,
+        9, // length
+        0x7a,
+        0x6c,
+        0x69,
+        0x62,
+        0x2c,
+        0x6e,
+        0x6f,
+        0x6e,
+        0x65, // "zlib,none"
       ]);
       reader.reset(data);
       expect(decoder.readNameList()).toEqual(['zlib', 'none']);
@@ -191,7 +258,7 @@ describe('SshDecoder', () => {
       data[2] = 0;
       data[3] = bytes.length;
       data.set(bytes, 4);
-      
+
       reader.reset(data);
       expect(decoder.readNameList()).toEqual(['one', 'two', 'three']);
     });

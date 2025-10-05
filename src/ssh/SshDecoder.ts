@@ -76,11 +76,11 @@ export class SshDecoder<R extends IReader & IReaderResettable = IReader & IReade
     const length = this.readUint32();
     const reader = this.reader;
     const data = new Uint8Array(length);
-    
+
     for (let i = 0; i < length; i++) {
       data[i] = reader.u8();
     }
-    
+
     return data;
   }
 
@@ -91,13 +91,13 @@ export class SshDecoder<R extends IReader & IReaderResettable = IReader & IReade
   public readStr(): string {
     const length = this.readUint32();
     const reader = this.reader;
-    
+
     // Read UTF-8 bytes
     const utf8Bytes = new Uint8Array(length);
     for (let i = 0; i < length; i++) {
       utf8Bytes[i] = reader.u8();
     }
-    
+
     // Decode UTF-8 to string
     return new TextDecoder('utf-8').decode(utf8Bytes);
   }
@@ -110,11 +110,11 @@ export class SshDecoder<R extends IReader & IReaderResettable = IReader & IReade
     const length = this.readUint32();
     const reader = this.reader;
     let str = '';
-    
+
     for (let i = 0; i < length; i++) {
       str += String.fromCharCode(reader.u8());
     }
-    
+
     return str;
   }
 
@@ -126,11 +126,11 @@ export class SshDecoder<R extends IReader & IReaderResettable = IReader & IReade
     const length = this.readUint32();
     const reader = this.reader;
     const data = new Uint8Array(length);
-    
+
     for (let i = 0; i < length; i++) {
       data[i] = reader.u8();
     }
-    
+
     return new JsonPackMpint(data);
   }
 

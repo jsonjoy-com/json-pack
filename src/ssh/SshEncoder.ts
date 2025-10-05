@@ -78,7 +78,7 @@ export class SshEncoder implements BinaryJsonEncoder {
    * Writes an SSH byte value (8-bit).
    */
   public writeByte(byte: number): void {
-    this.writer.u8(byte & 0xFF);
+    this.writer.u8(byte & 0xff);
   }
 
   /**
@@ -152,7 +152,7 @@ export class SshEncoder implements BinaryJsonEncoder {
 
     this.writeUint32(str.length);
     for (let i = 0; i < str.length; i++) {
-      writer.u8(str.charCodeAt(i) & 0x7F); // ASCII only
+      writer.u8(str.charCodeAt(i) & 0x7f); // ASCII only
     }
   }
 
@@ -181,7 +181,7 @@ export class SshEncoder implements BinaryJsonEncoder {
    */
   public writeNumber(num: number): void {
     if (Number.isInteger(num)) {
-      if (num >= 0 && num <= 0xFFFFFFFF) {
+      if (num >= 0 && num <= 0xffffffff) {
         this.writeUint32(num);
       } else {
         this.writeUint64(num);

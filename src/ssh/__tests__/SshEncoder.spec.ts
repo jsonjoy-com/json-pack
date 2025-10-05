@@ -43,15 +43,15 @@ describe('SshEncoder', () => {
     });
 
     test('encodes uint32 max value', () => {
-      encoder.writeUint32(0xFFFFFFFF);
+      encoder.writeUint32(0xffffffff);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([0xFF, 0xFF, 0xFF, 0xFF]));
+      expect(result).toEqual(new Uint8Array([0xff, 0xff, 0xff, 0xff]));
     });
 
     test('encodes uint64 from bigint', () => {
       encoder.writeUint64(BigInt('0x123456789ABCDEF0'));
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0]));
+      expect(result).toEqual(new Uint8Array([0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0]));
     });
 
     test('encodes uint64 from number', () => {
@@ -78,8 +78,17 @@ describe('SshEncoder', () => {
       encoder.writeStr('testing');
       const result = writer.flush();
       const expected = new Uint8Array([
-        0, 0, 0, 7, // length
-        0x74, 0x65, 0x73, 0x74, 0x69, 0x6e, 0x67 // "testing"
+        0,
+        0,
+        0,
+        7, // length
+        0x74,
+        0x65,
+        0x73,
+        0x74,
+        0x69,
+        0x6e,
+        0x67, // "testing"
       ]);
       expect(result).toEqual(expected);
     });
@@ -97,20 +106,35 @@ describe('SshEncoder', () => {
     test('encodes ASCII string', () => {
       encoder.writeAsciiStr('test');
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 4, // length
-        0x74, 0x65, 0x73, 0x74 // "test"
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          4, // length
+          0x74,
+          0x65,
+          0x73,
+          0x74, // "test"
+        ]),
+      );
     });
 
     test('encodes binary string', () => {
       const data = new Uint8Array([0x01, 0x02, 0x03]);
       encoder.writeBinStr(data);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 3, // length
-        0x01, 0x02, 0x03
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          3, // length
+          0x01,
+          0x02,
+          0x03,
+        ]),
+      );
     });
 
     test('encodes empty binary string', () => {
@@ -132,40 +156,73 @@ describe('SshEncoder', () => {
       const mpint = JsonPackMpint.fromBigInt(BigInt('0x9a378f9b2e332a7'));
       encoder.writeMpint(mpint);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 8, // length
-        0x09, 0xa3, 0x78, 0xf9, 0xb2, 0xe3, 0x32, 0xa7
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          8, // length
+          0x09,
+          0xa3,
+          0x78,
+          0xf9,
+          0xb2,
+          0xe3,
+          0x32,
+          0xa7,
+        ]),
+      );
     });
 
     test('encodes mpint 0x80', () => {
       const mpint = JsonPackMpint.fromBigInt(BigInt(0x80));
       encoder.writeMpint(mpint);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 2, // length
-        0x00, 0x80
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          2, // length
+          0x00,
+          0x80,
+        ]),
+      );
     });
 
     test('encodes mpint -1234', () => {
       const mpint = JsonPackMpint.fromBigInt(BigInt(-1234));
       encoder.writeMpint(mpint);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 2, // length
-        0xfb, 0x2e
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          2, // length
+          0xfb,
+          0x2e,
+        ]),
+      );
     });
 
     test('encodes mpint -0xdeadbeef', () => {
       const mpint = JsonPackMpint.fromBigInt(-BigInt('0xdeadbeef'));
       encoder.writeMpint(mpint);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 5, // length
-        0xff, 0x21, 0x52, 0x41, 0x11
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          5, // length
+          0xff,
+          0x21,
+          0x52,
+          0x41,
+          0x11,
+        ]),
+      );
     });
   });
 
@@ -179,19 +236,40 @@ describe('SshEncoder', () => {
     test('encodes single name "zlib"', () => {
       encoder.writeNameList(['zlib']);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 4, // length
-        0x7a, 0x6c, 0x69, 0x62 // "zlib"
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          4, // length
+          0x7a,
+          0x6c,
+          0x69,
+          0x62, // "zlib"
+        ]),
+      );
     });
 
     test('encodes name-list "zlib,none"', () => {
       encoder.writeNameList(['zlib', 'none']);
       const result = writer.flush();
-      expect(result).toEqual(new Uint8Array([
-        0, 0, 0, 9, // length
-        0x7a, 0x6c, 0x69, 0x62, 0x2c, 0x6e, 0x6f, 0x6e, 0x65 // "zlib,none"
-      ]));
+      expect(result).toEqual(
+        new Uint8Array([
+          0,
+          0,
+          0,
+          9, // length
+          0x7a,
+          0x6c,
+          0x69,
+          0x62,
+          0x2c,
+          0x6e,
+          0x6f,
+          0x6e,
+          0x65, // "zlib,none"
+        ]),
+      );
     });
 
     test('encodes name-list with three items', () => {

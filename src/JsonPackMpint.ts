@@ -1,6 +1,6 @@
 /**
  * Represents an SSH multiprecision integer (mpint).
- * 
+ *
  * An mpint is stored in two's complement format, 8 bits per byte, MSB first.
  * According to RFC 4251:
  * - Negative numbers have the value 1 as the most significant bit of the first byte
@@ -27,33 +27,33 @@ export class JsonPackMpint {
     }
 
     const negative = value < BigInt(0);
-    let bytes: number[] = [];
+    const bytes: number[] = [];
 
     if (negative) {
       // For negative numbers, work with two's complement
-      let absValue = -value;
-      let bitLength = absValue.toString(2).length;
-      let byteLength = Math.ceil((bitLength + 1) / 8); // +1 for sign bit
-      
+      const absValue = -value;
+      const bitLength = absValue.toString(2).length;
+      const byteLength = Math.ceil((bitLength + 1) / 8); // +1 for sign bit
+
       // Calculate two's complement
-      let twoComplement = (BigInt(1) << BigInt(byteLength * 8)) + value;
-      
+      const twoComplement = (BigInt(1) << BigInt(byteLength * 8)) + value;
+
       for (let i = byteLength - 1; i >= 0; i--) {
-        bytes.push(Number((twoComplement >> BigInt(i * 8)) & BigInt(0xFF)));
+        bytes.push(Number((twoComplement >> BigInt(i * 8)) & BigInt(0xff)));
       }
-      
+
       // Ensure MSB is 1 for negative numbers
-      while (bytes.length > 0 && bytes[0] === 0xFF && bytes.length > 1 && (bytes[1] & 0x80) !== 0) {
+      while (bytes.length > 0 && bytes[0] === 0xff && bytes.length > 1 && (bytes[1] & 0x80) !== 0) {
         bytes.shift();
       }
     } else {
       // For positive numbers
       let tempValue = value;
       while (tempValue > BigInt(0)) {
-        bytes.unshift(Number(tempValue & BigInt(0xFF)));
+        bytes.unshift(Number(tempValue & BigInt(0xff)));
         tempValue >>= BigInt(8);
       }
-      
+
       // Add leading zero if MSB is set (to indicate positive number)
       if (bytes[0] & 0x80) {
         bytes.unshift(0);
@@ -72,7 +72,7 @@ export class JsonPackMpint {
     }
 
     const negative = (this.data[0] & 0x80) !== 0;
-    
+
     if (negative) {
       // Two's complement for negative numbers
       let value = BigInt(0);

@@ -2,7 +2,55 @@ import type {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import type {Nfsv3Stat} from './constants';
 import type * as stucts from './structs';
 
-export {Nfsv3Stat} from './constants';
+export type Nfsv3Message = Nfsv3Request | Nfsv3Response;
+
+export type Nfsv3Request = 
+  | Nfsv3GetattrRequest
+  | Nfsv3SetattrRequest
+  | Nfsv3LookupRequest
+  | Nfsv3AccessRequest
+  | Nfsv3ReadlinkRequest
+  | Nfsv3ReadRequest
+  | Nfsv3WriteRequest
+  | Nfsv3CreateRequest
+  | Nfsv3MkdirRequest
+  | Nfsv3SymlinkRequest
+  | Nfsv3MknodRequest
+  | Nfsv3RemoveRequest
+  | Nfsv3RmdirRequest
+  | Nfsv3RenameRequest
+  | Nfsv3LinkRequest
+  | Nfsv3ReaddirRequest
+  | Nfsv3ReaddirplusRequest
+  | Nfsv3FsstatRequest
+  | Nfsv3FsinfoRequest
+  | Nfsv3PathconfRequest
+  | Nfsv3CommitRequest
+  ;
+
+export type Nfsv3Response =
+  | Nfsv3GetattrResponse
+  | Nfsv3SetattrResponse
+  | Nfsv3LookupResponse
+  | Nfsv3AccessResponse
+  | Nfsv3ReadlinkResponse
+  | Nfsv3ReadResponse
+  | Nfsv3WriteResponse
+  | Nfsv3CreateResponse
+  | Nfsv3MkdirResponse
+  | Nfsv3SymlinkResponse
+  | Nfsv3MknodResponse
+  | Nfsv3RemoveResponse
+  | Nfsv3RmdirResponse
+  | Nfsv3RenameResponse
+  | Nfsv3LinkResponse
+  | Nfsv3ReaddirResponse
+  | Nfsv3ReaddirplusResponse
+  | Nfsv3FsstatResponse
+  | Nfsv3FsinfoResponse
+  | Nfsv3PathconfResponse
+  | Nfsv3CommitResponse;
+  ;
 
 /**
  * GETATTR request

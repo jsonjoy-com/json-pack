@@ -17,7 +17,8 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     params?: Uint8Array,
   ): Uint8Array {
     this.writeCall(xid, prog, vers, proc, cred, verf, params);
-    return this.writer.flush();
+    const payload = this.writer.flush();
+    return this.addRecordMarking(payload);
   }
 
   public encodeAcceptedReply(
@@ -28,7 +29,8 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     results?: Uint8Array,
   ): Uint8Array {
     this.writeAcceptedReply(xid, verf, acceptStat, mismatchInfo, results);
-    return this.writer.flush();
+    const payload = this.writer.flush();
+    return this.addRecordMarking(payload);
   }
 
   public encodeRejectedReply(
@@ -38,12 +40,24 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     authStat?: number,
   ): Uint8Array {
     this.writeRejectedReply(xid, rejectStat, mismatchInfo, authStat);
-    return this.writer.flush();
+    const payload = this.writer.flush();
+    return this.addRecordMarking(payload);
   }
 
   public encodeMessage(msg: RpcMessage): Uint8Array {
     this.writeMessage(msg);
-    return this.writer.flush();
+    const payload = this.writer.flush();
+    return this.addRecordMarking(payload);
+  }
+
+  private addRecordMarking(payload: Uint8Array): Uint8Array {
+    const length = payload.length;
+    const header = 0x80000000 | length;
+    const result = new Uint8Array(4 + length);
+    const view = new DataView(result.buffer);
+    view.setUint32(0, header, false);
+    result.set(payload, 4);
+    return result;
   }
 
   public writeMessage(msg: RpcMessage): void {
@@ -53,6 +67,9 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     if (body instanceof RpcCallBody) {
       writer.u32(RpcMsgType.CALL);
       this.writeCallBody(body);
+      if (body.params && body.params.length > 0) {
+        writer.buf(body.params, body.params.length);
+      }
     } else if (body instanceof RpcAcceptedReply) {
       writer.u32(RpcMsgType.REPLY);
       writer.u32(RpcReplyStat.MSG_ACCEPTED);

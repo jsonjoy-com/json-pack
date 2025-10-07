@@ -17,6 +17,7 @@ export class RpcCallBody {
     public readonly proc: number,
     public readonly cred: RpcOpaqueAuth,
     public readonly verf: RpcOpaqueAuth,
+    public params: Uint8Array | undefined = undefined,
   ) {}
 }
 
@@ -32,7 +33,7 @@ export class RpcAcceptedReply {
     public readonly verf: RpcOpaqueAuth,
     public readonly stat: RpcAcceptStat,
     public readonly mismatchInfo?: RpcMismatchInfo,
-    public readonly results?: Uint8Array,
+    public results: Uint8Array | undefined = undefined,
   ) {}
 }
 

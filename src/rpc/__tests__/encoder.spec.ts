@@ -253,4 +253,123 @@ describe('RpcMessageEncoder', () => {
       testCred(credBody4, 4);
     });
   });
+
+  describe('Record Marking (RFC 1057 Section 10)', () => {
+    test('encoded messages include record marking header', () => {
+      const encoder = new RpcMessageEncoder();
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const encoded = encoder.encodeCall(1, 100, 1, 0, cred, verf);
+      expect(encoded.length).toBeGreaterThan(4);
+      const view = new DataView(encoded.buffer, encoded.byteOffset);
+      const header = view.getUint32(0, false);
+      const lastFragment = (header & 0x80000000) !== 0;
+      const length = header & 0x7fffffff;
+      expect(lastFragment).toBe(true);
+      expect(length).toBe(encoded.length - 4);
+    });
+
+    test('record marking header has correct length for CALL with params', () => {
+      const encoder = new RpcMessageEncoder();
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const params = new Uint8Array(100);
+      const encoded = encoder.encodeCall(1, 100, 1, 0, cred, verf, params);
+      const view = new DataView(encoded.buffer, encoded.byteOffset);
+      const header = view.getUint32(0, false);
+      const length = header & 0x7fffffff;
+      expect(length).toBe(encoded.length - 4);
+      expect(length).toBeGreaterThanOrEqual(40 + 100);
+    });
+
+    test('record marking header has correct length for REPLY with results', () => {
+      const encoder = new RpcMessageEncoder();
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const results = new Uint8Array(50);
+      const encoded = encoder.encodeAcceptedReply(1, verf, RpcAcceptStat.SUCCESS, undefined, results);
+      const view = new DataView(encoded.buffer, encoded.byteOffset);
+      const header = view.getUint32(0, false);
+      const length = header & 0x7fffffff;
+      expect(length).toBe(encoded.length - 4);
+    });
+
+    test('encodeMessage includes record marking', () => {
+      const encoder = new RpcMessageEncoder();
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const callBody = new RpcCallBody(RPC_VERSION, 100, 1, 0, cred, verf);
+      callBody.params = new Uint8Array([0, 0, 0, 42]);
+      const msg = new RpcMessage(1, callBody);
+      const encoded = encoder.encodeMessage(msg);
+      const view = new DataView(encoded.buffer, encoded.byteOffset);
+      const header = view.getUint32(0, false);
+      const lastFragment = (header & 0x80000000) !== 0;
+      const length = header & 0x7fffffff;
+      expect(lastFragment).toBe(true);
+      expect(length).toBe(encoded.length - 4);
+    });
+  });
+
+  describe('Payload Encoding', () => {
+    test('encodes CALL with procedure parameters', () => {
+      const encoder = new RpcMessageEncoder();
+      const decoder = new RpcMessageDecoder();
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const params = new Uint8Array([0x00, 0x00, 0x00, 0x2a, 0x00, 0x00, 0x00, 0x45]);
+      const encoded = encoder.encodeCall(1, 100, 1, 1, cred, verf, params);
+      decoder.push(encoded);
+      const msg = decoder.readMessage()!;
+      expect(msg).toBeDefined();
+      const call = msg.body as RpcCallBody;
+      expect(call.params).toBeDefined();
+      expect(call.params).toEqual(params);
+    });
+
+    test('encodes REPLY with result data', () => {
+      const encoder = new RpcMessageEncoder();
+      const decoder = new RpcMessageDecoder();
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const results = new Uint8Array([0x00, 0x00, 0x00, 0x7b]);
+      const encoded = encoder.encodeAcceptedReply(1, verf, RpcAcceptStat.SUCCESS, undefined, results);
+      decoder.push(encoded);
+      const msg = decoder.readMessage()!;
+      expect(msg).toBeDefined();
+      const reply = msg.body as RpcAcceptedReply;
+      expect(reply.results).toBeDefined();
+      expect(reply.results).toEqual(results);
+    });
+
+    test('encodes RpcCallBody with params field via encodeMessage', () => {
+      const encoder = new RpcMessageEncoder();
+      const decoder = new RpcMessageDecoder();
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const params = new Uint8Array([0x12, 0x34, 0x56, 0x78]);
+      const callBody = new RpcCallBody(RPC_VERSION, 100, 1, 1, cred, verf);
+      callBody.params = params;
+      const msg = new RpcMessage(1, callBody);
+      const encoded = encoder.encodeMessage(msg);
+      decoder.push(encoded);
+      const decoded = decoder.readMessage()!;
+      expect(decoded).toBeDefined();
+      const decodedCall = decoded.body as RpcCallBody;
+      expect(decodedCall.params).toEqual(params);
+    });
+
+    test('encodes RpcAcceptedReply with results field via encodeMessage', () => {
+      const encoder = new RpcMessageEncoder();
+      const decoder = new RpcMessageDecoder();
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const results = new Uint8Array([0x00, 0x00, 0x01, 0x00]);
+      const reply = new RpcAcceptedReply(verf, RpcAcceptStat.SUCCESS, undefined, results);
+      const msg = new RpcMessage(1, reply);
+      const encoded = encoder.encodeMessage(msg);
+      decoder.push(encoded);
+      const decoded = decoder.readMessage()!;
+      expect(decoded).toBeDefined();
+      const decodedReply = decoded.body as RpcAcceptedReply;
+      expect(decodedReply.results).toEqual(results);
+    });
+  });
 });

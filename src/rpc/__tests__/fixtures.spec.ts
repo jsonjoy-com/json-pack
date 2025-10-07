@@ -8,7 +8,8 @@ describe('RPC Real-world Fixtures', () => {
   describe('Decoding fixtures', () => {
     test.each(fixtures.ALL_FIXTURES)('$name - can decode byte-for-byte', (fixture) => {
       const decoder = new RpcMessageDecoder();
-      decoder.push(fixture.bytes);
+      const withRecordMarking = fixtures.addRecordMarking(fixture.bytes);
+      decoder.push(withRecordMarking);
       const msg = decoder.readMessage();
       expect(msg).toBeDefined();
       expect(msg!.xid).toBe(fixture.expected.xid);
@@ -73,7 +74,8 @@ describe('RPC Real-world Fixtures', () => {
   describe('Round-trip encoding/decoding', () => {
     test.each(fixtures.ALL_FIXTURES)('$name - round-trip preserves structure', (fixture) => {
       const decoder1 = new RpcMessageDecoder();
-      decoder1.push(fixture.bytes);
+      const withRecordMarking = fixtures.addRecordMarking(fixture.bytes);
+      decoder1.push(withRecordMarking);
       const msg1 = decoder1.readMessage()!;
       expect(msg1).toBeDefined();
       const encoder = new RpcMessageEncoder();
@@ -126,7 +128,7 @@ describe('RPC Real-world Fixtures', () => {
   describe('Streaming decode', () => {
     test('can decode NFS NULL CALL in chunks', () => {
       const decoder = new RpcMessageDecoder();
-      const bytes = fixtures.NFS_NULL_CALL.bytes;
+      const bytes = fixtures.addRecordMarking(fixtures.NFS_NULL_CALL.bytes);
       for (let i = 0; i < bytes.length; i += 4) {
         const chunk = bytes.slice(i, i + 4);
         decoder.push(chunk);
@@ -138,9 +140,9 @@ describe('RPC Real-world Fixtures', () => {
 
     test('can decode multiple messages from stream', () => {
       const decoder = new RpcMessageDecoder();
-      decoder.push(fixtures.NFS_NULL_CALL.bytes);
-      decoder.push(fixtures.SUCCESS_REPLY.bytes);
-      decoder.push(fixtures.PROG_UNAVAIL_REPLY.bytes);
+      decoder.push(fixtures.addRecordMarking(fixtures.NFS_NULL_CALL.bytes));
+      decoder.push(fixtures.addRecordMarking(fixtures.SUCCESS_REPLY.bytes));
+      decoder.push(fixtures.addRecordMarking(fixtures.PROG_UNAVAIL_REPLY.bytes));
       const msg1 = decoder.readMessage();
       expect(msg1).toBeDefined();
       expect(msg1!.xid).toBe(1);
@@ -162,7 +164,7 @@ describe('RPC Real-world Fixtures', () => {
 
     test('handles partial messages correctly', () => {
       const decoder = new RpcMessageDecoder();
-      const bytes = fixtures.CALL_WITH_AUTH_UNIX.bytes;
+      const bytes = fixtures.addRecordMarking(fixtures.CALL_WITH_AUTH_UNIX.bytes);
       decoder.push(bytes.slice(0, 20));
       expect(decoder.readMessage()).toBeUndefined();
       decoder.push(bytes.slice(20));
@@ -177,7 +179,8 @@ describe('RPC Real-world Fixtures', () => {
       '$name - correctly handles padding',
       (fixture) => {
         const decoder = new RpcMessageDecoder();
-        decoder.push(fixture.bytes);
+        const withRecordMarking = fixtures.addRecordMarking(fixture.bytes);
+        decoder.push(withRecordMarking);
         const msg = decoder.readMessage()!;
         expect(msg).toBeDefined();
         const call = msg.body as RpcCallBody;
@@ -202,7 +205,8 @@ describe('RPC Real-world Fixtures', () => {
         0x00,
         0x99, // Invalid msg_type
       ]);
-      decoder.push(invalidBytes);
+      const withRecordMarking = fixtures.addRecordMarking(invalidBytes);
+      decoder.push(withRecordMarking);
       expect(() => decoder.readMessage()).toThrow();
     });
 
@@ -250,7 +254,8 @@ describe('RPC Real-world Fixtures', () => {
         0x00,
         0x00, // verf length
       ]);
-      decoder.push(invalidBytes);
+      const withRecordMarking = fixtures.addRecordMarking(invalidBytes);
+      decoder.push(withRecordMarking);
       expect(() => decoder.readMessage()).toThrow();
     });
 
@@ -290,7 +295,8 @@ describe('RPC Real-world Fixtures', () => {
         0xff,
         0xff, // oversized length
       ]);
-      decoder.push(invalidBytes);
+      const withRecordMarking = fixtures.addRecordMarking(invalidBytes);
+      decoder.push(withRecordMarking);
       expect(() => decoder.readMessage()).toThrow();
     });
 
@@ -310,7 +316,8 @@ describe('RPC Real-world Fixtures', () => {
         0x00,
         0x99, // Invalid reply_stat
       ]);
-      decoder.push(invalidBytes);
+      const withRecordMarking = fixtures.addRecordMarking(invalidBytes);
+      decoder.push(withRecordMarking);
       expect(() => decoder.readMessage()).toThrow();
     });
   });
@@ -318,7 +325,8 @@ describe('RPC Real-world Fixtures', () => {
   describe('NFS-specific scenarios', () => {
     test('NFS NULL call should have no parameters', () => {
       const decoder = new RpcMessageDecoder();
-      decoder.push(fixtures.NFS_NULL_CALL.bytes);
+      const withRecordMarking = fixtures.addRecordMarking(fixtures.NFS_NULL_CALL.bytes);
+      decoder.push(withRecordMarking);
       const msg = decoder.readMessage()!;
       const call = msg.body as RpcCallBody;
       expect(call.prog).toBe(100003);
@@ -329,7 +337,8 @@ describe('RPC Real-world Fixtures', () => {
 
     test('GETPORT response format is valid', () => {
       const decoder = new RpcMessageDecoder();
-      decoder.push(fixtures.SUCCESS_REPLY.bytes);
+      const withRecordMarking = fixtures.addRecordMarking(fixtures.SUCCESS_REPLY.bytes);
+      decoder.push(withRecordMarking);
       const msg = decoder.readMessage()!;
       const reply = msg.body as RpcAcceptedReply;
       expect(reply.stat).toBe(RpcAcceptStat.SUCCESS);
@@ -339,9 +348,10 @@ describe('RPC Real-world Fixtures', () => {
   describe('Performance tests', () => {
     test('can decode 1000 messages quickly', () => {
       const decoder = new RpcMessageDecoder();
+      const withRecordMarking = fixtures.addRecordMarking(fixtures.NFS_NULL_CALL.bytes);
       const start = Date.now();
       for (let i = 0; i < 1000; i++) {
-        decoder.push(fixtures.NFS_NULL_CALL.bytes);
+        decoder.push(withRecordMarking);
         const msg = decoder.readMessage();
         expect(msg).toBeDefined();
       }
@@ -352,7 +362,8 @@ describe('RPC Real-world Fixtures', () => {
     test('can encode 1000 messages quickly', () => {
       const encoder = new RpcMessageEncoder();
       const decoder = new RpcMessageDecoder();
-      decoder.push(fixtures.NFS_NULL_CALL.bytes);
+      const withRecordMarking = fixtures.addRecordMarking(fixtures.NFS_NULL_CALL.bytes);
+      decoder.push(withRecordMarking);
       const template = decoder.readMessage()!;
       const start = Date.now();
       for (let i = 0; i < 1000; i++) {

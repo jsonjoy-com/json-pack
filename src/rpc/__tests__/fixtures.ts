@@ -17,6 +17,21 @@ export interface RpcFixture {
 }
 
 /**
+ * Adds RFC 1057 record marking to a raw RPC message payload.
+ * The record mark is a 4-byte header with the high bit set (last fragment)
+ * and the lower 31 bits containing the fragment length.
+ */
+export function addRecordMarking(payload: Uint8Array): Uint8Array {
+  const length = payload.length;
+  const header = 0x80000000 | length;
+  const result = new Uint8Array(4 + length);
+  const view = new DataView(result.buffer);
+  view.setUint32(0, header, false);
+  result.set(payload, 4);
+  return result;
+}
+
+/**
  * NFS NULL procedure call - simplest RPC call
  * Source: Common NFS implementations
  */

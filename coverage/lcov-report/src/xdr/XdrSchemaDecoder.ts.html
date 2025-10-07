@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">98.36% </span>
+                <span class="strong">89.55% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>60/61</span>
+                <span class='fraction'>60/67</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.54% </span>
+                <span class="strong">85.29% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>29/31</span>
+                <span class='fraction'>29/34</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">92.85% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>13/13</span>
+                <span class='fraction'>13/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">98.3% </span>
+                <span class="strong">90.62% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>58/59</span>
+                <span class='fraction'>58/64</span>
             </div>
         
             
@@ -262,11 +262,23 @@
 <a name='L197'></a><a href='#L197'>197</a>
 <a name='L198'></a><a href='#L198'>198</a>
 <a name='L199'></a><a href='#L199'>199</a>
-<a name='L200'></a><a href='#L200'>200</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -345,6 +357,11 @@
 <span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -461,15 +478,23 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrDecoder} from './XdrDecoder';
 import {XdrUnion} from './XdrUnion';
 import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
 import type {
   XdrSchema,
-  XdrPrimitiveSchema,
-  XdrWidePrimitiveSchema,
-  XdrCompositeSchema,
   XdrEnumSchema,
   XdrOpaqueSchema,
   XdrVarlenOpaqueSchema,
@@ -478,6 +503,7 @@ import type {
   XdrVarlenArraySchema,
   XdrStructSchema,
   XdrUnionSchema,
+  XdrOptionalSchema,
 } from './types';
 &nbsp;
 /**
@@ -544,6 +570,11 @@ export class XdrSchemaDecoder {
         return this.readStruct(schema as XdrStructSchema);
       case 'union':
         return this.readUnion(schema as XdrUnionSchema);
+<span class="branch-17 cbranch-no" title="branch not covered" >      case 'optional':</span>
+<span class="cstat-no" title="statement not covered" >        return this.readOptional(schema as XdrOptionalSchema);</span>
+<span class="branch-18 cbranch-no" title="branch not covered" >      case 'const':</span>
+        // Constants are not decoded; they have no runtime representation
+<span class="cstat-no" title="statement not covered" >        return undefined;</span>
 &nbsp;
       default:
         throw new Error(`Unknown schema type: ${(schema as any).type}`);
@@ -659,6 +690,17 @@ export class XdrSchemaDecoder {
 &nbsp;
     throw new Error(`No matching union arm for discriminant: ${discriminant}`);
   }
+&nbsp;
+  /**
+   * Reads optional-data according to the optional schema (RFC 1832 Section 3.19).
+   * Optional-data is syntactic sugar for a union with boolean discriminant.
+   * Returns null if opted is FALSE, otherwise returns the decoded value.
+   */
+  private <span class="fstat-no" title="function not covered" >readOptional(</span>schema: XdrOptionalSchema): unknown | null {
+    const opted = <span class="cstat-no" title="statement not covered" >this.decoder.readBoolean();</span>
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!opted) <span class="cstat-no" title="statement not covered" >return null;</span></span>
+<span class="cstat-no" title="statement not covered" >    return this.readValue(schema.element);</span>
+  }
 }
 &nbsp;</pre></td></tr></table></pre>
 
@@ -667,7 +709,7 @@ export class XdrSchemaDecoder {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-07T10:00:22.626Z
+                at 2025-10-07T22:26:16.875Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

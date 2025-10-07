@@ -24,7 +24,6 @@ export class RmRecordDecoder {
         const currentFragment = reader.buf(len);
         reader.consume();
         const fragments = this.fragments;
-        // console.log('header', size, header, fin, len, fragments, currentFragment);
         if (fin) {
           if (!fragments.length) return currentFragment;
           fragments.push(currentFragment);

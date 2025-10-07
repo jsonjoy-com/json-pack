@@ -218,14 +218,14 @@ describe('RpcMessageEncoder', () => {
       const encoded2 = encoder.encodeCall(101, 1001, 1, 1, cred, verf);
       const encoded3 = encoder.encodeAcceptedReply(100, verf, RpcAcceptStat.SUCCESS);
       decoder.push(encoded1);
-      decoder.push(encoded2);
-      decoder.push(encoded3);
       const msg1 = decoder.readMessage()!;
       expect(msg1.xid).toBe(100);
       expect((msg1.body as RpcCallBody).prog).toBe(1000);
+      decoder.push(encoded2);
       const msg2 = decoder.readMessage()!;
       expect(msg2.xid).toBe(101);
       expect((msg2.body as RpcCallBody).prog).toBe(1001);
+      decoder.push(encoded3);
       const msg3 = decoder.readMessage()!;
       expect(msg3.xid).toBe(100);
       expect((msg3.body as RpcAcceptedReply).stat).toBe(RpcAcceptStat.SUCCESS);
@@ -251,62 +251,6 @@ describe('RpcMessageEncoder', () => {
       testCred(credBody2, 2);
       testCred(credBody3, 3);
       testCred(credBody4, 4);
-    });
-  });
-
-  describe('Record Marking (RFC 1057 Section 10)', () => {
-    test('encoded messages include record marking header', () => {
-      const encoder = new RpcMessageEncoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const encoded = encoder.encodeCall(1, 100, 1, 0, cred, verf);
-      expect(encoded.length).toBeGreaterThan(4);
-      const view = new DataView(encoded.buffer, encoded.byteOffset);
-      const header = view.getUint32(0, false);
-      const lastFragment = (header & 0x80000000) !== 0;
-      const length = header & 0x7fffffff;
-      expect(lastFragment).toBe(true);
-      expect(length).toBe(encoded.length - 4);
-    });
-
-    test('record marking header has correct length for CALL with params', () => {
-      const encoder = new RpcMessageEncoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const params = new Uint8Array(100);
-      const encoded = encoder.encodeCall(1, 100, 1, 0, cred, verf, params);
-      const view = new DataView(encoded.buffer, encoded.byteOffset);
-      const header = view.getUint32(0, false);
-      const length = header & 0x7fffffff;
-      expect(length).toBe(encoded.length - 4);
-      expect(length).toBeGreaterThanOrEqual(40 + 100);
-    });
-
-    test('record marking header has correct length for REPLY with results', () => {
-      const encoder = new RpcMessageEncoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const results = new Uint8Array(50);
-      const encoded = encoder.encodeAcceptedReply(1, verf, RpcAcceptStat.SUCCESS, undefined, results);
-      const view = new DataView(encoded.buffer, encoded.byteOffset);
-      const header = view.getUint32(0, false);
-      const length = header & 0x7fffffff;
-      expect(length).toBe(encoded.length - 4);
-    });
-
-    test('encodeMessage includes record marking', () => {
-      const encoder = new RpcMessageEncoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const callBody = new RpcCallBody(RPC_VERSION, 100, 1, 0, cred, verf);
-      callBody.params = new Uint8Array([0, 0, 0, 42]);
-      const msg = new RpcMessage(1, callBody);
-      const encoded = encoder.encodeMessage(msg);
-      const view = new DataView(encoded.buffer, encoded.byteOffset);
-      const header = view.getUint32(0, false);
-      const lastFragment = (header & 0x80000000) !== 0;
-      const length = header & 0x7fffffff;
-      expect(lastFragment).toBe(true);
-      expect(length).toBe(encoded.length - 4);
     });
   });
 

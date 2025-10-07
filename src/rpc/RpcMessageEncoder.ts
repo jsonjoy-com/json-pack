@@ -17,8 +17,7 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     params?: Uint8Array,
   ): Uint8Array {
     this.writeCall(xid, prog, vers, proc, cred, verf, params);
-    const payload = this.writer.flush();
-    return this.addRecordMarking(payload);
+    return this.writer.flush();
   }
 
   public encodeAcceptedReply(
@@ -29,8 +28,7 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     results?: Uint8Array,
   ): Uint8Array {
     this.writeAcceptedReply(xid, verf, acceptStat, mismatchInfo, results);
-    const payload = this.writer.flush();
-    return this.addRecordMarking(payload);
+    return this.writer.flush();
   }
 
   public encodeRejectedReply(
@@ -40,24 +38,12 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     authStat?: number,
   ): Uint8Array {
     this.writeRejectedReply(xid, rejectStat, mismatchInfo, authStat);
-    const payload = this.writer.flush();
-    return this.addRecordMarking(payload);
+    return this.writer.flush();
   }
 
   public encodeMessage(msg: RpcMessage): Uint8Array {
     this.writeMessage(msg);
-    const payload = this.writer.flush();
-    return this.addRecordMarking(payload);
-  }
-
-  private addRecordMarking(payload: Uint8Array): Uint8Array {
-    const length = payload.length;
-    const header = 0x80000000 | length;
-    const result = new Uint8Array(4 + length);
-    const view = new DataView(result.buffer);
-    view.setUint32(0, header, false);
-    result.set(payload, 4);
-    return result;
+    return this.writer.flush();
   }
 
   public writeMessage(msg: RpcMessage): void {

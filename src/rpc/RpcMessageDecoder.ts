@@ -5,9 +5,6 @@ import {RpcOpaqueAuth, RpcCallBody, RpcAcceptedReply, RpcRejectedReply, RpcMessa
 
 export class RpcMessageDecoder {
   public readonly reader = new StreamingReader();
-  private fragmentBuffer: Uint8Array | null = null;
-  private fragmentLength = 0;
-  private fragmentReceived = 0;
 
   public push(uint8: Uint8Array): void {
     this.reader.push(uint8);
@@ -17,65 +14,50 @@ export class RpcMessageDecoder {
     const reader = this.reader;
     const startPos = reader.x;
     try {
-      if (!this.readRecordFragment()) {
+      if (reader.size() < 8) {
         reader.x = startPos;
         return undefined;
       }
-      if (!this.fragmentBuffer) {
-        reader.x = startPos;
-        return undefined;
-      }
-      const fragmentReader = new StreamingReader();
-      fragmentReader.push(this.fragmentBuffer);
-      if (fragmentReader.size() < 8) {
-        this.fragmentBuffer = null;
-        throw new RpcDecodingError('Fragment too small for RPC message');
-      }
-      const xid = fragmentReader.u32();
-      const msgType = fragmentReader.u32();
+      const xid = reader.u32();
+      const msgType = reader.u32();
       let message: RpcMessage | undefined;
       if (msgType === RpcMsgType.CALL) {
-        const callBody = this.readCallBodyFromFragment(fragmentReader);
+        const callBody = this.readCallBody(reader);
         if (!callBody) {
-          this.fragmentBuffer = null;
-          throw new RpcDecodingError('Invalid CALL message');
+          reader.x = startPos;
+          return undefined;
         }
-        const params = fragmentReader.size() > 0 ? fragmentReader.buf(fragmentReader.size()) : undefined;
+        const params = reader.size() > 0 ? reader.buf(reader.size()) : undefined;
         callBody.params = params;
         message = new RpcMessage(xid, callBody);
       } else if (msgType === RpcMsgType.REPLY) {
-        if (fragmentReader.size() < 4) {
-          this.fragmentBuffer = null;
-          throw new RpcDecodingError('Fragment too small for REPLY');
+        if (reader.size() < 4) {
+          reader.x = startPos;
+          return undefined;
         }
-        const replyStat = fragmentReader.u32();
+        const replyStat = reader.u32();
         if (replyStat === RpcReplyStat.MSG_ACCEPTED) {
-          const reply = this.readAcceptedReplyFromFragment(fragmentReader);
+          const reply = this.readAcceptedReply(reader);
           if (!reply) {
-            this.fragmentBuffer = null;
-            throw new RpcDecodingError('Invalid ACCEPTED REPLY');
+            reader.x = startPos;
+            return undefined;
           }
-          const results = fragmentReader.size() > 0 ? fragmentReader.buf(fragmentReader.size()) : undefined;
+          const results = reader.size() > 0 ? reader.buf(reader.size()) : undefined;
           reply.results = results;
           message = new RpcMessage(xid, reply);
         } else if (replyStat === RpcReplyStat.MSG_DENIED) {
-          const reply = this.readRejectedReplyFromFragment(fragmentReader);
+          const reply = this.readRejectedReply(reader);
           if (!reply) {
-            this.fragmentBuffer = null;
-            throw new RpcDecodingError('Invalid REJECTED REPLY');
+            reader.x = startPos;
+            return undefined;
           }
           message = new RpcMessage(xid, reply);
         } else {
-          this.fragmentBuffer = null;
           throw new RpcDecodingError('Invalid reply_stat');
         }
       } else {
-        this.fragmentBuffer = null;
         throw new RpcDecodingError('Invalid msg_type');
       }
-      this.fragmentBuffer = null;
-      this.fragmentLength = 0;
-      this.fragmentReceived = 0;
       reader.consume();
       return message;
     } catch (err) {
@@ -87,30 +69,7 @@ export class RpcMessageDecoder {
     }
   }
 
-  private readRecordFragment(): boolean {
-    const reader = this.reader;
-    if (this.fragmentBuffer) {
-      return true;
-    }
-    if (reader.size() < 4) return false;
-    const header = reader.u32();
-    const lastFragment = (header & 0x80000000) !== 0;
-    const length = header & 0x7fffffff;
-    if (length > 0x7fffffff) {
-      throw new RpcDecodingError('Fragment length too large');
-    }
-    if (reader.size() < length) return false;
-    const fragmentData = reader.buf(length);
-    if (!lastFragment) {
-      throw new RpcDecodingError('Multi-fragment messages not yet supported');
-    }
-    this.fragmentBuffer = fragmentData;
-    this.fragmentLength = length;
-    this.fragmentReceived = length;
-    return true;
-  }
-
-  private readCallBodyFromFragment(reader: StreamingReader): RpcCallBody | undefined {
+  private readCallBody(reader: StreamingReader): RpcCallBody | undefined {
     if (reader.size() < 20) return undefined;
     const rpcvers = reader.u32();
     if (rpcvers !== RPC_VERSION) {
@@ -119,15 +78,15 @@ export class RpcMessageDecoder {
     const prog = reader.u32();
     const vers = reader.u32();
     const proc = reader.u32();
-    const cred = this.readOpaqueAuthFromFragment(reader);
+    const cred = this.readOpaqueAuth(reader);
     if (!cred) return undefined;
-    const verf = this.readOpaqueAuthFromFragment(reader);
+    const verf = this.readOpaqueAuth(reader);
     if (!verf) return undefined;
     return new RpcCallBody(rpcvers, prog, vers, proc, cred, verf);
   }
 
-  private readAcceptedReplyFromFragment(reader: StreamingReader): RpcAcceptedReply | undefined {
-    const verf = this.readOpaqueAuthFromFragment(reader);
+  private readAcceptedReply(reader: StreamingReader): RpcAcceptedReply | undefined {
+    const verf = this.readOpaqueAuth(reader);
     if (!verf) return undefined;
     if (reader.size() < 4) return undefined;
     const acceptStat = reader.u32();
@@ -141,7 +100,7 @@ export class RpcMessageDecoder {
     return new RpcAcceptedReply(verf, acceptStat, mismatchInfo, undefined);
   }
 
-  private readRejectedReplyFromFragment(reader: StreamingReader): RpcRejectedReply | undefined {
+  private readRejectedReply(reader: StreamingReader): RpcRejectedReply | undefined {
     if (reader.size() < 4) return undefined;
     const rejectStat = reader.u32();
     let mismatchInfo: RpcMismatchInfo | undefined;
@@ -158,7 +117,7 @@ export class RpcMessageDecoder {
     return new RpcRejectedReply(rejectStat, mismatchInfo, authStat);
   }
 
-  private readOpaqueAuthFromFragment(reader: StreamingReader): RpcOpaqueAuth | undefined {
+  private readOpaqueAuth(reader: StreamingReader): RpcOpaqueAuth | undefined {
     if (reader.size() < 8) return undefined;
     const flavor = reader.u32();
     const length = reader.u32();

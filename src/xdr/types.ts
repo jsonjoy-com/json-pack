@@ -1,9 +1,16 @@
 /**
  * XDR (External Data Representation Standard) schema type definitions
- * based on RFC 4506 specification.
+ * based on RFC 4506 (May 2006), which obsoletes RFC 1832 (August 1995)
+ * and RFC 1014 (June 1987).
+ *
+ * This implementation supports all three RFC versions:
+ * - RFC 1014: Original XDR standard
+ * - RFC 1832: Added quadruple-precision floats, enhanced optional-data
+ * - RFC 4506: Added IANA considerations and security guidance (no protocol changes)
+ *
  * Specification: https://datatracker.ietf.org/doc/html/rfc4506
  */
-export type XdrSchema = XdrPrimitiveSchema | XdrWidePrimitiveSchema | XdrCompositeSchema;
+export type XdrSchema = XdrPrimitiveSchema | XdrWidePrimitiveSchema | XdrCompositeSchema | XdrOptionalSchema;
 
 // Primitive type schemas
 
@@ -50,7 +57,13 @@ export interface XdrStringSchema extends XdrBaseSchema<'string'> {
 
 // Composite type schemas
 
-export type XdrCompositeSchema = XdrArraySchema | XdrVarlenArraySchema | XdrStructSchema | XdrUnionSchema;
+export type XdrCompositeSchema =
+  | XdrArraySchema
+  | XdrVarlenArraySchema
+  | XdrStructSchema
+  | XdrUnionSchema
+  | XdrOptionalSchema
+  | XdrConstantSchema;
 
 export interface XdrArraySchema extends XdrBaseSchema<'array'> {
   /** Schema of array elements */
@@ -88,6 +101,29 @@ export interface XdrUnionSchema extends XdrBaseSchema<'union'> {
   type: 'union';
   arms: [discriminant: number | string | boolean, schema: XdrSchema][];
   default?: XdrSchema;
+}
+
+/**
+ * Optional-data is a special case introduced in RFC 1832.
+ * It is syntactic sugar for a union with a boolean discriminant:
+ *   type *identifier;
+ * is equivalent to:
+ *   union switch (bool opted) {
+ *     case TRUE: type element;
+ *     case FALSE: void;
+ *   }
+ */
+export interface XdrOptionalSchema extends XdrBaseSchema<'optional'> {
+  /** Schema of the optional element */
+  element: XdrSchema;
+}
+
+/**
+ * Constant definition (RFC 4506 Section 4.17).
+ * Constants are used to define symbolic names for numeric values.
+ */
+export interface XdrConstantSchema extends XdrBaseSchema<'const'> {
+  value: number;
 }
 
 // Base schema

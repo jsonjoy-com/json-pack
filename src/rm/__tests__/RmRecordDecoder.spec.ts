@@ -45,20 +45,20 @@ describe('RmRecordDecoder', () => {
       decoder.push(new Uint8Array([1]));
       expect(decoder.readRecord()).toBeUndefined();
       decoder.push(new Uint8Array([42]));
-      expect(decoder.readRecord()).toEqual(new Uint8Array([42]));
+      expect(decoder.readRecord()?.buf()).toEqual(new Uint8Array([42]));
       expect(decoder.readRecord()).toBeUndefined();
       decoder.push(new Uint8Array([0b10000000, 0, 0]));
       expect(decoder.readRecord()).toBeUndefined();
       expect(decoder.readRecord()).toBeUndefined();
       decoder.push(new Uint8Array([1, 43]));
-      expect(decoder.readRecord()).toEqual(new Uint8Array([43]));
+      expect(decoder.readRecord()?.buf()).toEqual(new Uint8Array([43]));
       expect(decoder.readRecord()).toBeUndefined();
     });
 
     test('decodes single-byte record', () => {
       const decoder = new RmRecordDecoder();
       decoder.push(new Uint8Array([0b10000000, 0, 0, 1, 42]));
-      const result = decoder.readRecord();
+      const result = decoder.readRecord()?.buf();
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result!.length).toBe(1);
       expect(result![0]).toBe(42);
@@ -68,7 +68,7 @@ describe('RmRecordDecoder', () => {
       const decoder = new RmRecordDecoder();
       const data = new Uint8Array([1, 2, 3, 4, 5]);
       decoder.push(new Uint8Array([0b10000000, 0, 0, data.length, ...data]));
-      const result = decoder.readRecord();
+      const result = decoder.readRecord()?.buf();
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result!.length).toBe(data.length);
       expect(result).toEqual(data);
@@ -79,7 +79,7 @@ describe('RmRecordDecoder', () => {
       const data = new TextEncoder().encode(text);
       const decoder = new RmRecordDecoder();
       decoder.push(new Uint8Array([0b10000000, 0, 0, data.length, ...data]));
-      const result = decoder.readRecord();
+      const result = decoder.readRecord()?.buf();
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result!.length).toBe(data.length);
       expect(result).toEqual(data);
@@ -91,7 +91,7 @@ describe('RmRecordDecoder', () => {
       for (let i = 0; i < size; i++) data[i] = i % 256;
       const decoder = new RmRecordDecoder();
       decoder.push(new Uint8Array([0b10000000, (size >> 16) & 0xff, (size >> 8) & 0xff, size & 0xff, ...data]));
-      const result = decoder.readRecord();
+      const result = decoder.readRecord()?.buf();
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result!.length).toBe(data.length);
       expect(result).toEqual(data);
@@ -106,7 +106,7 @@ describe('RmRecordDecoder', () => {
       decoder.push(new Uint8Array([0b00000000, 0, 0, part1.length, ...part1]));
       expect(decoder.readRecord()).toBeUndefined();
       decoder.push(new Uint8Array([0b10000000, 0, 0, part2.length, ...part2]));
-      const result = decoder.readRecord();
+      const result = decoder.readRecord()?.buf();
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result!.length).toBe(part1.length + part2.length);
       expect(result).toEqual(new Uint8Array([...part1, ...part2]));
@@ -122,7 +122,7 @@ describe('RmRecordDecoder', () => {
       decoder.push(new Uint8Array([0b00000000, 0, 0, part2.length, ...part2]));
       expect(decoder.readRecord()).toBeUndefined();
       decoder.push(new Uint8Array([0b10000000, 0, 0, part3.length, ...part3]));
-      const result = decoder.readRecord();
+      const result = decoder.readRecord()?.buf();
       expect(result).toBeInstanceOf(Uint8Array);
       expect(result!.length).toBe(part1.length + part2.length + part3.length);
       expect(result).toEqual(new Uint8Array([...part1, ...part2, ...part3]));

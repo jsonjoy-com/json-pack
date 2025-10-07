@@ -1,4 +1,5 @@
 import {StreamingReader} from '@jsonjoy.com/buffers/lib/StreamingReader';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {concatList} from '@jsonjoy.com/buffers/lib/concat';
 
 export class RmRecordDecoder {
@@ -12,7 +13,7 @@ export class RmRecordDecoder {
   /**
    * @todo PERF: Make it return Slice instead of Uint8Array
    */
-  public readRecord(): Uint8Array | undefined {
+  public readRecord(): Reader | undefined {
     const reader = this.reader;
     let size = reader.size();
     if (size < 4) return undefined;
@@ -24,17 +25,16 @@ export class RmRecordDecoder {
         const fin = !!(header & 0b10000000_00000000_00000000_00000000);
         const len = header & 0b01111111_11111111_11111111_11111111;
         if (size < len) break READ_FRAGMENT;
-        const currentFragment = reader.buf(len);
         reader.consume();
         const fragments = this.fragments;
         if (fin) {
-          if (!fragments.length) return currentFragment;
-          fragments.push(currentFragment);
+          if (!fragments.length) return reader.cut(len);
+          fragments.push(reader.buf(len));
           const record = concatList(fragments);
           this.fragments = [];
-          return record.length ? record : undefined;
+          return record.length ? new Reader(record) : undefined;
         } else {
-          fragments.push(currentFragment);
+          fragments.push(reader.buf(len));
           return undefined;
         }
       } catch (err) {

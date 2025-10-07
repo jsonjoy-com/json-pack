@@ -9,7 +9,7 @@ describe('RPC Real-world Fixtures', () => {
     test.each(fixtures.ALL_FIXTURES)('$name - can decode byte-for-byte', (fixture) => {
       const decoder = new RpcMessageDecoder();
       decoder.push(fixture.bytes);
-      const msg = decoder.readMessage();
+      const msg = decoder.decodeMessage();
       expect(msg).toBeDefined();
       expect(msg!.xid).toBe(fixture.expected.xid);
       if (fixture.expected.type === 'CALL') {
@@ -75,13 +75,13 @@ describe('RPC Real-world Fixtures', () => {
       const decoder1 = new RpcMessageDecoder();
       const withRecordMarking = fixture.bytes;
       decoder1.push(withRecordMarking);
-      const msg1 = decoder1.readMessage()!;
+      const msg1 = decoder1.decodeMessage()!;
       expect(msg1).toBeDefined();
       const encoder = new RpcMessageEncoder();
       const encoded = encoder.encodeMessage(msg1);
       const decoder2 = new RpcMessageDecoder();
       decoder2.push(encoded);
-      const msg2 = decoder2.readMessage()!;
+      const msg2 = decoder2.decodeMessage()!;
       expect(msg2).toBeDefined();
       expect(msg2.xid).toBe(msg1.xid);
       if (msg1.body instanceof RpcCallBody) {
@@ -132,7 +132,7 @@ describe('RPC Real-world Fixtures', () => {
         const chunk = bytes.slice(i, i + 4);
         decoder.push(chunk);
       }
-      const msg = decoder.readMessage();
+      const msg = decoder.decodeMessage();
       expect(msg).toBeDefined();
       expect(msg!.xid).toBe(1);
     });
@@ -140,15 +140,15 @@ describe('RPC Real-world Fixtures', () => {
     test('can decode multiple messages from stream', () => {
       const decoder = new RpcMessageDecoder();
       decoder.push(fixtures.NFS_NULL_CALL.bytes);
-      const msg1 = decoder.readMessage();
+      const msg1 = decoder.decodeMessage();
       expect(msg1).toBeDefined();
       expect(msg1!.xid).toBe(1);
       decoder.push(fixtures.SUCCESS_REPLY.bytes);
-      const msg2 = decoder.readMessage();
+      const msg2 = decoder.decodeMessage();
       expect(msg2).toBeDefined();
       expect(msg2!.xid).toBe(156);
       decoder.push(fixtures.PROG_UNAVAIL_REPLY.bytes);
-      const msg3 = decoder.readMessage();
+      const msg3 = decoder.decodeMessage();
       expect(msg3).toBeDefined();
       expect(msg3!.xid).toBe(66);
     });
@@ -157,9 +157,9 @@ describe('RPC Real-world Fixtures', () => {
       const decoder = new RpcMessageDecoder();
       const bytes = fixtures.CALL_WITH_AUTH_UNIX.bytes;
       decoder.push(bytes.slice(0, 20));
-      expect(decoder.readMessage()).toBeUndefined();
+      expect(decoder.decodeMessage()).toBeUndefined();
       decoder.push(bytes.slice(20));
-      const msg = decoder.readMessage();
+      const msg = decoder.decodeMessage();
       expect(msg).toBeDefined();
       expect(msg!.xid).toBe(1234);
     });
@@ -172,7 +172,7 @@ describe('RPC Real-world Fixtures', () => {
         const decoder = new RpcMessageDecoder();
         const withRecordMarking = fixture.bytes;
         decoder.push(withRecordMarking);
-        const msg = decoder.readMessage()!;
+        const msg = decoder.decodeMessage()!;
         expect(msg).toBeDefined();
         const call = msg.body as RpcCallBody;
         expect(call.cred.body.length).toBe(fixture.expected.credBodyLength);
@@ -198,7 +198,7 @@ describe('RPC Real-world Fixtures', () => {
       ]);
       const withRecordMarking = invalidBytes;
       decoder.push(withRecordMarking);
-      expect(() => decoder.readMessage()).toThrow();
+      expect(() => decoder.decodeMessage()).toThrow();
     });
 
     test('handles invalid RPC version', () => {
@@ -247,7 +247,7 @@ describe('RPC Real-world Fixtures', () => {
       ]);
       const withRecordMarking = invalidBytes;
       decoder.push(withRecordMarking);
-      expect(() => decoder.readMessage()).toThrow();
+      expect(() => decoder.decodeMessage()).toThrow();
     });
 
     test('handles oversized auth body', () => {
@@ -288,7 +288,7 @@ describe('RPC Real-world Fixtures', () => {
       ]);
       const withRecordMarking = invalidBytes;
       decoder.push(withRecordMarking);
-      expect(() => decoder.readMessage()).toThrow();
+      expect(() => decoder.decodeMessage()).toThrow();
     });
 
     test('handles invalid reply_stat', () => {
@@ -309,7 +309,7 @@ describe('RPC Real-world Fixtures', () => {
       ]);
       const withRecordMarking = invalidBytes;
       decoder.push(withRecordMarking);
-      expect(() => decoder.readMessage()).toThrow();
+      expect(() => decoder.decodeMessage()).toThrow();
     });
   });
 
@@ -318,7 +318,7 @@ describe('RPC Real-world Fixtures', () => {
       const decoder = new RpcMessageDecoder();
       const withRecordMarking = fixtures.NFS_NULL_CALL.bytes;
       decoder.push(withRecordMarking);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       const call = msg.body as RpcCallBody;
       expect(call.prog).toBe(100003);
       expect(call.proc).toBe(0);
@@ -330,7 +330,7 @@ describe('RPC Real-world Fixtures', () => {
       const decoder = new RpcMessageDecoder();
       const withRecordMarking = fixtures.SUCCESS_REPLY.bytes;
       decoder.push(withRecordMarking);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       const reply = msg.body as RpcAcceptedReply;
       expect(reply.stat).toBe(RpcAcceptStat.SUCCESS);
     });
@@ -343,7 +343,7 @@ describe('RPC Real-world Fixtures', () => {
       const start = Date.now();
       for (let i = 0; i < 1000; i++) {
         decoder.push(withRecordMarking);
-        const msg = decoder.readMessage();
+        const msg = decoder.decodeMessage();
         expect(msg).toBeDefined();
       }
       const elapsed = Date.now() - start;
@@ -355,7 +355,7 @@ describe('RPC Real-world Fixtures', () => {
       const decoder = new RpcMessageDecoder();
       const withRecordMarking = fixtures.NFS_NULL_CALL.bytes;
       decoder.push(withRecordMarking);
-      const template = decoder.readMessage()!;
+      const template = decoder.decodeMessage()!;
       const start = Date.now();
       for (let i = 0; i < 1000; i++) {
         const encoded = encoder.encodeMessage(template);

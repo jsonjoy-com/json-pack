@@ -6,11 +6,8 @@ import {RpcOpaqueAuth, RpcCallBody, RpcAcceptedReply, RpcRejectedReply, RpcMessa
 export class RpcMessageDecoder {
   public readonly reader = new StreamingReader();
 
-  public push(uint8: Uint8Array): void {
+  public decodeMessage(uint8: Uint8Array): RpcMessage | undefined {
     this.reader.push(uint8);
-  }
-
-  public readMessage(): RpcMessage | undefined {
     const reader = this.reader;
     const startPos = reader.x;
     try {

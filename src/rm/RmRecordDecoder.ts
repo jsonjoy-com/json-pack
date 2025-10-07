@@ -9,6 +9,9 @@ export class RmRecordDecoder {
     this.reader.push(uint8);
   }
 
+  /**
+   * @todo PERF: Make it return Slice instead of Uint8Array
+   */
   public readRecord(): Uint8Array | undefined {
     const reader = this.reader;
     let size = reader.size();

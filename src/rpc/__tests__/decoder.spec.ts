@@ -1,6 +1,6 @@
 import {RpcMessageDecoder} from '../RpcMessageDecoder';
-import {RpcMsgType, RpcAuthFlavor, RpcAcceptStat, RpcRejectStat, RpcAuthStat, RPC_VERSION} from '../constants';
-import {RpcCallBody, RpcAcceptedReply, RpcRejectedReply, RpcOpaqueAuth} from '../messages';
+import {RpcAuthFlavor, RpcAcceptStat, RpcRejectStat, RpcAuthStat, RPC_VERSION} from '../constants';
+import {RpcCallBody, RpcAcceptedReply, RpcRejectedReply} from '../messages';
 
 describe('RpcMessageDecoder', () => {
   describe('CALL messages', () => {
@@ -49,7 +49,7 @@ describe('RpcMessageDecoder', () => {
         0x00, // verf.length = 0
       ]);
       decoder.push(payload);
-      const msg = decoder.readMessage()!
+      const msg = decoder.decodeMessage()!
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
       expect(msg.body).toBeInstanceOf(RpcCallBody);
@@ -118,7 +118,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(10);
       const call = msg.body as RpcCallBody;
@@ -144,7 +144,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload.slice(0, 10));
-      const msg = decoder.readMessage();
+      const msg = decoder.decodeMessage();
       expect(msg).toBeUndefined();
     });
 
@@ -197,11 +197,11 @@ describe('RpcMessageDecoder', () => {
       const chunk2 = payload.slice(20, 36);
       const chunk3 = payload.slice(36);
       decoder.push(chunk1);
-      expect(decoder.readMessage()).toBeUndefined();
+      expect(decoder.decodeMessage()).toBeUndefined();
       decoder.push(chunk2);
-      expect(decoder.readMessage()).toBeUndefined();
+      expect(decoder.decodeMessage()).toBeUndefined();
       decoder.push(chunk3);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
     });
@@ -242,7 +242,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
       expect(msg.body).toBeInstanceOf(RpcAcceptedReply);
@@ -280,7 +280,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(2);
       const reply = msg.body as RpcAcceptedReply;
@@ -325,7 +325,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(3);
       const reply = msg.body as RpcAcceptedReply;
@@ -365,7 +365,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(4);
       const reply = msg.body as RpcAcceptedReply;
@@ -402,7 +402,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(5);
       const reply = msg.body as RpcAcceptedReply;
@@ -441,7 +441,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(6);
       expect(msg.body).toBeInstanceOf(RpcRejectedReply);
@@ -478,7 +478,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(7);
       const reply = msg.body as RpcRejectedReply;
@@ -575,16 +575,16 @@ describe('RpcMessageDecoder', () => {
         0x00, // verf.length = 0
       ]);
       decoder.push(payload1);
-      const message1 = decoder.readMessage()!;
+      const message1 = decoder.decodeMessage()!;
       expect(message1).toBeDefined();
       expect(message1.xid).toBe(1);
       expect((message1.body as RpcCallBody).prog).toBe(100);
       decoder.push(payload2);
-      const message2 = decoder.readMessage()!;
+      const message2 = decoder.decodeMessage()!;
       expect(message2).toBeDefined();
       expect(message2.xid).toBe(2);
       expect((message2.body as RpcCallBody).prog).toBe(200);
-      expect(decoder.readMessage()).toBeUndefined();
+      expect(decoder.decodeMessage()).toBeUndefined();
     });
   });
 
@@ -637,7 +637,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
       const call = msg.body as RpcCallBody;
@@ -678,7 +678,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
       const reply = msg.body as RpcAcceptedReply;
@@ -733,7 +733,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       const call = msg.body as RpcCallBody;
       expect(call.params).toBeUndefined();
@@ -769,7 +769,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       const reply = msg.body as RpcAcceptedReply;
       expect(reply.results).toBeUndefined();
@@ -840,7 +840,7 @@ describe('RpcMessageDecoder', () => {
       ]);
       
       decoder.push(payload);
-      const msg = decoder.readMessage()!;
+      const msg = decoder.decodeMessage()!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(156);
       const call = msg.body as RpcCallBody;

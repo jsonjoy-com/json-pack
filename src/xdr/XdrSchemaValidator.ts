@@ -1,8 +1,5 @@
 import type {
   XdrSchema,
-  XdrPrimitiveSchema,
-  XdrWidePrimitiveSchema,
-  XdrCompositeSchema,
   XdrEnumSchema,
   XdrOpaqueSchema,
   XdrVarlenOpaqueSchema,
@@ -11,6 +8,8 @@ import type {
   XdrVarlenArraySchema,
   XdrStructSchema,
   XdrUnionSchema,
+  XdrOptionalSchema,
+  XdrConstantSchema,
 } from './types';
 
 /**
@@ -82,6 +81,12 @@ export class XdrSchemaValidator {
 
       case 'union':
         return this.validateUnionSchema(schema as XdrUnionSchema);
+
+      case 'optional':
+        return this.validateOptionalSchema(schema as XdrOptionalSchema);
+
+      case 'const':
+        return this.validateConstantSchema(schema as XdrConstantSchema);
 
       default:
         return false;
@@ -203,6 +208,22 @@ export class XdrSchemaValidator {
     return true;
   }
 
+  private validateOptionalSchema(schema: XdrOptionalSchema): boolean {
+    if (!schema.element) {
+      return false;
+    }
+
+    return this.validateSchemaInternal(schema.element);
+  }
+
+  private validateConstantSchema(schema: XdrConstantSchema): boolean {
+    if (typeof schema.value !== 'number' || !Number.isInteger(schema.value)) {
+      return false;
+    }
+
+    return true;
+  }
+
   private validateValueInternal(value: unknown, schema: XdrSchema): boolean {
     switch (schema.type) {
       case 'void':
@@ -281,6 +302,15 @@ export class XdrSchemaValidator {
         const matchesArm = unionSchema.arms.some(([, armSchema]) => this.validateValueInternal(value, armSchema));
         const matchesDefault = unionSchema.default ? this.validateValueInternal(value, unionSchema.default) : false;
         return matchesArm || matchesDefault;
+
+      case 'optional':
+        const optionalSchema = schema as XdrOptionalSchema;
+        // Optional values can be null/undefined or match the element schema
+        return value === null || value === undefined || this.validateValueInternal(value, optionalSchema.element);
+
+      case 'const':
+        // Constants have no runtime value validation
+        return true;
 
       default:
         return false;

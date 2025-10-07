@@ -4,9 +4,6 @@ import {XdrUnion} from './XdrUnion';
 import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
 import type {
   XdrSchema,
-  XdrPrimitiveSchema,
-  XdrWidePrimitiveSchema,
-  XdrCompositeSchema,
   XdrEnumSchema,
   XdrOpaqueSchema,
   XdrVarlenOpaqueSchema,
@@ -15,6 +12,7 @@ import type {
   XdrVarlenArraySchema,
   XdrStructSchema,
   XdrUnionSchema,
+  XdrOptionalSchema,
 } from './types';
 
 /**
@@ -81,6 +79,11 @@ export class XdrSchemaDecoder {
         return this.readStruct(schema as XdrStructSchema);
       case 'union':
         return this.readUnion(schema as XdrUnionSchema);
+      case 'optional':
+        return this.readOptional(schema as XdrOptionalSchema);
+      case 'const':
+        // Constants are not decoded; they have no runtime representation
+        return undefined;
 
       default:
         throw new Error(`Unknown schema type: ${(schema as any).type}`);
@@ -195,5 +198,16 @@ export class XdrSchemaDecoder {
     }
 
     throw new Error(`No matching union arm for discriminant: ${discriminant}`);
+  }
+
+  /**
+   * Reads optional-data according to the optional schema (RFC 1832 Section 3.19).
+   * Optional-data is syntactic sugar for a union with boolean discriminant.
+   * Returns null if opted is FALSE, otherwise returns the decoded value.
+   */
+  private readOptional(schema: XdrOptionalSchema): unknown | null {
+    const opted = this.decoder.readBoolean();
+    if (!opted) return null;
+    return this.readValue(schema.element);
   }
 }

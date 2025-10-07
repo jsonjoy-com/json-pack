@@ -11,6 +11,7 @@ import type {
   XdrVarlenArraySchema,
   XdrStructSchema,
   XdrUnionSchema,
+  XdrOptionalSchema,
 } from './types';
 
 export class XdrSchemaEncoder {
@@ -86,10 +87,16 @@ export class XdrSchemaEncoder {
     }
 
     if (!(value in schema.values)) {
-      throw new Error(`Invalid enum value: ${value}`);
+      throw new Error(`Invalid enum value: ${value}. Valid values are: ${Object.keys(schema.values).join(', ')}`);
     }
 
-    this.encoder.writeInt(schema.values[value]);
+    const enumValue = schema.values[value];
+    // Per RFC 4506 Section 4.3: "It is an error to encode as an enum any integer other than those that have been given assignments"
+    if (!Number.isInteger(enumValue)) {
+      throw new Error(`Enum value ${value} has non-integer assignment: ${enumValue}`);
+    }
+
+    this.encoder.writeInt(enumValue);
   }
 
   public writeOpaque(value: Uint8Array, schema: XdrOpaqueSchema): void {
@@ -189,6 +196,24 @@ export class XdrSchemaEncoder {
     }
   }
 
+  /**
+   * Writes optional-data value (RFC 1832 Section 3.19).
+   * Optional-data is syntactic sugar for a union with boolean discriminant.
+   * If value is null/undefined, writes FALSE; otherwise writes TRUE and the value.
+   */
+  public writeOptional(value: unknown, schema: XdrOptionalSchema): void {
+    if (schema.type !== 'optional') {
+      throw new Error('Schema is not an optional schema');
+    }
+
+    if (value === null || value === undefined) {
+      this.encoder.writeBoolean(false);
+    } else {
+      this.encoder.writeBoolean(true);
+      this.writeValue(value, schema.element);
+    }
+  }
+
   public writeNumber(value: number, schema: XdrSchema): void {
     switch (schema.type) {
       case 'int':
@@ -273,6 +298,12 @@ export class XdrSchemaEncoder {
         } else {
           throw new Error('Union values must be wrapped in XdrUnion class');
         }
+        break;
+      case 'optional':
+        this.writeOptional(value, schema as XdrOptionalSchema);
+        break;
+      case 'const':
+        // Constants are not encoded; they are compile-time values
         break;
       default:
         throw new Error(`Unknown schema type: ${(schema as any).type}`);

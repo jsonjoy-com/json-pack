@@ -1,4 +1,4 @@
-import {StreamingOctetReader} from '@jsonjoy.com/util/lib/buffers/StreamingOctetReader';
+import {StreamingOctetReader} from '@jsonjoy.com/buffers/lib/StreamingOctetReader';
 import {WsFrameOpcode} from './constants';
 import {WsFrameDecodingError} from './errors';
 import {WsCloseFrame, WsFrameHeader, WsPingFrame, WsPongFrame} from './frames';

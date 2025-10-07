@@ -278,12 +278,12 @@ describe('XdrDecoder', () => {
   describe('decode method', () => {
     test('decode method calls readAny which throws', () => {
       const encoded = new Uint8Array([0, 0, 0, 42]);
-      expect(() => decoder.decode(encoded)).toThrow('XdrDecoder.readAny() requires explicit type methods');
+      expect(() => decoder.decode(encoded)).toThrow('not implemented');
     });
 
     test('read method calls readAny which throws', () => {
       const encoded = new Uint8Array([0, 0, 0, 42]);
-      expect(() => decoder.read(encoded)).toThrow('XdrDecoder.readAny() requires explicit type methods');
+      expect(() => decoder.read(encoded)).toThrow('not implemented');
     });
   });
 

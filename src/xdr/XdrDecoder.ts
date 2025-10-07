@@ -30,7 +30,7 @@ export class XdrDecoder<R extends IReader & IReaderResettable = IReader & IReade
   public readAny(): unknown {
     // Basic implementation - in practice this would need schema info
     // For now, we'll throw as this should be used with schema decoder
-    throw new Error('XdrDecoder.readAny() requires explicit type methods or use XdrSchemaDecoder');
+    throw new Error('not implemented');
   }
 
   /**
@@ -122,17 +122,11 @@ export class XdrDecoder<R extends IReader & IReaderResettable = IReader & IReade
    */
   public readOpaque(size: number): Uint8Array {
     const reader = this.reader;
-    const data = new Uint8Array(size);
-
-    // Read actual data
-    for (let i = 0; i < size; i++) {
-      data[i] = reader.u8();
-    }
+    const data = reader.buf(size);
 
     // Skip padding bytes to reach 4-byte boundary
-    const paddedSize = Math.ceil(size / 4) * 4;
-    const padding = paddedSize - size;
-    reader.skip(padding);
+    const paddedSize = size % 4 === 0 ? size : size + (4 - (size % 4));
+    reader.skip(paddedSize - size);
 
     return data;
   }
@@ -153,20 +147,13 @@ export class XdrDecoder<R extends IReader & IReaderResettable = IReader & IReade
   public readString(): string {
     const size = this.readUnsignedInt();
     const reader = this.reader;
-
-    // Read UTF-8 bytes
-    const utf8Bytes = new Uint8Array(size);
-    for (let i = 0; i < size; i++) {
-      utf8Bytes[i] = reader.u8();
-    }
+    const text = reader.utf8(size);
 
     // Skip padding bytes to reach 4-byte boundary
-    const paddedSize = Math.ceil(size / 4) * 4;
-    const padding = paddedSize - size;
-    reader.skip(padding);
+    const paddedSize = size % 4 === 0 ? size : size + (4 - (size % 4));
+    reader.skip(paddedSize - size);
 
-    // Decode UTF-8 to string
-    return new TextDecoder('utf-8').decode(utf8Bytes);
+    return text;
   }
 
   /**
@@ -182,9 +169,7 @@ export class XdrDecoder<R extends IReader & IReaderResettable = IReader & IReade
    */
   public readArray<T>(size: number, elementReader: () => T): T[] {
     const array: T[] = [];
-    for (let i = 0; i < size; i++) {
-      array.push(elementReader());
-    }
+    for (let i = 0; i < size; i++) array.push(elementReader());
     return array;
   }
 

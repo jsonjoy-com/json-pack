@@ -1,5 +1,5 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
-import {RpcMsgType, RpcReplyStat, RpcAcceptStat, RpcRejectStat, RPC_VERSION} from './constants';
+import {RpcMsgType, RpcReplyStat, RpcAcceptStat, RpcRejectStat} from './constants';
 import {RpcDecodingError} from './errors';
 import {
   RpcOpaqueAuth,
@@ -81,16 +81,12 @@ export class RpcMessageDecoder {
     if (reader.size() < 8) return undefined;
     const flavor = reader.u32();
     const length = reader.u32();
-    if (length > 400) {
-      throw new RpcDecodingError('Auth body too large');
-    }
+    if (length > 400) throw new RpcDecodingError('Auth body too large');
     const paddedLength = (length + 3) & ~3;
     if (reader.size() < paddedLength) return undefined;
     const body = length > 0 ? reader.cut(length) : new Reader(new Uint8Array(0));
     const padding = paddedLength - length;
-    if (padding > 0) {
-      reader.skip(padding);
-    }
+    if (padding > 0) reader.skip(padding);
     return new RpcOpaqueAuth(flavor, body);
   }
 }

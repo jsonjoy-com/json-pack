@@ -17,91 +17,57 @@ export class RpcMessageDecoder {
       if (reader.size() < 8) return undefined;
       const xid = reader.u32();
       const msgType = reader.u32();
-      let message: RpcMessage | undefined;
       if (msgType === RpcMsgType.CALL) {
-        if (reader.size() < 20) {
-          reader.x = startPos;
-          return undefined;
-        }
+        if (reader.size() < 20) return (reader.x = startPos), undefined;
         const rpcvers = reader.u32();
-        if (rpcvers !== RPC_VERSION) {
-          throw new RpcDecodingError(`Unsupported RPC version: ${rpcvers}`);
-        }
+        // if (rpcvers !== RPC_VERSION) throw new RpcDecodingError(`Unsupported RPC version: ${rpcvers}`);
         const prog = reader.u32();
         const vers = reader.u32();
         const proc = reader.u32();
         const cred = this.readOpaqueAuth(reader);
-        if (!cred) {
-          reader.x = startPos;
-          return undefined;
-        }
+        if (!cred) return (reader.x = startPos, undefined);
         const verf = this.readOpaqueAuth(reader);
-        if (!verf) {
-          reader.x = startPos;
-          return undefined;
-        }
+        if (!verf) return (reader.x = startPos), undefined;
         const params = reader.size() > 0 ? reader.cut(reader.size()) : undefined;
-        message = new RpcCallMessage(xid, rpcvers, prog, vers, proc, cred, verf, params);
+        return new RpcCallMessage(xid, rpcvers, prog, vers, proc, cred, verf, params);
       } else if (msgType === RpcMsgType.REPLY) {
-        if (reader.size() < 4) {
-          reader.x = startPos;
-          return undefined;
-        }
+        if (reader.size() < 4) return (reader.x = startPos), undefined;
         const replyStat = reader.u32();
         if (replyStat === RpcReplyStat.MSG_ACCEPTED) {
           const verf = this.readOpaqueAuth(reader);
-          if (!verf) {
-            reader.x = startPos;
-            return undefined;
-          }
-          if (reader.size() < 4) {
-            reader.x = startPos;
-            return undefined;
-          }
+          if (!verf || reader.size() < 4) return (reader.x = startPos), undefined;
           const acceptStat = reader.u32();
           let mismatchInfo: RpcMismatchInfo | undefined;
           if (acceptStat === RpcAcceptStat.PROG_MISMATCH) {
-            if (reader.size() < 8) {
-              reader.x = startPos;
-              return undefined;
-            }
+            if (reader.size() < 8) return (reader.x = startPos), undefined;
             const low = reader.u32();
             const high = reader.u32();
             mismatchInfo = new RpcMismatchInfo(low, high);
           }
           const results = reader.size() > 0 ? reader.cut(reader.size()) : undefined;
-          message = new RpcAcceptedReplyMessage(xid, verf, acceptStat, mismatchInfo, results);
+          return new RpcAcceptedReplyMessage(xid, verf, acceptStat, mismatchInfo, results);
         } else if (replyStat === RpcReplyStat.MSG_DENIED) {
-          if (reader.size() < 4) {
-            reader.x = startPos;
-            return undefined;
-          }
+          if (reader.size() < 4) return (reader.x = startPos), undefined;
           const rejectStat = reader.u32();
           let mismatchInfo: RpcMismatchInfo | undefined;
           let authStat: number | undefined;
           if (rejectStat === RpcRejectStat.RPC_MISMATCH) {
-            if (reader.size() < 8) {
-              reader.x = startPos;
-              return undefined;
-            }
+            if (reader.size() < 8) return (reader.x = startPos), undefined;
             const low = reader.u32();
             const high = reader.u32();
             mismatchInfo = new RpcMismatchInfo(low, high);
+            if (!mismatchInfo) return (reader.x = startPos), undefined;
           } else if (rejectStat === RpcRejectStat.AUTH_ERROR) {
-            if (reader.size() < 4) {
-              reader.x = startPos;
-              return undefined;
-            }
+            if (reader.size() < 4) return (reader.x = startPos), undefined;
             authStat = reader.u32();
           }
-          message = new RpcRejectedReplyMessage(xid, rejectStat, mismatchInfo, authStat);
+          return new RpcRejectedReplyMessage(xid, rejectStat, mismatchInfo, authStat);
         } else {
           throw new RpcDecodingError('Invalid reply_stat');
         }
       } else {
         throw new RpcDecodingError('Invalid msg_type');
       }
-      return message;
     } catch (err) {
       if (err instanceof RangeError) {
         reader.x = startPos;

@@ -605,10 +605,10 @@
   resolved "https://registry.yarnpkg.com/@jsonjoy.com/buffers/-/buffers-1.0.0.tgz#ade6895b7d3883d70f87b5743efaa12c71dfef7a"
   integrity sha512-NDigYR3PHqCnQLXYyoLbnEdzMMvzeiCWo1KOut7Q0CoIqg9tUAPKJ1iq/2nFhc5kZtexzutNY0LFjdwWL3Dw3Q==
 
-"@jsonjoy.com/buffers@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@jsonjoy.com/buffers/-/buffers-1.1.0.tgz#0be6938bedd791d29acc79d2d2bb05c6e1302077"
-  integrity sha512-QOOUerWq5DfN9PNKVn3+Pj7Aje+vtsi2qlSshnTF3ElWrVbtN4Mp4afo60xmqd7MfeRyvR/KLIxhVpJ9IxSzxg==
+"@jsonjoy.com/buffers@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@jsonjoy.com/buffers/-/buffers-1.2.0.tgz#57b9bbc509055de80f22cf6b696ac7efd7554046"
+  integrity sha512-6RX+W5a+ZUY/c/7J5s5jK9UinLfJo5oWKh84fb4X0yK2q4WXEWUWZWuEMjvCb1YNUQhEAhUfr5scEGOH7jC4YQ==
 
 "@jsonjoy.com/codegen@^1.0.0":
   version "1.0.0"

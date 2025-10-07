@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "@jsonjoy.com/base64": "^1.1.2",
-    "@jsonjoy.com/buffers": "^1.1.0",
+    "@jsonjoy.com/buffers": "^1.2.0",
     "@jsonjoy.com/codegen": "^1.0.0",
     "@jsonjoy.com/json-pointer": "^1.0.2",
     "@jsonjoy.com/util": "^1.9.0",

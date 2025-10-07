@@ -1,5 +1,5 @@
 import { RmRecordDecoder } from "../../rm";
-import { RpcCallMessage, RpcMessage } from "../messages";
+import { RpcMessage } from "../messages";
 import { RpcMessageDecoder } from "../RpcMessageDecoder";
 
 const rmDecoder = new RmRecordDecoder();

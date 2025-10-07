@@ -14,10 +14,7 @@ export class RpcMessageDecoder {
   public decodeMessage(reader: Reader): RpcMessage | undefined {
     const startPos = reader.x;
     try {
-      if (reader.size() < 8) {
-        reader.x = startPos;
-        return undefined;
-      }
+      if (reader.size() < 8) return undefined;
       const xid = reader.u32();
       const msgType = reader.u32();
       let message: RpcMessage | undefined;
@@ -123,7 +120,7 @@ export class RpcMessageDecoder {
     }
     const paddedLength = (length + 3) & ~3;
     if (reader.size() < paddedLength) return undefined;
-    const body = length > 0 ? reader.buf(length) : new Uint8Array(0);
+    const body = length > 0 ? reader.cut(length) : new Reader(new Uint8Array(0));
     const padding = paddedLength - length;
     if (padding > 0) {
       reader.skip(padding);

@@ -6,7 +6,7 @@ export {RpcMsgType, RpcReplyStat, RpcAcceptStat, RpcRejectStat, RpcAuthStat, Rpc
 export class RpcOpaqueAuth {
   constructor(
     public readonly flavor: RpcAuthFlavor,
-    public readonly body: Uint8Array,
+    public readonly body: Reader,
   ) {}
 }
 

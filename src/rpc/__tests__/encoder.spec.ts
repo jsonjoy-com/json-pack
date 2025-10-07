@@ -8,8 +8,8 @@ describe('RpcMessageEncoder', () => {
   describe('CALL messages', () => {
     test('can encode a simple CALL message with AUTH_NULL', () => {
       const encoder = new RpcMessageEncoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const encoded = encoder.encodeCall(1, 100, 1, 0, cred, verf);
       const decoder = new RpcMessageDecoder();
       const reader = new Reader(encoded);
@@ -28,9 +28,9 @@ describe('RpcMessageEncoder', () => {
 
     test('can encode CALL message with opaque auth data', () => {
       const encoder = new RpcMessageEncoder();
-      const credBody = new Uint8Array([1, 2, 3, 4, 5]);
+      const credBody = new Reader(new Uint8Array([1, 2, 3, 4, 5]));
       const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_UNIX, credBody);
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const encoded = encoder.encodeCall(10, 200, 2, 5, cred, verf);
       const decoder = new RpcMessageDecoder();
       const reader = new Reader(encoded);
@@ -42,13 +42,13 @@ describe('RpcMessageEncoder', () => {
       expect(call.vers).toBe(2);
       expect(call.proc).toBe(5);
       expect(call.cred.flavor).toBe(RpcAuthFlavor.AUTH_UNIX);
-      expect(call.cred.body).toEqual(credBody);
+      expect(call.cred.body.buf()).toEqual(new Uint8Array([1, 2, 3, 4, 5]));
     });
 
     test('can encode CALL message with parameters', () => {
       const encoder = new RpcMessageEncoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const params = new Uint8Array([0, 0, 0, 42]);
       const encoded = encoder.encodeCall(15, 300, 1, 3, cred, verf, params);
       expect(encoded.length).toBeGreaterThan(40);
@@ -61,8 +61,8 @@ describe('RpcMessageEncoder', () => {
 
     test('can encode CALL with RpcMessage object', () => {
       const encoder = new RpcMessageEncoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const msg = new RpcCallMessage(20, RPC_VERSION, 100, 1, 0, cred, verf);
       const encoded = encoder.encodeMessage(msg);
       const decoder = new RpcMessageDecoder();
@@ -77,7 +77,7 @@ describe('RpcMessageEncoder', () => {
   describe('REPLY messages - MSG_ACCEPTED', () => {
     test('can encode SUCCESS reply', () => {
       const encoder = new RpcMessageEncoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const results = new Uint8Array([0, 0, 0, 42]);
       const encoded = encoder.encodeAcceptedReply(1, verf, RpcAcceptStat.SUCCESS, undefined, results);
       const decoder = new RpcMessageDecoder();
@@ -92,7 +92,7 @@ describe('RpcMessageEncoder', () => {
 
     test('can encode PROG_UNAVAIL reply', () => {
       const encoder = new RpcMessageEncoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const encoded = encoder.encodeAcceptedReply(2, verf, RpcAcceptStat.PROG_UNAVAIL);
       const decoder = new RpcMessageDecoder();
       const reader = new Reader(encoded);
@@ -105,7 +105,7 @@ describe('RpcMessageEncoder', () => {
 
     test('can encode PROG_MISMATCH reply', () => {
       const encoder = new RpcMessageEncoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const mismatchInfo = {low: 1, high: 3};
       const encoded = encoder.encodeAcceptedReply(3, verf, RpcAcceptStat.PROG_MISMATCH, mismatchInfo);
       const decoder = new RpcMessageDecoder();
@@ -122,7 +122,7 @@ describe('RpcMessageEncoder', () => {
 
     test('can encode PROC_UNAVAIL reply', () => {
       const encoder = new RpcMessageEncoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const encoded = encoder.encodeAcceptedReply(4, verf, RpcAcceptStat.PROC_UNAVAIL);
       const decoder = new RpcMessageDecoder();
       const reader = new Reader(encoded);
@@ -135,7 +135,7 @@ describe('RpcMessageEncoder', () => {
 
     test('can encode GARBAGE_ARGS reply', () => {
       const encoder = new RpcMessageEncoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const encoded = encoder.encodeAcceptedReply(5, verf, RpcAcceptStat.GARBAGE_ARGS);
       const decoder = new RpcMessageDecoder();
       const reader = new Reader(encoded);
@@ -148,7 +148,7 @@ describe('RpcMessageEncoder', () => {
 
     test('can encode AcceptedReply with RpcMessage object', () => {
       const encoder = new RpcMessageEncoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const msg = new RpcAcceptedReplyMessage(25, verf, RpcAcceptStat.SUCCESS);
       const encoded = encoder.encodeMessage(msg);
       const decoder = new RpcMessageDecoder();
@@ -210,8 +210,8 @@ describe('RpcMessageEncoder', () => {
     test('multiple messages can be encoded and decoded', () => {
       const encoder = new RpcMessageEncoder();
       const decoder = new RpcMessageDecoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const encoded1 = encoder.encodeCall(100, 1000, 1, 0, cred, verf);
       const encoded2 = encoder.encodeCall(101, 1001, 1, 1, cred, verf);
       const encoded3 = encoder.encodeAcceptedReply(100, verf, RpcAcceptStat.SUCCESS);
@@ -236,14 +236,14 @@ describe('RpcMessageEncoder', () => {
       const credBody2 = new Uint8Array([1, 2]);
       const credBody3 = new Uint8Array([1, 2, 3]);
       const credBody4 = new Uint8Array([1, 2, 3, 4]);
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const testCred = (body: Uint8Array, xid: number) => {
-        const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_UNIX, body);
+        const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_UNIX, new Reader(body));
         const encoded = encoder.encodeCall(xid, 100, 1, 0, cred, verf);
         const reader = new Reader(encoded);
       const msg = decoder.decodeMessage(reader)!;
         expect(msg.xid).toBe(xid);
-        expect((msg as RpcCallMessage).cred.body).toEqual(body);
+        expect((msg as RpcCallMessage).cred.body.buf()).toEqual(body);
       };
       testCred(credBody1, 1);
       testCred(credBody2, 2);
@@ -256,8 +256,8 @@ describe('RpcMessageEncoder', () => {
     test('encodes CALL with procedure parameters', () => {
       const encoder = new RpcMessageEncoder();
       const decoder = new RpcMessageDecoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const params = new Uint8Array([0x00, 0x00, 0x00, 0x2a, 0x00, 0x00, 0x00, 0x45]);
       const encoded = encoder.encodeCall(1, 100, 1, 1, cred, verf, params);
       const reader = new Reader(encoded);
@@ -271,7 +271,7 @@ describe('RpcMessageEncoder', () => {
     test('encodes REPLY with result data', () => {
       const encoder = new RpcMessageEncoder();
       const decoder = new RpcMessageDecoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const results = new Uint8Array([0x00, 0x00, 0x00, 0x7b]);
       const encoded = encoder.encodeAcceptedReply(1, verf, RpcAcceptStat.SUCCESS, undefined, results);
       const reader = new Reader(encoded);
@@ -285,8 +285,8 @@ describe('RpcMessageEncoder', () => {
     test('encodes RpcCallMessage with params field via encodeMessage', () => {
       const encoder = new RpcMessageEncoder();
       const decoder = new RpcMessageDecoder();
-      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const params = new Uint8Array([0x12, 0x34, 0x56, 0x78]);
       const msg = new RpcCallMessage(1, RPC_VERSION, 100, 1, 1, cred, verf, new Reader(params));
       const encoded = encoder.encodeMessage(msg);
@@ -300,7 +300,7 @@ describe('RpcMessageEncoder', () => {
     test('encodes RpcAcceptedReplyMessage with results field via encodeMessage', () => {
       const encoder = new RpcMessageEncoder();
       const decoder = new RpcMessageDecoder();
-      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Uint8Array(0));
+      const verf = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NULL, new Reader(new Uint8Array(0)));
       const results = new Uint8Array([0x00, 0x00, 0x01, 0x00]);
       const msg = new RpcAcceptedReplyMessage(1, verf, RpcAcceptStat.SUCCESS, undefined, new Reader(results));
       const encoded = encoder.encodeMessage(msg);

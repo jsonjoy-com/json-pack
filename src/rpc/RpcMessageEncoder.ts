@@ -149,11 +149,12 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
   private writeOpaqueAuth(auth: RpcOpaqueAuth): void {
     const writer = this.writer;
     writer.u32(auth.flavor);
-    const length = auth.body.length;
+    const body = auth.body;
+    const length = body.size();
     if (length > 400) throw new RpcEncodingError('Auth body too large');
     writer.u32(length);
     if (length > 0) {
-      writer.buf(auth.body, length);
+      writer.buf(body.subarray(0, length), length);
       const padding = (4 - (length % 4)) % 4;
       for (let i = 0; i < padding; i++) {
         writer.u8(0);

@@ -35,7 +35,7 @@ describe('RPC Real-world Fixtures', () => {
           expect(call.verf.flavor).toBe(fixture.expected.verfFlavor);
         }
         if (fixture.expected.credBodyLength !== undefined) {
-          expect(call.cred.body.length).toBe(fixture.expected.credBodyLength);
+          expect(call.cred.body.buf().length).toBe(fixture.expected.credBodyLength);
         }
       } else if (fixture.expected.type === 'REPLY') {
         if (fixture.expected.replyStat === 'MSG_ACCEPTED') {
@@ -94,9 +94,9 @@ describe('RPC Real-world Fixtures', () => {
         expect(call2.vers).toBe(call1.vers);
         expect(call2.proc).toBe(call1.proc);
         expect(call2.cred.flavor).toBe(call1.cred.flavor);
-        expect(call2.cred.body).toEqual(call1.cred.body);
+        expect(call2.cred.body.subarray()).toEqual(call1.cred.body.subarray());
         expect(call2.verf.flavor).toBe(call1.verf.flavor);
-        expect(call2.verf.body).toEqual(call1.verf.body);
+        expect(call2.verf.body.subarray()).toEqual(call1.verf.body.subarray());
       } else if (msg1 instanceof RpcAcceptedReplyMessage) {
         expect(msg2).toBeInstanceOf(RpcAcceptedReplyMessage);
         const reply1 = msg1 as RpcAcceptedReplyMessage;
@@ -189,7 +189,7 @@ describe('RPC Real-world Fixtures', () => {
       const msg = decoder.decodeMessage(reader)!;
         expect(msg).toBeDefined();
         const call = msg as RpcCallMessage;
-        expect(call.cred.body.length).toBe(fixture.expected.credBodyLength);
+        expect(call.cred.body.buf().length).toBe(fixture.expected.credBodyLength);
         const encoder = new RpcMessageEncoder();
         const encoded = encoder.encodeMessage(msg);
         expect(encoded.length % 4).toBe(0);
@@ -336,8 +336,8 @@ describe('RPC Real-world Fixtures', () => {
       const call = msg as RpcCallMessage;
       expect(call.prog).toBe(100003);
       expect(call.proc).toBe(0);
-      expect(call.cred.body.length).toBe(0);
-      expect(call.verf.body.length).toBe(0);
+      expect(call.cred.body.size()).toBe(0);
+      expect(call.verf.body.size()).toBe(0);
     });
 
     test('GETPORT response format is valid', () => {

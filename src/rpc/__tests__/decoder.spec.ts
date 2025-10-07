@@ -60,9 +60,9 @@ describe('RpcMessageDecoder', () => {
       expect(call.vers).toBe(2);
       expect(call.proc).toBe(0);
       expect(call.cred.flavor).toBe(RpcAuthFlavor.AUTH_NULL);
-      expect(call.cred.body.length).toBe(0);
+      expect(call.cred.body.size()).toBe(0);
       expect(call.verf.flavor).toBe(RpcAuthFlavor.AUTH_NULL);
-      expect(call.verf.body.length).toBe(0);
+      expect(call.verf.body.size()).toBe(0);
     });
 
     test('can decode CALL message with opaque auth data', () => {
@@ -123,7 +123,7 @@ describe('RpcMessageDecoder', () => {
       expect(msg.xid).toBe(10);
       const call = msg as RpcCallMessage;
       expect(call.cred.flavor).toBe(RpcAuthFlavor.AUTH_UNIX);
-      expect(call.cred.body).toEqual(new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05]));
+      expect(call.cred.body.buf()).toEqual(new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05]));
     });
 
     test('returns undefined when not enough data', () => {

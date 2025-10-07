@@ -1,3 +1,4 @@
+import type {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import type {RpcAuthFlavor, RpcAcceptStat, RpcRejectStat, RpcAuthStat} from './constants';
 
 export {RpcMsgType, RpcReplyStat, RpcAcceptStat, RpcRejectStat, RpcAuthStat, RpcAuthFlavor} from './constants';
@@ -9,18 +10,6 @@ export class RpcOpaqueAuth {
   ) {}
 }
 
-export class RpcCallBody {
-  constructor(
-    public readonly rpcvers: number,
-    public readonly prog: number,
-    public readonly vers: number,
-    public readonly proc: number,
-    public readonly cred: RpcOpaqueAuth,
-    public readonly verf: RpcOpaqueAuth,
-    public params: Uint8Array | undefined = undefined,
-  ) {}
-}
-
 export class RpcMismatchInfo {
   constructor(
     public readonly low: number,
@@ -28,44 +17,39 @@ export class RpcMismatchInfo {
   ) {}
 }
 
-export class RpcAcceptedReply {
+export class RpcCallMessage {
   constructor(
+    public readonly xid: number,
+    public readonly rpcvers: number,
+    public readonly prog: number,
+    public readonly vers: number,
+    public readonly proc: number,
+    public readonly cred: RpcOpaqueAuth,
     public readonly verf: RpcOpaqueAuth,
-    public readonly stat: RpcAcceptStat,
-    public readonly mismatchInfo?: RpcMismatchInfo,
-    public results: Uint8Array | undefined = undefined,
+    public params: Reader | undefined = undefined,
   ) {}
 }
 
-export class RpcRejectedReply {
+export class RpcAcceptedReplyMessage {
   constructor(
+    public readonly xid: number,
+    public readonly verf: RpcOpaqueAuth,
+    public readonly stat: RpcAcceptStat,
+    public readonly mismatchInfo?: RpcMismatchInfo,
+    public results: Reader | undefined = undefined,
+  ) {}
+}
+
+export class RpcRejectedReplyMessage {
+  constructor(
+    public readonly xid: number,
     public readonly stat: RpcRejectStat,
     public readonly mismatchInfo?: RpcMismatchInfo,
     public readonly authStat?: RpcAuthStat,
   ) {}
 }
 
-export class RpcMessage {
-  constructor(
-    public readonly xid: number,
-    public readonly body: RpcCallBody | RpcAcceptedReply | RpcRejectedReply,
-  ) {}
-}
-
-export class RpcCallMessage extends RpcMessage {
-  constructor(
-    xid: number,
-    public readonly call: RpcCallBody,
-  ) {
-    super(xid, call);
-  }
-}
-
-export class RpcReplyMessage extends RpcMessage {
-  constructor(
-    xid: number,
-    public readonly reply: RpcAcceptedReply | RpcRejectedReply,
-  ) {
-    super(xid, reply);
-  }
-}
+export type RpcMessage =
+  | RpcCallMessage
+  | RpcAcceptedReplyMessage
+  | RpcRejectedReplyMessage;

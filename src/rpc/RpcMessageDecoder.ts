@@ -1,14 +1,10 @@
-import {StreamingReader} from '@jsonjoy.com/buffers/lib/StreamingReader';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {RpcMsgType, RpcReplyStat, RpcAcceptStat, RpcRejectStat, RPC_VERSION} from './constants';
 import {RpcDecodingError} from './errors';
 import {RpcOpaqueAuth, RpcCallBody, RpcAcceptedReply, RpcRejectedReply, RpcMessage, RpcMismatchInfo} from './messages';
 
 export class RpcMessageDecoder {
-  public readonly reader = new StreamingReader();
-
-  public decodeMessage(uint8: Uint8Array): RpcMessage | undefined {
-    this.reader.push(uint8);
-    const reader = this.reader;
+  public decodeMessage(reader: Reader): RpcMessage | undefined {
     const startPos = reader.x;
     try {
       if (reader.size() < 8) {

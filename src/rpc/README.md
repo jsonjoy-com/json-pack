@@ -1,7 +1,13 @@
 # RPC (Remote Procedure Call) Codec
 
-This codec implements streaming encoder and decoder for (Sun Microsystems) RPC
-protocol as described in RFC 1057.
+This codec implements streaming encoder and decoder for ONC (Open Network Computing)
+RPC protocol. It supports all three major RPC RFCs:
+
+- **RFC 1057** (1988) - RPC: Remote Procedure Call, Version 2
+- **RFC 1831** (1995) - RPC: Remote Procedure Call Protocol Specification Version 2
+- **RFC 5531** (2009) - RPC: Remote Procedure Call Protocol Specification Version 2 (Internet Standard)
+
+See `RFC_COMPLIANCE.md` for detailed information about supported features and differences between RFC versions.
 
 ## Note on Record Marking
 

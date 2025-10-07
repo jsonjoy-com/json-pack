@@ -11,10 +11,10 @@ export class RpcMessageDecoder {
   }
 
   public readMessage(): RpcMessage | undefined {
+    const reader = this.reader;
+    if (reader.size() < 8) return undefined;
+    const startPos = reader.x;
     try {
-      const reader = this.reader;
-      if (reader.size() < 8) return undefined;
-      const startPos = reader.x;
       const xid = reader.u32();
       const msgType = reader.u32();
       if (msgType === RpcMsgType.CALL) {
@@ -23,6 +23,7 @@ export class RpcMessageDecoder {
           reader.x = startPos;
           return undefined;
         }
+        reader.consume();
         return new RpcMessage(xid, callBody);
       } else if (msgType === RpcMsgType.REPLY) {
         if (reader.size() < 4) {
@@ -36,6 +37,7 @@ export class RpcMessageDecoder {
             reader.x = startPos;
             return undefined;
           }
+          reader.consume();
           return new RpcMessage(xid, reply);
         } else if (replyStat === RpcReplyStat.MSG_DENIED) {
           const reply = this.readRejectedReply();
@@ -43,6 +45,7 @@ export class RpcMessageDecoder {
             reader.x = startPos;
             return undefined;
           }
+          reader.consume();
           return new RpcMessage(xid, reply);
         } else {
           throw new RpcDecodingError('Invalid reply_stat');
@@ -51,7 +54,10 @@ export class RpcMessageDecoder {
         throw new RpcDecodingError('Invalid msg_type');
       }
     } catch (err) {
-      if (err instanceof RangeError) return undefined;
+      if (err instanceof RangeError) {
+        reader.x = startPos;
+        return undefined;
+      }
       throw err;
     }
   }
@@ -94,7 +100,6 @@ export class RpcMessageDecoder {
     }
     const acceptStat = reader.u32();
     let mismatchInfo: RpcMismatchInfo | undefined;
-    let results: Uint8Array | undefined;
     if (acceptStat === RpcAcceptStat.PROG_MISMATCH) {
       if (reader.size() < 8) {
         reader.x = startPos;
@@ -103,13 +108,8 @@ export class RpcMessageDecoder {
       const low = reader.u32();
       const high = reader.u32();
       mismatchInfo = new RpcMismatchInfo(low, high);
-    } else if (acceptStat === RpcAcceptStat.SUCCESS) {
-      const remaining = reader.size();
-      if (remaining > 0) {
-        results = reader.buf(remaining);
-      }
     }
-    return new RpcAcceptedReply(verf, acceptStat, mismatchInfo, results);
+    return new RpcAcceptedReply(verf, acceptStat, mismatchInfo, undefined);
   }
 
   private readRejectedReply(): RpcRejectedReply | undefined {

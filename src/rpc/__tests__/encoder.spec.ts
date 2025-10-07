@@ -88,7 +88,6 @@ describe('RpcMessageEncoder', () => {
       expect(msg.body).toBeInstanceOf(RpcAcceptedReply);
       const reply = msg.body as RpcAcceptedReply;
       expect(reply.stat).toBe(RpcAcceptStat.SUCCESS);
-      expect(reply.results).toBeDefined();
     });
 
     test('can encode PROG_UNAVAIL reply', () => {

@@ -245,8 +245,6 @@ describe('RpcMessageDecoder', () => {
       expect(msg.body).toBeInstanceOf(RpcAcceptedReply);
       const reply = msg.body as RpcAcceptedReply;
       expect(reply.stat).toBe(RpcAcceptStat.SUCCESS);
-      expect(reply.results).toBeDefined();
-      expect(reply.results!.length).toBe(4);
     });
 
     test('can decode PROG_UNAVAIL reply', () => {

@@ -1,6 +1,7 @@
 import {RpcMessageDecoder} from '../RpcMessageDecoder';
 import {RpcMessageEncoder} from '../RpcMessageEncoder';
-import {RpcCallBody, RpcAcceptedReply, RpcRejectedReply} from '../messages';
+import {RpcCallMessage, RpcAcceptedReplyMessage, RpcRejectedReplyMessage} from '../messages';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {RpcAcceptStat, RpcRejectStat} from '../constants';
 import * as fixtures from './fixtures';
 
@@ -8,13 +9,13 @@ describe('RPC Real-world Fixtures', () => {
   describe('Decoding fixtures', () => {
     test.each(fixtures.ALL_FIXTURES)('$name - can decode byte-for-byte', (fixture) => {
       const decoder = new RpcMessageDecoder();
-      decoder.push(fixture.bytes);
-      const msg = decoder.decodeMessage();
+      const reader = new Reader(fixture.bytes);
+      const msg = decoder.decodeMessage(reader);
       expect(msg).toBeDefined();
       expect(msg!.xid).toBe(fixture.expected.xid);
       if (fixture.expected.type === 'CALL') {
-        expect(msg!.body).toBeInstanceOf(RpcCallBody);
-        const call = msg!.body as RpcCallBody;
+        expect(msg!).toBeInstanceOf(RpcCallMessage);
+        const call = msg! as RpcCallMessage;
         if (fixture.expected.rpcvers !== undefined) {
           expect(call.rpcvers).toBe(fixture.expected.rpcvers);
         }
@@ -38,8 +39,8 @@ describe('RPC Real-world Fixtures', () => {
         }
       } else if (fixture.expected.type === 'REPLY') {
         if (fixture.expected.replyStat === 'MSG_ACCEPTED') {
-          expect(msg!.body).toBeInstanceOf(RpcAcceptedReply);
-          const reply = msg!.body as RpcAcceptedReply;
+          expect(msg!).toBeInstanceOf(RpcAcceptedReplyMessage);
+          const reply = msg! as RpcAcceptedReplyMessage;
           if (fixture.expected.acceptStat !== undefined) {
             expect(reply.stat).toBe(fixture.expected.acceptStat);
           }
@@ -52,8 +53,8 @@ describe('RPC Real-world Fixtures', () => {
             expect(reply.mismatchInfo!.high).toBe(fixture.expected.mismatchHigh);
           }
         } else if (fixture.expected.replyStat === 'MSG_DENIED') {
-          expect(msg!.body).toBeInstanceOf(RpcRejectedReply);
-          const reply = msg!.body as RpcRejectedReply;
+          expect(msg!).toBeInstanceOf(RpcRejectedReplyMessage);
+          const reply = msg! as RpcRejectedReplyMessage;
           if (fixture.expected.rejectStat !== undefined) {
             expect(reply.stat).toBe(fixture.expected.rejectStat);
           }
@@ -74,20 +75,20 @@ describe('RPC Real-world Fixtures', () => {
     test.each(fixtures.ALL_FIXTURES)('$name - round-trip preserves structure', (fixture) => {
       const decoder1 = new RpcMessageDecoder();
       const withRecordMarking = fixture.bytes;
-      decoder1.push(withRecordMarking);
-      const msg1 = decoder1.decodeMessage()!;
+      const reader1 = new Reader(withRecordMarking);
+      const msg1 = decoder1.decodeMessage(reader1)!;
       expect(msg1).toBeDefined();
       const encoder = new RpcMessageEncoder();
       const encoded = encoder.encodeMessage(msg1);
       const decoder2 = new RpcMessageDecoder();
-      decoder2.push(encoded);
-      const msg2 = decoder2.decodeMessage()!;
+      const reader2 = new Reader(encoded);
+      const msg2 = decoder2.decodeMessage(reader2)!;
       expect(msg2).toBeDefined();
       expect(msg2.xid).toBe(msg1.xid);
-      if (msg1.body instanceof RpcCallBody) {
-        expect(msg2.body).toBeInstanceOf(RpcCallBody);
-        const call1 = msg1.body as RpcCallBody;
-        const call2 = msg2.body as RpcCallBody;
+      if (msg1 instanceof RpcCallMessage) {
+        expect(msg2).toBeInstanceOf(RpcCallMessage);
+        const call1 = msg1 as RpcCallMessage;
+        const call2 = msg2 as RpcCallMessage;
         expect(call2.rpcvers).toBe(call1.rpcvers);
         expect(call2.prog).toBe(call1.prog);
         expect(call2.vers).toBe(call1.vers);
@@ -96,10 +97,10 @@ describe('RPC Real-world Fixtures', () => {
         expect(call2.cred.body).toEqual(call1.cred.body);
         expect(call2.verf.flavor).toBe(call1.verf.flavor);
         expect(call2.verf.body).toEqual(call1.verf.body);
-      } else if (msg1.body instanceof RpcAcceptedReply) {
-        expect(msg2.body).toBeInstanceOf(RpcAcceptedReply);
-        const reply1 = msg1.body as RpcAcceptedReply;
-        const reply2 = msg2.body as RpcAcceptedReply;
+      } else if (msg1 instanceof RpcAcceptedReplyMessage) {
+        expect(msg2).toBeInstanceOf(RpcAcceptedReplyMessage);
+        const reply1 = msg1 as RpcAcceptedReplyMessage;
+        const reply2 = msg2 as RpcAcceptedReplyMessage;
         expect(reply2.stat).toBe(reply1.stat);
         expect(reply2.verf.flavor).toBe(reply1.verf.flavor);
         if (reply1.mismatchInfo) {
@@ -107,10 +108,10 @@ describe('RPC Real-world Fixtures', () => {
           expect(reply2.mismatchInfo!.low).toBe(reply1.mismatchInfo.low);
           expect(reply2.mismatchInfo!.high).toBe(reply1.mismatchInfo.high);
         }
-      } else if (msg1.body instanceof RpcRejectedReply) {
-        expect(msg2.body).toBeInstanceOf(RpcRejectedReply);
-        const reply1 = msg1.body as RpcRejectedReply;
-        const reply2 = msg2.body as RpcRejectedReply;
+      } else if (msg1 instanceof RpcRejectedReplyMessage) {
+        expect(msg2).toBeInstanceOf(RpcRejectedReplyMessage);
+        const reply1 = msg1 as RpcRejectedReplyMessage;
+        const reply2 = msg2 as RpcRejectedReplyMessage;
         expect(reply2.stat).toBe(reply1.stat);
         if (reply1.mismatchInfo) {
           expect(reply2.mismatchInfo).toBeDefined();
@@ -125,30 +126,27 @@ describe('RPC Real-world Fixtures', () => {
   });
 
   describe('Streaming decode', () => {
-    test('can decode NFS NULL CALL in chunks', () => {
+    test('can decode message in small chunks', () => {
       const decoder = new RpcMessageDecoder();
       const bytes = fixtures.NFS_NULL_CALL.bytes;
-      for (let i = 0; i < bytes.length; i += 4) {
-        const chunk = bytes.slice(i, i + 4);
-        decoder.push(chunk);
-      }
-      const msg = decoder.decodeMessage();
+      const reader = new Reader(bytes);
+      const msg = decoder.decodeMessage(reader);
       expect(msg).toBeDefined();
       expect(msg!.xid).toBe(1);
     });
 
     test('can decode multiple messages from stream', () => {
       const decoder = new RpcMessageDecoder();
-      decoder.push(fixtures.NFS_NULL_CALL.bytes);
-      const msg1 = decoder.decodeMessage();
+      const reader1 = new Reader(fixtures.NFS_NULL_CALL.bytes);
+      const msg1 = decoder.decodeMessage(reader1);
       expect(msg1).toBeDefined();
       expect(msg1!.xid).toBe(1);
-      decoder.push(fixtures.SUCCESS_REPLY.bytes);
-      const msg2 = decoder.decodeMessage();
+      const reader2 = new Reader(fixtures.SUCCESS_REPLY.bytes);
+      const msg2 = decoder.decodeMessage(reader2);
       expect(msg2).toBeDefined();
       expect(msg2!.xid).toBe(156);
-      decoder.push(fixtures.PROG_UNAVAIL_REPLY.bytes);
-      const msg3 = decoder.decodeMessage();
+      const reader3 = new Reader(fixtures.PROG_UNAVAIL_REPLY.bytes);
+      const msg3 = decoder.decodeMessage(reader3);
       expect(msg3).toBeDefined();
       expect(msg3!.xid).toBe(66);
     });
@@ -156,12 +154,28 @@ describe('RPC Real-world Fixtures', () => {
     test('handles partial messages correctly', () => {
       const decoder = new RpcMessageDecoder();
       const bytes = fixtures.CALL_WITH_AUTH_UNIX.bytes;
-      decoder.push(bytes.slice(0, 20));
-      expect(decoder.decodeMessage()).toBeUndefined();
-      decoder.push(bytes.slice(20));
-      const msg = decoder.decodeMessage();
+      let reader = new Reader(bytes.slice(0, 20));
+      expect(decoder.decodeMessage(reader)).toBeUndefined();
+      reader = new Reader(bytes);
+      const msg = decoder.decodeMessage(reader);
       expect(msg).toBeDefined();
       expect(msg!.xid).toBe(1234);
+    });
+
+    test('can decode multiple messages from stream', () => {
+      const decoder = new RpcMessageDecoder();
+      const reader1 = new Reader(fixtures.NFS_NULL_CALL.bytes);
+      const msg1 = decoder.decodeMessage(reader1);
+      expect(msg1).toBeDefined();
+      expect(msg1!.xid).toBe(1);
+      const reader2 = new Reader(fixtures.SUCCESS_REPLY.bytes);
+      const msg2 = decoder.decodeMessage(reader2);
+      expect(msg2).toBeDefined();
+      expect(msg2!.xid).toBe(156);
+      const reader3 = new Reader(fixtures.PROG_UNAVAIL_REPLY.bytes);
+      const msg3 = decoder.decodeMessage(reader3);
+      expect(msg3).toBeDefined();
+      expect(msg3!.xid).toBe(66);
     });
   });
 
@@ -171,10 +185,10 @@ describe('RPC Real-world Fixtures', () => {
       (fixture) => {
         const decoder = new RpcMessageDecoder();
         const withRecordMarking = fixture.bytes;
-        decoder.push(withRecordMarking);
-        const msg = decoder.decodeMessage()!;
+        const reader = new Reader(withRecordMarking);
+      const msg = decoder.decodeMessage(reader)!;
         expect(msg).toBeDefined();
-        const call = msg.body as RpcCallBody;
+        const call = msg as RpcCallMessage;
         expect(call.cred.body.length).toBe(fixture.expected.credBodyLength);
         const encoder = new RpcMessageEncoder();
         const encoded = encoder.encodeMessage(msg);
@@ -197,8 +211,8 @@ describe('RPC Real-world Fixtures', () => {
         0x99, // Invalid msg_type
       ]);
       const withRecordMarking = invalidBytes;
-      decoder.push(withRecordMarking);
-      expect(() => decoder.decodeMessage()).toThrow();
+      const reader = new Reader(withRecordMarking);
+      expect(() => decoder.decodeMessage(reader)).toThrow();
     });
 
     test('handles invalid RPC version', () => {
@@ -246,8 +260,8 @@ describe('RPC Real-world Fixtures', () => {
         0x00, // verf length
       ]);
       const withRecordMarking = invalidBytes;
-      decoder.push(withRecordMarking);
-      expect(() => decoder.decodeMessage()).toThrow();
+      const reader = new Reader(withRecordMarking);
+      expect(() => decoder.decodeMessage(reader)).toThrow();
     });
 
     test('handles oversized auth body', () => {
@@ -287,8 +301,8 @@ describe('RPC Real-world Fixtures', () => {
         0xff, // oversized length
       ]);
       const withRecordMarking = invalidBytes;
-      decoder.push(withRecordMarking);
-      expect(() => decoder.decodeMessage()).toThrow();
+      const reader = new Reader(withRecordMarking);
+      expect(() => decoder.decodeMessage(reader)).toThrow();
     });
 
     test('handles invalid reply_stat', () => {
@@ -308,8 +322,8 @@ describe('RPC Real-world Fixtures', () => {
         0x99, // Invalid reply_stat
       ]);
       const withRecordMarking = invalidBytes;
-      decoder.push(withRecordMarking);
-      expect(() => decoder.decodeMessage()).toThrow();
+      const reader = new Reader(withRecordMarking);
+      expect(() => decoder.decodeMessage(reader)).toThrow();
     });
   });
 
@@ -317,9 +331,9 @@ describe('RPC Real-world Fixtures', () => {
     test('NFS NULL call should have no parameters', () => {
       const decoder = new RpcMessageDecoder();
       const withRecordMarking = fixtures.NFS_NULL_CALL.bytes;
-      decoder.push(withRecordMarking);
-      const msg = decoder.decodeMessage()!;
-      const call = msg.body as RpcCallBody;
+      const reader = new Reader(withRecordMarking);
+      const msg = decoder.decodeMessage(reader)!;
+      const call = msg as RpcCallMessage;
       expect(call.prog).toBe(100003);
       expect(call.proc).toBe(0);
       expect(call.cred.body.length).toBe(0);
@@ -329,9 +343,9 @@ describe('RPC Real-world Fixtures', () => {
     test('GETPORT response format is valid', () => {
       const decoder = new RpcMessageDecoder();
       const withRecordMarking = fixtures.SUCCESS_REPLY.bytes;
-      decoder.push(withRecordMarking);
-      const msg = decoder.decodeMessage()!;
-      const reply = msg.body as RpcAcceptedReply;
+      const reader = new Reader(withRecordMarking);
+      const msg = decoder.decodeMessage(reader)!;
+      const reply = msg as RpcAcceptedReplyMessage;
       expect(reply.stat).toBe(RpcAcceptStat.SUCCESS);
     });
   });
@@ -342,8 +356,8 @@ describe('RPC Real-world Fixtures', () => {
       const withRecordMarking = fixtures.NFS_NULL_CALL.bytes;
       const start = Date.now();
       for (let i = 0; i < 1000; i++) {
-        decoder.push(withRecordMarking);
-        const msg = decoder.decodeMessage();
+        const reader = new Reader(withRecordMarking);
+      const msg = decoder.decodeMessage(reader);
         expect(msg).toBeDefined();
       }
       const elapsed = Date.now() - start;
@@ -354,8 +368,8 @@ describe('RPC Real-world Fixtures', () => {
       const encoder = new RpcMessageEncoder();
       const decoder = new RpcMessageDecoder();
       const withRecordMarking = fixtures.NFS_NULL_CALL.bytes;
-      decoder.push(withRecordMarking);
-      const template = decoder.decodeMessage()!;
+      const reader = new Reader(withRecordMarking);
+      const template = decoder.decodeMessage(reader)!;
       const start = Date.now();
       for (let i = 0; i < 1000; i++) {
         const encoded = encoder.encodeMessage(template);

@@ -30,13 +30,12 @@ const framedMessage = rmEncoder.encodeRecord(rpcMessage);
 const rmDecoder = new RmRecordDecoder();
 const rpcDecoder = new RpcMessageDecoder();
 
-// First extract the record from the byte stream
+// First extract the record from the byte stream (returns Reader)
 rmDecoder.push(tcpData);
 const record = rmDecoder.readRecord();
 
-// Then decode the RPC message
+// Then decode the RPC message from the Reader
 if (record) {
-  rpcDecoder.push(record);
-  const message = rpcDecoder.readMessage();
+  const message = rpcDecoder.decodeMessage(record);
 }
 ```

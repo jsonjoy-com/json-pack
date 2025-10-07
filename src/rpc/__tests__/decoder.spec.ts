@@ -1,6 +1,7 @@
 import {RpcMessageDecoder} from '../RpcMessageDecoder';
 import {RpcAuthFlavor, RpcAcceptStat, RpcRejectStat, RpcAuthStat, RPC_VERSION} from '../constants';
-import {RpcCallBody, RpcAcceptedReply, RpcRejectedReply} from '../messages';
+import {RpcCallMessage, RpcAcceptedReplyMessage, RpcRejectedReplyMessage} from '../messages';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 
 describe('RpcMessageDecoder', () => {
   describe('CALL messages', () => {
@@ -48,12 +49,12 @@ describe('RpcMessageDecoder', () => {
         0x00,
         0x00, // verf.length = 0
       ]);
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
+      expect(msg).toBeInstanceOf(RpcCallMessage);
       expect(msg.xid).toBe(1);
-      expect(msg.body).toBeInstanceOf(RpcCallBody);
-      const call = msg.body as RpcCallBody;
+      const call = msg as RpcCallMessage;
       expect(call.rpcvers).toBe(RPC_VERSION);
       expect(call.prog).toBe(390);
       expect(call.vers).toBe(2);
@@ -116,12 +117,11 @@ describe('RpcMessageDecoder', () => {
         0x00,
         0x00, // verf.length = 0
       ]);
-      
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(10);
-      const call = msg.body as RpcCallBody;
+      const call = msg as RpcCallMessage;
       expect(call.cred.flavor).toBe(RpcAuthFlavor.AUTH_UNIX);
       expect(call.cred.body).toEqual(new Uint8Array([0x01, 0x02, 0x03, 0x04, 0x05]));
     });
@@ -142,13 +142,12 @@ describe('RpcMessageDecoder', () => {
         0x00,
         0x02, // rpcvers = 2
       ]);
-      
-      decoder.push(payload.slice(0, 10));
-      const msg = decoder.decodeMessage();
+      const reader = new Reader(payload.slice(0, 10));
+      const msg = decoder.decodeMessage(reader);
       expect(msg).toBeUndefined();
     });
 
-    test('can decode message in chunks', () => {
+    test('returns undefined when message is incomplete', () => {
       const decoder = new RpcMessageDecoder();
       const payload = new Uint8Array([
         0x00,
@@ -192,16 +191,11 @@ describe('RpcMessageDecoder', () => {
         0x00,
         0x00, // verf.length = 0
       ]);
-      
       const chunk1 = payload.slice(0, 20);
-      const chunk2 = payload.slice(20, 36);
-      const chunk3 = payload.slice(36);
-      decoder.push(chunk1);
-      expect(decoder.decodeMessage()).toBeUndefined();
-      decoder.push(chunk2);
-      expect(decoder.decodeMessage()).toBeUndefined();
-      decoder.push(chunk3);
-      const msg = decoder.decodeMessage()!;
+      let reader = new Reader(chunk1);
+      expect(decoder.decodeMessage(reader)).toBeUndefined();
+      reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
     });
@@ -241,12 +235,12 @@ describe('RpcMessageDecoder', () => {
         0x2a, // results (example: 42)
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
-      expect(msg.body).toBeInstanceOf(RpcAcceptedReply);
-      const reply = msg.body as RpcAcceptedReply;
+      expect(msg).toBeInstanceOf(RpcAcceptedReplyMessage);
+      const reply = msg as RpcAcceptedReplyMessage;
       expect(reply.stat).toBe(RpcAcceptStat.SUCCESS);
     });
 
@@ -279,11 +273,11 @@ describe('RpcMessageDecoder', () => {
         0x01, // accept_stat = PROG_UNAVAIL
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(2);
-      const reply = msg.body as RpcAcceptedReply;
+      const reply = msg as RpcAcceptedReplyMessage;
       expect(reply.stat).toBe(RpcAcceptStat.PROG_UNAVAIL);
     });
 
@@ -324,11 +318,11 @@ describe('RpcMessageDecoder', () => {
         0x03, // high = 3
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(3);
-      const reply = msg.body as RpcAcceptedReply;
+      const reply = msg as RpcAcceptedReplyMessage;
       expect(reply.stat).toBe(RpcAcceptStat.PROG_MISMATCH);
       expect(reply.mismatchInfo).toBeDefined();
       expect(reply.mismatchInfo!.low).toBe(1);
@@ -364,11 +358,11 @@ describe('RpcMessageDecoder', () => {
         0x03, // accept_stat = PROC_UNAVAIL
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(4);
-      const reply = msg.body as RpcAcceptedReply;
+      const reply = msg as RpcAcceptedReplyMessage;
       expect(reply.stat).toBe(RpcAcceptStat.PROC_UNAVAIL);
     });
 
@@ -401,11 +395,11 @@ describe('RpcMessageDecoder', () => {
         0x04, // accept_stat = GARBAGE_ARGS
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(5);
-      const reply = msg.body as RpcAcceptedReply;
+      const reply = msg as RpcAcceptedReplyMessage;
       expect(reply.stat).toBe(RpcAcceptStat.GARBAGE_ARGS);
     });
   });
@@ -440,12 +434,12 @@ describe('RpcMessageDecoder', () => {
         0x02, // high = 2
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(6);
-      expect(msg.body).toBeInstanceOf(RpcRejectedReply);
-      const reply = msg.body as RpcRejectedReply;
+      expect(msg).toBeInstanceOf(RpcRejectedReplyMessage);
+      const reply = msg as RpcRejectedReplyMessage;
       expect(reply.stat).toBe(RpcRejectStat.RPC_MISMATCH);
       expect(reply.mismatchInfo).toBeDefined();
       expect(reply.mismatchInfo!.low).toBe(2);
@@ -477,11 +471,11 @@ describe('RpcMessageDecoder', () => {
         0x01, // auth_stat = AUTH_BADCRED
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(7);
-      const reply = msg.body as RpcRejectedReply;
+      const reply = msg as RpcRejectedReplyMessage;
       expect(reply.stat).toBe(RpcRejectStat.AUTH_ERROR);
       expect(reply.authStat).toBe(RpcAuthStat.AUTH_BADCRED);
     });
@@ -574,17 +568,18 @@ describe('RpcMessageDecoder', () => {
         0x00,
         0x00, // verf.length = 0
       ]);
-      decoder.push(payload1);
-      const message1 = decoder.decodeMessage()!;
+      
+      const reader1 = new Reader(payload1);
+      const message1 = decoder.decodeMessage(reader1)!;
       expect(message1).toBeDefined();
       expect(message1.xid).toBe(1);
-      expect((message1.body as RpcCallBody).prog).toBe(100);
-      decoder.push(payload2);
-      const message2 = decoder.decodeMessage()!;
+      expect((message1 as RpcCallMessage).prog).toBe(100);
+      
+      const reader2 = new Reader(payload2);
+      const message2 = decoder.decodeMessage(reader2)!;
       expect(message2).toBeDefined();
       expect(message2.xid).toBe(2);
-      expect((message2.body as RpcCallBody).prog).toBe(200);
-      expect(decoder.decodeMessage()).toBeUndefined();
+      expect((message2 as RpcCallMessage).prog).toBe(200);
     });
   });
 
@@ -636,14 +631,14 @@ describe('RpcMessageDecoder', () => {
         ...params,
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
-      const call = msg.body as RpcCallBody;
+      const call = msg as RpcCallMessage;
       expect(call.proc).toBe(1);
       expect(call.params).toBeDefined();
-      expect(call.params).toEqual(params);
+      expect(call.params!.buf(call.params!.size())).toEqual(params);
     });
 
     test('can decode SUCCESS reply with result data', () => {
@@ -677,14 +672,14 @@ describe('RpcMessageDecoder', () => {
         ...results,
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(1);
-      const reply = msg.body as RpcAcceptedReply;
+      const reply = msg as RpcAcceptedReplyMessage;
       expect(reply.stat).toBe(RpcAcceptStat.SUCCESS);
       expect(reply.results).toBeDefined();
-      expect(reply.results).toEqual(results);
+      expect(reply.results!.buf(reply.results!.size())).toEqual(results);
     });
 
     test('handles CALL with no parameters', () => {
@@ -732,10 +727,10 @@ describe('RpcMessageDecoder', () => {
         0x00, // verf.length = 0
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
-      const call = msg.body as RpcCallBody;
+      const call = msg as RpcCallMessage;
       expect(call.params).toBeUndefined();
     });
 
@@ -768,10 +763,10 @@ describe('RpcMessageDecoder', () => {
         0x01, // accept_stat = PROG_UNAVAIL
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
-      const reply = msg.body as RpcAcceptedReply;
+      const reply = msg as RpcAcceptedReplyMessage;
       expect(reply.results).toBeUndefined();
     });
 
@@ -839,16 +834,16 @@ describe('RpcMessageDecoder', () => {
         ...params,
       ]);
       
-      decoder.push(payload);
-      const msg = decoder.decodeMessage()!;
+      const reader = new Reader(payload);
+      const msg = decoder.decodeMessage(reader)!;
       expect(msg).toBeDefined();
       expect(msg.xid).toBe(156);
-      const call = msg.body as RpcCallBody;
+      const call = msg as RpcCallMessage;
       expect(call.prog).toBe(100000);
       expect(call.vers).toBe(2);
       expect(call.proc).toBe(3);
       expect(call.params).toBeDefined();
-      expect(call.params).toEqual(params);
+      expect(call.params!.buf(call.params!.size())).toEqual(params);
     });
   });
 });

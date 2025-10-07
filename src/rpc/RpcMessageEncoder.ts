@@ -1,6 +1,5 @@
 import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
-import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
-import type {Reader} from '@jsonjoy.com/buffers/lib/Reader';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {RpcMsgType, RpcReplyStat, RPC_VERSION} from './constants';
 import {RpcEncodingError} from './errors';
 import {
@@ -10,6 +9,7 @@ import {
   RpcRejectedReplyMessage,
   RpcMessage,
 } from './messages';
+import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
 export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> {
   constructor(public readonly writer: W = new Writer() as any) {}
@@ -73,25 +73,29 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     params?: Reader | Uint8Array,
   ): void {
     const writer = this.writer;
-    writer.u32(xid);
-    writer.u32(RpcMsgType.CALL);
-    writer.u32(RPC_VERSION);
-    writer.u32(prog);
-    writer.u32(vers);
-    writer.u32(proc);
+    writer.ensureCapacity(16 * 4);
+    const view = writer.view;
+    let x = writer.x;
+    view.setUint32(x, xid, false);
+    x += 4;
+    view.setUint32(x, RpcMsgType.CALL, false);
+    x += 4;
+    view.setUint32(x, RPC_VERSION, false);
+    x += 4;
+    view.setUint32(x, prog, false);
+    x += 4;
+    view.setUint32(x, vers, false);
+    x += 4;
+    view.setUint32(x, proc, false);
+    x += 4;
+    writer.x = x;
     this.writeOpaqueAuth(cred);
     this.writeOpaqueAuth(verf);
-    if (params) {
-      if (params instanceof Uint8Array) {
-        if (params.length > 0) {
-          writer.buf(params, params.length);
-        }
-      } else {
-        const size = params.size();
-        if (size > 0) {
-          writer.buf(params.uint8, size);
-        }
-      }
+    if (params instanceof Uint8Array) {
+      if (params.length > 0) writer.buf(params, params.length);
+    } else if (params instanceof Reader) {
+      const size = params.size();
+      if (size > 0) writer.buf(params.subarray(0, size), size);
     }
   }
 
@@ -103,9 +107,16 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     results?: Reader | Uint8Array,
   ): void {
     const writer = this.writer;
-    writer.u32(xid);
-    writer.u32(RpcMsgType.REPLY);
-    writer.u32(RpcReplyStat.MSG_ACCEPTED);
+    writer.ensureCapacity(16 * 4);
+    const view = writer.view;
+    let x = writer.x;
+    view.setUint32(x, xid, false);
+    x += 4;
+    view.setUint32(x, RpcMsgType.REPLY, false);
+    x += 4;
+    view.setUint32(x, RpcReplyStat.MSG_ACCEPTED, false);
+    x += 4;
+    writer.x = x;
     this.writeOpaqueAuth(verf);
     writer.u32(acceptStat);
     if (mismatchInfo) {
@@ -114,14 +125,10 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     }
     if (results) {
       if (results instanceof Uint8Array) {
-        if (results.length > 0) {
-          writer.buf(results, results.length);
-        }
+        if (results.length > 0) writer.buf(results, results.length);
       } else {
         const size = results.size();
-        if (size > 0) {
-          writer.buf(results.uint8, size);
-        }
+        if (size > 0) writer.buf(results.uint8, size);
       }
     }
   }
@@ -133,32 +140,52 @@ export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & I
     authStat?: number,
   ): void {
     const writer = this.writer;
-    writer.u32(xid);
-    writer.u32(RpcMsgType.REPLY);
-    writer.u32(RpcReplyStat.MSG_DENIED);
-    writer.u32(rejectStat);
+    writer.ensureCapacity(7 * 4);
+    const view = writer.view;
+    let x = writer.x;
+    view.setUint32(x, xid, false);
+    x += 4;
+    view.setUint32(x, RpcMsgType.REPLY, false);
+    x += 4;
+    view.setUint32(x, RpcReplyStat.MSG_DENIED, false);
+    x += 4;
+    view.setUint32(x, rejectStat, false);
+    x += 4;
     if (mismatchInfo) {
-      writer.u32(mismatchInfo.low);
-      writer.u32(mismatchInfo.high);
+      view.setUint32(x, mismatchInfo.low, false);
+      x += 4;
+      view.setUint32(x, mismatchInfo.high, false);
+      x += 4;
     }
     if (authStat !== undefined) {
-      writer.u32(authStat);
+      view.setUint32(x, authStat, false);
+      x += 4;
     }
+    writer.x = x;
   }
 
   private writeOpaqueAuth(auth: RpcOpaqueAuth): void {
     const writer = this.writer;
-    writer.u32(auth.flavor);
     const body = auth.body;
     const length = body.size();
     if (length > 400) throw new RpcEncodingError('Auth body too large');
-    writer.u32(length);
+    writer.ensureCapacity(2 * 4 + length + 3);
+    const view = writer.view;
+    let x = writer.x;
+    view.setUint32(x, auth.flavor, false);
+    x += 4;
+    view.setUint32(x, length, false);
+    x += 4;
     if (length > 0) {
+      writer.x = x;
       writer.buf(body.subarray(0, length), length);
+      x = writer.x;
       const padding = (4 - (length % 4)) % 4;
       for (let i = 0; i < padding; i++) {
-        writer.u8(0);
+        view.setUint8(x, 0);
+        x += 1;
       }
     }
+    writer.x = x;
   }
 }

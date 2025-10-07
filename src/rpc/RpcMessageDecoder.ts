@@ -25,7 +25,7 @@ export class RpcMessageDecoder {
         const vers = reader.u32();
         const proc = reader.u32();
         const cred = this.readOpaqueAuth(reader);
-        if (!cred) return (reader.x = startPos, undefined);
+        if (!cred) return (reader.x = startPos), undefined;
         const verf = this.readOpaqueAuth(reader);
         if (!verf) return (reader.x = startPos), undefined;
         const params = reader.size() > 0 ? reader.cut(reader.size()) : undefined;

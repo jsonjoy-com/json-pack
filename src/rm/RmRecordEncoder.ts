@@ -8,7 +8,7 @@ export class RmRecordEncoder<W extends IWriter & IWriterGrowable = IWriter & IWr
     this.writeHdr(fin, length);
     return this.writer.flush();
   }
-  
+
   public encodeRecord(record: Uint8Array): Uint8Array {
     this.writeRecord(record);
     return this.writer.flush();

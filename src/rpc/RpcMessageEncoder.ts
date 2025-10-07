@@ -2,13 +2,7 @@ import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {RpcMsgType, RpcReplyStat, RPC_VERSION} from './constants';
 import {RpcEncodingError} from './errors';
-import {
-  RpcOpaqueAuth,
-  RpcCallMessage,
-  RpcAcceptedReplyMessage,
-  RpcRejectedReplyMessage,
-  RpcMessage,
-} from './messages';
+import {RpcOpaqueAuth, RpcCallMessage, RpcAcceptedReplyMessage, RpcRejectedReplyMessage, RpcMessage} from './messages';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
 export class RpcMessageEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> {

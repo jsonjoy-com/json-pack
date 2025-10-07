@@ -49,7 +49,4 @@ export class RpcRejectedReplyMessage {
   ) {}
 }
 
-export type RpcMessage =
-  | RpcCallMessage
-  | RpcAcceptedReplyMessage
-  | RpcRejectedReplyMessage;
+export type RpcMessage = RpcCallMessage | RpcAcceptedReplyMessage | RpcRejectedReplyMessage;

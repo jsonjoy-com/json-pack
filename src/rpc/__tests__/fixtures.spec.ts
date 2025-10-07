@@ -186,7 +186,7 @@ describe('RPC Real-world Fixtures', () => {
         const decoder = new RpcMessageDecoder();
         const withRecordMarking = fixture.bytes;
         const reader = new Reader(withRecordMarking);
-      const msg = decoder.decodeMessage(reader)!;
+        const msg = decoder.decodeMessage(reader)!;
         expect(msg).toBeDefined();
         const call = msg as RpcCallMessage;
         expect(call.cred.body.buf().length).toBe(fixture.expected.credBodyLength);
@@ -357,7 +357,7 @@ describe('RPC Real-world Fixtures', () => {
       const start = Date.now();
       for (let i = 0; i < 1000; i++) {
         const reader = new Reader(withRecordMarking);
-      const msg = decoder.decodeMessage(reader);
+        const msg = decoder.decodeMessage(reader);
         expect(msg).toBeDefined();
       }
       const elapsed = Date.now() - start;

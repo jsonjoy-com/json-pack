@@ -241,7 +241,7 @@ describe('RpcMessageEncoder', () => {
         const cred = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_UNIX, new Reader(body));
         const encoded = encoder.encodeCall(xid, 100, 1, 0, cred, verf);
         const reader = new Reader(encoded);
-      const msg = decoder.decodeMessage(reader)!;
+        const msg = decoder.decodeMessage(reader)!;
         expect(msg.xid).toBe(xid);
         expect((msg as RpcCallMessage).cred.body.buf()).toEqual(body);
       };

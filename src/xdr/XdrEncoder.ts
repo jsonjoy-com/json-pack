@@ -102,7 +102,6 @@ export class XdrEncoder implements BinaryJsonEncoder {
   public writeHyper(hyper: number | bigint): void {
     const writer = this.writer;
     writer.ensureCapacity(8);
-
     if (typeof hyper === 'bigint') {
       writer.view.setBigInt64(writer.x, hyper, false); // big-endian
     } else {
@@ -171,15 +170,9 @@ export class XdrEncoder implements BinaryJsonEncoder {
     const writer = this.writer;
     const paddedSize = Math.ceil(size / 4) * 4;
     writer.ensureCapacity(paddedSize);
-
-    // Write data
     writer.buf(data, size);
-
-    // Write padding bytes
     const padding = paddedSize - size;
-    for (let i = 0; i < padding; i++) {
-      writer.u8(0);
-    }
+    for (let i = 0; i < padding; i++) writer.u8(0);
   }
 
   /**
@@ -202,13 +195,9 @@ export class XdrEncoder implements BinaryJsonEncoder {
     const lengthOffset = writer.x;
     writer.x += 4; // Reserve space for length
     const bytesWritten = writer.utf8(str);
-
-    // Calculate and write padding
     const paddedSize = Math.ceil(bytesWritten / 4) * 4;
     const padding = paddedSize - bytesWritten;
-    for (let i = 0; i < padding; i++) {
-      writer.u8(0);
-    }
+    for (let i = 0; i < padding; i++) writer.u8(0);
 
     // Go back and write the actual byte length
     const currentPos = writer.x;
@@ -232,14 +221,9 @@ export class XdrEncoder implements BinaryJsonEncoder {
    */
   public writeNumber(num: number): void {
     if (Number.isInteger(num)) {
-      if (num >= -2147483648 && num <= 2147483647) {
-        this.writeInt(num);
-      } else {
-        this.writeHyper(num);
-      }
-    } else {
-      this.writeDouble(num);
-    }
+      if (num >= -2147483648 && num <= 2147483647) this.writeInt(num);
+      else this.writeHyper(num);
+    } else this.writeDouble(num);
   }
 
   /**

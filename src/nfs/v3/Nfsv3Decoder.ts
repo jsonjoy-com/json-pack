@@ -138,28 +138,31 @@ export class Nfsv3Decoder {
   }
 
   private readTime(): structs.Nfsv3Time {
-    const seconds = this.xdr.readUnsignedInt();
-    const nseconds = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const seconds = xdr.readUnsignedInt();
+    const nseconds = xdr.readUnsignedInt();
     return new structs.Nfsv3Time(seconds, nseconds);
   }
 
   private readSpecData(): structs.Nfsv3SpecData {
-    const specdata1 = this.xdr.readUnsignedInt();
-    const specdata2 = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const specdata1 = xdr.readUnsignedInt();
+    const specdata2 = xdr.readUnsignedInt();
     return new structs.Nfsv3SpecData(specdata1, specdata2);
   }
 
   private readFattr(): structs.Nfsv3Fattr {
-    const type = this.xdr.readUnsignedInt() as Nfsv3FType;
-    const mode = this.xdr.readUnsignedInt();
-    const nlink = this.xdr.readUnsignedInt();
-    const uid = this.xdr.readUnsignedInt();
-    const gid = this.xdr.readUnsignedInt();
-    const size = this.xdr.readUnsignedHyper();
-    const used = this.xdr.readUnsignedHyper();
+    const xdr = this.xdr;
+    const type = xdr.readUnsignedInt() as Nfsv3FType;
+    const mode = xdr.readUnsignedInt();
+    const nlink = xdr.readUnsignedInt();
+    const uid = xdr.readUnsignedInt();
+    const gid = xdr.readUnsignedInt();
+    const size = xdr.readUnsignedHyper();
+    const used = xdr.readUnsignedHyper();
     const rdev = this.readSpecData();
-    const fsid = this.xdr.readUnsignedHyper();
-    const fileid = this.xdr.readUnsignedHyper();
+    const fsid = xdr.readUnsignedHyper();
+    const fileid = xdr.readUnsignedHyper();
     const atime = this.readTime();
     const mtime = this.readTime();
     const ctime = this.readTime();
@@ -256,13 +259,14 @@ export class Nfsv3Decoder {
   }
 
   private readCreateHow(): structs.Nfsv3CreateHow {
-    const mode = this.xdr.readUnsignedInt() as Nfsv3CreateMode;
+    const xdr = this.xdr;
+    const mode = xdr.readUnsignedInt() as Nfsv3CreateMode;
     let objAttributes: structs.Nfsv3Sattr | undefined;
     let verf: Reader | undefined;
     if (mode === Nfsv3CreateMode.UNCHECKED || mode === Nfsv3CreateMode.GUARDED) {
       objAttributes = this.readSattr();
     } else if (mode === Nfsv3CreateMode.EXCLUSIVE) {
-      const verfData = this.xdr.readOpaque(8);
+      const verfData = xdr.readOpaque(8);
       verf = new Reader(verfData);
     }
     return new structs.Nfsv3CreateHow(mode, objAttributes, verf);
@@ -292,21 +296,23 @@ export class Nfsv3Decoder {
   }
 
   private readEntry(): structs.Nfsv3Entry | undefined {
-    const valueFollows = this.xdr.readBoolean();
+    const xdr = this.xdr;
+    const valueFollows = xdr.readBoolean();
     if (!valueFollows) return undefined;
-    const fileid = this.xdr.readUnsignedHyper();
+    const fileid = xdr.readUnsignedHyper();
     const name = this.readFilename();
-    const cookie = this.xdr.readUnsignedHyper();
+    const cookie = xdr.readUnsignedHyper();
     const nextentry = this.readEntry();
     return new structs.Nfsv3Entry(fileid, name, cookie, nextentry);
   }
 
   private readEntryPlus(): structs.Nfsv3EntryPlus | undefined {
-    const valueFollows = this.xdr.readBoolean();
+    const xdr = this.xdr;
+    const valueFollows = xdr.readBoolean();
     if (!valueFollows) return undefined;
-    const fileid = this.xdr.readUnsignedHyper();
+    const fileid = xdr.readUnsignedHyper();
     const name = this.readFilename();
-    const cookie = this.xdr.readUnsignedHyper();
+    const cookie = xdr.readUnsignedHyper();
     const nameAttributes = this.readPostOpAttr();
     const nameHandle = this.readPostOpFh();
     const nextentry = this.readEntryPlus();
@@ -388,12 +394,13 @@ export class Nfsv3Decoder {
   }
 
   private decodeAccessResponse(): msg.Nfsv3AccessResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     let resok: msg.Nfsv3AccessResOk | undefined;
     let resfail: msg.Nfsv3AccessResFail | undefined;
     const objAttributes = this.readPostOpAttr();
     if (status === 0) {
-      const access = this.xdr.readUnsignedInt();
+      const access = xdr.readUnsignedInt();
       resok = new msg.Nfsv3AccessResOk(objAttributes, access);
     } else {
       resfail = new msg.Nfsv3AccessResFail(objAttributes);
@@ -422,8 +429,9 @@ export class Nfsv3Decoder {
 
   private decodeReadRequest(): msg.Nfsv3ReadRequest {
     const file = this.readFh();
-    const offset = this.xdr.readUnsignedHyper();
-    const count = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const offset = xdr.readUnsignedHyper();
+    const count = xdr.readUnsignedInt();
     return new msg.Nfsv3ReadRequest(file, offset, count);
   }
 
@@ -433,9 +441,10 @@ export class Nfsv3Decoder {
     let resfail: msg.Nfsv3ReadResFail | undefined;
     const fileAttributes = this.readPostOpAttr();
     if (status === 0) {
-      const count = this.xdr.readUnsignedInt();
-      const eof = this.xdr.readBoolean();
-      const data = this.xdr.readVarlenOpaque();
+      const xdr = this.xdr;
+      const count = xdr.readUnsignedInt();
+      const eof = xdr.readBoolean();
+      const data = xdr.readVarlenOpaque();
       resok = new msg.Nfsv3ReadResOk(fileAttributes, count, eof, new Reader(data));
     } else {
       resfail = new msg.Nfsv3ReadResFail(fileAttributes);
@@ -445,22 +454,24 @@ export class Nfsv3Decoder {
 
   private decodeWriteRequest(): msg.Nfsv3WriteRequest {
     const file = this.readFh();
-    const offset = this.xdr.readUnsignedHyper();
-    const count = this.xdr.readUnsignedInt();
-    const stable = this.xdr.readUnsignedInt();
-    const data = this.xdr.readVarlenOpaque();
+    const xdr = this.xdr;
+    const offset = xdr.readUnsignedHyper();
+    const count = xdr.readUnsignedInt();
+    const stable = xdr.readUnsignedInt();
+    const data = xdr.readVarlenOpaque();
     return new msg.Nfsv3WriteRequest(file, offset, count, stable, new Reader(data));
   }
 
   private decodeWriteResponse(): msg.Nfsv3WriteResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     let resok: msg.Nfsv3WriteResOk | undefined;
     let resfail: msg.Nfsv3WriteResFail | undefined;
     const fileWcc = this.readWccData();
     if (status === 0) {
-      const count = this.xdr.readUnsignedInt();
-      const committed = this.xdr.readUnsignedInt();
-      const verf = this.xdr.readOpaque(8);
+      const count = xdr.readUnsignedInt();
+      const committed = xdr.readUnsignedInt();
+      const verf = xdr.readOpaque(8);
       resok = new msg.Nfsv3WriteResOk(fileWcc, count, committed, new Reader(verf));
     } else {
       resfail = new msg.Nfsv3WriteResFail(fileWcc);
@@ -635,19 +646,21 @@ export class Nfsv3Decoder {
 
   private decodeReaddirRequest(): msg.Nfsv3ReaddirRequest {
     const dir = this.readFh();
-    const cookie = this.xdr.readUnsignedHyper();
-    const cookieverf = this.xdr.readOpaque(8);
-    const count = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const cookie = xdr.readUnsignedHyper();
+    const cookieverf = xdr.readOpaque(8);
+    const count = xdr.readUnsignedInt();
     return new msg.Nfsv3ReaddirRequest(dir, cookie, new Reader(cookieverf), count);
   }
 
   private decodeReaddirResponse(): msg.Nfsv3ReaddirResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     let resok: msg.Nfsv3ReaddirResOk | undefined;
     let resfail: msg.Nfsv3ReaddirResFail | undefined;
     const dirAttributes = this.readPostOpAttr();
     if (status === 0) {
-      const cookieverf = this.xdr.readOpaque(8);
+      const cookieverf = xdr.readOpaque(8);
       const reply = this.readDirList();
       resok = new msg.Nfsv3ReaddirResOk(dirAttributes, new Reader(cookieverf), reply);
     } else {
@@ -658,20 +671,22 @@ export class Nfsv3Decoder {
 
   private decodeReaddirplusRequest(): msg.Nfsv3ReaddirplusRequest {
     const dir = this.readFh();
-    const cookie = this.xdr.readUnsignedHyper();
-    const cookieverf = this.xdr.readOpaque(8);
-    const dircount = this.xdr.readUnsignedInt();
-    const maxcount = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const cookie = xdr.readUnsignedHyper();
+    const cookieverf = xdr.readOpaque(8);
+    const dircount = xdr.readUnsignedInt();
+    const maxcount = xdr.readUnsignedInt();
     return new msg.Nfsv3ReaddirplusRequest(dir, cookie, new Reader(cookieverf), dircount, maxcount);
   }
 
   private decodeReaddirplusResponse(): msg.Nfsv3ReaddirplusResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     let resok: msg.Nfsv3ReaddirplusResOk | undefined;
     let resfail: msg.Nfsv3ReaddirplusResFail | undefined;
     const dirAttributes = this.readPostOpAttr();
     if (status === 0) {
-      const cookieverf = this.xdr.readOpaque(8);
+      const cookieverf = xdr.readOpaque(8);
       const reply = this.readDirListPlus();
       resok = new msg.Nfsv3ReaddirplusResOk(dirAttributes, new Reader(cookieverf), reply);
     } else {
@@ -686,18 +701,19 @@ export class Nfsv3Decoder {
   }
 
   private decodeFsstatResponse(): msg.Nfsv3FsstatResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     let resok: msg.Nfsv3FsstatResOk | undefined;
     let resfail: msg.Nfsv3FsstatResFail | undefined;
     const objAttributes = this.readPostOpAttr();
     if (status === 0) {
-      const tbytes = this.xdr.readUnsignedHyper();
-      const fbytes = this.xdr.readUnsignedHyper();
-      const abytes = this.xdr.readUnsignedHyper();
-      const tfiles = this.xdr.readUnsignedHyper();
-      const ffiles = this.xdr.readUnsignedHyper();
-      const afiles = this.xdr.readUnsignedHyper();
-      const invarsec = this.xdr.readUnsignedInt();
+      const tbytes = xdr.readUnsignedHyper();
+      const fbytes = xdr.readUnsignedHyper();
+      const abytes = xdr.readUnsignedHyper();
+      const tfiles = xdr.readUnsignedHyper();
+      const ffiles = xdr.readUnsignedHyper();
+      const afiles = xdr.readUnsignedHyper();
+      const invarsec = xdr.readUnsignedInt();
       resok = new msg.Nfsv3FsstatResOk(objAttributes, tbytes, fbytes, abytes, tfiles, ffiles, afiles, invarsec);
     } else {
       resfail = new msg.Nfsv3FsstatResFail(objAttributes);
@@ -711,21 +727,22 @@ export class Nfsv3Decoder {
   }
 
   private decodeFsinfoResponse(): msg.Nfsv3FsinfoResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     let resok: msg.Nfsv3FsinfoResOk | undefined;
     let resfail: msg.Nfsv3FsinfoResFail | undefined;
     const objAttributes = this.readPostOpAttr();
     if (status === 0) {
-      const rtmax = this.xdr.readUnsignedInt();
-      const rtpref = this.xdr.readUnsignedInt();
-      const rtmult = this.xdr.readUnsignedInt();
-      const wtmax = this.xdr.readUnsignedInt();
-      const wtpref = this.xdr.readUnsignedInt();
-      const wtmult = this.xdr.readUnsignedInt();
-      const dtpref = this.xdr.readUnsignedInt();
-      const maxfilesize = this.xdr.readUnsignedHyper();
-      const timeDelta = {seconds: this.xdr.readUnsignedInt(), nseconds: this.xdr.readUnsignedInt()};
-      const properties = this.xdr.readUnsignedInt();
+      const rtmax = xdr.readUnsignedInt();
+      const rtpref = xdr.readUnsignedInt();
+      const rtmult = xdr.readUnsignedInt();
+      const wtmax = xdr.readUnsignedInt();
+      const wtpref = xdr.readUnsignedInt();
+      const wtmult = xdr.readUnsignedInt();
+      const dtpref = xdr.readUnsignedInt();
+      const maxfilesize = xdr.readUnsignedHyper();
+      const timeDelta = {seconds: xdr.readUnsignedInt(), nseconds: xdr.readUnsignedInt()};
+      const properties = xdr.readUnsignedInt();
       resok = new msg.Nfsv3FsinfoResOk(
         objAttributes,
         rtmax,
@@ -751,17 +768,18 @@ export class Nfsv3Decoder {
   }
 
   private decodePathconfResponse(): msg.Nfsv3PathconfResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     let resok: msg.Nfsv3PathconfResOk | undefined;
     let resfail: msg.Nfsv3PathconfResFail | undefined;
     const objAttributes = this.readPostOpAttr();
     if (status === 0) {
-      const linkmax = this.xdr.readUnsignedInt();
-      const namemax = this.xdr.readUnsignedInt();
-      const noTrunc = this.xdr.readBoolean();
-      const chownRestricted = this.xdr.readBoolean();
-      const caseInsensitive = this.xdr.readBoolean();
-      const casePreserving = this.xdr.readBoolean();
+      const linkmax = xdr.readUnsignedInt();
+      const namemax = xdr.readUnsignedInt();
+      const noTrunc = xdr.readBoolean();
+      const chownRestricted = xdr.readBoolean();
+      const caseInsensitive = xdr.readBoolean();
+      const casePreserving = xdr.readBoolean();
       resok = new msg.Nfsv3PathconfResOk(
         objAttributes,
         linkmax,
@@ -779,18 +797,20 @@ export class Nfsv3Decoder {
 
   private decodeCommitRequest(): msg.Nfsv3CommitRequest {
     const file = this.readFh();
-    const offset = this.xdr.readUnsignedHyper();
-    const count = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const offset = xdr.readUnsignedHyper();
+    const count = xdr.readUnsignedInt();
     return new msg.Nfsv3CommitRequest(file, offset, count);
   }
 
   private decodeCommitResponse(): msg.Nfsv3CommitResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     let resok: msg.Nfsv3CommitResOk | undefined;
     let resfail: msg.Nfsv3CommitResFail | undefined;
     const fileWcc = this.readWccData();
     if (status === 0) {
-      const verf = this.xdr.readOpaque(8);
+      const verf = xdr.readOpaque(8);
       resok = new msg.Nfsv3CommitResOk(fileWcc, new Reader(verf));
     } else {
       resfail = new msg.Nfsv3CommitResFail(fileWcc);

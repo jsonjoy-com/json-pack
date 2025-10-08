@@ -59,7 +59,6 @@ describe('NFSv3 Decoder with real traffic', () => {
       expect(proc).toBe(Nfsv3Proc.LOOKUP);
       expect(request).toBeInstanceOf(msg.Nfsv3LookupRequest);
       const lookupReq = request as msg.Nfsv3LookupRequest;
-      console.log(lookupReq);
       expect(lookupReq.what.name).toBe('hello');
     });
 

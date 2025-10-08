@@ -1,18 +1,22 @@
 import * as net from 'net';
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
-import {FullNfsv3Encoder} from '../FullNfsv3Encoder';
-import {Nfsv3GetattrRequest} from '../messages';
-import {Nfsv3Fh} from '../structs';
-import {Nfsv3Proc} from '../constants';
+import {FullNfsv4Encoder} from '../FullNfsv4Encoder';
+import {Nfsv4CompoundRequest, Nfsv4PutfhRequest, Nfsv4LookupRequest, Nfsv4GetfhRequest} from '../messages';
+import {Nfsv4Fh} from '../structs';
+import {Nfsv4Proc} from '../constants';
 
 /* tslint:disable:no-console */
 
-const PORT = 2049;
+const PORT = Number(process.env.PORT) || 2049;
 const HOST = '127.0.0.1';
 
-const createTestRequest = (): Nfsv3GetattrRequest => {
+const createTestCompoundRequest = (): Nfsv4CompoundRequest => {
   const fhData = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
-  return new Nfsv3GetattrRequest(new Nfsv3Fh(fhData));
+  const fh = new Nfsv4Fh(fhData);
+  const putfh = new Nfsv4PutfhRequest(fh);
+  const lookup = new Nfsv4LookupRequest('testfile.txt');
+  const getfh = new Nfsv4GetfhRequest();
+  return new Nfsv4CompoundRequest('nfs4_client', 0, [putfh, lookup, getfh]);
 };
 
 const createTestCred = () => {
@@ -29,15 +33,15 @@ const createTestVerf = () => {
   };
 };
 
-console.log('Connecting to NFSv3 server...');
+console.log('Connecting to NFSv4 server...');
 
 const client = net.connect({port: PORT, host: HOST}, () => {
   console.log(`Connected to ${HOST}:${PORT}`);
-  console.log('Sending GETATTR request...\n');
-  const encoder = new FullNfsv3Encoder();
-  const request = createTestRequest();
-  const xid = 12345;
-  const proc = Nfsv3Proc.GETATTR;
+  console.log('Sending COMPOUND request (PUTFH + LOOKUP + GETFH)...\n');
+  const encoder = new FullNfsv4Encoder();
+  const request = createTestCompoundRequest();
+  const xid = 0x1b8b45f2;
+  const proc = Nfsv4Proc.COMPOUND;
   const cred = createTestCred();
   const verf = createTestVerf();
   const encoded = encoder.encodeCall(xid, proc, cred, verf, request);
@@ -48,15 +52,17 @@ const client = net.connect({port: PORT, host: HOST}, () => {
       .map((b) => b.toString(16).padStart(2, '0'))
       .join(' '),
   );
+  console.log('');
   client.write(encoded);
   setTimeout(() => {
-    console.log('\nClosing connection...');
+    console.log('Closing connection...');
     client.end();
   }, 100);
 });
 
 client.on('data', (data) => {
   console.log('Received response:', data.length, 'bytes');
+  console.log('(This demo server does not send responses)');
 });
 
 client.on('end', () => {

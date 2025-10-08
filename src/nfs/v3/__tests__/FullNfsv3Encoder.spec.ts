@@ -22,7 +22,7 @@ describe('FullNfsv3Encoder', () => {
 
   const createTestRequest = (): msg.Nfsv3GetattrRequest => {
     const fhData = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
-    return new msg.Nfsv3GetattrRequest(new structs.Nfsv3Fh(new Reader(fhData)));
+    return new msg.Nfsv3GetattrRequest(new structs.Nfsv3Fh(fhData));
   };
 
   const createTestCred = () => {
@@ -58,7 +58,7 @@ describe('FullNfsv3Encoder', () => {
       expect(call.proc).toBe(proc);
       const nfsRequest = nfsDecoder.decodeMessage(call.params!, proc, true);
       expect(nfsRequest).toBeInstanceOf(msg.Nfsv3GetattrRequest);
-      expect((nfsRequest as msg.Nfsv3GetattrRequest).object.data.uint8).toEqual(request.object.data.uint8);
+      expect((nfsRequest as msg.Nfsv3GetattrRequest).object.data).toEqual(request.object.data);
     });
 
     test('produces same output as separate encoders', () => {
@@ -83,7 +83,7 @@ describe('FullNfsv3Encoder', () => {
     test('encodes LOOKUP request', () => {
       const fullEncoder = new FullNfsv3Encoder();
       const fhData = new Uint8Array([1, 2, 3, 4]);
-      const dirOpArgs = new structs.Nfsv3DirOpArgs(new structs.Nfsv3Fh(new Reader(fhData)), 'test.txt');
+      const dirOpArgs = new structs.Nfsv3DirOpArgs(new structs.Nfsv3Fh(fhData), 'test.txt');
       const request = new msg.Nfsv3LookupRequest(dirOpArgs);
       const xid = 54321;
       const proc = Nfsv3Proc.LOOKUP;
@@ -106,7 +106,7 @@ describe('FullNfsv3Encoder', () => {
     test('encodes READ request', () => {
       const fullEncoder = new FullNfsv3Encoder();
       const fhData = new Uint8Array([1, 2, 3, 4]);
-      const request = new msg.Nfsv3ReadRequest(new structs.Nfsv3Fh(new Reader(fhData)), BigInt(0), 4096);
+      const request = new msg.Nfsv3ReadRequest(new structs.Nfsv3Fh(fhData), BigInt(0), 4096);
       const xid = 99999;
       const proc = Nfsv3Proc.READ;
       const cred = createTestCred();
@@ -144,7 +144,7 @@ describe('FullNfsv3Encoder', () => {
     test('handles large file handles', () => {
       const fullEncoder = new FullNfsv3Encoder();
       const fhData = new Uint8Array(64).fill(0xff);
-      const request = new msg.Nfsv3GetattrRequest(new structs.Nfsv3Fh(new Reader(fhData)));
+      const request = new msg.Nfsv3GetattrRequest(new structs.Nfsv3Fh(fhData));
       const xid = 1;
       const proc = Nfsv3Proc.GETATTR;
       const cred = createTestCred();
@@ -156,7 +156,7 @@ describe('FullNfsv3Encoder', () => {
       const rpcMessage = rpcDecoder.decodeMessage(rmRecord!);
       const call = rpcMessage as RpcCallMessage;
       const nfsRequest = nfsDecoder.decodeMessage(call.params!, proc, true) as msg.Nfsv3GetattrRequest;
-      expect(nfsRequest.object.data.uint8).toEqual(fhData);
+      expect(nfsRequest.object.data).toEqual(fhData);
     });
   });
 
@@ -205,7 +205,7 @@ describe('FullNfsv3Encoder', () => {
       const verf = createTestVerf();
       const data = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
       const postOpAttr = new structs.Nfsv3PostOpAttr(false);
-      const resok = new msg.Nfsv3ReadResOk(postOpAttr, data.length, true, new Reader(data));
+      const resok = new msg.Nfsv3ReadResOk(postOpAttr, data.length, true, data);
       const response = new msg.Nfsv3ReadResponse(Nfsv3Stat.NFS3_OK, resok);
       const encoded = fullEncoder.encodeAcceptedReply(xid, proc, verf, response);
       rmDecoder.push(encoded);
@@ -219,7 +219,7 @@ describe('FullNfsv3Encoder', () => {
       expect(nfsResponse).toBeInstanceOf(msg.Nfsv3ReadResponse);
       expect(nfsResponse.status).toBe(Nfsv3Stat.NFS3_OK);
       expect(nfsResponse.resok).toBeDefined();
-      expect(nfsResponse.resok!.data.uint8).toEqual(data);
+      expect(nfsResponse.resok!.data).toEqual(data);
       expect(nfsResponse.resok!.eof).toBe(true);
     });
 

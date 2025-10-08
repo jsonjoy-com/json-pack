@@ -5,6 +5,8 @@ import {Nfsv3GetattrRequest} from '../messages';
 import {Nfsv3Fh} from '../structs';
 import {Nfsv3Proc} from '../constants';
 
+/* tslint:disable:no-console */
+
 const PORT = 2049;
 const HOST = '127.0.0.1';
 
@@ -40,7 +42,12 @@ const client = net.connect({port: PORT, host: HOST}, () => {
   const verf = createTestVerf();
   const encoded = encoder.encodeCall(xid, proc, cred, verf, request);
   console.log(`Sending ${encoded.length} bytes`);
-  console.log('HEX:', Array.from(encoded).map(b => b.toString(16).padStart(2, '0')).join(' '));
+  console.log(
+    'HEX:',
+    Array.from(encoded)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join(' '),
+  );
   client.write(encoded);
   setTimeout(() => {
     console.log('\nClosing connection...');

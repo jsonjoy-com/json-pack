@@ -3,12 +3,14 @@ import {RmRecordDecoder} from '../../../rm';
 import {RpcMessageDecoder, RpcCallMessage} from '../../../rpc';
 import {Nfsv3Decoder} from '../Nfsv3Decoder';
 
+/* tslint:disable:no-console */
+
 const PORT = 2049;
 const HOST = '127.0.0.1';
 
 const toHex = (buffer: Uint8Array | Buffer): string => {
   return Array.from(buffer)
-    .map(byte => byte.toString(16).padStart(2, '0'))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
     .join('');
 };
 

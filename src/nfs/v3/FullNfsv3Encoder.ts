@@ -16,7 +16,10 @@ export class FullNfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
   protected readonly rpcEncoder: RpcMessageEncoder<W>;
   protected readonly rmEncoder: RmRecordEncoder<W>;
 
-  constructor(public program: number = 100003, public readonly writer: W = new Writer() as any) {
+  constructor(
+    public program: number = 100003,
+    public readonly writer: W = new Writer() as any,
+  ) {
     this.nfsEncoder = new Nfsv3Encoder(writer);
     this.rpcEncoder = new RpcMessageEncoder(writer);
     this.rmEncoder = new RmRecordEncoder(writer);
@@ -58,12 +61,7 @@ export class FullNfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     return this.writer.flush();
   }
 
-  public writeAcceptedReply(
-    xid: number,
-    proc: Nfsv3Proc,
-    verf: RpcOpaqueAuth,
-    response: msg.Nfsv3Response,
-  ): void {
+  public writeAcceptedReply(xid: number, proc: Nfsv3Proc, verf: RpcOpaqueAuth, response: msg.Nfsv3Response): void {
     const writer = this.writer;
     const rmHeaderPosition = writer.x;
     writer.x += RM_HEADER_SIZE;

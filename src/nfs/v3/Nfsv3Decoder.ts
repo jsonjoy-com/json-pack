@@ -263,6 +263,7 @@ export class Nfsv3Decoder {
     const mode = xdr.readUnsignedInt() as Nfsv3CreateMode;
     let objAttributes: structs.Nfsv3Sattr | undefined;
     let verf: Reader | undefined;
+    // tslint:disable-next-line
     if (mode === Nfsv3CreateMode.UNCHECKED || mode === Nfsv3CreateMode.GUARDED) {
       objAttributes = this.readSattr();
     } else if (mode === Nfsv3CreateMode.EXCLUSIVE) {

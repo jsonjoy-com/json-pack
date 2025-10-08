@@ -1,6 +1,12 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {RmRecordEncoder, RmRecordDecoder} from '../../../rm';
-import {RpcMessageEncoder, RpcMessageDecoder, RpcCallMessage, RpcAcceptedReplyMessage, RpcRejectedReplyMessage} from '../../../rpc';
+import {
+  RpcMessageEncoder,
+  RpcMessageDecoder,
+  RpcCallMessage,
+  RpcAcceptedReplyMessage,
+  RpcRejectedReplyMessage,
+} from '../../../rpc';
 import {RpcRejectStat, RpcAuthStat} from '../../../rpc/constants';
 import {Nfsv3Encoder} from '../Nfsv3Encoder';
 import {Nfsv3Decoder} from '../Nfsv3Decoder';
@@ -271,7 +277,12 @@ describe('FullNfsv3Encoder', () => {
     test('encodes AUTH_ERROR rejected reply', () => {
       const fullEncoder = new FullNfsv3Encoder();
       const xid = 88888;
-      const encoded = fullEncoder.encodeRejectedReply(xid, RpcRejectStat.AUTH_ERROR, undefined, RpcAuthStat.AUTH_TOOWEAK);
+      const encoded = fullEncoder.encodeRejectedReply(
+        xid,
+        RpcRejectStat.AUTH_ERROR,
+        undefined,
+        RpcAuthStat.AUTH_TOOWEAK,
+      );
       rmDecoder.push(encoded);
       const rmRecord = rmDecoder.readRecord();
       expect(rmRecord).toBeDefined();

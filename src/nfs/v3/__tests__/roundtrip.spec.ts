@@ -58,7 +58,8 @@ test('assert roundtrip of Call messages', () => {
   assertCallRoundtrip(nfsv3.GETATTR.Call[0], true);
   assertCallRoundtrip(nfsv3.GETATTR.Call[0] + nfsv3.ACCESS.Call[0], false);
   assertCallRoundtrip(nfsv3.GETATTR.Call[0] + nfsv3.ACCESS.Call[0], true);
-  const stream = nfsv3.ACCESS.Call[0] +
+  const stream =
+    nfsv3.ACCESS.Call[0] +
     nfsv3.GETATTR.Call[0] +
     nfsv3.COMMIT.Call[0] +
     nfsv3.RMDIR.Call[0] +

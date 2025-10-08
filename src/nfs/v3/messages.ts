@@ -1,4 +1,3 @@
-import type {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import type {Nfsv3Stat} from './constants';
 import type * as stucts from './structs';
 
@@ -237,7 +236,7 @@ export class Nfsv3ReadResOk {
     public readonly fileAttributes: stucts.Nfsv3PostOpAttr,
     public readonly count: number,
     public readonly eof: boolean,
-    public readonly data: Reader,
+    public readonly data: Uint8Array,
   ) {}
 }
 
@@ -268,7 +267,7 @@ export class Nfsv3WriteRequest {
     public readonly offset: bigint,
     public readonly count: number,
     public readonly stable: number,
-    public readonly data: Reader,
+    public readonly data: Uint8Array,
   ) {}
 }
 
@@ -280,7 +279,7 @@ export class Nfsv3WriteResOk {
     public readonly fileWcc: stucts.Nfsv3WccData,
     public readonly count: number,
     public readonly committed: number,
-    public readonly verf: Reader,
+    public readonly verf: Uint8Array,
   ) {}
 }
 
@@ -612,7 +611,7 @@ export class Nfsv3ReaddirRequest {
   constructor(
     public readonly dir: stucts.Nfsv3Fh,
     public readonly cookie: bigint,
-    public readonly cookieverf: Reader,
+    public readonly cookieverf: Uint8Array,
     public readonly count: number,
   ) {}
 }
@@ -623,7 +622,7 @@ export class Nfsv3ReaddirRequest {
 export class Nfsv3ReaddirResOk {
   constructor(
     public readonly dirAttributes: stucts.Nfsv3PostOpAttr,
-    public readonly cookieverf: Reader,
+    public readonly cookieverf: Uint8Array,
     public readonly reply: stucts.Nfsv3DirList,
   ) {}
 }
@@ -653,7 +652,7 @@ export class Nfsv3ReaddirplusRequest {
   constructor(
     public readonly dir: stucts.Nfsv3Fh,
     public readonly cookie: bigint,
-    public readonly cookieverf: Reader,
+    public readonly cookieverf: Uint8Array,
     public readonly dircount: number,
     public readonly maxcount: number,
   ) {}
@@ -665,7 +664,7 @@ export class Nfsv3ReaddirplusRequest {
 export class Nfsv3ReaddirplusResOk {
   constructor(
     public readonly dirAttributes: stucts.Nfsv3PostOpAttr,
-    public readonly cookieverf: Reader,
+    public readonly cookieverf: Uint8Array,
     public readonly reply: stucts.Nfsv3DirListPlus,
   ) {}
 }
@@ -830,7 +829,7 @@ export class Nfsv3CommitRequest {
 export class Nfsv3CommitResOk {
   constructor(
     public readonly fileWcc: stucts.Nfsv3WccData,
-    public readonly verf: Reader,
+    public readonly verf: Uint8Array,
   ) {}
 }
 

@@ -1,4 +1,3 @@
-import type {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import type {Nfsv4FType, Nfsv4TimeHow, Nfsv4DelegType} from './constants';
 
 /**
@@ -25,14 +24,14 @@ export class Nfsv4SpecData {
  * NFSv4 file handle
  */
 export class Nfsv4Fh {
-  constructor(public readonly data: Reader) {}
+  constructor(public readonly data: Uint8Array) {}
 }
 
 /**
  * NFSv4 verifier (8 bytes)
  */
 export class Nfsv4Verifier {
-  constructor(public readonly data: Reader) {}
+  constructor(public readonly data: Uint8Array) {}
 }
 
 /**
@@ -51,7 +50,7 @@ export class Nfsv4Fsid {
 export class Nfsv4Stateid {
   constructor(
     public readonly seqid: number,
-    public readonly other: Reader,
+    public readonly other: Uint8Array,
   ) {}
 }
 
@@ -89,7 +88,7 @@ export class Nfsv4Bitmap {
 export class Nfsv4Fattr {
   constructor(
     public readonly attrmask: Nfsv4Bitmap,
-    public readonly attrVals: Reader,
+    public readonly attrVals: Uint8Array,
   ) {}
 }
 
@@ -119,7 +118,7 @@ export class Nfsv4CbClient {
 export class Nfsv4ClientId {
   constructor(
     public readonly verifier: Nfsv4Verifier,
-    public readonly id: Reader,
+    public readonly id: Uint8Array,
   ) {}
 }
 
@@ -129,7 +128,7 @@ export class Nfsv4ClientId {
 export class Nfsv4OpenOwner {
   constructor(
     public readonly clientid: bigint,
-    public readonly owner: Reader,
+    public readonly owner: Uint8Array,
   ) {}
 }
 
@@ -139,7 +138,7 @@ export class Nfsv4OpenOwner {
 export class Nfsv4LockOwner {
   constructor(
     public readonly clientid: bigint,
-    public readonly owner: Reader,
+    public readonly owner: Uint8Array,
   ) {}
 }
 
@@ -200,7 +199,7 @@ export class Nfsv4Acl {
 export class Nfsv4SecInfo {
   constructor(
     public readonly flavor: number,
-    public readonly flavorInfo?: Reader,
+    public readonly flavorInfo?: Uint8Array,
   ) {}
 }
 
@@ -379,7 +378,7 @@ export const enum Nfsv4RpcSecGssService {
  */
 export class Nfsv4RpcSecGssInfo {
   constructor(
-    public readonly oid: Reader,
+    public readonly oid: Uint8Array,
     public readonly qop: number,
     public readonly service: Nfsv4RpcSecGssService,
   ) {}

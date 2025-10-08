@@ -1,4 +1,3 @@
-import type {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import type {Nfsv3FType, Nfsv3TimeHow, Nfsv3StableHow, Nfsv3CreateMode} from './constants';
 
 /**
@@ -25,7 +24,7 @@ export class Nfsv3SpecData {
  * NFSv3 file handle
  */
 export class Nfsv3Fh {
-  constructor(public readonly data: Reader) {}
+  constructor(public readonly data: Uint8Array) {}
 }
 
 /**
@@ -224,7 +223,7 @@ export class Nfsv3CreateHow {
   constructor(
     public readonly mode: Nfsv3CreateMode,
     public readonly objAttributes?: Nfsv3Sattr,
-    public readonly verf?: Reader,
+    public readonly verf?: Uint8Array,
   ) {}
 }
 

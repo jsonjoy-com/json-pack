@@ -1,4 +1,3 @@
-import type {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import type {Nfsv4Stat, Nfsv4LockType} from './constants';
 import type * as structs from './structs';
 
@@ -422,7 +421,7 @@ export class Nfsv4ReadRequest {
 export class Nfsv4ReadResOk {
   constructor(
     public readonly eof: boolean,
-    public readonly data: Reader,
+    public readonly data: Uint8Array,
   ) {}
 }
 
@@ -606,7 +605,7 @@ export class Nfsv4WriteRequest {
     public readonly stateid: structs.Nfsv4Stateid,
     public readonly offset: bigint,
     public readonly stable: number,
-    public readonly data: Reader,
+    public readonly data: Uint8Array,
   ) {}
 }
 

@@ -12,7 +12,10 @@ export class Nfsv4Decoder {
     this.xdr = new XdrDecoder(reader);
   }
 
-  public decodeCompound(reader: Reader, isRequest: boolean): msg.Nfsv4CompoundRequest | msg.Nfsv4CompoundResponse | undefined {
+  public decodeCompound(
+    reader: Reader,
+    isRequest: boolean,
+  ): msg.Nfsv4CompoundRequest | msg.Nfsv4CompoundResponse | undefined {
     this.xdr.reader = reader;
     const startPos = reader.x;
     try {
@@ -31,12 +34,13 @@ export class Nfsv4Decoder {
   }
 
   private decodeCompoundRequest(): msg.Nfsv4CompoundRequest {
-    const tag = this.xdr.readString();
-    const minorversion = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const tag = xdr.readString();
+    const minorversion = xdr.readUnsignedInt();
     const argarray: msg.Nfsv4Request[] = [];
-    const count = this.xdr.readUnsignedInt();
+    const count = xdr.readUnsignedInt();
     for (let i = 0; i < count; i++) {
-      const op = this.xdr.readUnsignedInt() as Nfsv4Op;
+      const op = xdr.readUnsignedInt() as Nfsv4Op;
       const request = this.decodeRequest(op);
       if (request) argarray.push(request);
     }
@@ -44,12 +48,13 @@ export class Nfsv4Decoder {
   }
 
   private decodeCompoundResponse(): msg.Nfsv4CompoundResponse {
-    const status = this.xdr.readUnsignedInt();
-    const tag = this.xdr.readString();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
+    const tag = xdr.readString();
     const resarray: msg.Nfsv4Response[] = [];
-    const count = this.xdr.readUnsignedInt();
+    const count = xdr.readUnsignedInt();
     for (let i = 0; i < count; i++) {
-      const op = this.xdr.readUnsignedInt() as Nfsv4Op;
+      const op = xdr.readUnsignedInt() as Nfsv4Op;
       const response = this.decodeResponse(op);
       if (response) resarray.push(response);
     }
@@ -353,7 +358,10 @@ export class Nfsv4Decoder {
       for (let i = 0; i < aceCount; i++) {
         permissions.push(this.readAce());
       }
-      return new structs.Nfsv4OpenDelegation(delegationType, new structs.Nfsv4OpenReadDelegation(stateid, recall, permissions));
+      return new structs.Nfsv4OpenDelegation(
+        delegationType,
+        new structs.Nfsv4OpenReadDelegation(stateid, recall, permissions),
+      );
     } else if (delegationType === Nfsv4DelegType.OPEN_DELEGATE_WRITE) {
       const stateid = this.readStateid();
       const recall = this.xdr.readBoolean();
@@ -363,7 +371,10 @@ export class Nfsv4Decoder {
       for (let i = 0; i < aceCount; i++) {
         permissions.push(this.readAce());
       }
-      return new structs.Nfsv4OpenDelegation(delegationType, new structs.Nfsv4OpenWriteDelegation(stateid, recall, spaceLimit, permissions));
+      return new structs.Nfsv4OpenDelegation(
+        delegationType,
+        new structs.Nfsv4OpenWriteDelegation(stateid, recall, spaceLimit, permissions),
+      );
     }
     throw new Nfsv4DecodingError(`Unknown delegation type: ${delegationType}`);
   }

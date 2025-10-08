@@ -361,11 +361,7 @@ export class Nfsv4CreateTypeOther {
 export class Nfsv4CreateType {
   constructor(
     public readonly type: Nfsv4FType,
-    public readonly objtype:
-      | Nfsv4CreateTypeFile
-      | Nfsv4CreateTypeLink
-      | Nfsv4CreateTypeDevice
-      | Nfsv4CreateTypeOther,
+    public readonly objtype: Nfsv4CreateTypeFile | Nfsv4CreateTypeLink | Nfsv4CreateTypeDevice | Nfsv4CreateTypeOther,
   ) {}
 }
 

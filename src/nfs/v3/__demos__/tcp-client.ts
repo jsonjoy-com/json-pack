@@ -12,7 +12,7 @@ const HOST = '127.0.0.1';
 
 const createTestRequest = (): Nfsv3GetattrRequest => {
   const fhData = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
-  return new Nfsv3GetattrRequest(new Nfsv3Fh(new Reader(fhData)));
+  return new Nfsv3GetattrRequest(new Nfsv3Fh(fhData));
 };
 
 const createTestCred = () => {

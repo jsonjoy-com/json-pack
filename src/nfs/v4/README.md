@@ -12,3 +12,8 @@ NFSv4 is a distributed file system protocol that integrates:
 - COMPOUND operations for reduced latency
 - Client caching and delegations
 - Internationalization support
+
+## References
+
+- [RFC 7530](https://tools.ietf.org/html/rfc7530): NFSv4 Protocol
+- [RFC 7531](https://tools.ietf.org/html/rfc7531): NFSv4 XDR Description

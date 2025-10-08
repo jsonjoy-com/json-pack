@@ -1,6 +1,7 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrDecoder} from '../../xdr/XdrDecoder';
 import {Nfsv3FType, Nfsv3TimeHow, Nfsv3CreateMode, Nfsv3Proc} from './constants';
+import {Nfsv3DecodingError} from './errors';
 import * as msg from './messages';
 import * as structs from './structs';
 
@@ -74,7 +75,7 @@ export class Nfsv3Decoder {
       case Nfsv3Proc.COMMIT:
         return this.decodeCommitRequest();
       default:
-        throw new Error(`Unknown procedure: \${proc}`);
+        throw new Nfsv3DecodingError(`Unknown procedure: \${proc}`);
     }
   }
 
@@ -123,7 +124,7 @@ export class Nfsv3Decoder {
       case Nfsv3Proc.COMMIT:
         return this.decodeCommitResponse();
       default:
-        throw new Error(`Unknown procedure: \${proc}`);
+        throw new Nfsv3DecodingError(`Unknown procedure: \${proc}`);
     }
   }
 

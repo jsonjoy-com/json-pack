@@ -1,6 +1,7 @@
 import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {XdrEncoder} from '../../xdr/XdrEncoder';
 import {Nfsv3FType, Nfsv3TimeHow, Nfsv3CreateMode, Nfsv3Proc} from './constants';
+import {Nfsv3EncodingError} from './errors';
 import * as msg from './messages';
 import * as structs from './structs';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
@@ -13,20 +14,14 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   public encodeMessage(message: msg.Nfsv3Message, proc: Nfsv3Proc, isRequest: boolean): Uint8Array {
-    if (isRequest) {
-      this.writeRequest(message as msg.Nfsv3Request, proc);
-    } else {
-      this.writeResponse(message as msg.Nfsv3Response, proc);
-    }
+    if (isRequest) this.writeRequest(message as msg.Nfsv3Request, proc);
+    else this.writeResponse(message as msg.Nfsv3Response, proc);
     return this.writer.flush();
   }
 
   public writeMessage(message: msg.Nfsv3Message, proc: Nfsv3Proc, isRequest: boolean): void {
-    if (isRequest) {
-      this.writeRequest(message as msg.Nfsv3Request, proc);
-    } else {
-      this.writeResponse(message as msg.Nfsv3Response, proc);
-    }
+    if (isRequest) this.writeRequest(message as msg.Nfsv3Request, proc);
+    else this.writeResponse(message as msg.Nfsv3Response, proc);
   }
 
   private writeRequest(request: msg.Nfsv3Request, proc: Nfsv3Proc): void {
@@ -74,7 +69,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
       case Nfsv3Proc.COMMIT:
         return this.writeCommitRequest(request as msg.Nfsv3CommitRequest);
       default:
-        throw new Error(`Unknown procedure: ${proc}`);
+        throw new Nfsv3EncodingError(`Unknown procedure: ${proc}`);
     }
   }
 
@@ -123,7 +118,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
       case Nfsv3Proc.COMMIT:
         return this.writeCommitResponse(response as msg.Nfsv3CommitResponse);
       default:
-        throw new Error(`Unknown procedure: ${proc}`);
+        throw new Nfsv3EncodingError(`Unknown procedure: ${proc}`);
     }
   }
 
@@ -137,26 +132,29 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeTime(time: structs.Nfsv3Time): void {
-    this.xdr.writeUnsignedInt(time.seconds);
-    this.xdr.writeUnsignedInt(time.nseconds);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(time.seconds);
+    xdr.writeUnsignedInt(time.nseconds);
   }
 
   private writeSpecData(spec: structs.Nfsv3SpecData): void {
-    this.xdr.writeUnsignedInt(spec.specdata1);
-    this.xdr.writeUnsignedInt(spec.specdata2);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(spec.specdata1);
+    xdr.writeUnsignedInt(spec.specdata2);
   }
 
   private writeFattr(attr: structs.Nfsv3Fattr): void {
-    this.xdr.writeUnsignedInt(attr.type);
-    this.xdr.writeUnsignedInt(attr.mode);
-    this.xdr.writeUnsignedInt(attr.nlink);
-    this.xdr.writeUnsignedInt(attr.uid);
-    this.xdr.writeUnsignedInt(attr.gid);
-    this.xdr.writeUnsignedHyper(attr.size);
-    this.xdr.writeUnsignedHyper(attr.used);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(attr.type);
+    xdr.writeUnsignedInt(attr.mode);
+    xdr.writeUnsignedInt(attr.nlink);
+    xdr.writeUnsignedInt(attr.uid);
+    xdr.writeUnsignedInt(attr.gid);
+    xdr.writeUnsignedHyper(attr.size);
+    xdr.writeUnsignedHyper(attr.used);
     this.writeSpecData(attr.rdev);
-    this.xdr.writeUnsignedHyper(attr.fsid);
-    this.xdr.writeUnsignedHyper(attr.fileid);
+    xdr.writeUnsignedHyper(attr.fsid);
+    xdr.writeUnsignedHyper(attr.fileid);
     this.writeTime(attr.atime);
     this.writeTime(attr.mtime);
     this.writeTime(attr.ctime);
@@ -195,30 +193,34 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeSetMode(setMode: structs.Nfsv3SetMode): void {
-    this.xdr.writeBoolean(setMode.set);
+    const xdr = this.xdr;
+    xdr.writeBoolean(setMode.set);
     if (setMode.set && setMode.mode !== undefined) {
-      this.xdr.writeUnsignedInt(setMode.mode);
+      xdr.writeUnsignedInt(setMode.mode);
     }
   }
 
   private writeSetUid(setUid: structs.Nfsv3SetUid): void {
-    this.xdr.writeBoolean(setUid.set);
+    const xdr = this.xdr;
+    xdr.writeBoolean(setUid.set);
     if (setUid.set && setUid.uid !== undefined) {
-      this.xdr.writeUnsignedInt(setUid.uid);
+      xdr.writeUnsignedInt(setUid.uid);
     }
   }
 
   private writeSetGid(setGid: structs.Nfsv3SetGid): void {
-    this.xdr.writeBoolean(setGid.set);
+    const xdr = this.xdr;
+    xdr.writeBoolean(setGid.set);
     if (setGid.set && setGid.gid !== undefined) {
-      this.xdr.writeUnsignedInt(setGid.gid);
+      xdr.writeUnsignedInt(setGid.gid);
     }
   }
 
   private writeSetSize(setSize: structs.Nfsv3SetSize): void {
-    this.xdr.writeBoolean(setSize.set);
+    const xdr = this.xdr;
+    xdr.writeBoolean(setSize.set);
     if (setSize.set && setSize.size !== undefined) {
-      this.xdr.writeUnsignedHyper(setSize.size);
+      xdr.writeUnsignedHyper(setSize.size);
     }
   }
 
@@ -230,7 +232,8 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeSetMtime(setMtime: structs.Nfsv3SetMtime): void {
-    this.xdr.writeUnsignedInt(setMtime.how);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(setMtime.how);
     if (setMtime.how === Nfsv3TimeHow.SET_TO_CLIENT_TIME && setMtime.mtime) {
       this.writeTime(setMtime.mtime);
     }
@@ -246,7 +249,8 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeSattrGuard(guard: structs.Nfsv3SattrGuard): void {
-    this.xdr.writeBoolean(guard.check);
+    const xdr = this.xdr;
+    xdr.writeBoolean(guard.check);
     if (guard.check && guard.objCtime) {
       this.writeTime(guard.objCtime);
     }
@@ -258,7 +262,8 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeCreateHow(how: structs.Nfsv3CreateHow): void {
-    this.xdr.writeUnsignedInt(how.mode);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(how.mode);
     switch (how.mode) {
       case Nfsv3CreateMode.UNCHECKED:
       case Nfsv3CreateMode.GUARDED:
@@ -269,7 +274,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
       case Nfsv3CreateMode.EXCLUSIVE:
         if (how.verf) {
           const verfData = how.verf.uint8;
-          this.xdr.writeOpaque(verfData);
+          xdr.writeOpaque(verfData);
         }
         break;
     }
@@ -304,26 +309,28 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeEntry(entry: structs.Nfsv3Entry | undefined): void {
+    const xdr = this.xdr;
     if (!entry) {
-      this.xdr.writeBoolean(false);
+      xdr.writeBoolean(false);
       return;
     }
-    this.xdr.writeBoolean(true);
-    this.xdr.writeUnsignedHyper(entry.fileid);
+    xdr.writeBoolean(true);
+    xdr.writeUnsignedHyper(entry.fileid);
     this.writeFilename(entry.name);
-    this.xdr.writeUnsignedHyper(entry.cookie);
+    xdr.writeUnsignedHyper(entry.cookie);
     this.writeEntry(entry.nextentry);
   }
 
   private writeEntryPlus(entry: structs.Nfsv3EntryPlus | undefined): void {
+    const xdr = this.xdr;
     if (!entry) {
-      this.xdr.writeBoolean(false);
+      xdr.writeBoolean(false);
       return;
     }
-    this.xdr.writeBoolean(true);
-    this.xdr.writeUnsignedHyper(entry.fileid);
+    xdr.writeBoolean(true);
+    xdr.writeUnsignedHyper(entry.fileid);
     this.writeFilename(entry.name);
-    this.xdr.writeUnsignedHyper(entry.cookie);
+    xdr.writeUnsignedHyper(entry.cookie);
     this.writePostOpAttr(entry.nameAttributes);
     this.writePostOpFh(entry.nameHandle);
     this.writeEntryPlus(entry.nextentry);
@@ -386,10 +393,11 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeAccessResponse(res: msg.Nfsv3AccessResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.objAttributes);
-      this.xdr.writeUnsignedInt(res.resok.access);
+      xdr.writeUnsignedInt(res.resok.access);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.objAttributes);
     }
@@ -411,18 +419,20 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
 
   private writeReadRequest(req: msg.Nfsv3ReadRequest): void {
     this.writeFh(req.file);
-    this.xdr.writeUnsignedHyper(req.offset);
-    this.xdr.writeUnsignedInt(req.count);
+    const xdr = this.xdr;
+    xdr.writeUnsignedHyper(req.offset);
+    xdr.writeUnsignedInt(req.count);
   }
 
   private writeReadResponse(res: msg.Nfsv3ReadResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.fileAttributes);
-      this.xdr.writeUnsignedInt(res.resok.count);
-      this.xdr.writeBoolean(res.resok.eof);
+      xdr.writeUnsignedInt(res.resok.count);
+      xdr.writeBoolean(res.resok.eof);
       const data = res.resok.data.uint8;
-      this.xdr.writeVarlenOpaque(data);
+      xdr.writeVarlenOpaque(data);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.fileAttributes);
     }
@@ -430,21 +440,23 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
 
   private writeWriteRequest(req: msg.Nfsv3WriteRequest): void {
     this.writeFh(req.file);
-    this.xdr.writeUnsignedHyper(req.offset);
-    this.xdr.writeUnsignedInt(req.count);
-    this.xdr.writeUnsignedInt(req.stable);
+    const xdr = this.xdr;
+    xdr.writeUnsignedHyper(req.offset);
+    xdr.writeUnsignedInt(req.count);
+    xdr.writeUnsignedInt(req.stable);
     const data = req.data.uint8;
-    this.xdr.writeVarlenOpaque(data);
+    xdr.writeVarlenOpaque(data);
   }
 
   private writeWriteResponse(res: msg.Nfsv3WriteResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writeWccData(res.resok.fileWcc);
-      this.xdr.writeUnsignedInt(res.resok.count);
-      this.xdr.writeUnsignedInt(res.resok.committed);
+      xdr.writeUnsignedInt(res.resok.count);
+      xdr.writeUnsignedInt(res.resok.committed);
       const verf = res.resok.verf.uint8;
-      this.xdr.writeOpaque(verf);
+      xdr.writeOpaque(verf);
     } else if (res.resfail) {
       this.writeWccData(res.resfail.fileWcc);
     }
@@ -575,18 +587,20 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
 
   private writeReaddirRequest(req: msg.Nfsv3ReaddirRequest): void {
     this.writeFh(req.dir);
-    this.xdr.writeUnsignedHyper(req.cookie);
+    const xdr = this.xdr;
+    xdr.writeUnsignedHyper(req.cookie);
     const cookieverf = req.cookieverf.uint8;
-    this.xdr.writeOpaque(cookieverf);
-    this.xdr.writeUnsignedInt(req.count);
+    xdr.writeOpaque(cookieverf);
+    xdr.writeUnsignedInt(req.count);
   }
 
   private writeReaddirResponse(res: msg.Nfsv3ReaddirResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.dirAttributes);
       const cookieverf = res.resok.cookieverf.uint8;
-      this.xdr.writeOpaque(cookieverf);
+      xdr.writeOpaque(cookieverf);
       this.writeDirList(res.resok.reply);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.dirAttributes);
@@ -595,19 +609,21 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
 
   private writeReaddirplusRequest(req: msg.Nfsv3ReaddirplusRequest): void {
     this.writeFh(req.dir);
-    this.xdr.writeUnsignedHyper(req.cookie);
+    const xdr = this.xdr;
+    xdr.writeUnsignedHyper(req.cookie);
     const cookieverf = req.cookieverf.uint8;
-    this.xdr.writeOpaque(cookieverf);
-    this.xdr.writeUnsignedInt(req.dircount);
-    this.xdr.writeUnsignedInt(req.maxcount);
+    xdr.writeOpaque(cookieverf);
+    xdr.writeUnsignedInt(req.dircount);
+    xdr.writeUnsignedInt(req.maxcount);
   }
 
   private writeReaddirplusResponse(res: msg.Nfsv3ReaddirplusResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.dirAttributes);
       const cookieverf = res.resok.cookieverf.uint8;
-      this.xdr.writeOpaque(cookieverf);
+      xdr.writeOpaque(cookieverf);
       this.writeDirListPlus(res.resok.reply);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.dirAttributes);
@@ -619,16 +635,17 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeFsstatResponse(res: msg.Nfsv3FsstatResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.objAttributes);
-      this.xdr.writeUnsignedHyper(res.resok.tbytes);
-      this.xdr.writeUnsignedHyper(res.resok.fbytes);
-      this.xdr.writeUnsignedHyper(res.resok.abytes);
-      this.xdr.writeUnsignedHyper(res.resok.tfiles);
-      this.xdr.writeUnsignedHyper(res.resok.ffiles);
-      this.xdr.writeUnsignedHyper(res.resok.afiles);
-      this.xdr.writeUnsignedInt(res.resok.invarsec);
+      xdr.writeUnsignedHyper(res.resok.tbytes);
+      xdr.writeUnsignedHyper(res.resok.fbytes);
+      xdr.writeUnsignedHyper(res.resok.abytes);
+      xdr.writeUnsignedHyper(res.resok.tfiles);
+      xdr.writeUnsignedHyper(res.resok.ffiles);
+      xdr.writeUnsignedHyper(res.resok.afiles);
+      xdr.writeUnsignedInt(res.resok.invarsec);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.objAttributes);
     }
@@ -639,20 +656,21 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeFsinfoResponse(res: msg.Nfsv3FsinfoResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.objAttributes);
-      this.xdr.writeUnsignedInt(res.resok.rtmax);
-      this.xdr.writeUnsignedInt(res.resok.rtpref);
-      this.xdr.writeUnsignedInt(res.resok.rtmult);
-      this.xdr.writeUnsignedInt(res.resok.wtmax);
-      this.xdr.writeUnsignedInt(res.resok.wtpref);
-      this.xdr.writeUnsignedInt(res.resok.wtmult);
-      this.xdr.writeUnsignedInt(res.resok.dtpref);
-      this.xdr.writeUnsignedHyper(res.resok.maxfilesize);
-      this.xdr.writeUnsignedInt(res.resok.timeDelta.seconds);
-      this.xdr.writeUnsignedInt(res.resok.timeDelta.nseconds);
-      this.xdr.writeUnsignedInt(res.resok.properties);
+      xdr.writeUnsignedInt(res.resok.rtmax);
+      xdr.writeUnsignedInt(res.resok.rtpref);
+      xdr.writeUnsignedInt(res.resok.rtmult);
+      xdr.writeUnsignedInt(res.resok.wtmax);
+      xdr.writeUnsignedInt(res.resok.wtpref);
+      xdr.writeUnsignedInt(res.resok.wtmult);
+      xdr.writeUnsignedInt(res.resok.dtpref);
+      xdr.writeUnsignedHyper(res.resok.maxfilesize);
+      xdr.writeUnsignedInt(res.resok.timeDelta.seconds);
+      xdr.writeUnsignedInt(res.resok.timeDelta.nseconds);
+      xdr.writeUnsignedInt(res.resok.properties);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.objAttributes);
     }
@@ -663,15 +681,16 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writePathconfResponse(res: msg.Nfsv3PathconfResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.objAttributes);
-      this.xdr.writeUnsignedInt(res.resok.linkmax);
-      this.xdr.writeUnsignedInt(res.resok.namemax);
-      this.xdr.writeBoolean(res.resok.noTrunc);
-      this.xdr.writeBoolean(res.resok.chownRestricted);
-      this.xdr.writeBoolean(res.resok.caseInsensitive);
-      this.xdr.writeBoolean(res.resok.casePreserving);
+      xdr.writeUnsignedInt(res.resok.linkmax);
+      xdr.writeUnsignedInt(res.resok.namemax);
+      xdr.writeBoolean(res.resok.noTrunc);
+      xdr.writeBoolean(res.resok.chownRestricted);
+      xdr.writeBoolean(res.resok.caseInsensitive);
+      xdr.writeBoolean(res.resok.casePreserving);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.objAttributes);
     }
@@ -679,16 +698,18 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
 
   private writeCommitRequest(req: msg.Nfsv3CommitRequest): void {
     this.writeFh(req.file);
-    this.xdr.writeUnsignedHyper(req.offset);
-    this.xdr.writeUnsignedInt(req.count);
+    const xdr = this.xdr;
+    xdr.writeUnsignedHyper(req.offset);
+    xdr.writeUnsignedInt(req.count);
   }
 
   private writeCommitResponse(res: msg.Nfsv3CommitResponse): void {
-    this.xdr.writeUnsignedInt(res.status);
+    const xdr = this.xdr;
+    xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writeWccData(res.resok.fileWcc);
       const verf = res.resok.verf.uint8;
-      this.xdr.writeOpaque(verf);
+      xdr.writeOpaque(verf);
     } else if (res.resfail) {
       this.writeWccData(res.resfail.fileWcc);
     }

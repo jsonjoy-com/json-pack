@@ -130,7 +130,7 @@ export class Nfsv3Decoder {
 
   private readFh(): structs.Nfsv3Fh {
     const data = this.xdr.readVarlenOpaque();
-    return new structs.Nfsv3Fh(new Reader(data));
+    return new structs.Nfsv3Fh(data);
   }
 
   private readFilename(): string {
@@ -262,13 +262,13 @@ export class Nfsv3Decoder {
     const xdr = this.xdr;
     const mode = xdr.readUnsignedInt() as Nfsv3CreateMode;
     let objAttributes: structs.Nfsv3Sattr | undefined;
-    let verf: Reader | undefined;
+    let verf: Uint8Array | undefined;
     // tslint:disable-next-line
     if (mode === Nfsv3CreateMode.UNCHECKED || mode === Nfsv3CreateMode.GUARDED) {
       objAttributes = this.readSattr();
     } else if (mode === Nfsv3CreateMode.EXCLUSIVE) {
       const verfData = xdr.readOpaque(8);
-      verf = new Reader(verfData);
+      verf = verfData;
     }
     return new structs.Nfsv3CreateHow(mode, objAttributes, verf);
   }
@@ -446,7 +446,7 @@ export class Nfsv3Decoder {
       const count = xdr.readUnsignedInt();
       const eof = xdr.readBoolean();
       const data = xdr.readVarlenOpaque();
-      resok = new msg.Nfsv3ReadResOk(fileAttributes, count, eof, new Reader(data));
+      resok = new msg.Nfsv3ReadResOk(fileAttributes, count, eof, data);
     } else {
       resfail = new msg.Nfsv3ReadResFail(fileAttributes);
     }
@@ -460,7 +460,7 @@ export class Nfsv3Decoder {
     const count = xdr.readUnsignedInt();
     const stable = xdr.readUnsignedInt();
     const data = xdr.readVarlenOpaque();
-    return new msg.Nfsv3WriteRequest(file, offset, count, stable, new Reader(data));
+    return new msg.Nfsv3WriteRequest(file, offset, count, stable, data);
   }
 
   private decodeWriteResponse(): msg.Nfsv3WriteResponse {
@@ -473,7 +473,7 @@ export class Nfsv3Decoder {
       const count = xdr.readUnsignedInt();
       const committed = xdr.readUnsignedInt();
       const verf = xdr.readOpaque(8);
-      resok = new msg.Nfsv3WriteResOk(fileWcc, count, committed, new Reader(verf));
+      resok = new msg.Nfsv3WriteResOk(fileWcc, count, committed, verf);
     } else {
       resfail = new msg.Nfsv3WriteResFail(fileWcc);
     }
@@ -651,7 +651,7 @@ export class Nfsv3Decoder {
     const cookie = xdr.readUnsignedHyper();
     const cookieverf = xdr.readOpaque(8);
     const count = xdr.readUnsignedInt();
-    return new msg.Nfsv3ReaddirRequest(dir, cookie, new Reader(cookieverf), count);
+    return new msg.Nfsv3ReaddirRequest(dir, cookie, cookieverf, count);
   }
 
   private decodeReaddirResponse(): msg.Nfsv3ReaddirResponse {
@@ -663,7 +663,7 @@ export class Nfsv3Decoder {
     if (status === 0) {
       const cookieverf = xdr.readOpaque(8);
       const reply = this.readDirList();
-      resok = new msg.Nfsv3ReaddirResOk(dirAttributes, new Reader(cookieverf), reply);
+      resok = new msg.Nfsv3ReaddirResOk(dirAttributes, cookieverf, reply);
     } else {
       resfail = new msg.Nfsv3ReaddirResFail(dirAttributes);
     }
@@ -677,7 +677,7 @@ export class Nfsv3Decoder {
     const cookieverf = xdr.readOpaque(8);
     const dircount = xdr.readUnsignedInt();
     const maxcount = xdr.readUnsignedInt();
-    return new msg.Nfsv3ReaddirplusRequest(dir, cookie, new Reader(cookieverf), dircount, maxcount);
+    return new msg.Nfsv3ReaddirplusRequest(dir, cookie, cookieverf, dircount, maxcount);
   }
 
   private decodeReaddirplusResponse(): msg.Nfsv3ReaddirplusResponse {
@@ -689,7 +689,7 @@ export class Nfsv3Decoder {
     if (status === 0) {
       const cookieverf = xdr.readOpaque(8);
       const reply = this.readDirListPlus();
-      resok = new msg.Nfsv3ReaddirplusResOk(dirAttributes, new Reader(cookieverf), reply);
+      resok = new msg.Nfsv3ReaddirplusResOk(dirAttributes, cookieverf, reply);
     } else {
       resfail = new msg.Nfsv3ReaddirplusResFail(dirAttributes);
     }
@@ -812,7 +812,7 @@ export class Nfsv3Decoder {
     const fileWcc = this.readWccData();
     if (status === 0) {
       const verf = xdr.readOpaque(8);
-      resok = new msg.Nfsv3CommitResOk(fileWcc, new Reader(verf));
+      resok = new msg.Nfsv3CommitResOk(fileWcc, verf);
     } else {
       resfail = new msg.Nfsv3CommitResFail(fileWcc);
     }

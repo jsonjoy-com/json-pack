@@ -123,8 +123,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeFh(fh: structs.Nfsv3Fh): void {
-    const data = fh.data.uint8;
-    this.xdr.writeVarlenOpaque(data);
+    this.xdr.writeVarlenOpaque(fh.data);
   }
 
   private writeFilename(filename: string): void {
@@ -273,8 +272,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
         break;
       case Nfsv3CreateMode.EXCLUSIVE:
         if (how.verf) {
-          const verfData = how.verf.uint8;
-          xdr.writeOpaque(verfData);
+          xdr.writeOpaque(how.verf);
         }
         break;
     }
@@ -431,8 +429,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
       this.writePostOpAttr(res.resok.fileAttributes);
       xdr.writeUnsignedInt(res.resok.count);
       xdr.writeBoolean(res.resok.eof);
-      const data = res.resok.data.uint8;
-      xdr.writeVarlenOpaque(data);
+      xdr.writeVarlenOpaque(res.resok.data);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.fileAttributes);
     }
@@ -444,8 +441,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     xdr.writeUnsignedHyper(req.offset);
     xdr.writeUnsignedInt(req.count);
     xdr.writeUnsignedInt(req.stable);
-    const data = req.data.uint8;
-    xdr.writeVarlenOpaque(data);
+    xdr.writeVarlenOpaque(req.data);
   }
 
   private writeWriteResponse(res: msg.Nfsv3WriteResponse): void {
@@ -455,8 +451,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
       this.writeWccData(res.resok.fileWcc);
       xdr.writeUnsignedInt(res.resok.count);
       xdr.writeUnsignedInt(res.resok.committed);
-      const verf = res.resok.verf.uint8;
-      xdr.writeOpaque(verf);
+      xdr.writeOpaque(res.resok.verf);
     } else if (res.resfail) {
       this.writeWccData(res.resfail.fileWcc);
     }
@@ -589,8 +584,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     this.writeFh(req.dir);
     const xdr = this.xdr;
     xdr.writeUnsignedHyper(req.cookie);
-    const cookieverf = req.cookieverf.uint8;
-    xdr.writeOpaque(cookieverf);
+    xdr.writeOpaque(req.cookieverf);
     xdr.writeUnsignedInt(req.count);
   }
 
@@ -599,8 +593,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.dirAttributes);
-      const cookieverf = res.resok.cookieverf.uint8;
-      xdr.writeOpaque(cookieverf);
+      xdr.writeOpaque(res.resok.cookieverf);
       this.writeDirList(res.resok.reply);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.dirAttributes);
@@ -611,8 +604,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     this.writeFh(req.dir);
     const xdr = this.xdr;
     xdr.writeUnsignedHyper(req.cookie);
-    const cookieverf = req.cookieverf.uint8;
-    xdr.writeOpaque(cookieverf);
+    xdr.writeOpaque(req.cookieverf);
     xdr.writeUnsignedInt(req.dircount);
     xdr.writeUnsignedInt(req.maxcount);
   }
@@ -622,8 +614,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writePostOpAttr(res.resok.dirAttributes);
-      const cookieverf = res.resok.cookieverf.uint8;
-      xdr.writeOpaque(cookieverf);
+      xdr.writeOpaque(res.resok.cookieverf);
       this.writeDirListPlus(res.resok.reply);
     } else if (res.resfail) {
       this.writePostOpAttr(res.resfail.dirAttributes);
@@ -708,8 +699,7 @@ export class Nfsv3Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writeWccData(res.resok.fileWcc);
-      const verf = res.resok.verf.uint8;
-      xdr.writeOpaque(verf);
+      xdr.writeOpaque(res.resok.verf);
     } else if (res.resfail) {
       this.writeWccData(res.resfail.fileWcc);
     }

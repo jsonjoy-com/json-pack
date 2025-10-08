@@ -1,6 +1,6 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrDecoder} from '../../xdr/XdrDecoder';
-import {Nfsv4Op, Nfsv4FType, Nfsv4TimeHow, Nfsv4DelegType} from './constants';
+import {Nfsv4Op, Nfsv4FType, Nfsv4DelegType} from './constants';
 import {Nfsv4DecodingError} from './errors';
 import * as msg from './messages';
 import * as structs from './structs';
@@ -229,12 +229,12 @@ export class Nfsv4Decoder {
 
   private readFh(): structs.Nfsv4Fh {
     const data = this.xdr.readVarlenOpaque();
-    return new structs.Nfsv4Fh(new Reader(data));
+    return new structs.Nfsv4Fh(data);
   }
 
   private readVerifier(): structs.Nfsv4Verifier {
     const data = this.xdr.readOpaque(8);
-    return new structs.Nfsv4Verifier(new Reader(data));
+    return new structs.Nfsv4Verifier(data);
   }
 
   private readTime(): structs.Nfsv4Time {
@@ -246,7 +246,7 @@ export class Nfsv4Decoder {
   private readStateid(): structs.Nfsv4Stateid {
     const seqid = this.xdr.readUnsignedInt();
     const other = this.xdr.readOpaque(12);
-    return new structs.Nfsv4Stateid(seqid, new Reader(other));
+    return new structs.Nfsv4Stateid(seqid, other);
   }
 
   private readBitmap(): structs.Nfsv4Bitmap {
@@ -261,7 +261,7 @@ export class Nfsv4Decoder {
   private readFattr(): structs.Nfsv4Fattr {
     const attrmask = this.readBitmap();
     const attrVals = this.xdr.readVarlenOpaque();
-    return new structs.Nfsv4Fattr(attrmask, new Reader(attrVals));
+    return new structs.Nfsv4Fattr(attrmask, attrVals);
   }
 
   private readChangeInfo(): structs.Nfsv4ChangeInfo {
@@ -286,19 +286,19 @@ export class Nfsv4Decoder {
   private readClientId(): structs.Nfsv4ClientId {
     const verifier = this.readVerifier();
     const id = this.xdr.readVarlenOpaque();
-    return new structs.Nfsv4ClientId(verifier, new Reader(id));
+    return new structs.Nfsv4ClientId(verifier, id);
   }
 
   private readOpenOwner(): structs.Nfsv4OpenOwner {
     const clientid = this.xdr.readUnsignedHyper();
     const owner = this.xdr.readVarlenOpaque();
-    return new structs.Nfsv4OpenOwner(clientid, new Reader(owner));
+    return new structs.Nfsv4OpenOwner(clientid, owner);
   }
 
   private readLockOwner(): structs.Nfsv4LockOwner {
     const clientid = this.xdr.readUnsignedHyper();
     const owner = this.xdr.readVarlenOpaque();
-    return new structs.Nfsv4LockOwner(clientid, new Reader(owner));
+    return new structs.Nfsv4LockOwner(clientid, owner);
   }
 
   private readOpenToLockOwner(): structs.Nfsv4OpenToLockOwner {
@@ -393,7 +393,7 @@ export class Nfsv4Decoder {
       const oid = this.xdr.readVarlenOpaque();
       const qop = this.xdr.readUnsignedInt();
       const service = this.xdr.readUnsignedInt();
-      const flavorInfo = new structs.Nfsv4RpcSecGssInfo(new Reader(oid), qop, service);
+      const flavorInfo = new structs.Nfsv4RpcSecGssInfo(oid, qop, service);
       return new structs.Nfsv4SecInfoFlavor(flavor, flavorInfo);
     }
     return new structs.Nfsv4SecInfoFlavor(flavor);
@@ -736,7 +736,7 @@ export class Nfsv4Decoder {
     if (status === 0) {
       const eof = this.xdr.readBoolean();
       const data = this.xdr.readVarlenOpaque();
-      return new msg.Nfsv4ReadResponse(status, new msg.Nfsv4ReadResOk(eof, new Reader(data)));
+      return new msg.Nfsv4ReadResponse(status, new msg.Nfsv4ReadResOk(eof, data));
     }
     return new msg.Nfsv4ReadResponse(status);
   }
@@ -911,7 +911,7 @@ export class Nfsv4Decoder {
     const offset = this.xdr.readUnsignedHyper();
     const stable = this.xdr.readUnsignedInt();
     const data = this.xdr.readVarlenOpaque();
-    return new msg.Nfsv4WriteRequest(stateid, offset, stable, new Reader(data));
+    return new msg.Nfsv4WriteRequest(stateid, offset, stable, data);
   }
 
   private decodeWriteResponse(): msg.Nfsv4WriteResponse {

@@ -237,24 +237,26 @@ export class Nfsv4Decoder {
     return new structs.Nfsv4Verifier(data);
   }
 
+  // TODO: Why is this not used?
   private readTime(): structs.Nfsv4Time {
-    const seconds = this.xdr.readHyper();
-    const nseconds = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const seconds = xdr.readHyper();
+    const nseconds = xdr.readUnsignedInt();
     return new structs.Nfsv4Time(seconds, nseconds);
   }
 
   private readStateid(): structs.Nfsv4Stateid {
-    const seqid = this.xdr.readUnsignedInt();
-    const other = this.xdr.readOpaque(12);
+    const xdr = this.xdr;
+    const seqid = xdr.readUnsignedInt();
+    const other = xdr.readOpaque(12);
     return new structs.Nfsv4Stateid(seqid, other);
   }
 
   private readBitmap(): structs.Nfsv4Bitmap {
-    const count = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const count = xdr.readUnsignedInt();
     const mask: number[] = [];
-    for (let i = 0; i < count; i++) {
-      mask.push(this.xdr.readUnsignedInt());
-    }
+    for (let i = 0; i < count; i++) mask.push(xdr.readUnsignedInt());
     return new structs.Nfsv4Bitmap(mask);
   }
 
@@ -265,15 +267,17 @@ export class Nfsv4Decoder {
   }
 
   private readChangeInfo(): structs.Nfsv4ChangeInfo {
-    const atomic = this.xdr.readBoolean();
-    const before = this.xdr.readUnsignedHyper();
-    const after = this.xdr.readUnsignedHyper();
+    const xdr = this.xdr;
+    const atomic = xdr.readBoolean();
+    const before = xdr.readUnsignedHyper();
+    const after = xdr.readUnsignedHyper();
     return new structs.Nfsv4ChangeInfo(atomic, before, after);
   }
 
   private readClientAddr(): structs.Nfsv4ClientAddr {
-    const rNetid = this.xdr.readString();
-    const rAddr = this.xdr.readString();
+    const xdr = this.xdr;
+    const rNetid = xdr.readString();
+    const rAddr = xdr.readString();
     return new structs.Nfsv4ClientAddr(rNetid, rAddr);
   }
 
@@ -290,55 +294,60 @@ export class Nfsv4Decoder {
   }
 
   private readOpenOwner(): structs.Nfsv4OpenOwner {
-    const clientid = this.xdr.readUnsignedHyper();
-    const owner = this.xdr.readVarlenOpaque();
+    const xdr = this.xdr;
+    const clientid = xdr.readUnsignedHyper();
+    const owner = xdr.readVarlenOpaque();
     return new structs.Nfsv4OpenOwner(clientid, owner);
   }
 
   private readLockOwner(): structs.Nfsv4LockOwner {
-    const clientid = this.xdr.readUnsignedHyper();
-    const owner = this.xdr.readVarlenOpaque();
+    const xdr = this.xdr;
+    const clientid = xdr.readUnsignedHyper();
+    const owner = xdr.readVarlenOpaque();
     return new structs.Nfsv4LockOwner(clientid, owner);
   }
 
   private readOpenToLockOwner(): structs.Nfsv4OpenToLockOwner {
-    const openSeqid = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const openSeqid = xdr.readUnsignedInt();
     const openStateid = this.readStateid();
-    const lockSeqid = this.xdr.readUnsignedInt();
+    const lockSeqid = xdr.readUnsignedInt();
     const lockOwner = this.readLockOwner();
     return new structs.Nfsv4OpenToLockOwner(openSeqid, openStateid, lockSeqid, lockOwner);
   }
 
   private readLockOwnerInfo(): structs.Nfsv4LockOwnerInfo {
-    const newLockOwner = this.xdr.readBoolean();
+    const xdr = this.xdr;
+    const newLockOwner = xdr.readBoolean();
     if (newLockOwner) {
       const openToLockOwner = this.readOpenToLockOwner();
       return new structs.Nfsv4LockOwnerInfo(true, new structs.Nfsv4LockNewOwner(openToLockOwner));
     } else {
       const lockStateid = this.readStateid();
-      const lockSeqid = this.xdr.readUnsignedInt();
+      const lockSeqid = xdr.readUnsignedInt();
       return new structs.Nfsv4LockOwnerInfo(false, new structs.Nfsv4LockExistingOwner(lockStateid, lockSeqid));
     }
   }
 
   private readOpenClaim(): structs.Nfsv4OpenClaim {
-    const claimType = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const claimType = xdr.readUnsignedInt();
     switch (claimType) {
       case 0: {
-        const file = this.xdr.readString();
+        const file = xdr.readString();
         return new structs.Nfsv4OpenClaim(claimType, new structs.Nfsv4OpenClaimNull(file));
       }
       case 1: {
-        const delegateType = this.xdr.readUnsignedInt() as Nfsv4DelegType;
+        const delegateType = xdr.readUnsignedInt() as Nfsv4DelegType;
         return new structs.Nfsv4OpenClaim(claimType, new structs.Nfsv4OpenClaimPrevious(delegateType));
       }
       case 2: {
         const delegateStateid = this.readStateid();
-        const file = this.xdr.readString();
+        const file = xdr.readString();
         return new structs.Nfsv4OpenClaim(claimType, new structs.Nfsv4OpenClaimDelegateCur(delegateStateid, file));
       }
       case 3: {
-        const file = this.xdr.readString();
+        const file = xdr.readString();
         return new structs.Nfsv4OpenClaim(claimType, new structs.Nfsv4OpenClaimDelegatePrev(file));
       }
       default:
@@ -347,52 +356,59 @@ export class Nfsv4Decoder {
   }
 
   private readOpenDelegation(): structs.Nfsv4OpenDelegation {
-    const delegationType = this.xdr.readUnsignedInt() as Nfsv4DelegType;
-    if (delegationType === Nfsv4DelegType.OPEN_DELEGATE_NONE) {
-      return new structs.Nfsv4OpenDelegation(delegationType);
-    } else if (delegationType === Nfsv4DelegType.OPEN_DELEGATE_READ) {
-      const stateid = this.readStateid();
-      const recall = this.xdr.readBoolean();
-      const aceCount = this.xdr.readUnsignedInt();
-      const permissions: structs.Nfsv4Ace[] = [];
-      for (let i = 0; i < aceCount; i++) {
-        permissions.push(this.readAce());
+    const xdr = this.xdr;
+    const delegationType = xdr.readUnsignedInt() as Nfsv4DelegType;
+    switch (delegationType) {
+      case Nfsv4DelegType.OPEN_DELEGATE_NONE:
+        return new structs.Nfsv4OpenDelegation(delegationType);
+      case Nfsv4DelegType.OPEN_DELEGATE_READ: {
+        const stateid = this.readStateid();
+        const recall = xdr.readBoolean();
+        const aceCount = xdr.readUnsignedInt();
+        const permissions: structs.Nfsv4Ace[] = [];
+        for (let i = 0; i < aceCount; i++) {
+          permissions.push(this.readAce());
+        }
+        return new structs.Nfsv4OpenDelegation(
+          delegationType,
+          new structs.Nfsv4OpenReadDelegation(stateid, recall, permissions),
+        );
       }
-      return new structs.Nfsv4OpenDelegation(
-        delegationType,
-        new structs.Nfsv4OpenReadDelegation(stateid, recall, permissions),
-      );
-    } else if (delegationType === Nfsv4DelegType.OPEN_DELEGATE_WRITE) {
-      const stateid = this.readStateid();
-      const recall = this.xdr.readBoolean();
-      const spaceLimit = this.xdr.readUnsignedHyper();
-      const aceCount = this.xdr.readUnsignedInt();
-      const permissions: structs.Nfsv4Ace[] = [];
-      for (let i = 0; i < aceCount; i++) {
-        permissions.push(this.readAce());
+      case Nfsv4DelegType.OPEN_DELEGATE_WRITE: {
+        const stateid = this.readStateid();
+        const recall = xdr.readBoolean();
+        const spaceLimit = xdr.readUnsignedHyper();
+        const aceCount = xdr.readUnsignedInt();
+        const permissions: structs.Nfsv4Ace[] = [];
+        for (let i = 0; i < aceCount; i++) {
+          permissions.push(this.readAce());
+        }
+        return new structs.Nfsv4OpenDelegation(
+          delegationType,
+          new structs.Nfsv4OpenWriteDelegation(stateid, recall, spaceLimit, permissions),
+        );
       }
-      return new structs.Nfsv4OpenDelegation(
-        delegationType,
-        new structs.Nfsv4OpenWriteDelegation(stateid, recall, spaceLimit, permissions),
-      );
+      default:
+        throw new Nfsv4DecodingError(`Unknown delegation type: ${delegationType}`);
     }
-    throw new Nfsv4DecodingError(`Unknown delegation type: ${delegationType}`);
   }
 
   private readAce(): structs.Nfsv4Ace {
-    const type = this.xdr.readUnsignedInt();
-    const flag = this.xdr.readUnsignedInt();
-    const accessMask = this.xdr.readUnsignedInt();
-    const who = this.xdr.readString();
+    const xdr = this.xdr;
+    const type = xdr.readUnsignedInt();
+    const flag = xdr.readUnsignedInt();
+    const accessMask = xdr.readUnsignedInt();
+    const who = xdr.readString();
     return new structs.Nfsv4Ace(type, flag, accessMask, who);
   }
 
   private readSecInfoFlavor(): structs.Nfsv4SecInfoFlavor {
-    const flavor = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const flavor = xdr.readUnsignedInt();
     if (flavor === 6) {
-      const oid = this.xdr.readVarlenOpaque();
-      const qop = this.xdr.readUnsignedInt();
-      const service = this.xdr.readUnsignedInt();
+      const oid = xdr.readVarlenOpaque();
+      const qop = xdr.readUnsignedInt();
+      const service = xdr.readUnsignedInt();
       const flavorInfo = new structs.Nfsv4RpcSecGssInfo(oid, qop, service);
       return new structs.Nfsv4SecInfoFlavor(flavor, flavorInfo);
     }
@@ -405,17 +421,19 @@ export class Nfsv4Decoder {
   }
 
   private decodeAccessResponse(): msg.Nfsv4AccessResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
-      const supported = this.xdr.readUnsignedInt();
-      const access = this.xdr.readUnsignedInt();
+      const supported = xdr.readUnsignedInt();
+      const access = xdr.readUnsignedInt();
       return new msg.Nfsv4AccessResponse(status, new msg.Nfsv4AccessResOk(supported, access));
     }
     return new msg.Nfsv4AccessResponse(status);
   }
 
   private decodeCloseRequest(): msg.Nfsv4CloseRequest {
-    const seqid = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const seqid = xdr.readUnsignedInt();
     const openStateid = this.readStateid();
     return new msg.Nfsv4CloseRequest(seqid, openStateid);
   }
@@ -430,8 +448,9 @@ export class Nfsv4Decoder {
   }
 
   private decodeCommitRequest(): msg.Nfsv4CommitRequest {
-    const offset = this.xdr.readUnsignedHyper();
-    const count = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const offset = xdr.readUnsignedHyper();
+    const count = xdr.readUnsignedInt();
     return new msg.Nfsv4CommitRequest(offset, count);
   }
 
@@ -445,20 +464,21 @@ export class Nfsv4Decoder {
   }
 
   private decodeCreateRequest(): msg.Nfsv4CreateRequest {
-    const type = this.xdr.readUnsignedInt() as Nfsv4FType;
+    const xdr = this.xdr;
+    const type = xdr.readUnsignedInt() as Nfsv4FType;
     let objtype: structs.Nfsv4CreateType;
-    const objname = this.xdr.readString();
+    const objname = xdr.readString();
     const createattrs = this.readFattr();
     switch (type) {
       case Nfsv4FType.NF4LNK: {
-        const linkdata = this.xdr.readString();
+        const linkdata = xdr.readString();
         objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeLink(linkdata, createattrs));
         break;
       }
       case Nfsv4FType.NF4BLK:
       case Nfsv4FType.NF4CHR: {
-        const specdata1 = this.xdr.readUnsignedInt();
-        const specdata2 = this.xdr.readUnsignedInt();
+        const specdata1 = xdr.readUnsignedInt();
+        const specdata2 = xdr.readUnsignedInt();
         const devdata = new structs.Nfsv4SpecData(specdata1, specdata2);
         objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeDevice(devdata, createattrs));
         break;
@@ -541,23 +561,25 @@ export class Nfsv4Decoder {
   }
 
   private decodeLockRequest(): msg.Nfsv4LockRequest {
-    const locktype = this.xdr.readUnsignedInt();
-    const reclaim = this.xdr.readBoolean();
-    const offset = this.xdr.readUnsignedHyper();
-    const length = this.xdr.readUnsignedHyper();
+    const xdr = this.xdr;
+    const locktype = xdr.readUnsignedInt();
+    const reclaim = xdr.readBoolean();
+    const offset = xdr.readUnsignedHyper();
+    const length = xdr.readUnsignedHyper();
     const locker = this.readLockOwnerInfo();
     return new msg.Nfsv4LockRequest(locktype, reclaim, offset, length, locker);
   }
 
   private decodeLockResponse(): msg.Nfsv4LockResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
       const lockStateid = this.readStateid();
       return new msg.Nfsv4LockResponse(status, new msg.Nfsv4LockResOk(lockStateid));
     } else if (status === 10010) {
-      const offset = this.xdr.readUnsignedHyper();
-      const length = this.xdr.readUnsignedHyper();
-      const locktype = this.xdr.readUnsignedInt();
+      const offset = xdr.readUnsignedHyper();
+      const length = xdr.readUnsignedHyper();
+      const locktype = xdr.readUnsignedInt();
       const owner = this.readLockOwner();
       return new msg.Nfsv4LockResponse(status, undefined, new msg.Nfsv4LockResDenied(offset, length, locktype, owner));
     }
@@ -565,19 +587,21 @@ export class Nfsv4Decoder {
   }
 
   private decodeLocktRequest(): msg.Nfsv4LocktRequest {
-    const locktype = this.xdr.readUnsignedInt();
-    const offset = this.xdr.readUnsignedHyper();
-    const length = this.xdr.readUnsignedHyper();
+    const xdr = this.xdr;
+    const locktype = xdr.readUnsignedInt();
+    const offset = xdr.readUnsignedHyper();
+    const length = xdr.readUnsignedHyper();
     const owner = this.readLockOwner();
     return new msg.Nfsv4LocktRequest(locktype, offset, length, owner);
   }
 
   private decodeLocktResponse(): msg.Nfsv4LocktResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 10010) {
-      const offset = this.xdr.readUnsignedHyper();
-      const length = this.xdr.readUnsignedHyper();
-      const locktype = this.xdr.readUnsignedInt();
+      const offset = xdr.readUnsignedHyper();
+      const length = xdr.readUnsignedHyper();
+      const locktype = xdr.readUnsignedInt();
       const owner = this.readLockOwner();
       return new msg.Nfsv4LocktResponse(status, new msg.Nfsv4LocktResDenied(offset, length, locktype, owner));
     }
@@ -585,11 +609,12 @@ export class Nfsv4Decoder {
   }
 
   private decodeLockuRequest(): msg.Nfsv4LockuRequest {
-    const locktype = this.xdr.readUnsignedInt();
-    const seqid = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const locktype = xdr.readUnsignedInt();
+    const seqid = xdr.readUnsignedInt();
     const lockStateid = this.readStateid();
-    const offset = this.xdr.readUnsignedHyper();
-    const length = this.xdr.readUnsignedHyper();
+    const offset = xdr.readUnsignedHyper();
+    const length = xdr.readUnsignedHyper();
     return new msg.Nfsv4LockuRequest(locktype, seqid, lockStateid, offset, length);
   }
 
@@ -632,21 +657,23 @@ export class Nfsv4Decoder {
   }
 
   private decodeOpenRequest(): msg.Nfsv4OpenRequest {
-    const seqid = this.xdr.readUnsignedInt();
-    const shareAccess = this.xdr.readUnsignedInt();
-    const shareDeny = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const seqid = xdr.readUnsignedInt();
+    const shareAccess = xdr.readUnsignedInt();
+    const shareDeny = xdr.readUnsignedInt();
     const owner = this.readOpenOwner();
-    const openhow = this.xdr.readUnsignedInt();
+    const openhow = xdr.readUnsignedInt();
     const claim = this.readOpenClaim();
     return new msg.Nfsv4OpenRequest(seqid, shareAccess, shareDeny, owner, openhow, claim);
   }
 
   private decodeOpenResponse(): msg.Nfsv4OpenResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
       const stateid = this.readStateid();
       const cinfo = this.readChangeInfo();
-      const rflags = this.xdr.readUnsignedInt();
+      const rflags = xdr.readUnsignedInt();
       const attrset = this.readBitmap();
       const delegation = this.readOpenDelegation();
       return new msg.Nfsv4OpenResponse(status, new msg.Nfsv4OpenResOk(stateid, cinfo, rflags, attrset, delegation));
@@ -680,10 +707,11 @@ export class Nfsv4Decoder {
   }
 
   private decodeOpenDowngradeRequest(): msg.Nfsv4OpenDowngradeRequest {
+    const xdr = this.xdr;
     const openStateid = this.readStateid();
-    const seqid = this.xdr.readUnsignedInt();
-    const shareAccess = this.xdr.readUnsignedInt();
-    const shareDeny = this.xdr.readUnsignedInt();
+    const seqid = xdr.readUnsignedInt();
+    const shareAccess = xdr.readUnsignedInt();
+    const shareDeny = xdr.readUnsignedInt();
     return new msg.Nfsv4OpenDowngradeRequest(openStateid, seqid, shareAccess, shareDeny);
   }
 
@@ -725,43 +753,47 @@ export class Nfsv4Decoder {
   }
 
   private decodeReadRequest(): msg.Nfsv4ReadRequest {
+    const xdr = this.xdr;
     const stateid = this.readStateid();
-    const offset = this.xdr.readUnsignedHyper();
-    const count = this.xdr.readUnsignedInt();
+    const offset = xdr.readUnsignedHyper();
+    const count = xdr.readUnsignedInt();
     return new msg.Nfsv4ReadRequest(stateid, offset, count);
   }
 
   private decodeReadResponse(): msg.Nfsv4ReadResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
-      const eof = this.xdr.readBoolean();
-      const data = this.xdr.readVarlenOpaque();
+      const eof = xdr.readBoolean();
+      const data = xdr.readVarlenOpaque();
       return new msg.Nfsv4ReadResponse(status, new msg.Nfsv4ReadResOk(eof, data));
     }
     return new msg.Nfsv4ReadResponse(status);
   }
 
   private decodeReaddirRequest(): msg.Nfsv4ReaddirRequest {
-    const cookie = this.xdr.readUnsignedHyper();
+    const xdr = this.xdr;
+    const cookie = xdr.readUnsignedHyper();
     const cookieverf = this.readVerifier();
-    const dircount = this.xdr.readUnsignedInt();
-    const maxcount = this.xdr.readUnsignedInt();
+    const dircount = xdr.readUnsignedInt();
+    const maxcount = xdr.readUnsignedInt();
     const attrRequest = this.readBitmap();
     return new msg.Nfsv4ReaddirRequest(cookie, cookieverf, dircount, maxcount, attrRequest);
   }
 
   private decodeReaddirResponse(): msg.Nfsv4ReaddirResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
       const cookieverf = this.readVerifier();
       const entries: structs.Nfsv4Entry[] = [];
-      while (this.xdr.readBoolean()) {
-        const cookie = this.xdr.readUnsignedHyper();
-        const name = this.xdr.readString();
+      while (xdr.readBoolean()) {
+        const cookie = xdr.readUnsignedHyper();
+        const name = xdr.readString();
         const attrs = this.readFattr();
         entries.push(new structs.Nfsv4Entry(cookie, name, attrs));
       }
-      const eof = this.xdr.readBoolean();
+      const eof = xdr.readBoolean();
       return new msg.Nfsv4ReaddirResponse(status, new msg.Nfsv4ReaddirResOk(cookieverf, entries, eof));
     }
     return new msg.Nfsv4ReaddirResponse(status);
@@ -772,9 +804,10 @@ export class Nfsv4Decoder {
   }
 
   private decodeReadlinkResponse(): msg.Nfsv4ReadlinkResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
-      const link = this.xdr.readString();
+      const link = xdr.readString();
       return new msg.Nfsv4ReadlinkResponse(status, new msg.Nfsv4ReadlinkResOk(link));
     }
     return new msg.Nfsv4ReadlinkResponse(status);
@@ -795,13 +828,15 @@ export class Nfsv4Decoder {
   }
 
   private decodeRenameRequest(): msg.Nfsv4RenameRequest {
-    const oldname = this.xdr.readString();
-    const newname = this.xdr.readString();
+    const xdr = this.xdr;
+    const oldname = xdr.readString();
+    const newname = xdr.readString();
     return new msg.Nfsv4RenameRequest(oldname, newname);
   }
 
   private decodeRenameResponse(): msg.Nfsv4RenameResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
       const sourceCinfo = this.readChangeInfo();
       const targetCinfo = this.readChangeInfo();
@@ -844,13 +879,12 @@ export class Nfsv4Decoder {
   }
 
   private decodeSecinfoResponse(): msg.Nfsv4SecinfoResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
-      const count = this.xdr.readUnsignedInt();
+      const count = xdr.readUnsignedInt();
       const flavors: structs.Nfsv4SecInfoFlavor[] = [];
-      for (let i = 0; i < count; i++) {
-        flavors.push(this.readSecInfoFlavor());
-      }
+      for (let i = 0; i < count; i++) flavors.push(this.readSecInfoFlavor());
       return new msg.Nfsv4SecinfoResponse(status, new msg.Nfsv4SecinfoResOk(flavors));
     }
     return new msg.Nfsv4SecinfoResponse(status);
@@ -876,9 +910,10 @@ export class Nfsv4Decoder {
   }
 
   private decodeSetclientidResponse(): msg.Nfsv4SetclientidResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
-      const clientid = this.xdr.readUnsignedHyper();
+      const clientid = xdr.readUnsignedHyper();
       const setclientidConfirm = this.readVerifier();
       return new msg.Nfsv4SetclientidResponse(status, new msg.Nfsv4SetclientidResOk(clientid, setclientidConfirm));
     }
@@ -907,18 +942,20 @@ export class Nfsv4Decoder {
   }
 
   private decodeWriteRequest(): msg.Nfsv4WriteRequest {
+    const xdr = this.xdr;
     const stateid = this.readStateid();
-    const offset = this.xdr.readUnsignedHyper();
-    const stable = this.xdr.readUnsignedInt();
-    const data = this.xdr.readVarlenOpaque();
+    const offset = xdr.readUnsignedHyper();
+    const stable = xdr.readUnsignedInt();
+    const data = xdr.readVarlenOpaque();
     return new msg.Nfsv4WriteRequest(stateid, offset, stable, data);
   }
 
   private decodeWriteResponse(): msg.Nfsv4WriteResponse {
-    const status = this.xdr.readUnsignedInt();
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
     if (status === 0) {
-      const count = this.xdr.readUnsignedInt();
-      const committed = this.xdr.readUnsignedInt();
+      const count = xdr.readUnsignedInt();
+      const committed = xdr.readUnsignedInt();
       const writeverf = this.readVerifier();
       return new msg.Nfsv4WriteResponse(status, new msg.Nfsv4WriteResOk(count, committed, writeverf));
     }

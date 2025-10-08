@@ -82,7 +82,6 @@ describe('NFSv4 Decoder', () => {
       expect(getattrOpStrict.attrRequest).toBeDefined();
       expect(Array.isArray(getattrOpStrict.attrRequest.mask)).toBe(true);
       expect(getattrOpStrict.attrRequest.mask.length).toBeGreaterThan(0);
-      console.log(request.argarray[0]);
     });
 
     test('decodes COMPOUND with GETATTR response', () => {

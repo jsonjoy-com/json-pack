@@ -125,13 +125,7 @@ describe('Nfsv3Encoder', () => {
     test('encodes and decodes WRITE request', () => {
       const fhData = new Uint8Array([1, 2, 3, 4]);
       const data = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
-      const request = new msg.Nfsv3WriteRequest(
-        new structs.Nfsv3Fh(fhData),
-        BigInt(0),
-        data.length,
-        0,
-        data,
-      );
+      const request = new msg.Nfsv3WriteRequest(new structs.Nfsv3Fh(fhData), BigInt(0), data.length, 0, data);
       const encoded = encoder.encodeMessage(request, Nfsv3Proc.WRITE, true);
       const decoded = decoder.decodeMessage(new Reader(encoded), Nfsv3Proc.WRITE, true) as msg.Nfsv3WriteRequest;
       expect(decoded).toBeInstanceOf(msg.Nfsv3WriteRequest);
@@ -247,12 +241,7 @@ describe('Nfsv3Encoder', () => {
     test('encodes and decodes READDIR request', () => {
       const fhData = new Uint8Array([1, 2, 3, 4]);
       const cookieverf = new Uint8Array(8);
-      const request = new msg.Nfsv3ReaddirRequest(
-        new structs.Nfsv3Fh(fhData),
-        BigInt(0),
-        cookieverf,
-        4096,
-      );
+      const request = new msg.Nfsv3ReaddirRequest(new structs.Nfsv3Fh(fhData), BigInt(0), cookieverf, 4096);
       const encoded = encoder.encodeMessage(request, Nfsv3Proc.READDIR, true);
       const decoded = decoder.decodeMessage(new Reader(encoded), Nfsv3Proc.READDIR, true) as msg.Nfsv3ReaddirRequest;
       expect(decoded).toBeInstanceOf(msg.Nfsv3ReaddirRequest);

@@ -1,50 +1,229 @@
-import {RpcCallMessage, RpcMessageDecoder} from '../../../rpc';
 import {RmRecordDecoder} from '../../../rm';
-import {Nfsv3Message} from '../messages';
+import {RpcCallMessage, RpcMessageDecoder, RpcAcceptedReplyMessage} from '../../../rpc';
 import {Nfsv3Decoder} from '../Nfsv3Decoder';
+import {Nfsv3Proc, Nfsv3Stat} from '../constants';
+import * as msg from '../messages';
+import {nfsv3} from './fixtures';
 
 const rmDecoder = new RmRecordDecoder();
 const rpcDecoder = new RpcMessageDecoder();
 const nfsDecoder = new Nfsv3Decoder();
 
-const decode = (hex: string): Nfsv3Message | undefined => {
-  const msg = Buffer.from(hex, 'hex');
-  const u8 = new Uint8Array(msg);
-  rmDecoder.push(u8);
+const decodeMessage = (hex: string) => {
+  const buffer = Buffer.from(hex, 'hex');
+  rmDecoder.push(new Uint8Array(buffer));
   const record = rmDecoder.readRecord();
-  if (record) {
-    const rpcMessage = rpcDecoder.decodeMessage(record);
-    if (rpcMessage instanceof RpcCallMessage) {
-      const nfsMessage = nfsDecoder.decodeMessage(rpcMessage.params!, rpcMessage.proc, true);
-      console.log(nfsMessage);
-      return nfsMessage;
-    }
-  }
-  return undefined;
+  if (!record) return undefined;
+  const rpcMessage = rpcDecoder.decodeMessage(record);
+  return rpcMessage;
 };
 
-const nfs3LookupCallHex =
-  '80000090eb8a42cb0000000000000002000186a30000000300000003000000010000003c00490e680000001d455042594d494e573039333554312e6d696e736b2e6570616d2e636f6d000000000001f40000000a000000020000000a000001f400000000000000000000001c9725bb51046621880c000000a68c020078286c3e00000000000000000000000568656c6c6f000000';
-const nfs3AccessCallHex =
-  '80000088ea8a42cb0000000000000002000186a30000000300000004000000010000003c00490e680000001d455042594d494e573039333554312e6d696e736b2e6570616d2e636f6d000000000001f40000000a000000020000000a000001f400000000000000000000001c9725bb51046621880c000000a68c020078286c3e00000000000000000000001f';
-const nfs3RaddirplusReplyHex =
-  '800001b4ed8a42cb0000000100000000000000000000000000000000000000000000000100000002000001ed00000002000001f400000000000000000000020000000000000008000000003c000a009700000000000000410000000000028ca651ed1cc20000000051ed1cb00000000051ed1cb0000000000000000000000f59000000010000000000028ca6000000012e000000000000000000000c0000000100000002000001ed00000002000001f400000000000000000000020000000000000008000000003c000a009700000000000000410000000000028ca651ed1cc20000000051ed1cb00000000051ed1cb000000000000000010000001c9725bb51046621880c000000a68c020078286c3e0000000000000000000000010000000000012665000000022e2e000000000000000002000000000100000002000001ff00000005000003ea000000000000000000000200000000000000080000000096000400df0000000000000041000000000001266551ec763d0000000051e69ed20000000051e69ed200000000000000010000001c9725bb51046621880c000000652601008072c43300000000000000000000000000000001';
+const decodeCall = (hex: string): {proc: Nfsv3Proc; request: msg.Nfsv3Request} | undefined => {
+  const rpcMessage = decodeMessage(hex);
+  if (!(rpcMessage instanceof RpcCallMessage)) return undefined;
+  const request = nfsDecoder.decodeMessage(rpcMessage.params!, rpcMessage.proc, true) as msg.Nfsv3Request;
+  return {proc: rpcMessage.proc, request};
+};
 
-test('RPC Call LOOKUP', () => {
-  const msg = decode(nfs3LookupCallHex);
+const decodeReply = (hex: string, proc: Nfsv3Proc): msg.Nfsv3Response | undefined => {
+  const rpcMessage = decodeMessage(hex);
+  if (!(rpcMessage instanceof RpcAcceptedReplyMessage)) return undefined;
+  return nfsDecoder.decodeMessage(rpcMessage.results!, proc, false) as msg.Nfsv3Response;
+};
+
+describe('NFSv3 Decoder with real traffic', () => {
+  describe('GETATTR', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.GETATTR.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.GETATTR);
+      expect(request).toBeInstanceOf(msg.Nfsv3GetattrRequest);
+      expect(request).toBeDefined();
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.GETATTR.Reply[0], Nfsv3Proc.GETATTR);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3GetattrResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+      expect(response.resok).toBeDefined();
+    });
+  });
+
+  describe('LOOKUP', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.LOOKUP.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.LOOKUP);
+      expect(request).toBeInstanceOf(msg.Nfsv3LookupRequest);
+      const lookupReq = request as msg.Nfsv3LookupRequest;
+      console.log(lookupReq);
+      expect(lookupReq.what.name).toBe('hello');
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.LOOKUP.Reply[0], Nfsv3Proc.LOOKUP);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3LookupResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3ERR_NOENT);
+    });
+  });
+
+  describe('ACCESS', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.ACCESS.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.ACCESS);
+      expect(request).toBeInstanceOf(msg.Nfsv3AccessRequest);
+      const accessReq = request as msg.Nfsv3AccessRequest;
+      expect(accessReq.access).toBe(0x1f);
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.ACCESS.Reply[0], Nfsv3Proc.ACCESS);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3AccessResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+      const accessResp = response as msg.Nfsv3AccessResponse;
+      expect(accessResp.resok).toBeDefined();
+      expect(accessResp.resok!.access).toBe(0x1f);
+    });
+  });
+
+  describe('WRITE', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.WRITE.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.WRITE);
+      expect(request).toBeInstanceOf(msg.Nfsv3WriteRequest);
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.WRITE.Reply[0], Nfsv3Proc.WRITE);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3WriteResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+      const writeResp = response as msg.Nfsv3WriteResponse;
+      expect(writeResp.resok).toBeDefined();
+      expect(writeResp.resok!.count).toBe(32768);
+    });
+  });
+
+  describe('CREATE', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.CREATE.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.CREATE);
+      expect(request).toBeInstanceOf(msg.Nfsv3CreateRequest);
+      const createReq = request as msg.Nfsv3CreateRequest;
+      expect(createReq.where.name).toBe('temp.file');
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.CREATE.Reply[0], Nfsv3Proc.CREATE);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3CreateResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+    });
+  });
+
+  describe('MKDIR', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.MKDIR.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.MKDIR);
+      expect(request).toBeInstanceOf(msg.Nfsv3MkdirRequest);
+      const mkdirReq = request as msg.Nfsv3MkdirRequest;
+      expect(mkdirReq.where.name).toBe('hello');
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.MKDIR.Reply[0], Nfsv3Proc.MKDIR);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3MkdirResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+    });
+  });
+
+  describe('REMOVE', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.REMOVE.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.REMOVE);
+      expect(request).toBeInstanceOf(msg.Nfsv3RemoveRequest);
+      const removeReq = request as msg.Nfsv3RemoveRequest;
+      expect(removeReq.object.name).toBe('temp.file');
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.REMOVE.Reply[0], Nfsv3Proc.REMOVE);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3RemoveResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+    });
+  });
+
+  describe('RMDIR', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.RMDIR.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.RMDIR);
+      expect(request).toBeInstanceOf(msg.Nfsv3RmdirRequest);
+      const rmdirReq = request as msg.Nfsv3RmdirRequest;
+      expect(rmdirReq.object.name).toBe('hello');
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.RMDIR.Reply[0], Nfsv3Proc.RMDIR);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3RmdirResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+    });
+  });
+
+  describe('READDIRPLUS', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.READDIRPLUS.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.READDIRPLUS);
+      expect(request).toBeInstanceOf(msg.Nfsv3ReaddirplusRequest);
+      const readdirReq = request as msg.Nfsv3ReaddirplusRequest;
+      expect(readdirReq.cookie).toBe(BigInt(0));
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.READDIRPLUS.Reply[0], Nfsv3Proc.READDIRPLUS);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3ReaddirplusResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+    });
+  });
+
+  describe('COMMIT', () => {
+    test('decodes call message', () => {
+      const result = decodeCall(nfsv3.COMMIT.Call[0]);
+      if (!result) return;
+      const {proc, request} = result;
+      expect(proc).toBe(Nfsv3Proc.COMMIT);
+      expect(request).toBeInstanceOf(msg.Nfsv3CommitRequest);
+      const commitReq = request as msg.Nfsv3CommitRequest;
+      expect(commitReq.offset).toBe(BigInt(0));
+    });
+
+    test('decodes reply message', () => {
+      const response = decodeReply(nfsv3.COMMIT.Reply[0], Nfsv3Proc.COMMIT);
+      if (!response) return;
+      expect(response).toBeInstanceOf(msg.Nfsv3CommitResponse);
+      expect(response.status).toBe(Nfsv3Stat.NFS3_OK);
+    });
+  });
 });
-
-// test('RPC Call ACCESS', () => {
-//   const msg = decode(nfs3AccessCallHex) as RpcCallMessage;
-//   expect(msg.xid).toBe(0xea8a42cb);
-//   expect(msg.rpcvers).toBe(2);
-//   expect(msg.prog).toBe(100003);
-//   expect(msg.vers).toBe(3);
-//   expect(msg.proc).toBe(4);
-// });
-
-// test('RPC Reply READDIRPLUS', () => {
-//   const msg = decode(nfs3RaddirplusReplyHex) as RpcAcceptedReplyMessage;
-//   expect(msg.xid).toBe(3985261259);
-//   expect(msg.stat).toBe(RpcAcceptStat.SUCCESS);
-// });

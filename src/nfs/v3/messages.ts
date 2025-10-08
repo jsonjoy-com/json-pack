@@ -4,7 +4,7 @@ import type * as stucts from './structs';
 
 export type Nfsv3Message = Nfsv3Request | Nfsv3Response;
 
-export type Nfsv3Request = 
+export type Nfsv3Request =
   | Nfsv3GetattrRequest
   | Nfsv3SetattrRequest
   | Nfsv3LookupRequest
@@ -25,8 +25,7 @@ export type Nfsv3Request =
   | Nfsv3FsstatRequest
   | Nfsv3FsinfoRequest
   | Nfsv3PathconfRequest
-  | Nfsv3CommitRequest
-  ;
+  | Nfsv3CommitRequest;
 
 export type Nfsv3Response =
   | Nfsv3GetattrResponse
@@ -50,8 +49,6 @@ export type Nfsv3Response =
   | Nfsv3FsinfoResponse
   | Nfsv3PathconfResponse
   | Nfsv3CommitResponse;
-  ;
-
 /**
  * GETATTR request
  */

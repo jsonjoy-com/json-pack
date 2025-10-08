@@ -1,3 +1,11 @@
+# NFSv3 Protocol Implementation
+
+This directory contains a complete implementation of the NFSv3 protocol (RFC 1813), including:
+
+- **NFSv3**: Core NFS version 3 protocol operations
+- **MOUNT**: Mount protocol (Appendix I of RFC 1813)
+- **NLM**: Network Lock Manager protocol version 4 (Appendix II of RFC 1813)
+
 ## `FullNfsv3Encoder`
 
 `FullNfsv3Encoder` encoder that combines all three protocol layers (RM, RPC, and NFS)
@@ -16,9 +24,7 @@ const encoder = new FullNfsv3Encoder();
 
 // Create NFS request
 const fhData = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);
-const request = new msg.Nfsv3GetattrRequest(
-  new structs.Nfsv3Fh(new Reader(fhData))
-);
+const request = new msg.Nfsv3GetattrRequest(new structs.Nfsv3Fh(new Reader(fhData)));
 
 // Create RPC authentication
 const cred = {
@@ -32,11 +38,11 @@ const verf = {
 
 // Encode the complete NFS call (RM + RPC + NFS layers)
 const encoded = encoder.encodeCall(
-  12345,                      // XID
-  Nfsv3Proc.GETATTR,         // Procedure
-  cred,                       // Credentials
-  verf,                       // Verifier
-  request                     // NFS request
+  12345, // XID
+  Nfsv3Proc.GETATTR, // Procedure
+  cred, // Credentials
+  verf, // Verifier
+  request, // NFS request
 );
 
 // Send the encoded data over TCP

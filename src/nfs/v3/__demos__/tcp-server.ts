@@ -5,7 +5,7 @@ import {Nfsv3Decoder} from '../Nfsv3Decoder';
 
 /* tslint:disable:no-console */
 
-const PORT = 2049;
+const PORT = Number(process.env.PORT) || 2049;
 const HOST = '127.0.0.1';
 
 const toHex = (buffer: Uint8Array | Buffer): string => {

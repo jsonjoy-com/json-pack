@@ -1,6 +1,5 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {SshDecoder} from '../SshDecoder';
-import {JsonPackMpint} from '../../JsonPackMpint';
 
 describe('SshDecoder', () => {
   let reader: Reader;

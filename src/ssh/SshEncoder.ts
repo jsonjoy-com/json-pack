@@ -1,6 +1,6 @@
+import {JsonPackMpint} from '../JsonPackMpint';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib';
 import type {BinaryJsonEncoder} from '../types';
-import {JsonPackMpint} from '../JsonPackMpint';
 
 /**
  * SSH 2.0 binary encoder for SSH protocol data types.

@@ -31,7 +31,13 @@ npx ts-node src/nfs/v4/__demos__/tcp-server.ts
 You can also specify a custom port:
 
 ```bash
-PORT=8585 npx ts-node src/nfs/v4/__demos__/tcp-server.ts
+PORT=8777 npx ts-node src/nfs/v4/__demos__/tcp-server.ts
+```
+
+Then mount an NFSv4 share from another terminal or machine:
+
+```bash
+mount -t nfs -o vers=4,nfsvers=4,port=8777,mountport=8777,proto=tcp,sec=none 127.0.0.1:/export ~/mnt/test
 ```
 
 ## NFSv4 Protocol Structure

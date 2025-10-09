@@ -1,9 +1,9 @@
 import * as net from 'net';
-import {RmRecordDecoder} from '../../../rm';
-import {RpcMessageDecoder, RpcCallMessage} from '../../../rpc';
+import {RmRecordDecoder, RmRecordEncoder} from '../../../rm';
+import {RpcMessageDecoder, RpcCallMessage, RpcAcceptStat, RpcMessageEncoder, RpcOpaqueAuth, RpcAuthFlavor} from '../../../rpc';
 import {Nfsv4Decoder} from '../Nfsv4Decoder';
 import * as msg from '../messages';
-import {Nfsv4Op} from '../constants';
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 
 /* tslint:disable:no-console */
 
@@ -71,6 +71,8 @@ const server = net.createServer((socket) => {
   const rmDecoder = new RmRecordDecoder();
   const rpcDecoder = new RpcMessageDecoder();
   const nfsDecoder = new Nfsv4Decoder();
+  const rmEncoder = new RmRecordEncoder();
+  const rpcEncoder = new RpcMessageEncoder();
   socket.on('data', (data) => {
     console.log('\n' + '='.repeat(80));
     console.log(`[${new Date().toISOString()}] Received ${data.length} bytes`);
@@ -89,8 +91,8 @@ const server = net.createServer((socket) => {
         if (rpcMessage instanceof RpcCallMessage) {
           const proc = rpcMessage.proc;
           console.log(`\nNFS Procedure: ${getProcName(proc)}`);
-          if (rpcMessage.params) {
-            if (proc === 1) {
+
+            if (proc === 1 && rpcMessage.params) {
               const compound = nfsDecoder.decodeCompound(rpcMessage.params, true);
               if (compound && 'argarray' in compound) {
                 console.log('\nNFS COMPOUND Request:');
@@ -106,11 +108,22 @@ const server = net.createServer((socket) => {
               }
             } else if (proc === 0) {
               console.log('NULL procedure (no parameters)');
+              const rpcReplyU8 = rpcEncoder.encodeAcceptedReply(
+                rpcMessage.xid,
+                new RpcOpaqueAuth(
+                  RpcAuthFlavor.AUTH_NONE,
+                  new Reader(new Uint8Array(0)),
+                ),
+                RpcAcceptStat.SUCCESS
+              );
+              const recordU8 = rmEncoder.encodeRecord(rpcReplyU8);
+              console.log('\nSending RPC Accepted Reply for NULL:');
+              console.log(`HEX: ${toHex(recordU8)}`);
+              socket.write(recordU8);
             } else {
               console.log(`Unknown procedure: ${proc}`);
             }
           }
-        }
       } else {
         console.log('Could not decode RPC message');
       }

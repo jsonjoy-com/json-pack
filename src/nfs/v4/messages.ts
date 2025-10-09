@@ -1,4 +1,5 @@
-import type {Nfsv4Stat, Nfsv4LockType} from './constants';
+import type {XdrEncoder, XdrType} from '../../xdr';
+import {type Nfsv4Stat, type Nfsv4LockType, Nfsv4Op} from './constants';
 import type * as structs from './structs';
 
 export type Nfsv4Operation = Nfsv4Request | Nfsv4Response;
@@ -83,8 +84,13 @@ export type Nfsv4Response =
   | Nfsv4ReleaseLockOwnerResponse
   | Nfsv4IllegalResponse;
 
-export class Nfsv4AccessRequest {
+export class Nfsv4AccessRequest implements XdrType {
   constructor(public readonly access: number) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.ACCESS);
+    xdr.writeUnsignedInt(this.access);
+  }
 }
 
 export class Nfsv4AccessResOk {
@@ -106,6 +112,12 @@ export class Nfsv4CloseRequest {
     public readonly seqid: number,
     public readonly openStateid: structs.Nfsv4Stateid,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.CLOSE);
+    xdr.writeUnsignedInt(this.seqid);
+    this.openStateid.encode(xdr);
+  }
 }
 
 export class Nfsv4CloseResOk {

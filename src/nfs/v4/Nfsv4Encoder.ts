@@ -48,12 +48,12 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeRequest(request: msg.Nfsv4Request): void {
+    const xdr = this.xdr; 
     if (request instanceof msg.Nfsv4AccessRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.ACCESS);
-      this.writeAccessRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4CloseRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.CLOSE);
-      this.writeCloseRequest(request);
+      // TODO: Add tests for this encoding branch
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4CommitRequest) {
       this.xdr.writeUnsignedInt(Nfsv4Op.COMMIT);
       this.writeCommitRequest(request);
@@ -362,10 +362,6 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeAccessRequest(req: msg.Nfsv4AccessRequest): void {
-    this.xdr.writeUnsignedInt(req.access);
-  }
-
   private writeAccessResponse(res: msg.Nfsv4AccessResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
@@ -373,12 +369,6 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
       xdr.writeUnsignedInt(res.resok.supported);
       xdr.writeUnsignedInt(res.resok.access);
     }
-  }
-
-  private writeCloseRequest(req: msg.Nfsv4CloseRequest): void {
-    const xdr = this.xdr;
-    xdr.writeUnsignedInt(req.seqid);
-    this.writeStateid(req.openStateid);
   }
 
   private writeCloseResponse(res: msg.Nfsv4CloseResponse): void {

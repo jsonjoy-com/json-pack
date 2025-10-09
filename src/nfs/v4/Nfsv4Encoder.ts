@@ -21,4 +21,16 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   public writeCompound(compound: msg.Nfsv4CompoundRequest | msg.Nfsv4CompoundResponse, isRequest: boolean): void {
     compound.encode(this.xdr);
   }
+
+  public encodeCbCompound(
+    compound: msg.Nfsv4CbCompoundRequest | msg.Nfsv4CbCompoundResponse,
+    isRequest?: boolean,
+  ): Uint8Array {
+    compound.encode(this.xdr);
+    return this.writer.flush();
+  }
+
+  public writeCbCompound(compound: msg.Nfsv4CbCompoundRequest | msg.Nfsv4CbCompoundResponse, isRequest: boolean): void {
+    compound.encode(this.xdr);
+  }
 }

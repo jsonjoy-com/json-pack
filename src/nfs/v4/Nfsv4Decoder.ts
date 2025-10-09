@@ -1,6 +1,6 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrDecoder} from '../../xdr/XdrDecoder';
-import {Nfsv4Op, Nfsv4FType, Nfsv4DelegType} from './constants';
+import {Nfsv4Op, Nfsv4CbOp, Nfsv4FType, Nfsv4DelegType} from './constants';
 import {Nfsv4DecodingError} from './errors';
 import * as msg from './messages';
 import * as structs from './structs';
@@ -981,5 +981,117 @@ export class Nfsv4Decoder {
   private decodeIllegalResponse(): msg.Nfsv4IllegalResponse {
     const status = this.xdr.readUnsignedInt();
     return new msg.Nfsv4IllegalResponse(status);
+  }
+
+  public decodeCbCompound(
+    reader: Reader,
+    isRequest: boolean,
+  ): msg.Nfsv4CbCompoundRequest | msg.Nfsv4CbCompoundResponse | undefined {
+    this.xdr.reader = reader;
+    const startPos = reader.x;
+    try {
+      if (isRequest) {
+        return this.decodeCbCompoundRequest();
+      } else {
+        return this.decodeCbCompoundResponse();
+      }
+    } catch (err) {
+      if (err instanceof RangeError) {
+        reader.x = startPos;
+        return undefined;
+      }
+      throw err;
+    }
+  }
+
+  private decodeCbCompoundRequest(): msg.Nfsv4CbCompoundRequest {
+    const xdr = this.xdr;
+    const tag = xdr.readString();
+    const minorversion = xdr.readUnsignedInt();
+    const callbackIdent = xdr.readUnsignedInt();
+    const argarray: msg.Nfsv4CbRequest[] = [];
+    const count = xdr.readUnsignedInt();
+    for (let i = 0; i < count; i++) {
+      const op = xdr.readUnsignedInt() as Nfsv4CbOp;
+      const request = this.decodeCbRequest(op);
+      if (request) argarray.push(request);
+    }
+    return new msg.Nfsv4CbCompoundRequest(tag, minorversion, callbackIdent, argarray);
+  }
+
+  private decodeCbCompoundResponse(): msg.Nfsv4CbCompoundResponse {
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
+    const tag = xdr.readString();
+    const resarray: msg.Nfsv4CbResponse[] = [];
+    const count = xdr.readUnsignedInt();
+    for (let i = 0; i < count; i++) {
+      const op = xdr.readUnsignedInt() as Nfsv4CbOp;
+      const response = this.decodeCbResponse(op);
+      if (response) resarray.push(response);
+    }
+    return new msg.Nfsv4CbCompoundResponse(status, tag, resarray);
+  }
+
+  private decodeCbRequest(op: Nfsv4CbOp): msg.Nfsv4CbRequest | undefined {
+    switch (op) {
+      case Nfsv4CbOp.CB_GETATTR:
+        return this.decodeCbGetattrRequest();
+      case Nfsv4CbOp.CB_RECALL:
+        return this.decodeCbRecallRequest();
+      case Nfsv4CbOp.CB_ILLEGAL:
+        return this.decodeCbIllegalRequest();
+      default:
+        throw new Nfsv4DecodingError(`Unknown callback operation: ${op}`);
+    }
+  }
+
+  private decodeCbResponse(op: Nfsv4CbOp): msg.Nfsv4CbResponse | undefined {
+    switch (op) {
+      case Nfsv4CbOp.CB_GETATTR:
+        return this.decodeCbGetattrResponse();
+      case Nfsv4CbOp.CB_RECALL:
+        return this.decodeCbRecallResponse();
+      case Nfsv4CbOp.CB_ILLEGAL:
+        return this.decodeCbIllegalResponse();
+      default:
+        throw new Nfsv4DecodingError(`Unknown callback operation: ${op}`);
+    }
+  }
+
+  private decodeCbGetattrRequest(): msg.Nfsv4CbGetattrRequest {
+    const fh = this.readFh();
+    const attrRequest = this.readBitmap();
+    return new msg.Nfsv4CbGetattrRequest(fh, attrRequest);
+  }
+
+  private decodeCbGetattrResponse(): msg.Nfsv4CbGetattrResponse {
+    const status = this.xdr.readUnsignedInt();
+    if (status === 0) {
+      const objAttributes = this.readFattr();
+      return new msg.Nfsv4CbGetattrResponse(status, new msg.Nfsv4CbGetattrResOk(objAttributes));
+    }
+    return new msg.Nfsv4CbGetattrResponse(status);
+  }
+
+  private decodeCbRecallRequest(): msg.Nfsv4CbRecallRequest {
+    const stateid = this.readStateid();
+    const truncate = this.xdr.readBoolean();
+    const fh = this.readFh();
+    return new msg.Nfsv4CbRecallRequest(stateid, truncate, fh);
+  }
+
+  private decodeCbRecallResponse(): msg.Nfsv4CbRecallResponse {
+    const status = this.xdr.readUnsignedInt();
+    return new msg.Nfsv4CbRecallResponse(status);
+  }
+
+  private decodeCbIllegalRequest(): msg.Nfsv4CbIllegalRequest {
+    return new msg.Nfsv4CbIllegalRequest();
+  }
+
+  private decodeCbIllegalResponse(): msg.Nfsv4CbIllegalResponse {
+    const status = this.xdr.readUnsignedInt();
+    return new msg.Nfsv4CbIllegalResponse(status);
   }
 }

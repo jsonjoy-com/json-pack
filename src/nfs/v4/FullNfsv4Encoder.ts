@@ -2,7 +2,7 @@ import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
 import {Nfsv4Encoder} from './Nfsv4Encoder';
 import {RpcMessageEncoder} from '../../rpc/RpcMessageEncoder';
 import {RmRecordEncoder} from '../../rm/RmRecordEncoder';
-import {Nfsv4Proc, Nfsv4Const} from './constants';
+import {Nfsv4Proc, Nfsv4CbProc, Nfsv4Const} from './constants';
 import {RpcOpaqueAuth} from '../../rpc/messages';
 import {RpcAcceptStat} from '../../rpc/constants';
 import type * as msg from './messages';
@@ -114,5 +114,57 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
       writer.reset();
       rmEncoder.writeRecord(data);
     }
+  }
+
+  public encodeCbCall(
+    xid: number,
+    cbProgram: number,
+    proc: Nfsv4CbProc,
+    cred: RpcOpaqueAuth,
+    verf: RpcOpaqueAuth,
+    request: msg.Nfsv4CbCompoundRequest,
+  ): Uint8Array {
+    this.writeCbCall(xid, cbProgram, proc, cred, verf, request);
+    return this.writer.flush();
+  }
+
+  public writeCbCall(
+    xid: number,
+    cbProgram: number,
+    proc: Nfsv4CbProc,
+    cred: RpcOpaqueAuth,
+    verf: RpcOpaqueAuth,
+    request: msg.Nfsv4CbCompoundRequest,
+  ): void {
+    const writer = this.writer;
+    const rmHeaderPosition = writer.x;
+    writer.x += RM_HEADER_SIZE;
+    this.rpcEncoder.writeCall(xid, cbProgram, Nfsv4Const.VERSION, proc, cred, verf);
+    this.nfsEncoder.writeCbCompound(request, true);
+    this.writeRmHeader(rmHeaderPosition, writer.x);
+  }
+
+  public encodeCbAcceptedReply(
+    xid: number,
+    proc: Nfsv4CbProc,
+    verf: RpcOpaqueAuth,
+    response: msg.Nfsv4CbCompoundResponse,
+  ): Uint8Array {
+    this.writeCbAcceptedReply(xid, proc, verf, response);
+    return this.writer.flush();
+  }
+
+  public writeCbAcceptedReply(
+    xid: number,
+    proc: Nfsv4CbProc,
+    verf: RpcOpaqueAuth,
+    response: msg.Nfsv4CbCompoundResponse,
+  ): void {
+    const writer = this.writer;
+    const rmHeaderPosition = writer.x;
+    writer.x += RM_HEADER_SIZE;
+    this.rpcEncoder.writeAcceptedReply(xid, verf, RpcAcceptStat.SUCCESS);
+    this.nfsEncoder.writeCbCompound(response, false);
+    this.writeRmHeader(rmHeaderPosition, writer.x);
   }
 }

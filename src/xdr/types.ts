@@ -1,3 +1,6 @@
+import type {XdrDecoder} from "./XdrDecoder";
+import type {XdrEncoder} from "./XdrEncoder";
+
 /**
  * XDR (External Data Representation Standard) schema type definitions
  * based on RFC 4506 (May 2006), which obsoletes RFC 1832 (August 1995)
@@ -131,4 +134,10 @@ export interface XdrConstantSchema extends XdrBaseSchema<'const'> {
 export interface XdrBaseSchema<Type extends string> {
   /** The schema type */
   type: Type;
+}
+
+export type XdrTypeDecoder<T extends XdrType> = (xdr: XdrDecoder) => T;
+
+export interface XdrType {
+  encode(xdr: XdrEncoder): void;
 }

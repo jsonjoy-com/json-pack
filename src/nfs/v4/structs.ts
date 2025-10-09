@@ -124,10 +124,10 @@ export class Nfsv4Bitmap implements XdrType {
   constructor(public readonly mask: number[]) {}
 
   encode(xdr: XdrEncoder): void {
-    xdr.writeUnsignedInt(this.mask.length);
-    for (const m of this.mask) {
-      xdr.writeUnsignedInt(m);
-    }
+    const mask = this.mask;
+    const length = mask.length;
+    xdr.writeUnsignedInt(length);
+    for (let i = 0; i < length; i++) xdr.writeUnsignedInt(mask[i]);
   }
 }
 
@@ -250,14 +250,13 @@ export class Nfsv4FsLocation implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
-    xdr.writeUnsignedInt(this.server.length);
-    for (const s of this.server) {
-      xdr.writeStr(s);
-    }
-    xdr.writeUnsignedInt(this.rootpath.length);
-    for (const p of this.rootpath) {
-      xdr.writeStr(p);
-    }
+    const {server, rootpath} = this;
+    const serverLen = server.length;
+    xdr.writeUnsignedInt(serverLen);
+    for (let i = 0; i < serverLen; i++) xdr.writeStr(server[i]);
+    const rootpathLen = rootpath.length;
+    xdr.writeUnsignedInt(rootpathLen);
+    for (let i = 0; i < rootpathLen; i++) xdr.writeStr(rootpath[i]);
   }
 }
 
@@ -272,13 +271,12 @@ export class Nfsv4FsLocations implements XdrType {
 
   encode(xdr: XdrEncoder): void {
     xdr.writeUnsignedInt(this.fsRoot.length);
-    for (const r of this.fsRoot) {
-      xdr.writeStr(r);
-    }
-    xdr.writeUnsignedInt(this.locations.length);
-    for (const l of this.locations) {
-      l.encode(xdr);
-    }
+    const {fsRoot, locations} = this;
+    const fsRootLen = fsRoot.length;
+    for (let i = 0; i < fsRootLen; i++) xdr.writeStr(fsRoot[i]);
+    const locationsLen = locations.length;
+    xdr.writeUnsignedInt(locationsLen);
+    for (let i = 0; i < locationsLen; i++) locations[i].encode(xdr);
   }
 }
 
@@ -308,10 +306,10 @@ export class Nfsv4Acl implements XdrType {
   constructor(public readonly aces: Nfsv4Ace[]) {}
 
   encode(xdr: XdrEncoder): void {
-    xdr.writeUnsignedInt(this.aces.length);
-    for (const ace of this.aces) {
-      ace.encode(xdr);
-    }
+    const aces = this.aces;
+    const length = aces.length;
+    xdr.writeUnsignedInt(length);
+    for (let i = 0; i < length; i++) aces[i].encode(xdr);
   }
 }
 
@@ -326,9 +324,8 @@ export class Nfsv4SecInfo implements XdrType {
 
   encode(xdr: XdrEncoder): void {
     xdr.writeUnsignedInt(this.flavor);
-    if (this.flavorInfo) {
-      xdr.writeVarlenOpaque(this.flavorInfo);
-    }
+    const flavorInfo = this.flavorInfo;
+    if (flavorInfo) xdr.writeVarlenOpaque(flavorInfo);
   }
 }
 
@@ -412,10 +409,10 @@ export class Nfsv4OpenReadDelegation implements XdrType {
   encode(xdr: XdrEncoder): void {
     this.stateid.encode(xdr);
     xdr.writeBoolean(this.recall);
-    xdr.writeUnsignedInt(this.permissions.length);
-    for (const ace of this.permissions) {
-      ace.encode(xdr);
-    }
+    const permissions = this.permissions;
+    const length = permissions.length;
+    xdr.writeUnsignedInt(length);
+    for (let i = 0; i < length; i++) permissions[i].encode(xdr);
   }
 }
 
@@ -434,10 +431,10 @@ export class Nfsv4OpenWriteDelegation implements XdrType {
     this.stateid.encode(xdr);
     xdr.writeBoolean(this.recall);
     xdr.writeUnsignedHyper(this.spaceLimit);
-    xdr.writeUnsignedInt(this.permissions.length);
-    for (const ace of this.permissions) {
-      ace.encode(xdr);
-    }
+    const permissions = this.permissions;
+    const length = permissions.length;
+    xdr.writeUnsignedInt(length);
+    for (let i = 0; i < length; i++) permissions[i].encode(xdr);
   }
 }
 
@@ -452,9 +449,7 @@ export class Nfsv4OpenDelegation implements XdrType {
 
   encode(xdr: XdrEncoder): void {
     xdr.writeUnsignedInt(this.delegationType);
-    if (this.delegation) {
-      this.delegation.encode(xdr);
-    }
+    this.delegation?.encode(xdr);
   }
 }
 
@@ -621,8 +616,6 @@ export class Nfsv4SecInfoFlavor implements XdrType {
 
   encode(xdr: XdrEncoder): void {
     xdr.writeUnsignedInt(this.flavor);
-    if (this.flavorInfo) {
-      this.flavorInfo.encode(xdr);
-    }
+    this.flavorInfo?.encode(xdr);
   }
 }

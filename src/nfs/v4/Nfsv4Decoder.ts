@@ -467,12 +467,10 @@ export class Nfsv4Decoder {
     const xdr = this.xdr;
     const type = xdr.readUnsignedInt() as Nfsv4FType;
     let objtype: structs.Nfsv4CreateType;
-    const objname = xdr.readString();
-    const createattrs = this.readFattr();
     switch (type) {
       case Nfsv4FType.NF4LNK: {
         const linkdata = xdr.readString();
-        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeLink(linkdata, createattrs));
+        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeLink(linkdata));
         break;
       }
       case Nfsv4FType.NF4BLK:
@@ -480,13 +478,17 @@ export class Nfsv4Decoder {
         const specdata1 = xdr.readUnsignedInt();
         const specdata2 = xdr.readUnsignedInt();
         const devdata = new structs.Nfsv4SpecData(specdata1, specdata2);
-        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeDevice(devdata, createattrs));
+        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeDevice(devdata));
         break;
       }
-      default:
-        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeOther(createattrs));
+      default: {
+        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeVoid());
+        break;
+      }
     }
-    return new msg.Nfsv4CreateRequest(objtype, objname);
+    const objname = xdr.readString();
+    const createattrs = this.readFattr();
+    return new msg.Nfsv4CreateRequest(objtype, objname, createattrs);
   }
 
   private decodeCreateResponse(): msg.Nfsv4CreateResponse {

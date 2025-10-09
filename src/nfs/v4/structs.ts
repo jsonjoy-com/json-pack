@@ -513,28 +513,13 @@ export class Nfsv4LockOwnerInfo implements XdrType {
 }
 
 /**
- * Create type for regular file
- */
-export class Nfsv4CreateTypeFile implements XdrType {
-  constructor(public readonly createattrs: Nfsv4Fattr) {}
-
-  encode(xdr: XdrEncoder): void {
-    this.createattrs.encode(xdr);
-  }
-}
-
-/**
  * Create type for symbolic link
  */
 export class Nfsv4CreateTypeLink implements XdrType {
-  constructor(
-    public readonly linkdata: string,
-    public readonly createattrs: Nfsv4Fattr,
-  ) {}
+  constructor(public readonly linkdata: string) {}
 
   encode(xdr: XdrEncoder): void {
     xdr.writeStr(this.linkdata);
-    this.createattrs.encode(xdr);
   }
 }
 
@@ -542,26 +527,18 @@ export class Nfsv4CreateTypeLink implements XdrType {
  * Create type for device files
  */
 export class Nfsv4CreateTypeDevice implements XdrType {
-  constructor(
-    public readonly devdata: Nfsv4SpecData,
-    public readonly createattrs: Nfsv4Fattr,
-  ) {}
+  constructor(public readonly devdata: Nfsv4SpecData) {}
 
   encode(xdr: XdrEncoder): void {
     this.devdata.encode(xdr);
-    this.createattrs.encode(xdr);
   }
 }
 
 /**
- * Create type for other file types
+ * Create type for other file types (void)
  */
-export class Nfsv4CreateTypeOther implements XdrType {
-  constructor(public readonly createattrs: Nfsv4Fattr) {}
-
-  encode(xdr: XdrEncoder): void {
-    this.createattrs.encode(xdr);
-  }
+export class Nfsv4CreateTypeVoid implements XdrType {
+  encode(xdr: XdrEncoder): void {}
 }
 
 /**
@@ -570,7 +547,7 @@ export class Nfsv4CreateTypeOther implements XdrType {
 export class Nfsv4CreateType implements XdrType {
   constructor(
     public readonly type: Nfsv4FType,
-    public readonly objtype: Nfsv4CreateTypeFile | Nfsv4CreateTypeLink | Nfsv4CreateTypeDevice | Nfsv4CreateTypeOther,
+    public readonly objtype: Nfsv4CreateTypeLink | Nfsv4CreateTypeDevice | Nfsv4CreateTypeVoid,
   ) {}
 
   encode(xdr: XdrEncoder): void {

@@ -12,23 +12,13 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
 
   public encodeCompound(
     compound: msg.Nfsv4CompoundRequest | msg.Nfsv4CompoundResponse,
-    isRequest: boolean,
+    isRequest?: boolean,
   ): Uint8Array {
-    if (isRequest) this.writeCompoundRequest(compound as msg.Nfsv4CompoundRequest);
-    else this.writeCompoundResponse(compound as msg.Nfsv4CompoundResponse);
+    compound.encode(this.xdr);
     return this.writer.flush();
   }
 
   public writeCompound(compound: msg.Nfsv4CompoundRequest | msg.Nfsv4CompoundResponse, isRequest: boolean): void {
-    if (isRequest) this.writeCompoundRequest(compound as msg.Nfsv4CompoundRequest);
-    else this.writeCompoundResponse(compound as msg.Nfsv4CompoundResponse);
-  }
-
-  private writeCompoundRequest(request: msg.Nfsv4CompoundRequest): void {
-    request.encode(this.xdr);
-  }
-
-  private writeCompoundResponse(response: msg.Nfsv4CompoundResponse): void {
-    response.encode(this.xdr);
+    compound.encode(this.xdr);
   }
 }

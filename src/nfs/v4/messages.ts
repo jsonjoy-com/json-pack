@@ -190,12 +190,14 @@ export class Nfsv4CreateRequest implements XdrType {
   constructor(
     public readonly objtype: structs.Nfsv4CreateType,
     public readonly objname: string,
+    public readonly createattrs: structs.Nfsv4Fattr,
   ) {}
 
   encode(xdr: XdrEncoder): void {
     xdr.writeUnsignedInt(Nfsv4Op.CREATE);
     this.objtype.encode(xdr);
     xdr.writeStr(this.objname);
+    this.createattrs.encode(xdr);
   }
 }
 
@@ -341,6 +343,7 @@ export class Nfsv4LinkResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LINK);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0) this.resok?.encode(xdr);
   }
@@ -397,6 +400,7 @@ export class Nfsv4LockResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LOCK);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) {
       this.resok.encode(xdr);
@@ -446,6 +450,7 @@ export class Nfsv4LocktResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LOCKT);
     xdr.writeUnsignedInt(this.status);
     this.denied?.encode(xdr);
   }
@@ -485,6 +490,7 @@ export class Nfsv4LockuResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LOCKU);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0) this.resok?.encode(xdr);
   }
@@ -536,6 +542,7 @@ export class Nfsv4NverifyResponse implements XdrType {
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.NVERIFY);
     xdr.writeUnsignedInt(this.status);
   }
 }
@@ -586,6 +593,7 @@ export class Nfsv4OpenResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.OPEN);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) {
       this.resok.encode(xdr);
@@ -606,6 +614,7 @@ export class Nfsv4OpenattrResponse implements XdrType {
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.OPENATTR);
     xdr.writeUnsignedInt(this.status);
   }
 }
@@ -638,6 +647,7 @@ export class Nfsv4OpenConfirmResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.OPEN_CONFIRM);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) {
       this.resok.encode(xdr);
@@ -677,6 +687,7 @@ export class Nfsv4OpenDowngradeResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.OPEN_DOWNGRADE);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) {
       this.resok.encode(xdr);
@@ -821,6 +832,7 @@ export class Nfsv4ReaddirResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.READDIR);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) {
       this.resok.encode(xdr);
@@ -849,6 +861,7 @@ export class Nfsv4ReadlinkResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.READLINK);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) {
       this.resok.encode(xdr);
@@ -880,6 +893,7 @@ export class Nfsv4RemoveResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.REMOVE);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) {
       this.resok.encode(xdr);
@@ -919,6 +933,7 @@ export class Nfsv4RenameResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.RENAME);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0) this.resok?.encode(xdr);
   }
@@ -937,6 +952,7 @@ export class Nfsv4RenewResponse implements XdrType {
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.RENEW);
     xdr.writeUnsignedInt(this.status);
   }
 }
@@ -998,6 +1014,7 @@ export class Nfsv4SecinfoResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.SECINFO);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) this.resok.encode(xdr);
   }
@@ -1031,6 +1048,7 @@ export class Nfsv4SetattrResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.SETATTR);
     xdr.writeUnsignedInt(this.status);
     this.resok?.encode(xdr);
   }
@@ -1111,6 +1129,7 @@ export class Nfsv4VerifyResponse implements XdrType {
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.VERIFY);
     xdr.writeUnsignedInt(this.status);
   }
 }
@@ -1172,6 +1191,7 @@ export class Nfsv4ReleaseLockOwnerResponse implements XdrType {
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.RELEASE_LOCKOWNER);
     xdr.writeUnsignedInt(this.status);
   }
 }
@@ -1186,6 +1206,7 @@ export class Nfsv4IllegalResponse implements XdrType {
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.ILLEGAL);
     xdr.writeUnsignedInt(this.status);
   }
 }
@@ -1258,6 +1279,7 @@ export class Nfsv4CbGetattrResponse implements XdrType {
   ) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4CbOp.CB_GETATTR);
     xdr.writeUnsignedInt(this.status);
     if (this.status === 0 && this.resok) {
       this.resok.encode(xdr);
@@ -1284,6 +1306,7 @@ export class Nfsv4CbRecallResponse implements XdrType {
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4CbOp.CB_RECALL);
     xdr.writeUnsignedInt(this.status);
   }
 }
@@ -1298,6 +1321,7 @@ export class Nfsv4CbIllegalResponse implements XdrType {
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4CbOp.CB_ILLEGAL);
     xdr.writeUnsignedInt(this.status);
   }
 }

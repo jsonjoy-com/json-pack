@@ -131,11 +131,17 @@ export class Nfsv4CloseResponse {
   ) {}
 }
 
-export class Nfsv4CommitRequest {
+export class Nfsv4CommitRequest implements XdrType {
   constructor(
     public readonly offset: bigint,
     public readonly count: number,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.COMMIT);
+    xdr.writeUnsignedHyper(this.offset);
+    xdr.writeUnsignedInt(this.count);
+  }
 }
 
 export class Nfsv4CommitResOk {
@@ -149,11 +155,17 @@ export class Nfsv4CommitResponse {
   ) {}
 }
 
-export class Nfsv4CreateRequest {
+export class Nfsv4CreateRequest implements XdrType {
   constructor(
     public readonly objtype: structs.Nfsv4CreateType,
     public readonly objname: string,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.CREATE);
+    this.objtype.encode(xdr);
+    xdr.writeStr(this.objname);
+  }
 }
 
 export class Nfsv4CreateResOk {
@@ -170,24 +182,39 @@ export class Nfsv4CreateResponse {
   ) {}
 }
 
-export class Nfsv4DelegpurgeRequest {
+export class Nfsv4DelegpurgeRequest implements XdrType {
   constructor(public readonly clientid: bigint) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.DELEGPURGE);
+    xdr.writeUnsignedHyper(this.clientid);
+  }
 }
 
 export class Nfsv4DelegpurgeResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4DelegreturnRequest {
+export class Nfsv4DelegreturnRequest implements XdrType {
   constructor(public readonly delegStateid: structs.Nfsv4Stateid) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.DELEGRETURN);
+    this.delegStateid.encode(xdr);
+  }
 }
 
 export class Nfsv4DelegreturnResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4GetattrRequest {
+export class Nfsv4GetattrRequest implements XdrType {
   constructor(public readonly attrRequest: structs.Nfsv4Bitmap) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.GETATTR);
+    this.attrRequest.encode(xdr);
+  }
 }
 
 export class Nfsv4GetattrResOk {
@@ -201,7 +228,11 @@ export class Nfsv4GetattrResponse {
   ) {}
 }
 
-export class Nfsv4GetfhRequest {}
+export class Nfsv4GetfhRequest implements XdrType {
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.GETFH);
+  }
+}
 
 export class Nfsv4GetfhResOk {
   constructor(public readonly object: structs.Nfsv4Fh) {}
@@ -214,8 +245,13 @@ export class Nfsv4GetfhResponse {
   ) {}
 }
 
-export class Nfsv4LinkRequest {
+export class Nfsv4LinkRequest implements XdrType {
   constructor(public readonly newname: string) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LINK);
+    xdr.writeStr(this.newname);
+  }
 }
 
 export class Nfsv4LinkResOk {
@@ -229,7 +265,7 @@ export class Nfsv4LinkResponse {
   ) {}
 }
 
-export class Nfsv4LockRequest {
+export class Nfsv4LockRequest implements XdrType {
   constructor(
     public readonly locktype: Nfsv4LockType,
     public readonly reclaim: boolean,
@@ -237,6 +273,15 @@ export class Nfsv4LockRequest {
     public readonly length: bigint,
     public readonly locker: structs.Nfsv4LockOwnerInfo,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LOCK);
+    xdr.writeUnsignedInt(this.locktype);
+    xdr.writeBoolean(this.reclaim);
+    xdr.writeUnsignedHyper(this.offset);
+    xdr.writeUnsignedHyper(this.length);
+    this.locker.encode(xdr);
+  }
 }
 
 export class Nfsv4LockResOk {
@@ -260,13 +305,21 @@ export class Nfsv4LockResponse {
   ) {}
 }
 
-export class Nfsv4LocktRequest {
+export class Nfsv4LocktRequest implements XdrType {
   constructor(
     public readonly locktype: Nfsv4LockType,
     public readonly offset: bigint,
     public readonly length: bigint,
     public readonly owner: structs.Nfsv4LockOwner,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LOCKT);
+    xdr.writeUnsignedInt(this.locktype);
+    xdr.writeUnsignedHyper(this.offset);
+    xdr.writeUnsignedHyper(this.length);
+    this.owner.encode(xdr);
+  }
 }
 
 export class Nfsv4LocktResDenied {
@@ -285,7 +338,7 @@ export class Nfsv4LocktResponse {
   ) {}
 }
 
-export class Nfsv4LockuRequest {
+export class Nfsv4LockuRequest implements XdrType {
   constructor(
     public readonly locktype: Nfsv4LockType,
     public readonly seqid: number,
@@ -293,6 +346,15 @@ export class Nfsv4LockuRequest {
     public readonly offset: bigint,
     public readonly length: bigint,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LOCKU);
+    xdr.writeUnsignedInt(this.locktype);
+    xdr.writeUnsignedInt(this.seqid);
+    this.lockStateid.encode(xdr);
+    xdr.writeUnsignedHyper(this.offset);
+    xdr.writeUnsignedHyper(this.length);
+  }
 }
 
 export class Nfsv4LockuResOk {
@@ -306,29 +368,43 @@ export class Nfsv4LockuResponse {
   ) {}
 }
 
-export class Nfsv4LookupRequest {
+export class Nfsv4LookupRequest implements XdrType {
   constructor(public readonly objname: string) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LOOKUP);
+    xdr.writeStr(this.objname);
+  }
 }
 
 export class Nfsv4LookupResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4LookuppRequest {}
+export class Nfsv4LookuppRequest implements XdrType {
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.LOOKUPP);
+  }
+}
 
 export class Nfsv4LookuppResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4NverifyRequest {
+export class Nfsv4NverifyRequest implements XdrType {
   constructor(public readonly objAttributes: structs.Nfsv4Fattr) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.NVERIFY);
+    this.objAttributes.encode(xdr);
+  }
 }
 
 export class Nfsv4NverifyResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4OpenRequest {
+export class Nfsv4OpenRequest implements XdrType {
   constructor(
     public readonly seqid: number,
     public readonly shareAccess: number,
@@ -337,6 +413,16 @@ export class Nfsv4OpenRequest {
     public readonly openhow: number,
     public readonly claim: structs.Nfsv4OpenClaim,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.OPEN);
+    xdr.writeUnsignedInt(this.seqid);
+    xdr.writeUnsignedInt(this.shareAccess);
+    xdr.writeUnsignedInt(this.shareDeny);
+    this.owner.encode(xdr);
+    xdr.writeUnsignedInt(this.openhow);
+    this.claim.encode(xdr);
+  }
 }
 
 export class Nfsv4OpenResOk {
@@ -356,19 +442,30 @@ export class Nfsv4OpenResponse {
   ) {}
 }
 
-export class Nfsv4OpenattrRequest {
+export class Nfsv4OpenattrRequest implements XdrType {
   constructor(public readonly createdir: boolean) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.OPENATTR);
+    xdr.writeBoolean(this.createdir);
+  }
 }
 
 export class Nfsv4OpenattrResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4OpenConfirmRequest {
+export class Nfsv4OpenConfirmRequest implements XdrType {
   constructor(
     public readonly openStateid: structs.Nfsv4Stateid,
     public readonly seqid: number,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.OPEN_CONFIRM);
+    this.openStateid.encode(xdr);
+    xdr.writeUnsignedInt(this.seqid);
+  }
 }
 
 export class Nfsv4OpenConfirmResOk {
@@ -382,13 +479,21 @@ export class Nfsv4OpenConfirmResponse {
   ) {}
 }
 
-export class Nfsv4OpenDowngradeRequest {
+export class Nfsv4OpenDowngradeRequest implements XdrType {
   constructor(
     public readonly openStateid: structs.Nfsv4Stateid,
     public readonly seqid: number,
     public readonly shareAccess: number,
     public readonly shareDeny: number,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.OPEN_DOWNGRADE);
+    this.openStateid.encode(xdr);
+    xdr.writeUnsignedInt(this.seqid);
+    xdr.writeUnsignedInt(this.shareAccess);
+    xdr.writeUnsignedInt(this.shareDeny);
+  }
 }
 
 export class Nfsv4OpenDowngradeResOk {
@@ -402,32 +507,52 @@ export class Nfsv4OpenDowngradeResponse {
   ) {}
 }
 
-export class Nfsv4PutfhRequest {
+export class Nfsv4PutfhRequest implements XdrType {
   constructor(public readonly object: structs.Nfsv4Fh) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.PUTFH);
+    this.object.encode(xdr);
+  }
 }
 
 export class Nfsv4PutfhResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4PutpubfhRequest {}
+export class Nfsv4PutpubfhRequest implements XdrType {
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.PUTPUBFH);
+  }
+}
 
 export class Nfsv4PutpubfhResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4PutrootfhRequest {}
+export class Nfsv4PutrootfhRequest implements XdrType {
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.PUTROOTFH);
+  }
+}
 
 export class Nfsv4PutrootfhResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4ReadRequest {
+export class Nfsv4ReadRequest implements XdrType {
   constructor(
     public readonly stateid: structs.Nfsv4Stateid,
     public readonly offset: bigint,
     public readonly count: number,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.READ);
+    this.stateid.encode(xdr);
+    xdr.writeUnsignedHyper(this.offset);
+    xdr.writeUnsignedInt(this.count);
+  }
 }
 
 export class Nfsv4ReadResOk {
@@ -444,7 +569,7 @@ export class Nfsv4ReadResponse {
   ) {}
 }
 
-export class Nfsv4ReaddirRequest {
+export class Nfsv4ReaddirRequest implements XdrType {
   constructor(
     public readonly cookie: bigint,
     public readonly cookieverf: structs.Nfsv4Verifier,
@@ -452,6 +577,15 @@ export class Nfsv4ReaddirRequest {
     public readonly maxcount: number,
     public readonly attrRequest: structs.Nfsv4Bitmap,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.READDIR);
+    xdr.writeUnsignedHyper(this.cookie);
+    this.cookieverf.encode(xdr);
+    xdr.writeUnsignedInt(this.dircount);
+    xdr.writeUnsignedInt(this.maxcount);
+    this.attrRequest.encode(xdr);
+  }
 }
 
 export class Nfsv4ReaddirResOk {
@@ -469,7 +603,11 @@ export class Nfsv4ReaddirResponse {
   ) {}
 }
 
-export class Nfsv4ReadlinkRequest {}
+export class Nfsv4ReadlinkRequest implements XdrType {
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.READLINK);
+  }
+}
 
 export class Nfsv4ReadlinkResOk {
   constructor(public readonly link: string) {}
@@ -482,8 +620,13 @@ export class Nfsv4ReadlinkResponse {
   ) {}
 }
 
-export class Nfsv4RemoveRequest {
+export class Nfsv4RemoveRequest implements XdrType {
   constructor(public readonly target: string) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.REMOVE);
+    xdr.writeStr(this.target);
+  }
 }
 
 export class Nfsv4RemoveResOk {
@@ -497,11 +640,17 @@ export class Nfsv4RemoveResponse {
   ) {}
 }
 
-export class Nfsv4RenameRequest {
+export class Nfsv4RenameRequest implements XdrType {
   constructor(
     public readonly oldname: string,
     public readonly newname: string,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.RENAME);
+    xdr.writeStr(this.oldname);
+    xdr.writeStr(this.newname);
+  }
 }
 
 export class Nfsv4RenameResOk {
@@ -518,28 +667,46 @@ export class Nfsv4RenameResponse {
   ) {}
 }
 
-export class Nfsv4RenewRequest {
+export class Nfsv4RenewRequest implements XdrType {
   constructor(public readonly clientid: bigint) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.RENEW);
+    xdr.writeUnsignedHyper(this.clientid);
+  }
 }
 
 export class Nfsv4RenewResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4RestorefhRequest {}
+export class Nfsv4RestorefhRequest implements XdrType {
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.RESTOREFH);
+  }
+}
 
 export class Nfsv4RestorefhResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4SavefhRequest {}
+export class Nfsv4SavefhRequest implements XdrType {
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.SAVEFH);
+  }
+}
 
 export class Nfsv4SavefhResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4SecinfoRequest {
+export class Nfsv4SecinfoRequest implements XdrType {
   constructor(public readonly name: string) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.SECINFO);
+    xdr.writeStr(this.name);
+  }
 }
 
 export class Nfsv4SecinfoResOk {
@@ -553,11 +720,17 @@ export class Nfsv4SecinfoResponse {
   ) {}
 }
 
-export class Nfsv4SetattrRequest {
+export class Nfsv4SetattrRequest implements XdrType {
   constructor(
     public readonly stateid: structs.Nfsv4Stateid,
     public readonly objAttributes: structs.Nfsv4Fattr,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.SETATTR);
+    this.stateid.encode(xdr);
+    this.objAttributes.encode(xdr);
+  }
 }
 
 export class Nfsv4SetattrResOk {
@@ -571,12 +744,19 @@ export class Nfsv4SetattrResponse {
   ) {}
 }
 
-export class Nfsv4SetclientidRequest {
+export class Nfsv4SetclientidRequest implements XdrType {
   constructor(
     public readonly client: structs.Nfsv4ClientId,
     public readonly callback: structs.Nfsv4CbClient,
     public readonly callbackIdent: number,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.SETCLIENTID);
+    this.client.encode(xdr);
+    this.callback.encode(xdr);
+    xdr.writeUnsignedInt(this.callbackIdent);
+  }
 }
 
 export class Nfsv4SetclientidResOk {
@@ -593,32 +773,51 @@ export class Nfsv4SetclientidResponse {
   ) {}
 }
 
-export class Nfsv4SetclientidConfirmRequest {
+export class Nfsv4SetclientidConfirmRequest implements XdrType {
   constructor(
     public readonly clientid: bigint,
     public readonly setclientidConfirm: structs.Nfsv4Verifier,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.SETCLIENTID_CONFIRM);
+    xdr.writeUnsignedHyper(this.clientid);
+    this.setclientidConfirm.encode(xdr);
+  }
 }
 
 export class Nfsv4SetclientidConfirmResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4VerifyRequest {
+export class Nfsv4VerifyRequest implements XdrType {
   constructor(public readonly objAttributes: structs.Nfsv4Fattr) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.VERIFY);
+    this.objAttributes.encode(xdr);
+  }
 }
 
 export class Nfsv4VerifyResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4WriteRequest {
+export class Nfsv4WriteRequest implements XdrType {
   constructor(
     public readonly stateid: structs.Nfsv4Stateid,
     public readonly offset: bigint,
     public readonly stable: number,
     public readonly data: Uint8Array,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.WRITE);
+    this.stateid.encode(xdr);
+    xdr.writeUnsignedHyper(this.offset);
+    xdr.writeUnsignedInt(this.stable);
+    xdr.writeVarlenOpaque(this.data);
+  }
 }
 
 export class Nfsv4WriteResOk {
@@ -636,15 +835,24 @@ export class Nfsv4WriteResponse {
   ) {}
 }
 
-export class Nfsv4ReleaseLockOwnerRequest {
+export class Nfsv4ReleaseLockOwnerRequest implements XdrType {
   constructor(public readonly lockOwner: structs.Nfsv4LockOwner) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.RELEASE_LOCKOWNER);
+    this.lockOwner.encode(xdr);
+  }
 }
 
 export class Nfsv4ReleaseLockOwnerResponse {
   constructor(public readonly status: Nfsv4Stat) {}
 }
 
-export class Nfsv4IllegalRequest {}
+export class Nfsv4IllegalRequest implements XdrType {
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(Nfsv4Op.ILLEGAL);
+  }
+}
 
 export class Nfsv4IllegalResponse {
   constructor(public readonly status: Nfsv4Stat) {}

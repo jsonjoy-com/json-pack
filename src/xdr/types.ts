@@ -1,5 +1,5 @@
-import type {XdrDecoder} from "./XdrDecoder";
-import type {XdrEncoder} from "./XdrEncoder";
+import type {XdrDecoder} from './XdrDecoder';
+import type {XdrEncoder} from './XdrEncoder';
 
 /**
  * XDR (External Data Representation Standard) schema type definitions

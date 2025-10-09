@@ -4,45 +4,68 @@ import type {Nfsv4FType, Nfsv4TimeHow, Nfsv4DelegType} from './constants';
 /**
  * NFSv4 time structure (seconds and nanoseconds since epoch)
  */
-export class Nfsv4Time {
+export class Nfsv4Time implements XdrType {
   constructor(
     public readonly seconds: bigint,
     public readonly nseconds: number,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeHyper(this.seconds);
+    xdr.writeUnsignedInt(this.nseconds);
+  }
 }
 
 /**
  * Special device file data (major/minor device numbers)
  */
-export class Nfsv4SpecData {
+export class Nfsv4SpecData implements XdrType {
   constructor(
     public readonly specdata1: number,
     public readonly specdata2: number,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.specdata1);
+    xdr.writeUnsignedInt(this.specdata2);
+  }
 }
 
 /**
  * NFSv4 file handle
  */
-export class Nfsv4Fh {
+export class Nfsv4Fh implements XdrType {
   constructor(public readonly data: Uint8Array) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeVarlenOpaque(this.data);
+  }
 }
 
 /**
  * NFSv4 verifier (8 bytes)
  */
-export class Nfsv4Verifier {
+export class Nfsv4Verifier implements XdrType {
   constructor(public readonly data: Uint8Array) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeOpaque(this.data);
+  }
 }
 
 /**
  * File system identifier
  */
-export class Nfsv4Fsid {
+export class Nfsv4Fsid implements XdrType {
   constructor(
     public readonly major: bigint,
     public readonly minor: bigint,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedHyper(this.major);
+    xdr.writeUnsignedHyper(this.minor);
+  }
 }
 
 /**
@@ -63,187 +86,304 @@ export class Nfsv4Stateid implements XdrType {
 /**
  * Change information for directory operations
  */
-export class Nfsv4ChangeInfo {
+export class Nfsv4ChangeInfo implements XdrType {
   constructor(
     public readonly atomic: boolean,
     public readonly before: bigint,
     public readonly after: bigint,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeBoolean(this.atomic);
+    xdr.writeUnsignedHyper(this.before);
+    xdr.writeUnsignedHyper(this.after);
+  }
 }
 
 /**
  * Set time discriminated union
  */
-export class Nfsv4SetTime {
+export class Nfsv4SetTime implements XdrType {
   constructor(
     public readonly how: Nfsv4TimeHow,
     public readonly time?: Nfsv4Time,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.how);
+    if (this.time) {
+      this.time.encode(xdr);
+    }
+  }
 }
 
 /**
  * Bitmap for attribute mask
  */
-export class Nfsv4Bitmap {
+export class Nfsv4Bitmap implements XdrType {
   constructor(public readonly mask: number[]) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.mask.length);
+    for (const m of this.mask) {
+      xdr.writeUnsignedInt(m);
+    }
+  }
 }
 
 /**
  * File attributes structure
  */
-export class Nfsv4Fattr {
+export class Nfsv4Fattr implements XdrType {
   constructor(
     public readonly attrmask: Nfsv4Bitmap,
     public readonly attrVals: Uint8Array,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.attrmask.encode(xdr);
+    xdr.writeVarlenOpaque(this.attrVals);
+  }
 }
 
 /**
  * Client address for callbacks
  */
-export class Nfsv4ClientAddr {
+export class Nfsv4ClientAddr implements XdrType {
   constructor(
     public readonly rNetid: string,
     public readonly rAddr: string,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeStr(this.rNetid);
+    xdr.writeStr(this.rAddr);
+  }
 }
 
 /**
  * Callback client information
  */
-export class Nfsv4CbClient {
+export class Nfsv4CbClient implements XdrType {
   constructor(
     public readonly cbProgram: number,
     public readonly cbLocation: Nfsv4ClientAddr,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.cbProgram);
+    this.cbLocation.encode(xdr);
+  }
 }
 
 /**
  * NFS client identifier
  */
-export class Nfsv4ClientId {
+export class Nfsv4ClientId implements XdrType {
   constructor(
     public readonly verifier: Nfsv4Verifier,
     public readonly id: Uint8Array,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.verifier.encode(xdr);
+    xdr.writeVarlenOpaque(this.id);
+  }
 }
 
 /**
  * Open owner identification
  */
-export class Nfsv4OpenOwner {
+export class Nfsv4OpenOwner implements XdrType {
   constructor(
     public readonly clientid: bigint,
     public readonly owner: Uint8Array,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedHyper(this.clientid);
+    xdr.writeVarlenOpaque(this.owner);
+  }
 }
 
 /**
  * Lock owner identification
  */
-export class Nfsv4LockOwner {
+export class Nfsv4LockOwner implements XdrType {
   constructor(
     public readonly clientid: bigint,
     public readonly owner: Uint8Array,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedHyper(this.clientid);
+    xdr.writeVarlenOpaque(this.owner);
+  }
 }
 
 /**
  * Open to lock owner transition
  */
-export class Nfsv4OpenToLockOwner {
+export class Nfsv4OpenToLockOwner implements XdrType {
   constructor(
     public readonly openSeqid: number,
     public readonly openStateid: Nfsv4Stateid,
     public readonly lockSeqid: number,
     public readonly lockOwner: Nfsv4LockOwner,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.openSeqid);
+    this.openStateid.encode(xdr);
+    xdr.writeUnsignedInt(this.lockSeqid);
+    this.lockOwner.encode(xdr);
+  }
 }
 
 /**
  * File system location
  */
-export class Nfsv4FsLocation {
+export class Nfsv4FsLocation implements XdrType {
   constructor(
     public readonly server: string[],
     public readonly rootpath: string[],
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.server.length);
+    for (const s of this.server) {
+      xdr.writeStr(s);
+    }
+    xdr.writeUnsignedInt(this.rootpath.length);
+    for (const p of this.rootpath) {
+      xdr.writeStr(p);
+    }
+  }
 }
 
 /**
  * File system locations for migration/replication
  */
-export class Nfsv4FsLocations {
+export class Nfsv4FsLocations implements XdrType {
   constructor(
     public readonly fsRoot: string[],
     public readonly locations: Nfsv4FsLocation[],
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.fsRoot.length);
+    for (const r of this.fsRoot) {
+      xdr.writeStr(r);
+    }
+    xdr.writeUnsignedInt(this.locations.length);
+    for (const l of this.locations) {
+      l.encode(xdr);
+    }
+  }
 }
 
 /**
  * Access Control Entry (ACE)
  */
-export class Nfsv4Ace {
+export class Nfsv4Ace implements XdrType {
   constructor(
     public readonly type: number,
     public readonly flag: number,
     public readonly accessMask: number,
     public readonly who: string,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.type);
+    xdr.writeUnsignedInt(this.flag);
+    xdr.writeUnsignedInt(this.accessMask);
+    xdr.writeStr(this.who);
+  }
 }
 
 /**
  * Access Control List
  */
-export class Nfsv4Acl {
+export class Nfsv4Acl implements XdrType {
   constructor(public readonly aces: Nfsv4Ace[]) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.aces.length);
+    for (const ace of this.aces) {
+      ace.encode(xdr);
+    }
+  }
 }
 
 /**
  * Security information
  */
-export class Nfsv4SecInfo {
+export class Nfsv4SecInfo implements XdrType {
   constructor(
     public readonly flavor: number,
     public readonly flavorInfo?: Uint8Array,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.flavor);
+    if (this.flavorInfo) {
+      xdr.writeVarlenOpaque(this.flavorInfo);
+    }
+  }
 }
 
 /**
  * Open claim - claim file by name
  */
-export class Nfsv4OpenClaimNull {
+export class Nfsv4OpenClaimNull implements XdrType {
   constructor(public readonly file: string) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeStr(this.file);
+  }
 }
 
 /**
  * Open claim - reclaim after server restart
  */
-export class Nfsv4OpenClaimPrevious {
+export class Nfsv4OpenClaimPrevious implements XdrType {
   constructor(public readonly delegateType: Nfsv4DelegType) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.delegateType);
+  }
 }
 
 /**
  * Open claim - claim file delegated to client
  */
-export class Nfsv4OpenClaimDelegateCur {
+export class Nfsv4OpenClaimDelegateCur implements XdrType {
   constructor(
     public readonly delegateStateid: Nfsv4Stateid,
     public readonly file: string,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.delegateStateid.encode(xdr);
+    xdr.writeStr(this.file);
+  }
 }
 
 /**
  * Open claim - reclaim delegation after client restart
  */
-export class Nfsv4OpenClaimDelegatePrev {
+export class Nfsv4OpenClaimDelegatePrev implements XdrType {
   constructor(public readonly file: string) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeStr(this.file);
+  }
 }
 
 /**
  * Open claim discriminated union
  */
-export class Nfsv4OpenClaim {
+export class Nfsv4OpenClaim implements XdrType {
   constructor(
     public readonly claimType: number,
     public readonly claim:
@@ -252,122 +392,196 @@ export class Nfsv4OpenClaim {
       | Nfsv4OpenClaimDelegateCur
       | Nfsv4OpenClaimDelegatePrev,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.claimType);
+    this.claim.encode(xdr);
+  }
 }
 
 /**
  * Read delegation
  */
-export class Nfsv4OpenReadDelegation {
+export class Nfsv4OpenReadDelegation implements XdrType {
   constructor(
     public readonly stateid: Nfsv4Stateid,
     public readonly recall: boolean,
     public readonly permissions: Nfsv4Ace[],
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.stateid.encode(xdr);
+    xdr.writeBoolean(this.recall);
+    xdr.writeUnsignedInt(this.permissions.length);
+    for (const ace of this.permissions) {
+      ace.encode(xdr);
+    }
+  }
 }
 
 /**
  * Write delegation
  */
-export class Nfsv4OpenWriteDelegation {
+export class Nfsv4OpenWriteDelegation implements XdrType {
   constructor(
     public readonly stateid: Nfsv4Stateid,
     public readonly recall: boolean,
     public readonly spaceLimit: bigint,
     public readonly permissions: Nfsv4Ace[],
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.stateid.encode(xdr);
+    xdr.writeBoolean(this.recall);
+    xdr.writeUnsignedHyper(this.spaceLimit);
+    xdr.writeUnsignedInt(this.permissions.length);
+    for (const ace of this.permissions) {
+      ace.encode(xdr);
+    }
+  }
 }
 
 /**
  * Open delegation discriminated union
  */
-export class Nfsv4OpenDelegation {
+export class Nfsv4OpenDelegation implements XdrType {
   constructor(
     public readonly delegationType: Nfsv4DelegType,
     public readonly delegation?: Nfsv4OpenReadDelegation | Nfsv4OpenWriteDelegation,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.delegationType);
+    if (this.delegation) {
+      this.delegation.encode(xdr);
+    }
+  }
 }
 
 /**
  * Directory entry for READDIR
  */
-export class Nfsv4Entry {
+export class Nfsv4Entry implements XdrType {
   constructor(
     public readonly cookie: bigint,
     public readonly name: string,
     public readonly attrs: Nfsv4Fattr,
     public readonly nextEntry?: Nfsv4Entry,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedHyper(this.cookie);
+    xdr.writeStr(this.name);
+    this.attrs.encode(xdr);
+  }
 }
 
 /**
  * Lock request with new lock owner
  */
-export class Nfsv4LockNewOwner {
+export class Nfsv4LockNewOwner implements XdrType {
   constructor(public readonly openToLockOwner: Nfsv4OpenToLockOwner) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.openToLockOwner.encode(xdr);
+  }
 }
 
 /**
  * Lock request with existing lock owner
  */
-export class Nfsv4LockExistingOwner {
+export class Nfsv4LockExistingOwner implements XdrType {
   constructor(
     public readonly lockStateid: Nfsv4Stateid,
     public readonly lockSeqid: number,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.lockStateid.encode(xdr);
+    xdr.writeUnsignedInt(this.lockSeqid);
+  }
 }
 
 /**
  * Lock owner discriminated union
  */
-export class Nfsv4LockOwnerInfo {
+export class Nfsv4LockOwnerInfo implements XdrType {
   constructor(
     public readonly newLockOwner: boolean,
     public readonly owner: Nfsv4LockNewOwner | Nfsv4LockExistingOwner,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeBoolean(this.newLockOwner);
+    this.owner.encode(xdr);
+  }
 }
 
 /**
  * Create type for regular file
  */
-export class Nfsv4CreateTypeFile {
+export class Nfsv4CreateTypeFile implements XdrType {
   constructor(public readonly createattrs: Nfsv4Fattr) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.createattrs.encode(xdr);
+  }
 }
 
 /**
  * Create type for symbolic link
  */
-export class Nfsv4CreateTypeLink {
+export class Nfsv4CreateTypeLink implements XdrType {
   constructor(
     public readonly linkdata: string,
     public readonly createattrs: Nfsv4Fattr,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeStr(this.linkdata);
+    this.createattrs.encode(xdr);
+  }
 }
 
 /**
  * Create type for device files
  */
-export class Nfsv4CreateTypeDevice {
+export class Nfsv4CreateTypeDevice implements XdrType {
   constructor(
     public readonly devdata: Nfsv4SpecData,
     public readonly createattrs: Nfsv4Fattr,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.devdata.encode(xdr);
+    this.createattrs.encode(xdr);
+  }
 }
 
 /**
  * Create type for other file types
  */
-export class Nfsv4CreateTypeOther {
+export class Nfsv4CreateTypeOther implements XdrType {
   constructor(public readonly createattrs: Nfsv4Fattr) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.createattrs.encode(xdr);
+  }
 }
 
 /**
  * Create type discriminated union
  */
-export class Nfsv4CreateType {
+export class Nfsv4CreateType implements XdrType {
   constructor(
     public readonly type: Nfsv4FType,
     public readonly objtype: Nfsv4CreateTypeFile | Nfsv4CreateTypeLink | Nfsv4CreateTypeDevice | Nfsv4CreateTypeOther,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.type);
+    this.objtype.encode(xdr);
+  }
 }
 
 /**
@@ -382,20 +596,33 @@ export const enum Nfsv4RpcSecGssService {
 /**
  * RPCSEC_GSS information
  */
-export class Nfsv4RpcSecGssInfo {
+export class Nfsv4RpcSecGssInfo implements XdrType {
   constructor(
     public readonly oid: Uint8Array,
     public readonly qop: number,
     public readonly service: Nfsv4RpcSecGssService,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeVarlenOpaque(this.oid);
+    xdr.writeUnsignedInt(this.qop);
+    xdr.writeUnsignedInt(this.service);
+  }
 }
 
 /**
  * Security flavor info discriminated union
  */
-export class Nfsv4SecInfoFlavor {
+export class Nfsv4SecInfoFlavor implements XdrType {
   constructor(
     public readonly flavor: number,
     public readonly flavorInfo?: Nfsv4RpcSecGssInfo,
   ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.flavor);
+    if (this.flavorInfo) {
+      this.flavorInfo.encode(xdr);
+    }
+  }
 }

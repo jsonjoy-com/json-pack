@@ -1,6 +1,13 @@
 import * as net from 'net';
 import {RmRecordDecoder, RmRecordEncoder} from '../../../rm';
-import {RpcMessageDecoder, RpcCallMessage, RpcAcceptStat, RpcMessageEncoder, RpcOpaqueAuth, RpcAuthFlavor} from '../../../rpc';
+import {
+  RpcMessageDecoder,
+  RpcCallMessage,
+  RpcAcceptStat,
+  RpcMessageEncoder,
+  RpcOpaqueAuth,
+  RpcAuthFlavor,
+} from '../../../rpc';
 import {Nfsv4Decoder} from '../Nfsv4Decoder';
 import * as msg from '../messages';
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
@@ -92,38 +99,35 @@ const server = net.createServer((socket) => {
           const proc = rpcMessage.proc;
           console.log(`\nNFS Procedure: ${getProcName(proc)}`);
 
-            if (proc === 1 && rpcMessage.params) {
-              const compound = nfsDecoder.decodeCompound(rpcMessage.params, true);
-              if (compound && 'argarray' in compound) {
-                console.log('\nNFS COMPOUND Request:');
-                console.log(`  Tag: "${compound.tag}"`);
-                console.log(`  Minor Version: ${compound.minorversion}`);
-                console.log(`  Operations (${compound.argarray.length}):`);
-                compound.argarray.forEach((op: any, idx: number) => {
-                  console.log(`    [${idx}] ${getOpName(op)}`);
-                  console.log(`        ${JSON.stringify(op, null, 2).split('\n').slice(1).join('\n        ')}`);
-                });
-              } else {
-                console.log('Could not decode COMPOUND request');
-              }
-            } else if (proc === 0) {
-              console.log('NULL procedure (no parameters)');
-              const rpcReplyU8 = rpcEncoder.encodeAcceptedReply(
-                rpcMessage.xid,
-                new RpcOpaqueAuth(
-                  RpcAuthFlavor.AUTH_NONE,
-                  new Reader(new Uint8Array(0)),
-                ),
-                RpcAcceptStat.SUCCESS
-              );
-              const recordU8 = rmEncoder.encodeRecord(rpcReplyU8);
-              console.log('\nSending RPC Accepted Reply for NULL:');
-              console.log(`HEX: ${toHex(recordU8)}`);
-              socket.write(recordU8);
+          if (proc === 1 && rpcMessage.params) {
+            const compound = nfsDecoder.decodeCompound(rpcMessage.params, true);
+            if (compound && 'argarray' in compound) {
+              console.log('\nNFS COMPOUND Request:');
+              console.log(`  Tag: "${compound.tag}"`);
+              console.log(`  Minor Version: ${compound.minorversion}`);
+              console.log(`  Operations (${compound.argarray.length}):`);
+              compound.argarray.forEach((op: any, idx: number) => {
+                console.log(`    [${idx}] ${getOpName(op)}`);
+                console.log(`        ${JSON.stringify(op, null, 2).split('\n').slice(1).join('\n        ')}`);
+              });
             } else {
-              console.log(`Unknown procedure: ${proc}`);
+              console.log('Could not decode COMPOUND request');
             }
+          } else if (proc === 0) {
+            console.log('NULL procedure (no parameters)');
+            const rpcReplyU8 = rpcEncoder.encodeAcceptedReply(
+              rpcMessage.xid,
+              new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NONE, new Reader(new Uint8Array(0))),
+              RpcAcceptStat.SUCCESS,
+            );
+            const recordU8 = rmEncoder.encodeRecord(rpcReplyU8);
+            console.log('\nSending RPC Accepted Reply for NULL:');
+            console.log(`HEX: ${toHex(recordU8)}`);
+            socket.write(recordU8);
+          } else {
+            console.log(`Unknown procedure: ${proc}`);
           }
+        }
       } else {
         console.log('Could not decode RPC message');
       }

@@ -48,110 +48,85 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
   }
 
   private writeRequest(request: msg.Nfsv4Request): void {
-    const xdr = this.xdr; 
+    const xdr = this.xdr;
     if (request instanceof msg.Nfsv4AccessRequest) {
       request.encode(xdr);
     } else if (request instanceof msg.Nfsv4CloseRequest) {
-      // TODO: Add tests for this encoding branch
       request.encode(xdr);
     } else if (request instanceof msg.Nfsv4CommitRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.COMMIT);
-      this.writeCommitRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4CreateRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.CREATE);
-      this.writeCreateRequest(request);
+      request.encode(xdr);
+    } else if (request instanceof msg.Nfsv4DelegpurgeRequest) {
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4DelegreturnRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.DELEGRETURN);
-      this.writeDelegreturnRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4GetattrRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.GETATTR);
-      this.writeGetattrRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4GetfhRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.GETFH);
-      this.writeGetfhRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4LinkRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.LINK);
-      this.writeLinkRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4LockRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.LOCK);
-      this.writeLockRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4LocktRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.LOCKT);
-      this.writeLocktRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4LockuRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.LOCKU);
-      this.writeLockuRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4LookupRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.LOOKUP);
-      this.writeLookupRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4LookuppRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.LOOKUPP);
-      this.writeLookuppRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4NverifyRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.NVERIFY);
-      this.writeNverifyRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4OpenRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.OPEN);
-      this.writeOpenRequest(request);
+      request.encode(xdr);
+    } else if (request instanceof msg.Nfsv4OpenattrRequest) {
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4OpenConfirmRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.OPEN_CONFIRM);
-      this.writeOpenConfirmRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4OpenDowngradeRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.OPEN_DOWNGRADE);
-      this.writeOpenDowngradeRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4PutfhRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.PUTFH);
-      this.writePutfhRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4PutpubfhRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.PUTPUBFH);
-      this.writePutpubfhRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4PutrootfhRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.PUTROOTFH);
-      this.writePutrootfhRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4ReadRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.READ);
-      this.writeReadRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4ReaddirRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.READDIR);
-      this.writeReaddirRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4ReadlinkRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.READLINK);
-      this.writeReadlinkRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4RemoveRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.REMOVE);
-      this.writeRemoveRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4RenameRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.RENAME);
-      this.writeRenameRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4RenewRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.RENEW);
-      this.writeRenewRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4RestorefhRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.RESTOREFH);
-      this.writeRestorefhRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4SavefhRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.SAVEFH);
-      this.writeSavefhRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4SecinfoRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.SECINFO);
-      this.writeSecinfoRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4SetattrRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.SETATTR);
-      this.writeSetattrRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4SetclientidRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.SETCLIENTID);
-      this.writeSetclientidRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4SetclientidConfirmRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.SETCLIENTID_CONFIRM);
-      this.writeSetclientidConfirmRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4VerifyRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.VERIFY);
-      this.writeVerifyRequest(request);
+      request.encode(xdr);
     } else if (request instanceof msg.Nfsv4WriteRequest) {
-      this.xdr.writeUnsignedInt(Nfsv4Op.WRITE);
-      this.writeWriteRequest(request);
+      request.encode(xdr);
+    } else if (request instanceof msg.Nfsv4ReleaseLockOwnerRequest) {
+      request.encode(xdr);
+    } else if (request instanceof msg.Nfsv4IllegalRequest) {
+      request.encode(xdr);
     } else {
-      throw new Nfsv4EncodingError(`Unknown request type: ${request.constructor.name}`);
+      throw new Nfsv4EncodingError(`Unknown request type: ${(request as any).constructor.name}`);
     }
   }
 
@@ -379,38 +354,11 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeCommitRequest(req: msg.Nfsv4CommitRequest): void {
-    const xdr = this.xdr;
-    xdr.writeUnsignedHyper(req.offset);
-    xdr.writeUnsignedInt(req.count);
-  }
-
   private writeCommitResponse(res: msg.Nfsv4CommitResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writeVerifier(res.resok.writeverf);
-    }
-  }
-
-  private writeCreateRequest(req: msg.Nfsv4CreateRequest): void {
-    const xdr = this.xdr;
-    const createType = req.objtype;
-    xdr.writeUnsignedInt(createType.type);
-    const objtype = createType.objtype;
-    if (objtype instanceof structs.Nfsv4CreateTypeLink) {
-      xdr.writeStr(objtype.linkdata);
-    } else if (objtype instanceof structs.Nfsv4CreateTypeDevice) {
-      xdr.writeUnsignedInt(objtype.devdata.specdata1);
-      xdr.writeUnsignedInt(objtype.devdata.specdata2);
-    }
-    xdr.writeStr(req.objname);
-    if (objtype instanceof structs.Nfsv4CreateTypeLink) {
-      this.writeFattr(objtype.createattrs);
-    } else if (objtype instanceof structs.Nfsv4CreateTypeDevice) {
-      this.writeFattr(objtype.createattrs);
-    } else if (objtype instanceof structs.Nfsv4CreateTypeOther) {
-      this.writeFattr(objtype.createattrs);
     }
   }
 
@@ -423,16 +371,8 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeDelegreturnRequest(req: msg.Nfsv4DelegreturnRequest): void {
-    this.writeStateid(req.delegStateid);
-  }
-
   private writeDelegreturnResponse(res: msg.Nfsv4DelegreturnResponse): void {
     this.xdr.writeUnsignedInt(res.status);
-  }
-
-  private writeGetattrRequest(req: msg.Nfsv4GetattrRequest): void {
-    this.writeBitmap(req.attrRequest);
   }
 
   private writeGetattrResponse(res: msg.Nfsv4GetattrResponse): void {
@@ -443,10 +383,6 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeGetfhRequest(req: msg.Nfsv4GetfhRequest): void {
-    // No arguments
-  }
-
   private writeGetfhResponse(res: msg.Nfsv4GetfhResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
@@ -455,30 +391,11 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeLinkRequest(req: msg.Nfsv4LinkRequest): void {
-    this.xdr.writeStr(req.newname);
-  }
-
   private writeLinkResponse(res: msg.Nfsv4LinkResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writeChangeInfo(res.resok.cinfo);
-    }
-  }
-
-  private writeLockRequest(req: msg.Nfsv4LockRequest): void {
-    const xdr = this.xdr;
-    xdr.writeUnsignedInt(req.locktype);
-    xdr.writeBoolean(req.reclaim);
-    xdr.writeUnsignedHyper(req.offset);
-    xdr.writeUnsignedHyper(req.length);
-    xdr.writeBoolean(req.locker.newLockOwner);
-    const owner = req.locker.owner;
-    if (owner instanceof structs.Nfsv4LockNewOwner) {
-      this.writeOpenToLockOwner(owner.openToLockOwner);
-    } else if (owner instanceof structs.Nfsv4LockExistingOwner) {
-      this.writeExistingLockOwner(owner);
     }
   }
 
@@ -495,14 +412,6 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeLocktRequest(req: msg.Nfsv4LocktRequest): void {
-    const xdr = this.xdr;
-    xdr.writeUnsignedInt(req.locktype);
-    xdr.writeUnsignedHyper(req.offset);
-    xdr.writeUnsignedHyper(req.length);
-    this.writeLockOwner(req.owner);
-  }
-
   private writeLocktResponse(res: msg.Nfsv4LocktResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
@@ -514,15 +423,6 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeLockuRequest(req: msg.Nfsv4LockuRequest): void {
-    const xdr = this.xdr;
-    xdr.writeUnsignedInt(req.locktype);
-    xdr.writeUnsignedInt(req.seqid);
-    this.writeStateid(req.lockStateid);
-    xdr.writeUnsignedHyper(req.offset);
-    xdr.writeUnsignedHyper(req.length);
-  }
-
   private writeLockuResponse(res: msg.Nfsv4LockuResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
@@ -531,38 +431,16 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeLookupRequest(req: msg.Nfsv4LookupRequest): void {
-    this.xdr.writeStr(req.objname);
-  }
-
   private writeLookupResponse(res: msg.Nfsv4LookupResponse): void {
     this.xdr.writeUnsignedInt(res.status);
-  }
-
-  private writeLookuppRequest(req: msg.Nfsv4LookuppRequest): void {
-    // No arguments
   }
 
   private writeLookuppResponse(res: msg.Nfsv4LookuppResponse): void {
     this.xdr.writeUnsignedInt(res.status);
   }
 
-  private writeNverifyRequest(req: msg.Nfsv4NverifyRequest): void {
-    this.writeFattr(req.objAttributes);
-  }
-
   private writeNverifyResponse(res: msg.Nfsv4NverifyResponse): void {
     this.xdr.writeUnsignedInt(res.status);
-  }
-
-  private writeOpenRequest(req: msg.Nfsv4OpenRequest): void {
-    const xdr = this.xdr;
-    xdr.writeUnsignedInt(req.seqid);
-    xdr.writeUnsignedInt(req.shareAccess);
-    xdr.writeUnsignedInt(req.shareDeny);
-    this.writeOpenOwner(req.owner);
-    xdr.writeUnsignedInt(req.openhow);
-    this.writeOpenClaim(req.claim);
   }
 
   private writeOpenResponse(res: msg.Nfsv4OpenResponse): void {
@@ -609,25 +487,12 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     xdr.writeStr(ace.who);
   }
 
-  private writeOpenConfirmRequest(req: msg.Nfsv4OpenConfirmRequest): void {
-    this.writeStateid(req.openStateid);
-    this.xdr.writeUnsignedInt(req.seqid);
-  }
-
   private writeOpenConfirmResponse(res: msg.Nfsv4OpenConfirmResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writeStateid(res.resok.openStateid);
     }
-  }
-
-  private writeOpenDowngradeRequest(req: msg.Nfsv4OpenDowngradeRequest): void {
-    const xdr = this.xdr;
-    this.writeStateid(req.openStateid);
-    xdr.writeUnsignedInt(req.seqid);
-    xdr.writeUnsignedInt(req.shareAccess);
-    xdr.writeUnsignedInt(req.shareDeny);
   }
 
   private writeOpenDowngradeResponse(res: msg.Nfsv4OpenDowngradeResponse): void {
@@ -638,35 +503,16 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writePutfhRequest(req: msg.Nfsv4PutfhRequest): void {
-    this.writeFh(req.object);
-  }
-
   private writePutfhResponse(res: msg.Nfsv4PutfhResponse): void {
     this.xdr.writeUnsignedInt(res.status);
-  }
-
-  private writePutpubfhRequest(req: msg.Nfsv4PutpubfhRequest): void {
-    // No arguments
   }
 
   private writePutpubfhResponse(res: msg.Nfsv4PutpubfhResponse): void {
     this.xdr.writeUnsignedInt(res.status);
   }
 
-  private writePutrootfhRequest(req: msg.Nfsv4PutrootfhRequest): void {
-    // No arguments
-  }
-
   private writePutrootfhResponse(res: msg.Nfsv4PutrootfhResponse): void {
     this.xdr.writeUnsignedInt(res.status);
-  }
-
-  private writeReadRequest(req: msg.Nfsv4ReadRequest): void {
-    const xdr = this.xdr;
-    this.writeStateid(req.stateid);
-    xdr.writeUnsignedHyper(req.offset);
-    xdr.writeUnsignedInt(req.count);
   }
 
   private writeReadResponse(res: msg.Nfsv4ReadResponse): void {
@@ -676,15 +522,6 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
       xdr.writeBoolean(res.resok.eof);
       xdr.writeVarlenOpaque(res.resok.data);
     }
-  }
-
-  private writeReaddirRequest(req: msg.Nfsv4ReaddirRequest): void {
-    const xdr = this.xdr;
-    xdr.writeUnsignedHyper(req.cookie);
-    this.writeVerifier(req.cookieverf);
-    xdr.writeUnsignedInt(req.dircount);
-    xdr.writeUnsignedInt(req.maxcount);
-    this.writeBitmap(req.attrRequest);
   }
 
   private writeReaddirResponse(res: msg.Nfsv4ReaddirResponse): void {
@@ -703,10 +540,6 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeReadlinkRequest(req: msg.Nfsv4ReadlinkRequest): void {
-    // No arguments
-  }
-
   private writeReadlinkResponse(res: msg.Nfsv4ReadlinkResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
@@ -715,22 +548,12 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeRemoveRequest(req: msg.Nfsv4RemoveRequest): void {
-    this.xdr.writeStr(req.target);
-  }
-
   private writeRemoveResponse(res: msg.Nfsv4RemoveResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
     if (res.status === 0 && res.resok) {
       this.writeChangeInfo(res.resok.cinfo);
     }
-  }
-
-  private writeRenameRequest(req: msg.Nfsv4RenameRequest): void {
-    const xdr = this.xdr;
-    xdr.writeStr(req.oldname);
-    xdr.writeStr(req.newname);
   }
 
   private writeRenameResponse(res: msg.Nfsv4RenameResponse): void {
@@ -742,32 +565,16 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeRenewRequest(req: msg.Nfsv4RenewRequest): void {
-    this.xdr.writeUnsignedHyper(req.clientid);
-  }
-
   private writeRenewResponse(res: msg.Nfsv4RenewResponse): void {
     this.xdr.writeUnsignedInt(res.status);
-  }
-
-  private writeRestorefhRequest(req: msg.Nfsv4RestorefhRequest): void {
-    // No arguments
   }
 
   private writeRestorefhResponse(res: msg.Nfsv4RestorefhResponse): void {
     this.xdr.writeUnsignedInt(res.status);
   }
 
-  private writeSavefhRequest(req: msg.Nfsv4SavefhRequest): void {
-    // No arguments
-  }
-
   private writeSavefhResponse(res: msg.Nfsv4SavefhResponse): void {
     this.xdr.writeUnsignedInt(res.status);
-  }
-
-  private writeSecinfoRequest(req: msg.Nfsv4SecinfoRequest): void {
-    this.xdr.writeStr(req.name);
   }
 
   private writeSecinfoResponse(res: msg.Nfsv4SecinfoResponse): void {
@@ -786,23 +593,12 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeSetattrRequest(req: msg.Nfsv4SetattrRequest): void {
-    this.writeStateid(req.stateid);
-    this.writeFattr(req.objAttributes);
-  }
-
   private writeSetattrResponse(res: msg.Nfsv4SetattrResponse): void {
     const xdr = this.xdr;
     xdr.writeUnsignedInt(res.status);
     if (res.resok) {
       this.writeBitmap(res.resok.attrsset);
     }
-  }
-
-  private writeSetclientidRequest(req: msg.Nfsv4SetclientidRequest): void {
-    this.writeClientId(req.client);
-    this.writeCbClient(req.callback);
-    this.xdr.writeUnsignedInt(req.callbackIdent);
   }
 
   private writeSetclientidResponse(res: msg.Nfsv4SetclientidResponse): void {
@@ -814,30 +610,12 @@ export class Nfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWrite
     }
   }
 
-  private writeSetclientidConfirmRequest(req: msg.Nfsv4SetclientidConfirmRequest): void {
-    const xdr = this.xdr;
-    xdr.writeUnsignedHyper(req.clientid);
-    this.writeVerifier(req.setclientidConfirm);
-  }
-
   private writeSetclientidConfirmResponse(res: msg.Nfsv4SetclientidConfirmResponse): void {
     this.xdr.writeUnsignedInt(res.status);
   }
 
-  private writeVerifyRequest(req: msg.Nfsv4VerifyRequest): void {
-    this.writeFattr(req.objAttributes);
-  }
-
   private writeVerifyResponse(res: msg.Nfsv4VerifyResponse): void {
     this.xdr.writeUnsignedInt(res.status);
-  }
-
-  private writeWriteRequest(req: msg.Nfsv4WriteRequest): void {
-    const xdr = this.xdr;
-    this.writeStateid(req.stateid);
-    xdr.writeUnsignedHyper(req.offset);
-    xdr.writeUnsignedInt(req.stable);
-    xdr.writeVarlenOpaque(req.data);
   }
 
   private writeWriteResponse(res: msg.Nfsv4WriteResponse): void {

@@ -6,7 +6,9 @@ import {Nfsv4Connection} from './Nfsv4Connection';
 const PORT = Number(process.env.NFS_PORT) || Number(process.env.PORT) || 2049;
 const HOST = process.env.NFS_HOST
   ? String(process.env.NFS_HOST)
-  : process.env.HOST ? String(process.env.HOST) : '127.0.0.1';
+  : process.env.HOST
+    ? String(process.env.HOST)
+    : '127.0.0.1';
 
 export interface Nfsv4TcpServerOpts {
   port?: number;
@@ -35,19 +37,23 @@ export class Nfsv4TcpServer {
     this.host = opts.host ?? HOST;
     this.debug = opts.debug ?? false;
     this.logger = opts.logger ?? console;
-    const server = this.server = new net.Server();
+    const server = (this.server = new net.Server());
     server.on('connection', (socket) => {
       if (this.debug) this.logger.log('New connection from', socket.remoteAddress, 'port', socket.remotePort);
       new Nfsv4Connection({
         duplex: socket,
         debug: this.debug,
         logger: this.logger,
-      })
+      });
     });
-    server.on('error', opts.onError ?? ((err) => {
-      if (this.debug) this.logger.error('Server error:', err.message);
-      process.exit(1);
-    }));
+    server.on(
+      'error',
+      opts.onError ??
+        ((err) => {
+          if (this.debug) this.logger.error('Server error:', err.message);
+          process.exit(1);
+        }),
+    );
     if (opts.stopOnSigint ?? true) {
       this.sigintHandler = () => {
         if (this.debug) this.logger.log('\nShutting down NFSv4 server...');

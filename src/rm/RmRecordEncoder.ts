@@ -43,7 +43,7 @@ export class RmRecordEncoder<W extends IWriter & IWriterGrowable = IWriter & IWr
     const fragment = record.subarray(offset, offset + length);
     this.writer.buf(fragment, length);
   }
-  
+
   /**
    * To write an RM record in one pass this method reserves space for the RM
    * header, and returns the state, which needs to passed to `endRmRecord` to

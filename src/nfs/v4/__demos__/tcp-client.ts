@@ -10,7 +10,9 @@ import {Nfsv4Proc} from '../constants';
 const PORT = Number(process.env.NFS_PORT) || Number(process.env.PORT) || 2049;
 const HOST = process.env.NFS_HOST
   ? String(process.env.NFS_HOST)
-  : process.env.HOST ? String(process.env.HOST) : '127.0.0.1';
+  : process.env.HOST
+    ? String(process.env.HOST)
+    : '127.0.0.1';
 
 const createTestCompoundRequest = (): Nfsv4CompoundRequest => {
   const fhData = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]);

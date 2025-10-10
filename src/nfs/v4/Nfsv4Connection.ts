@@ -2,7 +2,15 @@ import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {Nfsv4Decoder} from './Nfsv4Decoder';
 import {FullNfsv4Encoder} from './FullNfsv4Encoder';
 import {RmRecordDecoder, RmRecordEncoder} from '../../rm';
-import {RpcAcceptStat, RpcAuthFlavor, RpcCallMessage, RpcMessage, RpcMessageDecoder, RpcMessageEncoder, RpcOpaqueAuth} from '../../rpc';
+import {
+  RpcAcceptStat,
+  RpcAuthFlavor,
+  RpcCallMessage,
+  RpcMessage,
+  RpcMessageDecoder,
+  RpcMessageEncoder,
+  RpcOpaqueAuth,
+} from '../../rpc';
 import {EMPTY_READER, Nfsv4Proc} from './constants';
 import {Nfsv4CompoundRequest} from './messages';
 import {getOpNameFromRequest} from './util';
@@ -44,11 +52,11 @@ export class Nfsv4Connection {
   constructor(opts: Nfsv4ConnectionOpts) {
     this.debug = !!opts.debug;
     this.logger = opts.logger || console;
-    const duplex = this.duplex = opts.duplex;
+    const duplex = (this.duplex = opts.duplex);
     this.rmDecoder = new RmRecordDecoder();
     this.rpcDecoder = new RpcMessageDecoder();
     this.nfsDecoder = new Nfsv4Decoder();
-    const nfsEncoder = this.nfsEncoder = new FullNfsv4Encoder();
+    const nfsEncoder = (this.nfsEncoder = new FullNfsv4Encoder());
     this.writer = nfsEncoder.writer;
     this.rmEncoder = nfsEncoder.rmEncoder;
     this.rpcEncoder = nfsEncoder.rpcEncoder;
@@ -123,7 +131,13 @@ export class Nfsv4Connection {
     throw new Error('Not implemented non-RPCCallMessage');
   }
 
-  private closeWithError(error: RpcAcceptStat.PROG_UNAVAIL | RpcAcceptStat.PROC_UNAVAIL | RpcAcceptStat.GARBAGE_ARGS | RpcAcceptStat.SYSTEM_ERR): void {
+  private closeWithError(
+    error:
+      | RpcAcceptStat.PROG_UNAVAIL
+      | RpcAcceptStat.PROC_UNAVAIL
+      | RpcAcceptStat.GARBAGE_ARGS
+      | RpcAcceptStat.SYSTEM_ERR,
+  ): void {
     const xid = this.lastXid;
     if (xid) {
       const state = this.rmEncoder.startRmRecord();
@@ -160,16 +174,13 @@ export class Nfsv4Connection {
     const __uncorkTimer = this.__uncorkTimer;
     if (!__uncorkTimer) duplex.cork();
     duplex.write(buf);
-    if (!__uncorkTimer) this.__uncorkTimer = setImmediate(() => {
-      this.__uncorkTimer = null;
-      duplex.uncork();
-    });
+    if (!__uncorkTimer)
+      this.__uncorkTimer = setImmediate(() => {
+        this.__uncorkTimer = null;
+        duplex.uncork();
+      });
   }
-
-  // ------------------------------------------------- Write WebSocket messages
 
   // TODO: Execute NFS Callback...
-  public send(): void {
-    
-  }
+  public send(): void {}
 }

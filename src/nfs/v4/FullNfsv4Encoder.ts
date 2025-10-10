@@ -13,9 +13,7 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
   public readonly rpcEncoder: RpcMessageEncoder<W>;
   public readonly rmEncoder: RmRecordEncoder<W>;
 
-  constructor(
-    public readonly writer: W = new Writer() as any,
-  ) {
+  constructor(public readonly writer: W = new Writer() as any) {
     this.nfsEncoder = new Nfsv4Encoder(writer);
     this.rpcEncoder = new RpcMessageEncoder(writer);
     this.rmEncoder = new RmRecordEncoder(writer);

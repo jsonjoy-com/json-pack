@@ -1,4 +1,4 @@
-import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {Nfsv4Encoder} from './Nfsv4Encoder';
 import {RpcMessageEncoder} from '../../rpc/RpcMessageEncoder';
 import {RmRecordEncoder} from '../../rm/RmRecordEncoder';
@@ -9,12 +9,11 @@ import type * as msg from './messages';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
 export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> {
-  protected readonly nfsEncoder: Nfsv4Encoder<W>;
-  protected readonly rpcEncoder: RpcMessageEncoder<W>;
-  protected readonly rmEncoder: RmRecordEncoder<W>;
+  public readonly nfsEncoder: Nfsv4Encoder<W>;
+  public readonly rpcEncoder: RpcMessageEncoder<W>;
+  public readonly rmEncoder: RmRecordEncoder<W>;
 
   constructor(
-    public program: number = Nfsv4Const.PROGRAM,
     public readonly writer: W = new Writer() as any,
   ) {
     this.nfsEncoder = new Nfsv4Encoder(writer);

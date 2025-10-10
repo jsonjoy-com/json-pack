@@ -16,25 +16,16 @@ export class Nfsv4Decoder {
     reader: Reader,
     isRequest: boolean,
   ): msg.Nfsv4CompoundRequest | msg.Nfsv4CompoundResponse | undefined {
-    this.xdr.reader = reader;
-    const startPos = reader.x;
-    try {
-      if (isRequest) {
-        return this.decodeCompoundRequest();
-      } else {
-        return this.decodeCompoundResponse();
-      }
-    } catch (err) {
-      if (err instanceof RangeError) {
-        reader.x = startPos;
-        return undefined;
-      }
-      throw err;
+    if (isRequest) {
+      return this.decodeCompoundRequest(reader);
+    } else {
+      return this.decodeCompoundResponse(reader);
     }
   }
 
-  private decodeCompoundRequest(): msg.Nfsv4CompoundRequest {
+  public decodeCompoundRequest(reader: Reader): msg.Nfsv4CompoundRequest {
     const xdr = this.xdr;
+    xdr.reader = reader;
     const tag = xdr.readString();
     const minorversion = xdr.readUnsignedInt();
     const argarray: msg.Nfsv4Request[] = [];
@@ -47,8 +38,9 @@ export class Nfsv4Decoder {
     return new msg.Nfsv4CompoundRequest(tag, minorversion, argarray);
   }
 
-  private decodeCompoundResponse(): msg.Nfsv4CompoundResponse {
+  public decodeCompoundResponse(reader: Reader): msg.Nfsv4CompoundResponse {
     const xdr = this.xdr;
+    xdr.reader = reader;
     const status = xdr.readUnsignedInt();
     const tag = xdr.readString();
     const resarray: msg.Nfsv4Response[] = [];

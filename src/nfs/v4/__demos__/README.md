@@ -40,6 +40,12 @@ Then mount an NFSv4 share from another terminal or machine:
 mount -t nfs -o vers=4,nfsvers=4,port=8777,mountport=8777,proto=tcp,sec=none 127.0.0.1:/export ~/mnt/test
 ```
 
+You might need to clean all hanging `mount_nfs` processes if previous mounts failed.
+
+```bash
+sudo pkill -9 -f "ts-node.*tcp-server"; sudo pkill -9 mount_nfs
+```
+
 ## NFSv4 Protocol Structure
 
 NFSv4 differs from NFSv3 in that it uses COMPOUND procedures to bundle multiple operations:

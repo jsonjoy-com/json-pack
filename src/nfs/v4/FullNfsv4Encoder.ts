@@ -8,9 +8,6 @@ import {RpcAcceptStat} from '../../rpc/constants';
 import type * as msg from './messages';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
-const MAX_SINGLE_FRAME_SIZE = 0x7fffffff;
-const RM_HEADER_SIZE = 4;
-
 export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> {
   protected readonly nfsEncoder: Nfsv4Encoder<W>;
   protected readonly rpcEncoder: RpcMessageEncoder<W>;
@@ -43,12 +40,11 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     verf: RpcOpaqueAuth,
     request: msg.Nfsv4CompoundRequest,
   ): void {
-    const writer = this.writer;
-    const rmHeaderPosition = writer.x;
-    writer.x += RM_HEADER_SIZE;
+    const rm = this.rmEncoder;
+    const state = rm.startRmRecord();
     this.rpcEncoder.writeCall(xid, Nfsv4Const.PROGRAM, Nfsv4Const.VERSION, proc, cred, verf);
     this.nfsEncoder.writeCompound(request, true);
-    this.writeRmHeader(rmHeaderPosition, writer.x);
+    rm.endRmRecord(state);
   }
 
   public encodeAcceptedReply(
@@ -67,12 +63,11 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     verf: RpcOpaqueAuth,
     response: msg.Nfsv4CompoundResponse,
   ): void {
-    const writer = this.writer;
-    const rmHeaderPosition = writer.x;
-    writer.x += RM_HEADER_SIZE;
+    const rm = this.rmEncoder;
+    const state = rm.startRmRecord();
     this.rpcEncoder.writeAcceptedReply(xid, verf, RpcAcceptStat.SUCCESS);
     this.nfsEncoder.writeCompound(response, false);
-    this.writeRmHeader(rmHeaderPosition, writer.x);
+    rm.endRmRecord(state);
   }
 
   public encodeRejectedReply(
@@ -91,29 +86,10 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     mismatchInfo?: {low: number; high: number},
     authStat?: number,
   ): void {
-    const writer = this.writer;
-    const rmHeaderPosition = writer.x;
-    writer.x += RM_HEADER_SIZE;
+    const rm = this.rmEncoder;
+    const state = rm.startRmRecord();
     this.rpcEncoder.writeRejectedReply(xid, rejectStat, mismatchInfo, authStat);
-    this.writeRmHeader(rmHeaderPosition, writer.x);
-  }
-
-  private writeRmHeader(rmHeaderPosition: number, endPosition: number): void {
-    const writer = this.writer;
-    const rmEncoder = this.rmEncoder;
-    const totalSize = endPosition - rmHeaderPosition - RM_HEADER_SIZE;
-    if (totalSize <= MAX_SINGLE_FRAME_SIZE) {
-      const currentX = writer.x;
-      writer.x = rmHeaderPosition;
-      rmEncoder.writeHdr(1, totalSize);
-      writer.x = currentX;
-    } else {
-      const currentX = writer.x;
-      writer.x = rmHeaderPosition;
-      const data = writer.uint8.subarray(rmHeaderPosition + RM_HEADER_SIZE, currentX);
-      writer.reset();
-      rmEncoder.writeRecord(data);
-    }
+    rm.endRmRecord(state);
   }
 
   public encodeCbCall(
@@ -136,12 +112,11 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     verf: RpcOpaqueAuth,
     request: msg.Nfsv4CbCompoundRequest,
   ): void {
-    const writer = this.writer;
-    const rmHeaderPosition = writer.x;
-    writer.x += RM_HEADER_SIZE;
+    const rm = this.rmEncoder;
+    const state = rm.startRmRecord();
     this.rpcEncoder.writeCall(xid, cbProgram, Nfsv4Const.VERSION, proc, cred, verf);
     this.nfsEncoder.writeCbCompound(request, true);
-    this.writeRmHeader(rmHeaderPosition, writer.x);
+    rm.endRmRecord(state);
   }
 
   public encodeCbAcceptedReply(
@@ -160,11 +135,10 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     verf: RpcOpaqueAuth,
     response: msg.Nfsv4CbCompoundResponse,
   ): void {
-    const writer = this.writer;
-    const rmHeaderPosition = writer.x;
-    writer.x += RM_HEADER_SIZE;
+    const rm = this.rmEncoder;
+    const state = rm.startRmRecord();
     this.rpcEncoder.writeAcceptedReply(xid, verf, RpcAcceptStat.SUCCESS);
     this.nfsEncoder.writeCbCompound(response, false);
-    this.writeRmHeader(rmHeaderPosition, writer.x);
+    rm.endRmRecord(state);
   }
 }

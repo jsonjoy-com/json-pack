@@ -1,9 +1,6 @@
-import * as net from 'net';
-import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
-import {FullNfsv4Encoder} from '../../FullNfsv4Encoder';
 import {Nfsv4CompoundRequest, Nfsv4PutfhRequest, Nfsv4LookupRequest, Nfsv4GetfhRequest} from '../../messages';
 import {Nfsv4Fh} from '../../structs';
-import {Nfsv4Proc} from '../../constants';
+import {Nfsv4TcpClient} from '../../client/NfsvTcpClient';
 
 /* tslint:disable:no-console */
 
@@ -23,58 +20,39 @@ const createTestCompoundRequest = (): Nfsv4CompoundRequest => {
   return new Nfsv4CompoundRequest('nfs4_client', 0, [putfh, lookup, getfh]);
 };
 
-const createTestCred = () => {
-  return {
-    flavor: 0,
-    body: new Reader(new Uint8Array()),
-  };
+const main = async () => {
+  const client = new Nfsv4TcpClient({
+    host: HOST,
+    port: PORT,
+    debug: true,
+  });
+  try {
+    console.log(`Connecting to NFSv4 server at ${HOST}:${PORT}...`);
+    await client.connect();
+    console.log('Connected successfully!\n');
+    console.log('Sending NULL request...');
+    await client.null();
+    console.log('NULL request succeeded\n');
+    console.log('Sending COMPOUND request (PUTFH + LOOKUP + GETFH)...');
+    const request = createTestCompoundRequest();
+    const response = await client.compound(request);
+    console.log('\nReceived COMPOUND response:');
+    console.log(`  Status: ${response.status}`);
+    console.log(`  Tag: "${response.tag}"`);
+    console.log(`  Operations: ${response.resarray.length}`);
+    response.resarray.forEach((op: any, idx: number) => {
+      console.log(`    [${idx}] ${op.constructor.name}`);
+      console.log(`        Status: ${op.status}`);
+    });
+    console.log('\nClosing connection...');
+    client.close();
+    console.log('Done.');
+    process.exit(0);
+  } catch (err: any) {
+    console.error('Error:', err.message);
+    client.close();
+    process.exit(1);
+  }
 };
 
-const createTestVerf = () => {
-  return {
-    flavor: 0,
-    body: new Reader(new Uint8Array()),
-  };
-};
-
-console.log('Connecting to NFSv4 server...');
-
-const client = net.connect({port: PORT, host: HOST}, () => {
-  console.log(`Connected to ${HOST}:${PORT}`);
-  console.log('Sending COMPOUND request (PUTFH + LOOKUP + GETFH)...\n');
-  const encoder = new FullNfsv4Encoder();
-  const request = createTestCompoundRequest();
-  const xid = 0x1b8b45f2;
-  const proc = Nfsv4Proc.COMPOUND;
-  const cred = createTestCred();
-  const verf = createTestVerf();
-  const encoded = encoder.encodeCall(xid, proc, cred, verf, request);
-  console.log(`Sending ${encoded.length} bytes`);
-  console.log(
-    'HEX:',
-    Array.from(encoded)
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join(' '),
-  );
-  console.log('');
-  client.write(encoded);
-  setTimeout(() => {
-    console.log('Closing connection...');
-    client.end();
-  }, 100);
-});
-
-client.on('data', (data) => {
-  console.log('Received response:', data.length, 'bytes');
-  console.log('(This demo server does not send responses)');
-});
-
-client.on('end', () => {
-  console.log('Connection closed');
-  process.exit(0);
-});
-
-client.on('error', (err) => {
-  console.error('Connection error:', err.message);
-  process.exit(1);
-});
+main();

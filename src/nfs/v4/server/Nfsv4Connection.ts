@@ -1,7 +1,7 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
-import {Nfsv4Decoder} from './Nfsv4Decoder';
-import {FullNfsv4Encoder} from './FullNfsv4Encoder';
-import {RmRecordDecoder, RmRecordEncoder} from '../../rm';
+import {Nfsv4Decoder} from '../Nfsv4Decoder';
+import {FullNfsv4Encoder} from '../FullNfsv4Encoder';
+import {RmRecordDecoder, RmRecordEncoder} from '../../../rm';
 import {
   RpcAcceptStat,
   RpcAuthFlavor,
@@ -10,9 +10,9 @@ import {
   RpcMessageDecoder,
   RpcMessageEncoder,
   RpcOpaqueAuth,
-} from '../../rpc';
-import {EMPTY_READER, Nfsv4Proc} from './constants';
-import {Nfsv4CompoundRequest} from './messages';
+} from '../../../rpc';
+import {EMPTY_READER, Nfsv4Proc} from '../constants';
+import {Nfsv4CompoundRequest} from '../messages';
 import {getOpNameFromRequest} from './util';
 import type {Duplex} from 'node:stream';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib/types';

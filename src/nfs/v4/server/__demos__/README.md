@@ -19,19 +19,19 @@ This demo shows how to create a simple NFSv4 server that listens on a TCP socket
 npm run build
 
 # Run the demo
-node lib/nfs/v4/__demos__/tcp-server.js
+node lib/nfs/v4/server/__demos__/tcp-server.js
 ```
 
 Or run directly with ts-node:
 
 ```bash
-npx ts-node src/nfs/v4/__demos__/tcp-server.ts
+npx ts-node src/nfs/v4/server/__demos__/tcp-server.ts
 ```
 
 You can also specify a custom port:
 
 ```bash
-PORT=8777 npx ts-node src/nfs/v4/__demos__/tcp-server.ts
+PORT=8777 npx ts-node src/nfs/v4/server/__demos__/tcp-server.ts
 ```
 
 Then mount an NFSv4 share from another terminal or machine:

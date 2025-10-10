@@ -1,5 +1,5 @@
-import {Nfsv4Op, Nfsv4Proc} from './constants';
-import * as msg from './messages';
+import {Nfsv4Op, Nfsv4Proc} from '../constants';
+import * as msg from '../messages';
 
 export const toHex = (buffer: Uint8Array | Buffer): string => {
   return Array.from(buffer)

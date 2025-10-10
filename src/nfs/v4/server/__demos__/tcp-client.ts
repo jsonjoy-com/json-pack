@@ -1,9 +1,9 @@
 import * as net from 'net';
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
-import {FullNfsv4Encoder} from '../FullNfsv4Encoder';
-import {Nfsv4CompoundRequest, Nfsv4PutfhRequest, Nfsv4LookupRequest, Nfsv4GetfhRequest} from '../messages';
-import {Nfsv4Fh} from '../structs';
-import {Nfsv4Proc} from '../constants';
+import {FullNfsv4Encoder} from '../../FullNfsv4Encoder';
+import {Nfsv4CompoundRequest, Nfsv4PutfhRequest, Nfsv4LookupRequest, Nfsv4GetfhRequest} from '../../messages';
+import {Nfsv4Fh} from '../../structs';
+import {Nfsv4Proc} from '../../constants';
 
 /* tslint:disable:no-console */
 

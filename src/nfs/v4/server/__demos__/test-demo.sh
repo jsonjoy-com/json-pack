@@ -6,7 +6,7 @@
 PORT=8585
 
 echo "Starting NFSv4 TCP Server on port $PORT..."
-PORT=$PORT npx ts-node src/nfs/v4/__demos__/tcp-server.ts &
+PORT=$PORT npx ts-node src/nfs/v4/server/__demos__/tcp-server.ts &
 SERVER_PID=$!
 
 # Wait for server to start
@@ -14,7 +14,7 @@ sleep 2
 
 echo ""
 echo "Running NFSv4 TCP Client..."
-PORT=$PORT npx ts-node src/nfs/v4/__demos__/tcp-client.ts
+PORT=$PORT npx ts-node src/nfs/v4/server/__demos__/tcp-client.ts
 
 # Give time to see output
 sleep 1

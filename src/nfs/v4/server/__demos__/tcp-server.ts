@@ -1,4 +1,4 @@
-import {Nfsv4OperationsNode} from '../operations/Nfsv4OperationsNode';
+import {Nfsv4OperationsNode} from '../operations/node/Nfsv4OperationsNode';
 import {Nfsv4TcpServer} from '../Nfsv4TcpServer';
 import {fs} from 'memfs';
 

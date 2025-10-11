@@ -1,10 +1,11 @@
-import {Nfsv4Stat} from '../../constants';
-import {Nfsv4OperationCtx, Nfsv4Operations} from './Nfsv4Operations';
-import * as msg from '../../messages';
-import * as struct from '../../structs';
 import {randomBytes} from 'node:crypto';
+import {Nfsv4Const, Nfsv4Stat} from '../../../constants';
+import {Nfsv4OperationCtx, Nfsv4Operations} from '../Nfsv4Operations';
+import * as msg from '../../../messages';
+import * as struct from '../../../structs';
 import {cmpUint8Array} from '@jsonjoy.com/buffers/lib/cmpUint8Array';
-import {ClientRecord} from './ClientRecord';
+import {ClientRecord} from '../ClientRecord';
+import {FileHandleMapper, ROOT_FH} from './fh';
 
 export interface Nfsv4OperationsNodeOpts {
   /** Node.js `fs` module. */
@@ -31,17 +32,22 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   /** Next client ID to assign. */
   protected nextClientId = 1n;
 
+  /** Boot stamp, identifies server instance, 16 bits. */
+  protected bootStamp: number = Math.round(Math.random() * 0xffff);
+
+  protected readonly fh: FileHandleMapper;
+
   constructor(opts: Nfsv4OperationsNodeOpts) {
     this.fs = opts.fs;
     this.dir = opts.dir;
+    this.fh = new FileHandleMapper(this.bootStamp, this.dir);
   }
 
   protected findClientByIdString(
     map: Map<bigint, ClientRecord>,
     clientIdString: Uint8Array,
   ): [bigint, ClientRecord] | undefined {
-    for (const entry of map.entries())
-      if (cmpUint8Array(entry[1].clientIdString, clientIdString)) return entry;
+    for (const entry of map.entries()) if (cmpUint8Array(entry[1].clientIdString, clientIdString)) return entry;
     return;
   }
 
@@ -74,8 +80,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     let clientid: bigint = 0n;
     if (confirmedClientEntry) {
       const existingRecord = confirmedClientEntry[1];
-      if (existingRecord.principal !== principal)
-        return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4ERR_CLID_INUSE);
+      if (existingRecord.principal !== principal) return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4ERR_CLID_INUSE);
       this.pendingClients.delete(clientid);
       clientid = confirmedClientEntry[0];
       const verifierMatch = cmpUint8Array(existingRecord.verifier, verifier);
@@ -107,14 +112,22 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const verifierStruct = new struct.Nfsv4Verifier(setclientidConfirm);
     const body = new msg.Nfsv4SetclientidResOk(clientid, verifierStruct);
     const response = new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4_OK, body);
-    const newRecord = new ClientRecord(principal, verifier, clientIdString, callback, callbackIdent, setclientidConfirm, response);
+    const newRecord = new ClientRecord(
+      principal,
+      verifier,
+      clientIdString,
+      callback,
+      callbackIdent,
+      setclientidConfirm,
+      response,
+    );
 
     // Remove any existing pending records with same ID string.
     for (const [id, entry] of this.pendingClients.entries())
       if (cmpUint8Array(entry.clientIdString, clientIdString)) this.pendingClients.delete(id);
     this.enforcePendingClientLimit();
     this.pendingClients.set(clientid, newRecord);
-    
+
     return response;
   }
 
@@ -167,6 +180,35 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4IllegalResponse(Nfsv4Stat.NFS4ERR_OP_ILLEGAL);
   }
 
+  public async PUTROOTFH(
+    request: msg.Nfsv4PutrootfhRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4PutrootfhResponse> {
+    ctx.cfh = ROOT_FH;
+    return new msg.Nfsv4PutrootfhResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  public async PUTPUBFH(request: msg.Nfsv4PutpubfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4PutpubfhResponse> {
+    ctx.cfh = ROOT_FH;
+    return new msg.Nfsv4PutpubfhResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  public async PUTFH(request: msg.Nfsv4PutfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4PutfhResponse> {
+    const fh = request.object.data;
+    if (fh.length > Nfsv4Const.FHSIZE) return new msg.Nfsv4PutfhResponse(Nfsv4Stat.NFS4ERR_BADHANDLE);
+    const valid = this.fh.validate(fh);
+    ctx.cfh = fh;
+    return new msg.Nfsv4PutfhResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  public async GETFH(request: msg.Nfsv4GetfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4GetfhResponse> {
+    const cfh = ctx.cfh;
+    if (!cfh) return new msg.Nfsv4GetfhResponse(Nfsv4Stat.NFS4ERR_NOFILEHANDLE);
+    const fh = new struct.Nfsv4Fh(cfh);
+    const body = new msg.Nfsv4GetfhResOk(fh);
+    return new msg.Nfsv4GetfhResponse(Nfsv4Stat.NFS4_OK, body);
+  }
+
   // ----------------------------------------------- Stub implementations below
 
   public async ACCESS(request: msg.Nfsv4AccessRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4AccessResponse> {
@@ -215,12 +257,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     ctx.connection.logger.log('GETATTR', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4GetattrResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async GETFH(request: msg.Nfsv4GetfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4GetfhResponse> {
-    ctx.connection.logger.log('GETFH', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4GetfhResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
   public async LINK(request: msg.Nfsv4LinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LinkResponse> {
@@ -293,27 +329,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     ctx.connection.logger.log('OPEN_DOWNGRADE', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async PUTFH(request: msg.Nfsv4PutfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4PutfhResponse> {
-    ctx.connection.logger.log('PUTFH', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4PutfhResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async PUTPUBFH(request: msg.Nfsv4PutpubfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4PutpubfhResponse> {
-    ctx.connection.logger.log('PUTPUBFH', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4PutpubfhResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async PUTROOTFH(
-    request: msg.Nfsv4PutrootfhRequest,
-    ctx: Nfsv4OperationCtx,
-  ): Promise<msg.Nfsv4PutrootfhResponse> {
-    ctx.connection.logger.log('PUTROOTFH', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4PutrootfhResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
   public async READ(request: msg.Nfsv4ReadRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReadResponse> {

@@ -37,7 +37,7 @@ export class Nfsv4CompoundProcCtx {
 
   public async exec(): Promise<msg.Nfsv4CompoundResponse> {
     const {req, connection} = this;
-    const {ops} = connection;
+    const {ops, debug, logger} = connection;
     const {argarray, tag} = req;
     const length = argarray.length;
     let status: Nfsv4Stat = Nfsv4Stat.NFS4_OK;
@@ -95,8 +95,10 @@ export class Nfsv4CompoundProcCtx {
       else if (op instanceof msg.Nfsv4IllegalRequest) (fn = ops.ILLEGAL), (Response = msg.Nfsv4IllegalResponse);
       if (!fn || !Response) return new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4ERR_OP_ILLEGAL, tag, resarray);
       EXEC_OP: try {
+        if (debug) logger.log(fn.name, opReq);
         const opResponse = await fn.call(ops, opReq, this);
         if (!(opResponse instanceof Response)) throw new Error('Unexpected response, fn = ' + fn.name);
+        if (debug) logger.log(fn.name, opResponse);
         status = opResponse.status;
         resarray.push(opResponse);
       } catch (err) {
@@ -106,7 +108,7 @@ export class Nfsv4CompoundProcCtx {
             resarray.push(err);
             break EXEC_OP;
           } else {
-            this.connection.logger.error('Operation [' + fn.name + '] threw response with NFS4_OK');
+            logger.error('Operation [' + fn.name + '] threw response with NFS4_OK');
             err = Nfsv4Stat.NFS4ERR_SERVERFAULT;
           }
         }
@@ -117,11 +119,11 @@ export class Nfsv4CompoundProcCtx {
               break FIND_STATUS_CODE;
             }
             status = Nfsv4Stat.NFS4ERR_SERVERFAULT;
-            this.connection.logger.error('Invalid status [code = ' + err + ', fn = ' + fn.name + ']');
+            logger.error('Invalid status [code = ' + err + ', fn = ' + fn.name + ']');
             break FIND_STATUS_CODE;
           }
           status = Nfsv4Stat.NFS4ERR_SERVERFAULT;
-          this.connection.logger.error(fn.name, err);
+          logger.error(fn.name, err);
         }
         const opResponse = new Response(status);
         resarray.push(opResponse);

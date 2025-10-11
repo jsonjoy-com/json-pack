@@ -109,28 +109,30 @@ export class Nfsv4Connection {
   }
 
   protected onRpcCallMessage(procedure: RpcCallMessage): void {
-    const {debug, writer, rmEncoder} = this;
+    const {debug, logger, writer, rmEncoder} = this;
     const {xid, proc} = procedure;
     switch (proc) {
       case Nfsv4Proc.COMPOUND: {
+        if (debug) logger.log('COMPOUND', procedure);
         if (!(procedure.params instanceof Reader)) return;
         const compound = this.nfsDecoder.decodeCompoundRequest(procedure.params);
         if (compound instanceof msg.Nfsv4CompoundRequest) {
           new Nfsv4CompoundProcCtx(this, compound)
             .exec()
             .then((procResponse) => {
+              if (debug) logger.log('COMPOUND', procResponse);
               this.nfsEncoder.writeAcceptedCompoundReply(xid, EMPTY_AUTH, procResponse);
               this.write(writer.flush());
             })
             .catch((err) => {
-              this.logger.error('NFS COMPOUND error:', err);
+              logger.error('NFS COMPOUND error:', err);
               this.nfsEncoder.writeRejectedReply(xid, Nfsv4Stat.NFS4ERR_SERVERFAULT);
             });
         } else this.closeWithError(RpcAcceptStat.GARBAGE_ARGS);
         break;
       }
       case Nfsv4Proc.NULL: {
-        if (debug) this.logger.log('NULL procedure');
+        if (debug) logger.log('NULL', procedure);
         const state = rmEncoder.startRecord();
         this.rpcEncoder.writeAcceptedReply(xid, EMPTY_AUTH, RpcAcceptStat.SUCCESS);
         rmEncoder.endRecord(state);
@@ -138,7 +140,7 @@ export class Nfsv4Connection {
         break;
       }
       default: {
-        if (this.debug) this.logger.error(`Unknown procedure: ${proc}`);
+        if (debug) logger.error(`Unknown procedure: ${proc}`);
       }
     }
   }

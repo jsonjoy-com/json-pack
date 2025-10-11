@@ -65,6 +65,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     request: msg.Nfsv4SetclientidRequest,
     ctx: Nfsv4OperationCtx,
   ): Promise<msg.Nfsv4SetclientidResponse> {
+    const principal = ctx.getPrincipal();
     const verifier = request.client.verifier.data;
     const clientIdString = request.client.id;
     const callback = request.callback;
@@ -72,34 +73,49 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const confirmedClientEntry = this.findClientByIdString(this.clients, clientIdString);
     let clientid: bigint = 0n;
     if (confirmedClientEntry) {
+      const existingRecord = confirmedClientEntry[1];
+      if (existingRecord.principal !== principal)
+        return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4ERR_CLID_INUSE);
       this.pendingClients.delete(clientid);
-      const entry = confirmedClientEntry;
-      clientid = entry[0];
-      const verifierMatch = cmpUint8Array(entry[1].verifier, verifier);
+      clientid = confirmedClientEntry[0];
+      const verifierMatch = cmpUint8Array(existingRecord.verifier, verifier);
       if (verifierMatch) {
         // The client is re-registering with the same ID string and verifier.
-        // Update callback infoormation, return existing client ID and issue
+        // Update callback information, return existing client ID and issue
         // new confirm verifier.
       } else {
         // The client is re-registering with the same ID string but different verifier.
         clientid = this.nextClientId++;
       }
     } else {
+      const pendingClientEntry = this.findClientByIdString(this.pendingClients, clientIdString);
+      if (pendingClientEntry) {
+        const existingRecord = pendingClientEntry[1];
+        if (existingRecord.principal !== principal)
+          return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4ERR_CLID_INUSE);
+        const verifierMatch = cmpUint8Array(existingRecord.verifier, verifier);
+        if (verifierMatch && existingRecord.cache) {
+          // The client is re-registering with the same ID string and verifier.
+          // Return cached response.
+          return existingRecord.cache;
+        }
+      }
       // New client ID string. Create new client record.
       clientid = this.nextClientId++;
     }
     const setclientidConfirm = randomBytes(8);
-    const newRecord = new ClientRecord(verifier, clientIdString, callback, callbackIdent, setclientidConfirm);
+    const verifierStruct = new struct.Nfsv4Verifier(setclientidConfirm);
+    const body = new msg.Nfsv4SetclientidResOk(clientid, verifierStruct);
+    const response = new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4_OK, body);
+    const newRecord = new ClientRecord(principal, verifier, clientIdString, callback, callbackIdent, setclientidConfirm, response);
 
     // Remove any existing pending records with same ID string.
     for (const [id, entry] of this.pendingClients.entries())
       if (cmpUint8Array(entry.clientIdString, clientIdString)) this.pendingClients.delete(id);
-
     this.enforcePendingClientLimit();
     this.pendingClients.set(clientid, newRecord);
-    const verifierStruct = new struct.Nfsv4Verifier(setclientidConfirm);
-    const body = new msg.Nfsv4SetclientidResOk(clientid, verifierStruct);
-    return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4_OK, body);
+    
+    return response;
   }
 
   /**
@@ -119,9 +135,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4_OK);
       return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4ERR_STALE_CLIENTID);
     }
-    if (!cmpUint8Array(pendingRecord.setclientidConfirm, setclientidConfirm)) {
+    if (!cmpUint8Array(pendingRecord.setclientidConfirm, setclientidConfirm))
       return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4ERR_STALE_CLIENTID);
-    }
     const oldConfirmed = this.findClientByIdString(this.clients, pendingRecord.clientIdString);
     if (oldConfirmed) {
       this.clients.delete(oldConfirmed[0]);

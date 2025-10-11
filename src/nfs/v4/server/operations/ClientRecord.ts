@@ -1,8 +1,14 @@
-import * as struct from '../../structs';
+import type * as msg from '../../messages';
+import type * as struct from '../../structs';
 
 /** Client state record for NFS v4 client registration. */
 export class ClientRecord {
   constructor(
+    /**
+     * Principal associated with this client (from RPC credentials).
+     */
+    public readonly principal: string,
+
     /**
      * Client verifier - used to detect client reboots.
      * If client sends SETCLIENTID with same clientIdString but different verifier,
@@ -42,5 +48,13 @@ export class ClientRecord {
      *     typedef opaque  verifier4[NFS4_VERIFIER_SIZE];
      */
     public readonly setclientidConfirm: Uint8Array,
+
+    /**
+     * Cached SETCLIENTID response for duplicate request handling.
+     * If a client repeats a SETCLIENTID request (same clientIdString and verifier),
+     * server can return this cached response instead of creating a new record.
+     * This helps handle network retries and duplicate requests gracefully.
+     */
+    public cache: msg.Nfsv4SetclientidResponse | undefined = undefined,
   ) {}
 }

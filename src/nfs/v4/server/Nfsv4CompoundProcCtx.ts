@@ -19,6 +19,22 @@ export class Nfsv4CompoundProcCtx {
     public readonly req: msg.Nfsv4CompoundRequest,
   ) {}
 
+  /**
+   * Returns the principal associated with the current RPC call. For now,
+   * this is a stub returning "none" since we don't have real authentication.
+   * In a real implementation, this would extract the principal from the RPC
+   * credentials in the connection's current RPC call context.
+   *
+   * - AUTH_NONE -> `none`
+   * - AUTH_SYS -> `sys:machinename:uid`
+   * - GSS -> `gss:client@REALM`
+   *
+   * @returns The principal associated with the current RPC call.
+   */
+  public getPrincipal(): string {
+    return 'none';
+  }
+
   public async exec(): Promise<msg.Nfsv4CompoundResponse> {
     const {req, connection} = this;
     const {ops} = connection;

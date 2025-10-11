@@ -18,11 +18,17 @@ export class Nfsv4OperationsNotImpl implements Nfsv4Operations {
     ctx.connection.logger.log('CREATE', request);
     throw new Error('Not implemented');
   }
-  public async DELEGPURGE(request: msg.Nfsv4DelegpurgeRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4DelegpurgeResponse> {
+  public async DELEGPURGE(
+    request: msg.Nfsv4DelegpurgeRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4DelegpurgeResponse> {
     ctx.connection.logger.log('DELEGPURGE', request);
     throw new Error('Not implemented');
   }
-  public async DELEGRETURN(request: msg.Nfsv4DelegreturnRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4DelegreturnResponse> {
+  public async DELEGRETURN(
+    request: msg.Nfsv4DelegreturnRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4DelegreturnResponse> {
     ctx.connection.logger.log('DELEGRETURN', request);
     throw new Error('Not implemented');
   }
@@ -70,11 +76,17 @@ export class Nfsv4OperationsNotImpl implements Nfsv4Operations {
     ctx.connection.logger.log('OPENATTR', request);
     throw new Error('Not implemented');
   }
-  public async OPEN_CONFIRM(request: msg.Nfsv4OpenConfirmRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4OpenConfirmResponse> {
+  public async OPEN_CONFIRM(
+    request: msg.Nfsv4OpenConfirmRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4OpenConfirmResponse> {
     ctx.connection.logger.log('OPEN_CONFIRM', request);
     throw new Error('Not implemented');
   }
-  public async OPEN_DOWNGRADE(request: msg.Nfsv4OpenDowngradeRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4OpenDowngradeResponse> {
+  public async OPEN_DOWNGRADE(
+    request: msg.Nfsv4OpenDowngradeRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4OpenDowngradeResponse> {
     ctx.connection.logger.log('OPEN_DOWNGRADE', request);
     throw new Error('Not implemented');
   }
@@ -86,7 +98,10 @@ export class Nfsv4OperationsNotImpl implements Nfsv4Operations {
     ctx.connection.logger.log('PUTPUBFH', request);
     throw new Error('Not implemented');
   }
-  public async PUTROOTFH(request: msg.Nfsv4PutrootfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4PutrootfhResponse> {
+  public async PUTROOTFH(
+    request: msg.Nfsv4PutrootfhRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4PutrootfhResponse> {
     ctx.connection.logger.log('PUTROOTFH', request);
     throw new Error('Not implemented');
   }
@@ -114,7 +129,10 @@ export class Nfsv4OperationsNotImpl implements Nfsv4Operations {
     ctx.connection.logger.log('RENEW', request);
     throw new Error('Not implemented');
   }
-  public async RESTOREFH(request: msg.Nfsv4RestorefhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RestorefhResponse> {
+  public async RESTOREFH(
+    request: msg.Nfsv4RestorefhRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4RestorefhResponse> {
     ctx.connection.logger.log('RESTOREFH', request);
     throw new Error('Not implemented');
   }
@@ -130,11 +148,17 @@ export class Nfsv4OperationsNotImpl implements Nfsv4Operations {
     ctx.connection.logger.log('SETATTR', request);
     throw new Error('Not implemented');
   }
-  public async SETCLIENTID(request: msg.Nfsv4SetclientidRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SetclientidResponse> {
+  public async SETCLIENTID(
+    request: msg.Nfsv4SetclientidRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4SetclientidResponse> {
     ctx.connection.logger.log('SETCLIENTID', request);
     throw new Error('Not implemented');
   }
-  public async SETCLIENTID_CONFIRM(request: msg.Nfsv4SetclientidConfirmRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SetclientidConfirmResponse> {
+  public async SETCLIENTID_CONFIRM(
+    request: msg.Nfsv4SetclientidConfirmRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4SetclientidConfirmResponse> {
     ctx.connection.logger.log('SETCLIENTID_CONFIRM', request);
     throw new Error('Not implemented');
   }
@@ -146,7 +170,10 @@ export class Nfsv4OperationsNotImpl implements Nfsv4Operations {
     ctx.connection.logger.log('WRITE', request);
     throw new Error('Not implemented');
   }
-  public async RELEASE_LOCKOWNER(request: msg.Nfsv4ReleaseLockOwnerRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReleaseLockOwnerResponse> {
+  public async RELEASE_LOCKOWNER(
+    request: msg.Nfsv4ReleaseLockOwnerRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4ReleaseLockOwnerResponse> {
     ctx.connection.logger.log('RELEASE_LOCKOWNER', request);
     throw new Error('Not implemented');
   }

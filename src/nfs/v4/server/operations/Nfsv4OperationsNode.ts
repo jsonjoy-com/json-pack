@@ -20,16 +20,41 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   protected fs: typeof import('node:fs');
   protected dir: string;
 
-  /** Map of client records keyed by "confirmed-<hex>" or "unconfirmed-<hex>". */
-  protected clients: Map<string, ClientRecord> = new Map();
+  /** Confirmed clients. */
+  protected clients: Map<bigint, ClientRecord> = new Map();
+  /** Clients pending SETCLIENTID_CONFIRM confirmation. */
+  protected pendingClients: Map<bigint, ClientRecord> = new Map();
   /** Maximum number of client records to keep. */
-  protected maxClientRecords = 1000;
+  protected maxClients = 1000;
+  /** Maximum number of pending client records to keep. */
+  protected maxPendingClients = 1000;
   /** Next client ID to assign. */
   protected nextClientId = 1n;
 
   constructor(opts: Nfsv4OperationsNodeOpts) {
     this.fs = opts.fs;
     this.dir = opts.dir;
+  }
+
+  protected findClientByIdString(
+    map: Map<bigint, ClientRecord>,
+    clientIdString: Uint8Array,
+  ): [bigint, ClientRecord] | undefined {
+    for (const entry of map.entries())
+      if (cmpUint8Array(entry[1].clientIdString, clientIdString)) return entry;
+    return;
+  }
+
+  protected enforceClientLimit(): void {
+    if (this.clients.size <= this.maxClients) return;
+    const firstKey = this.clients.keys().next().value;
+    if (firstKey !== undefined) this.clients.delete(firstKey);
+  }
+
+  protected enforcePendingClientLimit(): void {
+    if (this.pendingClients.size < this.maxPendingClients) return;
+    const firstKey = this.pendingClients.keys().next().value;
+    if (firstKey !== undefined) this.pendingClients.delete(firstKey);
   }
 
   /**
@@ -44,64 +69,37 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const clientIdString = request.client.id;
     const callback = request.callback;
     const callbackIdent = request.callbackIdent;
-    const clientIdStringKey = Buffer.from(clientIdString).toString('hex');
-    const existingConfirmed = Array.from(this.clients.values()).find(
-      (record) => record.confirmed && Buffer.from(record.clientIdString).toString('hex') === clientIdStringKey,
-    );
-    if (existingConfirmed) {
-      const verifierMatch = cmpUint8Array(existingConfirmed.verifier, verifier);
+    const confirmedClientEntry = this.findClientByIdString(this.clients, clientIdString);
+    let clientid: bigint = 0n;
+    if (confirmedClientEntry) {
+      this.pendingClients.delete(clientid);
+      const entry = confirmedClientEntry;
+      clientid = entry[0];
+      const verifierMatch = cmpUint8Array(entry[1].verifier, verifier);
       if (verifierMatch) {
-        const unconfirmedKey = `unconfirmed-${clientIdStringKey}`;
-        const setclientidConfirm = randomBytes(8);
-        const newRecord = new ClientRecord(
-          verifier,
-          clientIdString,
-          existingConfirmed.clientid,
-          callback,
-          callbackIdent,
-          setclientidConfirm,
-          false,
-        );
-        this.clients.set(unconfirmedKey, newRecord);
-        const verifierStruct = new struct.Nfsv4Verifier(setclientidConfirm);
-        const body = new msg.Nfsv4SetclientidResOk(existingConfirmed.clientid, verifierStruct);
-        return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4_OK, body);
+        // The client is re-registering with the same ID string and verifier.
+        // Update callback infoormation, return existing client ID and issue
+        // new confirm verifier.
       } else {
-        const clientid = this.nextClientId++;
-        const setclientidConfirm = randomBytes(8);
-        const unconfirmedKey = `unconfirmed-${clientIdStringKey}`;
-        const newRecord = new ClientRecord(
-          verifier,
-          clientIdString,
-          clientid,
-          callback,
-          callbackIdent,
-          setclientidConfirm,
-          false,
-        );
-        this.clients.set(unconfirmedKey, newRecord);
-        const verifierStruct = new struct.Nfsv4Verifier(setclientidConfirm);
-        const body = new msg.Nfsv4SetclientidResOk(clientid, verifierStruct);
-        return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4_OK, body);
+        // The client is re-registering with the same ID string but different verifier.
+        clientid = this.nextClientId++;
       }
     } else {
-      const clientid = this.nextClientId++;
-      const setclientidConfirm = randomBytes(8);
-      const unconfirmedKey = `unconfirmed-${clientIdStringKey}`;
-      const newRecord = new ClientRecord(
-        verifier,
-        clientIdString,
-        clientid,
-        callback,
-        callbackIdent,
-        setclientidConfirm,
-        false,
-      );
-      this.clients.set(unconfirmedKey, newRecord);
-      const verifierStruct = new struct.Nfsv4Verifier(setclientidConfirm);
-      const body = new msg.Nfsv4SetclientidResOk(clientid, verifierStruct);
-      return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4_OK, body);
+      // New client ID string. Create new client record.
+      clientid = this.nextClientId++;
     }
+    const setclientidConfirm = randomBytes(8);
+    const newRecord = new ClientRecord(verifier, clientIdString, callback, callbackIdent, setclientidConfirm);
+
+    // Remove any existing pending records with same ID string.
+    for (const [id, entry] of this.pendingClients.entries())
+      if (cmpUint8Array(entry.clientIdString, clientIdString)) this.pendingClients.delete(id);
+
+    this.enforcePendingClientLimit();
+    this.pendingClients.set(clientid, newRecord);
+    const verifierStruct = new struct.Nfsv4Verifier(setclientidConfirm);
+    const body = new msg.Nfsv4SetclientidResOk(clientid, verifierStruct);
+    return new msg.Nfsv4SetclientidResponse(Nfsv4Stat.NFS4_OK, body);
   }
 
   /**
@@ -114,44 +112,23 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   ): Promise<msg.Nfsv4SetclientidConfirmResponse> {
     const clientid = request.clientid;
     const setclientidConfirm = request.setclientidConfirm.data;
-    const unconfirmedRecord = Array.from(this.clients.entries()).find(
-      ([key, record]) => !record.confirmed && record.clientid === clientid,
-    );
-    if (!unconfirmedRecord) {
-      const confirmedRecord = Array.from(this.clients.values()).find(
-        (record) =>
-          record.confirmed &&
-          record.clientid === clientid &&
-          cmpUint8Array(record.setclientidConfirm, setclientidConfirm),
-      );
-      if (confirmedRecord) {
+    const pendingRecord = this.pendingClients.get(clientid);
+    if (!pendingRecord) {
+      const confirmedRecord = this.clients.get(clientid);
+      if (confirmedRecord && cmpUint8Array(confirmedRecord.setclientidConfirm, setclientidConfirm))
         return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4_OK);
-      }
       return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4ERR_STALE_CLIENTID);
     }
-    const [unconfirmedKey, record] = unconfirmedRecord;
-    if (!cmpUint8Array(record.setclientidConfirm, setclientidConfirm)) {
+    if (!cmpUint8Array(pendingRecord.setclientidConfirm, setclientidConfirm)) {
       return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4ERR_STALE_CLIENTID);
     }
-    const clientIdStringKey = Buffer.from(record.clientIdString).toString('hex');
-    const confirmedKey = `confirmed-${clientIdStringKey}`;
-    const oldConfirmed = Array.from(this.clients.entries()).find(
-      ([key, r]) => r.confirmed && Buffer.from(r.clientIdString).toString('hex') === clientIdStringKey,
-    );
+    const oldConfirmed = this.findClientByIdString(this.clients, pendingRecord.clientIdString);
     if (oldConfirmed) {
       this.clients.delete(oldConfirmed[0]);
     }
-    const confirmedRecord = new ClientRecord(
-      record.verifier,
-      record.clientIdString,
-      record.clientid,
-      record.callback,
-      record.callbackIdent,
-      record.setclientidConfirm,
-      true,
-    );
-    this.clients.delete(unconfirmedKey);
-    this.clients.set(confirmedKey, confirmedRecord);
+    this.pendingClients.delete(clientid);
+    this.enforceClientLimit();
+    this.clients.set(clientid, pendingRecord);
     return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4_OK);
   }
 

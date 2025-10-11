@@ -101,9 +101,7 @@ export class Nfsv4CompoundProcCtx {
               break FIND_STATUS_CODE;
             }
             status = Nfsv4Stat.NFS4ERR_SERVERFAULT;
-            this.connection.logger.error(
-              'Invalid status [code = ' + err + ', fn = ' + fn.name + ']',
-            );
+            this.connection.logger.error('Invalid status [code = ' + err + ', fn = ' + fn.name + ']');
             break FIND_STATUS_CODE;
           }
           status = Nfsv4Stat.NFS4ERR_SERVERFAULT;

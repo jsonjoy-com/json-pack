@@ -1,9 +1,11 @@
-import * as msg from "../messages";
+import * as msg from '../messages';
 import type {Nfsv4CompoundProcCtx} from './Nfsv4CompoundProcCtx';
 
 export type Nfsv4OperationCtx = Pick<Nfsv4CompoundProcCtx, 'cfh' | 'sfh' | 'req'>;
-export type Nfsv4OperationFn<Req extends msg.Nfsv4Request, Res extends msg.Nfsv4Response> =
-  (request: Req, ctx: Nfsv4OperationCtx) => Promise<Res>;
+export type Nfsv4OperationFn<Req extends msg.Nfsv4Request, Res extends msg.Nfsv4Response> = (
+  request: Req,
+  ctx: Nfsv4OperationCtx,
+) => Promise<Res>;
 
 export interface Nfsv4Operations {
   ACCESS: Nfsv4OperationFn<msg.Nfsv4AccessRequest, msg.Nfsv4AccessResponse>;

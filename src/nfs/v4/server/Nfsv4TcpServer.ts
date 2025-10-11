@@ -13,7 +13,7 @@ const HOST = process.env.NFS_HOST
     : '127.0.0.1';
 
 export interface Nfsv4TcpServerOpts {
-  ops: Nfsv4Operations,
+  ops: Nfsv4Operations;
   port?: number;
   host?: string;
   debug?: boolean;

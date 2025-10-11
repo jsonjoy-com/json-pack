@@ -1,7 +1,7 @@
-import {Nfsv4Stat} from "../constants";
-import {Nfsv4OperationFn} from "./Nfsv4Operations";
-import {Nfsv4Connection} from "./Nfsv4Connection";
-import * as msg from "../messages";
+import {Nfsv4Stat} from '../constants';
+import {Nfsv4OperationFn} from './Nfsv4Operations';
+import {Nfsv4Connection} from './Nfsv4Connection';
+import * as msg from '../messages';
 
 /**
  * NFS v4 COMPOUND Procedure Context, holds state for a single COMPOUND procedure
@@ -20,7 +20,7 @@ export class Nfsv4CompoundProcCtx {
   ) {}
 
   public async exec(): Promise<msg.Nfsv4CompoundResponse> {
-    const {req, connection,} = this;
+    const {req, connection} = this;
     const {ops} = connection;
     const {argarray, tag} = req;
     const length = argarray.length;
@@ -50,15 +50,21 @@ export class Nfsv4CompoundProcCtx {
       else if (op instanceof msg.Nfsv4GetattrRequest) (fn = ops.GETATTR), (Response = msg.Nfsv4GetattrResponse);
       else if (op instanceof msg.Nfsv4SetattrRequest) (fn = ops.SETATTR), (Response = msg.Nfsv4SetattrResponse);
       else if (op instanceof msg.Nfsv4CreateRequest) (fn = ops.CREATE), (Response = msg.Nfsv4CreateResponse);
-      else if (op instanceof msg.Nfsv4SetclientidRequest) (fn = ops.SETCLIENTID), (Response = msg.Nfsv4SetclientidResponse);
-      else if (op instanceof msg.Nfsv4SetclientidConfirmRequest) (fn = ops.SETCLIENTID_CONFIRM), (Response = msg.Nfsv4SetclientidConfirmResponse);
-      else if (op instanceof msg.Nfsv4OpenConfirmRequest) (fn = ops.OPEN_CONFIRM), (Response = msg.Nfsv4OpenConfirmResponse);
-      else if (op instanceof msg.Nfsv4OpenDowngradeRequest) (fn = ops.OPEN_DOWNGRADE), (Response = msg.Nfsv4OpenDowngradeResponse);
+      else if (op instanceof msg.Nfsv4SetclientidRequest)
+        (fn = ops.SETCLIENTID), (Response = msg.Nfsv4SetclientidResponse);
+      else if (op instanceof msg.Nfsv4SetclientidConfirmRequest)
+        (fn = ops.SETCLIENTID_CONFIRM), (Response = msg.Nfsv4SetclientidConfirmResponse);
+      else if (op instanceof msg.Nfsv4OpenConfirmRequest)
+        (fn = ops.OPEN_CONFIRM), (Response = msg.Nfsv4OpenConfirmResponse);
+      else if (op instanceof msg.Nfsv4OpenDowngradeRequest)
+        (fn = ops.OPEN_DOWNGRADE), (Response = msg.Nfsv4OpenDowngradeResponse);
       else if (op instanceof msg.Nfsv4CommitRequest) (fn = ops.COMMIT), (Response = msg.Nfsv4CommitResponse);
       else if (op instanceof msg.Nfsv4LinkRequest) (fn = ops.LINK), (Response = msg.Nfsv4LinkResponse);
       else if (op instanceof msg.Nfsv4RenewRequest) (fn = ops.RENEW), (Response = msg.Nfsv4RenewResponse);
-      else if (op instanceof msg.Nfsv4DelegpurgeRequest) (fn = ops.DELEGPURGE), (Response = msg.Nfsv4DelegpurgeResponse);
-      else if (op instanceof msg.Nfsv4DelegreturnRequest) (fn = ops.DELEGRETURN), (Response = msg.Nfsv4DelegreturnResponse);
+      else if (op instanceof msg.Nfsv4DelegpurgeRequest)
+        (fn = ops.DELEGPURGE), (Response = msg.Nfsv4DelegpurgeResponse);
+      else if (op instanceof msg.Nfsv4DelegreturnRequest)
+        (fn = ops.DELEGRETURN), (Response = msg.Nfsv4DelegreturnResponse);
       else if (op instanceof msg.Nfsv4RestorefhRequest) (fn = ops.RESTOREFH), (Response = msg.Nfsv4RestorefhResponse);
       else if (op instanceof msg.Nfsv4SecinfoRequest) (fn = ops.SECINFO), (Response = msg.Nfsv4SecinfoResponse);
       else if (op instanceof msg.Nfsv4VerifyRequest) (fn = ops.VERIFY), (Response = msg.Nfsv4VerifyResponse);
@@ -68,11 +74,12 @@ export class Nfsv4CompoundProcCtx {
       else if (op instanceof msg.Nfsv4LookupRequest) (fn = ops.LOOKUP), (Response = msg.Nfsv4LookupResponse);
       else if (op instanceof msg.Nfsv4LookuppRequest) (fn = ops.LOOKUPP), (Response = msg.Nfsv4LookuppResponse);
       else if (op instanceof msg.Nfsv4NverifyRequest) (fn = ops.NVERIFY), (Response = msg.Nfsv4NverifyResponse);
-      else if (op instanceof msg.Nfsv4ReleaseLockOwnerRequest) (fn = ops.RELEASE_LOCKOWNER), (Response = msg.Nfsv4ReleaseLockOwnerResponse);
+      else if (op instanceof msg.Nfsv4ReleaseLockOwnerRequest)
+        (fn = ops.RELEASE_LOCKOWNER), (Response = msg.Nfsv4ReleaseLockOwnerResponse);
       else if (op instanceof msg.Nfsv4IllegalRequest) (fn = ops.ILLEGAL), (Response = msg.Nfsv4IllegalResponse);
       if (!fn || !Response) return new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4ERR_OP_ILLEGAL, tag, resarray);
       EXEC_OP: try {
-        const opResponse = await fn(opReq, this);
+        const opResponse = await fn.call(ops, opReq, this);
         status = opResponse.status;
         resarray.push(opResponse);
       } catch (err) {
@@ -88,12 +95,14 @@ export class Nfsv4CompoundProcCtx {
         }
         FIND_STATUS_CODE: {
           if (typeof err === 'number') {
-            if (err > Nfsv4Stat.NFS4_OK && err <= 0x00_FF_FF_FF) {
+            if (err > Nfsv4Stat.NFS4_OK && err <= 0x00_ff_ff_ff) {
               status = err;
               break FIND_STATUS_CODE;
             }
             status = Nfsv4Stat.NFS4ERR_SERVERFAULT;
-            this.connection.logger.error('Invalid status [code = ' + err + '], using NFS4ERR_SERVERFAULT, [fn = ' + fn.name + ']');
+            this.connection.logger.error(
+              'Invalid status [code = ' + err + '], using NFS4ERR_SERVERFAULT, [fn = ' + fn.name + ']',
+            );
             break FIND_STATUS_CODE;
           }
           status = Nfsv4Stat.NFS4ERR_SERVERFAULT;

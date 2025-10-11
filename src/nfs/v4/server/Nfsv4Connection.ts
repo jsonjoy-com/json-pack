@@ -13,7 +13,7 @@ import {
   RpcOpaqueAuth,
   RpcRejectedReplyMessage,
 } from '../../../rpc';
-import * as msg from "../messages";
+import * as msg from '../messages';
 import {EMPTY_READER, Nfsv4Proc, Nfsv4Stat} from '../constants';
 import {Nfsv4CompoundProcCtx} from './Nfsv4CompoundProcCtx';
 import type {Duplex} from 'node:stream';
@@ -116,10 +116,11 @@ export class Nfsv4Connection {
         if (!(procedure.params instanceof Reader)) return;
         const compound = this.nfsDecoder.decodeCompoundRequest(procedure.params);
         if (compound instanceof msg.Nfsv4CompoundRequest) {
-          new Nfsv4CompoundProcCtx(this, compound).exec()
+          new Nfsv4CompoundProcCtx(this, compound)
+            .exec()
             .then((procResponse) => {
               this.nfsEncoder.writeAcceptedCompoundReply(xid, EMPTY_AUTH, procResponse);
-              this.write(writer.flush());      
+              this.write(writer.flush());
             })
             .catch((err) => {
               this.logger.error('NFS COMPOUND error:', err);

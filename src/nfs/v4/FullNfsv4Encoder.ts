@@ -57,11 +57,7 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     return this.writer.flush();
   }
 
-  public writeAcceptedCompoundReply(
-    xid: number,
-    verf: RpcOpaqueAuth,
-    compound: msg.Nfsv4CompoundResponse,
-  ): void {
+  public writeAcceptedCompoundReply(xid: number, verf: RpcOpaqueAuth, compound: msg.Nfsv4CompoundResponse): void {
     const rm = this.rmEncoder;
     const state = rm.startRecord();
     this.rpcEncoder.writeAcceptedReply(xid, verf, RpcAcceptStat.SUCCESS);

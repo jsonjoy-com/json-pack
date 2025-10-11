@@ -40,7 +40,10 @@ export interface Nfsv4Operations {
   SAVEFH: Nfsv4OperationFn<msg.Nfsv4SavefhRequest, msg.Nfsv4SavefhResponse>;
   SECINFO: Nfsv4OperationFn<msg.Nfsv4SecinfoRequest, msg.Nfsv4SecinfoResponse>;
   SETATTR: Nfsv4OperationFn<msg.Nfsv4SetattrRequest, msg.Nfsv4SetattrResponse>;
+
+  /** @see {@link https://datatracker.ietf.org/doc/html/rfc7530#section-16.33} */
   SETCLIENTID: Nfsv4OperationFn<msg.Nfsv4SetclientidRequest, msg.Nfsv4SetclientidResponse>;
+
   SETCLIENTID_CONFIRM: Nfsv4OperationFn<msg.Nfsv4SetclientidConfirmRequest, msg.Nfsv4SetclientidConfirmResponse>;
   VERIFY: Nfsv4OperationFn<msg.Nfsv4VerifyRequest, msg.Nfsv4VerifyResponse>;
   WRITE: Nfsv4OperationFn<msg.Nfsv4WriteRequest, msg.Nfsv4WriteResponse>;

@@ -1,7 +1,7 @@
 import * as net from 'net';
 import {Nfsv4Connection} from './Nfsv4Connection';
 import {Logger} from './types';
-import {Nfsv4Operations} from './Nfsv4Operations';
+import {Nfsv4Operations} from './operations/Nfsv4Operations';
 
 /* tslint:disable:no-console */
 

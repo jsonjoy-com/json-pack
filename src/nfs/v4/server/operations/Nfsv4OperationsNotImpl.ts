@@ -1,4 +1,4 @@
-import * as msg from '../messages';
+import * as msg from '../../messages';
 import {Nfsv4OperationCtx, Nfsv4Operations} from './Nfsv4Operations';
 
 export class Nfsv4OperationsNotImpl implements Nfsv4Operations {

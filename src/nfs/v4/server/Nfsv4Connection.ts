@@ -18,7 +18,7 @@ import {EMPTY_READER, Nfsv4Proc, Nfsv4Stat} from '../constants';
 import {Nfsv4CompoundProcCtx} from './Nfsv4CompoundProcCtx';
 import type {Duplex} from 'node:stream';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib/types';
-import type {Nfsv4Operations} from './Nfsv4Operations';
+import type {Nfsv4Operations} from './operations/Nfsv4Operations';
 
 const EMPTY_AUTH = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NONE, EMPTY_READER);
 

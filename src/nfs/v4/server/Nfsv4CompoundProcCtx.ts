@@ -1,5 +1,5 @@
 import {Nfsv4Stat} from '../constants';
-import {Nfsv4OperationFn} from './Nfsv4Operations';
+import {Nfsv4OperationFn} from './operations/Nfsv4Operations';
 import {Nfsv4Connection} from './Nfsv4Connection';
 import * as msg from '../messages';
 

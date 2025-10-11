@@ -1,6 +1,6 @@
 import {Nfsv4CompoundRequest, Nfsv4PutfhRequest, Nfsv4LookupRequest, Nfsv4GetfhRequest} from '../../messages';
 import {Nfsv4Fh} from '../../structs';
-import {Nfsv4TcpClient} from '../../client/NfsvTcpClient';
+import {Nfsv4TcpClient} from '../../client/Nfsv4TcpClient';
 
 /* tslint:disable:no-console */
 

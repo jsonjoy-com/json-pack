@@ -15,7 +15,7 @@ export class Nfsv4CompoundProcCtx {
   sfh: Uint8Array | null = null;
 
   constructor(
-    protected readonly connection: Nfsv4Connection,
+    public readonly connection: Nfsv4Connection,
     public readonly req: msg.Nfsv4CompoundRequest,
   ) {}
 
@@ -107,7 +107,7 @@ export class Nfsv4CompoundProcCtx {
             break FIND_STATUS_CODE;
           }
           status = Nfsv4Stat.NFS4ERR_SERVERFAULT;
-          this.connection.logger.error(err);
+          this.connection.logger.error(fn.name, err);
         }
         const opResponse = new Response(status);
         resarray.push(opResponse);

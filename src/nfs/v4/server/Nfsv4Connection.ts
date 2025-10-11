@@ -4,24 +4,30 @@ import {FullNfsv4Encoder} from '../FullNfsv4Encoder';
 import {RmRecordDecoder, RmRecordEncoder} from '../../../rm';
 import {
   RpcAcceptStat,
+  RpcAcceptedReplyMessage,
   RpcAuthFlavor,
   RpcCallMessage,
   RpcMessage,
   RpcMessageDecoder,
   RpcMessageEncoder,
   RpcOpaqueAuth,
+  RpcRejectedReplyMessage,
 } from '../../../rpc';
-import {EMPTY_READER, Nfsv4Proc} from '../constants';
-import {Nfsv4CompoundRequest} from '../messages';
-import {getOpNameFromRequest} from './util';
+import * as msg from "../messages";
+import {EMPTY_READER, Nfsv4Proc, Nfsv4Stat} from '../constants';
+import {Nfsv4CompoundProcCtx} from './Nfsv4CompoundProcCtx';
 import type {Duplex} from 'node:stream';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/buffers/lib/types';
+import type {Nfsv4Operations} from './Nfsv4Operations';
+
+const EMPTY_AUTH = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NONE, EMPTY_READER);
 
 export interface Nfsv4ConnectionOpts {
   /**
    * Normally this is a TCP socket, but any Duplex stream will do.
    */
   duplex: Duplex;
+  ops: Nfsv4Operations;
   encoder?: FullNfsv4Encoder;
   decoder?: Nfsv4Decoder;
   debug?: boolean;
@@ -49,10 +55,13 @@ export class Nfsv4Connection {
   public debug: boolean;
   public logger: Pick<typeof console, 'log' | 'error'>;
 
+  public readonly ops: Nfsv4Operations;
+
   constructor(opts: Nfsv4ConnectionOpts) {
     this.debug = !!opts.debug;
     this.logger = opts.logger || console;
     const duplex = (this.duplex = opts.duplex);
+    this.ops = opts.ops;
     this.rmDecoder = new RmRecordDecoder();
     this.rpcDecoder = new RpcMessageDecoder();
     this.nfsDecoder = new Nfsv4Decoder();
@@ -89,46 +98,48 @@ export class Nfsv4Connection {
   }
 
   protected onRpcMessage(msg: RpcMessage): void {
-    const debug = this.debug;
     if (msg instanceof RpcCallMessage) {
-      const proc = msg.proc;
-      switch (proc) {
-        case Nfsv4Proc.NULL: {
-          if (debug) this.logger.log('NULL procedure');
-          const rmEncoder = this.rmEncoder;
-          const state = rmEncoder.startRmRecord();
-          this.rpcEncoder.writeAcceptedReply(
-            msg.xid,
-            new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NONE, EMPTY_READER),
-            RpcAcceptStat.SUCCESS,
-          );
-          rmEncoder.endRmRecord(state);
-          this.write(this.writer.flush());
-          return;
-        }
-        case Nfsv4Proc.COMPOUND: {
-          if (!(msg.params instanceof Reader)) return;
-          const compound = this.nfsDecoder.decodeCompoundRequest(msg.params);
-          if (compound instanceof Nfsv4CompoundRequest) {
-            console.log('\nNFS COMPOUND Request:');
-            console.log(`  Tag: "${compound.tag}"`);
-            console.log(`  Minor Version: ${compound.minorversion}`);
-            console.log(`  Operations (${compound.argarray.length}):`);
-            compound.argarray.forEach((op: any, idx: number) => {
-              console.log(`    [${idx}] ${getOpNameFromRequest(op)}`);
-              console.log(`        ${JSON.stringify(op, null, 2).split('\n').slice(1).join('\n        ')}`);
+      this.lastXid = msg.xid;
+      this.onRpcCallMessage(msg);
+    } else if (msg instanceof RpcAcceptedReplyMessage) {
+      throw new Error('Not implemented RpcAcceptedReplyMessage');
+    } else if (msg instanceof RpcRejectedReplyMessage) {
+      throw new Error('Not implemented RpcRejectedReplyMessage');
+    }
+  }
+
+  protected onRpcCallMessage(procedure: RpcCallMessage): void {
+    const {debug, writer, rmEncoder} = this;
+    const {xid, proc} = procedure;
+    switch (proc) {
+      case Nfsv4Proc.COMPOUND: {
+        if (!(procedure.params instanceof Reader)) return;
+        const compound = this.nfsDecoder.decodeCompoundRequest(procedure.params);
+        if (compound instanceof msg.Nfsv4CompoundRequest) {
+          new Nfsv4CompoundProcCtx(this, compound).exec()
+            .then((procResponse) => {
+              this.nfsEncoder.writeAcceptedCompoundReply(xid, EMPTY_AUTH, procResponse);
+              this.write(writer.flush());      
+            })
+            .catch((err) => {
+              this.logger.error('NFS COMPOUND error:', err);
+              this.nfsEncoder.writeRejectedReply(xid, Nfsv4Stat.NFS4ERR_SERVERFAULT);
             });
-          } else {
-            console.log('Could not decode COMPOUND request');
-          }
-          return;
-        }
-        default: {
-          console.log(`Unknown procedure: ${proc}`);
-        }
+        } else this.closeWithError(RpcAcceptStat.GARBAGE_ARGS);
+        break;
+      }
+      case Nfsv4Proc.NULL: {
+        if (debug) this.logger.log('NULL procedure');
+        const state = rmEncoder.startRecord();
+        this.rpcEncoder.writeAcceptedReply(xid, EMPTY_AUTH, RpcAcceptStat.SUCCESS);
+        rmEncoder.endRecord(state);
+        this.write(writer.flush());
+        break;
+      }
+      default: {
+        if (this.debug) this.logger.error(`Unknown procedure: ${proc}`);
       }
     }
-    throw new Error('Not implemented non-RPCCallMessage');
   }
 
   private closeWithError(
@@ -138,19 +149,20 @@ export class Nfsv4Connection {
       | RpcAcceptStat.GARBAGE_ARGS
       | RpcAcceptStat.SYSTEM_ERR,
   ): void {
+    if (this.debug) this.logger.log(`Closing with error: RpcAcceptStat = ${error}, xid = ${this.lastXid}`);
     const xid = this.lastXid;
     if (xid) {
-      const state = this.rmEncoder.startRmRecord();
+      const state = this.rmEncoder.startRecord();
       const verify = new RpcOpaqueAuth(RpcAuthFlavor.AUTH_NONE, EMPTY_READER);
       this.rpcEncoder.writeAcceptedReply(xid, verify, error);
-      this.rmEncoder.endRmRecord(state);
+      this.rmEncoder.endRecord(state);
       const bin = this.writer.flush();
       this.duplex.write(bin);
     }
     this.close();
   }
 
-  private close(): void {
+  public close(): void {
     if (this.closed) return;
     this.closed = true;
     clearImmediate(this.__uncorkTimer);

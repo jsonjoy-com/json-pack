@@ -49,7 +49,7 @@ export class RmRecordEncoder<W extends IWriter & IWriterGrowable = IWriter & IWr
    * header, and returns the state, which needs to passed to `endRmRecord` to
    * finalize the RM header.
    */
-  public startRmRecord(): number {
+  public startRecord(): number {
     const writer = this.writer;
     const rmHeaderPosition = writer.x;
     writer.x += RM_HEADER_SIZE;
@@ -65,7 +65,7 @@ export class RmRecordEncoder<W extends IWriter & IWriterGrowable = IWriter & IWr
    * place. If it doesn't, it will move the data to a new location and write
    * it as multiple RM frames.
    */
-  public endRmRecord(rmHeaderPosition: number): void {
+  public endRecord(rmHeaderPosition: number): void {
     const writer = this.writer;
     const totalSize = writer.x - rmHeaderPosition - RM_HEADER_SIZE;
     if (totalSize <= MAX_SINGLE_FRAME_SIZE) {

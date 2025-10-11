@@ -5,6 +5,7 @@ import {RmRecordEncoder} from '../../rm/RmRecordEncoder';
 import {Nfsv4Proc, Nfsv4CbProc, Nfsv4Const} from './constants';
 import {RpcOpaqueAuth} from '../../rpc/messages';
 import {RpcAcceptStat} from '../../rpc/constants';
+import {XdrEncoder} from '../../xdr';
 import type * as msg from './messages';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
@@ -12,11 +13,13 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
   public readonly nfsEncoder: Nfsv4Encoder<W>;
   public readonly rpcEncoder: RpcMessageEncoder<W>;
   public readonly rmEncoder: RmRecordEncoder<W>;
+  public readonly xdr: XdrEncoder;
 
   constructor(public readonly writer: W = new Writer() as any) {
     this.nfsEncoder = new Nfsv4Encoder(writer);
     this.rpcEncoder = new RpcMessageEncoder(writer);
     this.rmEncoder = new RmRecordEncoder(writer);
+    this.xdr = this.nfsEncoder.xdr;
   }
 
   public encodeCall(
@@ -38,33 +41,32 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     request: msg.Nfsv4CompoundRequest,
   ): void {
     const rm = this.rmEncoder;
-    const state = rm.startRmRecord();
+    const state = rm.startRecord();
     this.rpcEncoder.writeCall(xid, Nfsv4Const.PROGRAM, Nfsv4Const.VERSION, proc, cred, verf);
     this.nfsEncoder.writeCompound(request, true);
-    rm.endRmRecord(state);
+    rm.endRecord(state);
   }
 
-  public encodeAcceptedReply(
+  public encodeAcceptedCompoundReply(
     xid: number,
     proc: Nfsv4Proc,
     verf: RpcOpaqueAuth,
     response: msg.Nfsv4CompoundResponse,
   ): Uint8Array {
-    this.writeAcceptedReply(xid, proc, verf, response);
+    this.writeAcceptedCompoundReply(xid, verf, response);
     return this.writer.flush();
   }
 
-  public writeAcceptedReply(
+  public writeAcceptedCompoundReply(
     xid: number,
-    proc: Nfsv4Proc,
     verf: RpcOpaqueAuth,
-    response: msg.Nfsv4CompoundResponse,
+    compound: msg.Nfsv4CompoundResponse,
   ): void {
     const rm = this.rmEncoder;
-    const state = rm.startRmRecord();
+    const state = rm.startRecord();
     this.rpcEncoder.writeAcceptedReply(xid, verf, RpcAcceptStat.SUCCESS);
-    this.nfsEncoder.writeCompound(response, false);
-    rm.endRmRecord(state);
+    compound.encode(this.xdr);
+    rm.endRecord(state);
   }
 
   public encodeRejectedReply(
@@ -84,9 +86,9 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     authStat?: number,
   ): void {
     const rm = this.rmEncoder;
-    const state = rm.startRmRecord();
+    const state = rm.startRecord();
     this.rpcEncoder.writeRejectedReply(xid, rejectStat, mismatchInfo, authStat);
-    rm.endRmRecord(state);
+    rm.endRecord(state);
   }
 
   public encodeCbCall(
@@ -110,10 +112,10 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     request: msg.Nfsv4CbCompoundRequest,
   ): void {
     const rm = this.rmEncoder;
-    const state = rm.startRmRecord();
+    const state = rm.startRecord();
     this.rpcEncoder.writeCall(xid, cbProgram, Nfsv4Const.VERSION, proc, cred, verf);
     this.nfsEncoder.writeCbCompound(request, true);
-    rm.endRmRecord(state);
+    rm.endRecord(state);
   }
 
   public encodeCbAcceptedReply(
@@ -133,9 +135,9 @@ export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IW
     response: msg.Nfsv4CbCompoundResponse,
   ): void {
     const rm = this.rmEncoder;
-    const state = rm.startRmRecord();
+    const state = rm.startRecord();
     this.rpcEncoder.writeAcceptedReply(xid, verf, RpcAcceptStat.SUCCESS);
     this.nfsEncoder.writeCbCompound(response, false);
-    rm.endRmRecord(state);
+    rm.endRecord(state);
   }
 }

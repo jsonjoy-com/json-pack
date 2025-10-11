@@ -1,5 +1,7 @@
 import * as net from 'net';
 import {Nfsv4Connection} from './Nfsv4Connection';
+import {Logger} from './types';
+import {Nfsv4Operations} from './Nfsv4Operations';
 
 /* tslint:disable:no-console */
 
@@ -11,16 +13,17 @@ const HOST = process.env.NFS_HOST
     : '127.0.0.1';
 
 export interface Nfsv4TcpServerOpts {
+  ops: Nfsv4Operations,
   port?: number;
   host?: string;
   debug?: boolean;
-  logger?: Pick<typeof console, 'log' | 'error'>;
+  logger?: Logger;
   onError?: (err: Error) => void;
   stopOnSigint?: boolean;
 }
 
 export class Nfsv4TcpServer {
-  public static start(opts: Nfsv4TcpServerOpts = {}): void {
+  public static start(opts: Nfsv4TcpServerOpts): void {
     const server = new Nfsv4TcpServer(opts);
     server.start().catch(console.error);
   }
@@ -29,19 +32,21 @@ export class Nfsv4TcpServer {
   public port: number = PORT;
   public host: string = HOST;
   public debug: boolean = false;
-  public logger: Pick<typeof console, 'log' | 'error'> = console;
+  public logger: Logger;
   private sigintHandler?: () => void;
 
-  constructor(opts: Nfsv4TcpServerOpts = {}) {
+  constructor(opts: Nfsv4TcpServerOpts) {
     this.port = opts.port ?? PORT;
     this.host = opts.host ?? HOST;
     this.debug = opts.debug ?? false;
     this.logger = opts.logger ?? console;
+    const ops = opts.ops;
     const server = (this.server = new net.Server());
     server.on('connection', (socket) => {
       if (this.debug) this.logger.log('New connection from', socket.remoteAddress, 'port', socket.remotePort);
       new Nfsv4Connection({
         duplex: socket,
+        ops,
         debug: this.debug,
         logger: this.logger,
       });

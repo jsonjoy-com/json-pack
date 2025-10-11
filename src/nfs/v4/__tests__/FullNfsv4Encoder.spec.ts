@@ -203,7 +203,7 @@ describe('FullNfsv4Encoder', () => {
         new msg.Nfsv4GetattrResOk(new structs.Nfsv4Fattr(new structs.Nfsv4Bitmap([0]), new Uint8Array())),
       );
       const response = new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4_OK, 'test', [putfhRes, getattrRes]);
-      const encoded = fullEncoder.encodeAcceptedReply(xid, proc, verf, response);
+      const encoded = fullEncoder.encodeAcceptedCompoundReply(xid, proc, verf, response);
       rmDecoder.push(encoded);
       const rmRecord = rmDecoder.readRecord();
       expect(rmRecord).toBeDefined();
@@ -226,7 +226,7 @@ describe('FullNfsv4Encoder', () => {
       const putfhRes = new msg.Nfsv4PutfhResponse(Nfsv4Stat.NFS4_OK);
       const readRes = new msg.Nfsv4ReadResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4ReadResOk(true, data));
       const response = new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4_OK, 'read', [putfhRes, readRes]);
-      const encoded = fullEncoder.encodeAcceptedReply(xid, proc, verf, response);
+      const encoded = fullEncoder.encodeAcceptedCompoundReply(xid, proc, verf, response);
       rmDecoder.push(encoded);
       const rmRecord = rmDecoder.readRecord();
       expect(rmRecord).toBeDefined();
@@ -259,7 +259,7 @@ describe('FullNfsv4Encoder', () => {
         new msg.Nfsv4GetattrResOk(new structs.Nfsv4Fattr(new structs.Nfsv4Bitmap([0]), new Uint8Array())),
       );
       const response = new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4_OK, 'test', [putfhRes, getattrRes]);
-      const fullEncoded = fullEncoder.encodeAcceptedReply(xid, proc, verf, response);
+      const fullEncoded = fullEncoder.encodeAcceptedCompoundReply(xid, proc, verf, response);
       const nfsEncoded = nfsEncoder.encodeCompound(response, false);
       const rpcEncoded = rpcEncoder.encodeAcceptedReply(xid, verf, 0, undefined, nfsEncoded);
       const rmEncoded = rmEncoder.encodeRecord(rpcEncoded);

@@ -186,9 +186,9 @@ export class Nfsv4TcpClient extends EventEmitter {
     const writer = this.nfsEncoder.writer;
     const rmEncoder = this.nfsEncoder.rmEncoder;
     const rpcEncoder = this.nfsEncoder.rpcEncoder;
-    const state = rmEncoder.startRmRecord();
+    const state = rmEncoder.startRecord();
     rpcEncoder.writeCall(xid, Nfsv4Const.PROGRAM, Nfsv4Const.VERSION, Nfsv4Proc.NULL, cred, verf);
-    rmEncoder.endRmRecord(state);
+    rmEncoder.endRecord(state);
     const encoded = writer.flush();
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {

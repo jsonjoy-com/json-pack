@@ -80,6 +80,7 @@ export class Nfsv4CompoundProcCtx {
       if (!fn || !Response) return new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4ERR_OP_ILLEGAL, tag, resarray);
       EXEC_OP: try {
         const opResponse = await fn.call(ops, opReq, this);
+        if (!(opResponse instanceof Response)) throw new Error('Unexpected response, fn = ' + fn.name);
         status = opResponse.status;
         resarray.push(opResponse);
       } catch (err) {
@@ -101,7 +102,7 @@ export class Nfsv4CompoundProcCtx {
             }
             status = Nfsv4Stat.NFS4ERR_SERVERFAULT;
             this.connection.logger.error(
-              'Invalid status [code = ' + err + '], using NFS4ERR_SERVERFAULT, [fn = ' + fn.name + ']',
+              'Invalid status [code = ' + err + ', fn = ' + fn.name + ']',
             );
             break FIND_STATUS_CODE;
           }

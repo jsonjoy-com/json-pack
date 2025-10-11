@@ -126,24 +126,39 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     request: msg.Nfsv4SetclientidConfirmRequest,
     ctx: Nfsv4OperationCtx,
   ): Promise<msg.Nfsv4SetclientidConfirmResponse> {
+    const {clients, pendingClients} = this;
     const clientid = request.clientid;
     const setclientidConfirm = request.setclientidConfirm.data;
-    const pendingRecord = this.pendingClients.get(clientid);
+    const pendingRecord = pendingClients.get(clientid);
     if (!pendingRecord) {
       const confirmedRecord = this.clients.get(clientid);
       if (confirmedRecord && cmpUint8Array(confirmedRecord.setclientidConfirm, setclientidConfirm))
         return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4_OK);
       return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4ERR_STALE_CLIENTID);
     }
+    const principal = ctx.getPrincipal();
+    if (pendingRecord.principal !== principal)
+      return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4ERR_CLID_INUSE);
     if (!cmpUint8Array(pendingRecord.setclientidConfirm, setclientidConfirm))
       return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4ERR_STALE_CLIENTID);
     const oldConfirmed = this.findClientByIdString(this.clients, pendingRecord.clientIdString);
     if (oldConfirmed) {
-      this.clients.delete(oldConfirmed[0]);
+      const clientid2 = oldConfirmed[0];
+      this.clients.delete(clientid2);
+      pendingClients.delete(clientid2);
     }
-    this.pendingClients.delete(clientid);
+    this.clients.delete(clientid);
+    pendingClients.delete(clientid);
+
+    // Remove any existing pending records with same ID string.
+    const clientIdString = pendingRecord.clientIdString;
+    for (const [id, entry] of pendingClients.entries())
+      if (cmpUint8Array(entry.clientIdString, clientIdString)) pendingClients.delete(id);
+    for (const [id, entry] of clients.entries())
+      if (cmpUint8Array(entry.clientIdString, clientIdString)) clients.delete(id);
+
     this.enforceClientLimit();
-    this.clients.set(clientid, pendingRecord);
+    clients.set(clientid, pendingRecord);
     return new msg.Nfsv4SetclientidConfirmResponse(Nfsv4Stat.NFS4_OK);
   }
 

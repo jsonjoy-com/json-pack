@@ -8,8 +8,9 @@ import * as struct from '../../../structs';
 import {cmpUint8Array} from '@jsonjoy.com/buffers/lib/cmpUint8Array';
 import {ClientRecord} from '../ClientRecord';
 import {FileHandleMapper, ROOT_FH} from './fh';
-import {isErrCode} from './util';
+import {isErrCode, normalizeNodeFsError} from './util';
 import {encodeAttrs} from './attrs';
+import {parseBitmask, requiresLstat} from '../../../attributes';
 
 export interface Nfsv4OperationsNodeOpts {
   /** Node.js `fs` module. */
@@ -293,13 +294,14 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   public async GETATTR(request: msg.Nfsv4GetattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4GetattrResponse> {
     const path = this.fh.currentPath(ctx);
-    let stats: Stats;
-    try {
-      stats = await this.promises.lstat(path);
-    } catch (error: unknown) {
-      if (isErrCode('ENOENT', error)) throw Nfsv4Stat.NFS4ERR_NOENT;
-      if (isErrCode('EACCES', error)) throw Nfsv4Stat.NFS4ERR_ACCESS;
-      throw Nfsv4Stat.NFS4ERR_IO;
+    const requestedAttrNums = parseBitmask(request.attrRequest.mask);
+    let stats: Stats | undefined;
+    if (requiresLstat(requestedAttrNums)) {
+      try {
+        stats = await this.promises.lstat(path);
+      } catch (error: unknown) {
+        throw normalizeNodeFsError(error);
+      }
     }
     const attrs = encodeAttrs(request.attrRequest, stats, path, ctx.cfh!);
     return new msg.Nfsv4GetattrResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4GetattrResOk(attrs));

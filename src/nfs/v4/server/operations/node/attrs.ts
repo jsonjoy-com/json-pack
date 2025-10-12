@@ -5,8 +5,9 @@
 import type {Stats} from 'node:fs';
 import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {XdrEncoder} from '../../../../../xdr/XdrEncoder';
-import {Nfsv4Attr, Nfsv4FType} from '../../../constants';
+import {Nfsv4Attr, Nfsv4FType, Nfsv4Stat} from '../../../constants';
 import * as struct from '../../../structs';
+import {REQUIRED_ATTRS, RECOMMENDED_ATTRS, SET_ONLY_ATTRS} from '../../../attributes';
 
 const setBit = (mask: number[], attrNum: number): void => {
   const wordIndex = Math.floor(attrNum / 32);
@@ -16,12 +17,29 @@ const setBit = (mask: number[], attrNum: number): void => {
 };
 
 /**
+ * Create a bitmap of supported attributes (all REQUIRED and RECOMMENDED attrs we implement).
+ */
+const createSupportedAttrsBitmap = (): number[] => {
+  const mask: number[] = [];
+  const allSupported = [...Array.from(REQUIRED_ATTRS), ...Array.from(RECOMMENDED_ATTRS)];
+  for (let i = 0; i < allSupported.length; i++) {
+    const attrNum = allSupported[i];
+    setBit(mask, attrNum);
+  }
+  return mask;
+};
+
+/**
  * Encodes file attributes based on the requested bitmap.
  * Returns the attributes as a Nfsv4Fattr structure.
+ * @param requestedAttrs Bitmap of requested attributes
+ * @param stats Optional file stats (required only if stat-based attributes are requested)
+ * @param path File path (for context)
+ * @param fh Optional file handle (required only if FATTR4_FILEHANDLE is requested)
  */
 export const encodeAttrs = (
   requestedAttrs: struct.Nfsv4Bitmap,
-  stats: Stats,
+  stats: Stats | undefined,
   path: string,
   fh?: Uint8Array,
 ): struct.Nfsv4Fattr => {
@@ -37,7 +55,17 @@ export const encodeAttrs = (
       if (!(word & (1 << bit))) continue;
       const attrNum = wordIndex * 32 + bit;
       switch (attrNum) {
+        case Nfsv4Attr.FATTR4_SUPPORTED_ATTRS: {
+          const supportedAttrsBitmap = createSupportedAttrsBitmap();
+          xdr.writeUnsignedInt(supportedAttrsBitmap.length);
+          for (let j = 0; j < supportedAttrsBitmap.length; j++) {
+            xdr.writeUnsignedInt(supportedAttrsBitmap[j]);
+          }
+          setBit(supportedMask, attrNum);
+          break;
+        }
         case Nfsv4Attr.FATTR4_TYPE: {
+          if (!stats) break;
           let type: Nfsv4FType;
           if (stats.isFile()) type = Nfsv4FType.NF4REG;
           else if (stats.isDirectory()) type = Nfsv4FType.NF4DIR;
@@ -52,31 +80,37 @@ export const encodeAttrs = (
           break;
         }
         case Nfsv4Attr.FATTR4_SIZE: {
+          if (!stats) break;
           xdr.writeUnsignedHyper(BigInt(stats.size));
           setBit(supportedMask, attrNum);
           break;
         }
         case Nfsv4Attr.FATTR4_FILEID: {
+          if (!stats) break;
           xdr.writeUnsignedHyper(BigInt(stats.ino));
           setBit(supportedMask, attrNum);
           break;
         }
         case Nfsv4Attr.FATTR4_MODE: {
+          if (!stats) break;
           xdr.writeUnsignedInt(stats.mode & 0o7777);
           setBit(supportedMask, attrNum);
           break;
         }
         case Nfsv4Attr.FATTR4_NUMLINKS: {
+          if (!stats) break;
           xdr.writeUnsignedInt(stats.nlink);
           setBit(supportedMask, attrNum);
           break;
         }
         case Nfsv4Attr.FATTR4_SPACE_USED: {
+          if (!stats) break;
           xdr.writeUnsignedHyper(BigInt(stats.blocks * 512));
           setBit(supportedMask, attrNum);
           break;
         }
         case Nfsv4Attr.FATTR4_TIME_ACCESS: {
+          if (!stats) break;
           const atime = stats.atimeMs;
           const seconds = Math.floor(atime / 1000);
           const nseconds = Math.floor((atime % 1000) * 1000000);
@@ -86,6 +120,7 @@ export const encodeAttrs = (
           break;
         }
         case Nfsv4Attr.FATTR4_TIME_MODIFY: {
+          if (!stats) break;
           const mtime = stats.mtimeMs;
           const seconds = Math.floor(mtime / 1000);
           const nseconds = Math.floor((mtime % 1000) * 1000000);
@@ -95,6 +130,7 @@ export const encodeAttrs = (
           break;
         }
         case Nfsv4Attr.FATTR4_TIME_METADATA: {
+          if (!stats) break;
           const ctime = stats.ctimeMs;
           const seconds = Math.floor(ctime / 1000);
           const nseconds = Math.floor((ctime % 1000) * 1000000);
@@ -104,6 +140,7 @@ export const encodeAttrs = (
           break;
         }
         case Nfsv4Attr.FATTR4_CHANGE: {
+          if (!stats) break;
           const changeTime = BigInt(Math.floor(stats.mtimeMs * 1000000));
           xdr.writeUnsignedHyper(changeTime);
           setBit(supportedMask, attrNum);
@@ -115,6 +152,9 @@ export const encodeAttrs = (
             setBit(supportedMask, attrNum);
           }
           break;
+        }
+        default: {
+          if (SET_ONLY_ATTRS.has(attrNum)) throw Nfsv4Stat.NFS4ERR_INVAL;
         }
       }
     }

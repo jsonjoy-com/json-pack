@@ -9,12 +9,25 @@ import {cmpUint8Array} from '@jsonjoy.com/buffers/lib/cmpUint8Array';
 import {ClientRecord} from '../ClientRecord';
 import {FileHandleMapper, ROOT_FH} from './fh';
 import {isErrCode} from './util';
+import {encodeAttrs} from './attrs';
 
 export interface Nfsv4OperationsNodeOpts {
   /** Node.js `fs` module. */
   fs: typeof import('node:fs');
   /** Absolute path to the root directory to serve. */
   dir: string;
+
+  /**
+   * Maximum number of confirmed clients to allow.
+   * @default 1000
+   */
+  maxClients?: number;
+
+  /**
+   * Maximum number of pending clients to allow.
+   * @default 1000
+   */
+  maxPendingClients?: number;
 }
 
 /**
@@ -30,9 +43,9 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   /** Clients pending SETCLIENTID_CONFIRM confirmation. */
   protected pendingClients: Map<bigint, ClientRecord> = new Map();
   /** Maximum number of client records to keep. */
-  protected maxClients = 1000;
+  protected maxClients;
   /** Maximum number of pending client records to keep. */
-  protected maxPendingClients = 1000;
+  protected maxPendingClients;
   /** Next client ID to assign. */
   protected nextClientId = 1n;
 
@@ -46,6 +59,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     this.promises = this.fs.promises;
     this.dir = opts.dir;
     this.fh = new FileHandleMapper(this.bootStamp, this.dir);
+    this.maxClients = opts.maxClients ?? 1000;
+    this.maxPendingClients = opts.maxPendingClients ?? 1000;
   }
 
   protected findClientByIdString(
@@ -276,6 +291,20 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4LookuppResponse(Nfsv4Stat.NFS4_OK);
   }
 
+  public async GETATTR(request: msg.Nfsv4GetattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4GetattrResponse> {
+    const path = this.fh.currentPath(ctx);
+    let stats: Stats;
+    try {
+      stats = await this.promises.lstat(path);
+    } catch (error: unknown) {
+      if (isErrCode('ENOENT', error)) throw Nfsv4Stat.NFS4ERR_NOENT;
+      if (isErrCode('EACCES', error)) throw Nfsv4Stat.NFS4ERR_ACCESS;
+      throw Nfsv4Stat.NFS4ERR_IO;
+    }
+    const attrs = encodeAttrs(request.attrRequest, stats, path, ctx.cfh!);
+    return new msg.Nfsv4GetattrResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4GetattrResOk(attrs));
+  }
+
   // ----------------------------------------------- Stub implementations below
 
   public async ACCESS(request: msg.Nfsv4AccessRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4AccessResponse> {
@@ -318,12 +347,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     ctx.connection.logger.log('DELEGRETURN', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4DelegreturnResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async GETATTR(request: msg.Nfsv4GetattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4GetattrResponse> {
-    ctx.connection.logger.log('GETATTR', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4GetattrResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
   public async LINK(request: msg.Nfsv4LinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LinkResponse> {

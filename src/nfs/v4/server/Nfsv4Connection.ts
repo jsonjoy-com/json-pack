@@ -113,19 +113,19 @@ export class Nfsv4Connection {
     const {xid, proc} = procedure;
     switch (proc) {
       case Nfsv4Proc.COMPOUND: {
-        // if (debug) logger.log('COMPOUND', procedure);
+        if (debug) logger.log(`\n<COMPOUND{${xid}}>`);
         if (!(procedure.params instanceof Reader)) return;
         const compound = this.nfsDecoder.decodeCompoundRequest(procedure.params);
         if (compound instanceof msg.Nfsv4CompoundRequest) {
           new Nfsv4CompoundProcCtx(this, compound)
             .exec()
             .then((procResponse) => {
-              // if (debug) logger.log('COMPOUND', procResponse);
+              if (debug) logger.log(`</COMPOUND{${xid}}>`);
               this.nfsEncoder.writeAcceptedCompoundReply(xid, EMPTY_AUTH, procResponse);
               this.write(writer.flush());
             })
             .catch((err) => {
-              logger.error('NFS COMPOUND error:', err);
+              logger.error('NFS COMPOUND error:', xid, err);
               this.nfsEncoder.writeRejectedReply(xid, Nfsv4Stat.NFS4ERR_SERVERFAULT);
             });
         } else this.closeWithError(RpcAcceptStat.GARBAGE_ARGS);

@@ -9,7 +9,7 @@ import {XdrEncoder} from '../../xdr';
 import type * as msg from './messages';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 
-export class FullNfsv4Encoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> {
+export class Nfsv4FullEncoder<W extends IWriter & IWriterGrowable = IWriter & IWriterGrowable> {
   public readonly nfsEncoder: Nfsv4Encoder<W>;
   public readonly rpcEncoder: RpcMessageEncoder<W>;
   public readonly rmEncoder: RmRecordEncoder<W>;

@@ -1,6 +1,6 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {Nfsv4Decoder} from '../Nfsv4Decoder';
-import {FullNfsv4Encoder} from '../FullNfsv4Encoder';
+import {Nfsv4FullEncoder} from '../Nfsv4FullEncoder';
 import {RmRecordDecoder, RmRecordEncoder} from '../../../rm';
 import {
   RpcAcceptStat,
@@ -28,7 +28,7 @@ export interface Nfsv4ConnectionOpts {
    */
   duplex: Duplex;
   ops: Nfsv4Operations;
-  encoder?: FullNfsv4Encoder;
+  encoder?: Nfsv4FullEncoder;
   decoder?: Nfsv4Decoder;
   debug?: boolean;
   logger?: Pick<typeof console, 'log' | 'error'>;
@@ -50,7 +50,7 @@ export class Nfsv4Connection {
   protected readonly writer: IWriter & IWriterGrowable;
   protected readonly rmEncoder: RmRecordEncoder;
   protected readonly rpcEncoder: RpcMessageEncoder;
-  protected readonly nfsEncoder: FullNfsv4Encoder;
+  protected readonly nfsEncoder: Nfsv4FullEncoder;
 
   public debug: boolean;
   public logger: Pick<typeof console, 'log' | 'error'>;

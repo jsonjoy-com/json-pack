@@ -205,6 +205,9 @@ export const STAT_ATTRS = new Set<Nfsv4Attr>([
 
 /**
  * Extract attribute numbers from a bitmap mask.
+ * 
+ * @todo PERF: More efficient would be to parse to `Array<number>` and 
+ *     also use `Array<number>` for {@link overlap} calculation.
  */
 export const parseBitmask = (mask: number[]): Set<number> => {
   const attrs = new Set<number>();

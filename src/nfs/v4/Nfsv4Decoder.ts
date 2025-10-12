@@ -1,6 +1,6 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrDecoder} from '../../xdr/XdrDecoder';
-import {Nfsv4Op, Nfsv4CbOp, Nfsv4FType, Nfsv4DelegType} from './constants';
+import {Nfsv4Op, Nfsv4CbOp, Nfsv4FType, Nfsv4DelegType, Nfsv4Stat} from './constants';
 import {Nfsv4DecodingError} from './errors';
 import * as msg from './messages';
 import * as structs from './structs';
@@ -229,14 +229,6 @@ export class Nfsv4Decoder {
     return new structs.Nfsv4Verifier(data);
   }
 
-  // TODO: Why is this not used?
-  private readTime(): structs.Nfsv4Time {
-    const xdr = this.xdr;
-    const seconds = xdr.readHyper();
-    const nseconds = xdr.readUnsignedInt();
-    return new structs.Nfsv4Time(seconds, nseconds);
-  }
-
   private readStateid(): structs.Nfsv4Stateid {
     const xdr = this.xdr;
     const seqid = xdr.readUnsignedInt();
@@ -247,6 +239,7 @@ export class Nfsv4Decoder {
   private readBitmap(): structs.Nfsv4Bitmap {
     const xdr = this.xdr;
     const count = xdr.readUnsignedInt();
+    if (count > 8) throw Nfsv4Stat.NFS4ERR_BADXDR;
     const mask: number[] = [];
     for (let i = 0; i < count; i++) mask.push(xdr.readUnsignedInt());
     return new structs.Nfsv4Bitmap(mask);

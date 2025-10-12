@@ -1,3 +1,5 @@
+import type {Stats} from 'node:fs';
+import * as NodePath from 'node:path';
 import {randomBytes} from 'node:crypto';
 import {Nfsv4Const, Nfsv4Stat} from '../../../constants';
 import {Nfsv4OperationCtx, Nfsv4Operations} from '../Nfsv4Operations';
@@ -6,6 +8,7 @@ import * as struct from '../../../structs';
 import {cmpUint8Array} from '@jsonjoy.com/buffers/lib/cmpUint8Array';
 import {ClientRecord} from '../ClientRecord';
 import {FileHandleMapper, ROOT_FH} from './fh';
+import {isErrCode} from './util';
 
 export interface Nfsv4OperationsNodeOpts {
   /** Node.js `fs` module. */
@@ -18,7 +21,8 @@ export interface Nfsv4OperationsNodeOpts {
  * NFS v4 Operations implementation for Node.js `fs` filesystem.
  */
 export class Nfsv4OperationsNode implements Nfsv4Operations {
-  protected fs: typeof import('node:fs');
+  protected readonly fs: typeof import('node:fs');
+  protected readonly promises: (typeof import('node:fs'))['promises'];
   protected dir: string;
 
   /** Confirmed clients. */
@@ -39,6 +43,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   constructor(opts: Nfsv4OperationsNodeOpts) {
     this.fs = opts.fs;
+    this.promises = this.fs.promises;
     this.dir = opts.dir;
     this.fh = new FileHandleMapper(this.bootStamp, this.dir);
   }
@@ -209,6 +214,68 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4GetfhResponse(Nfsv4Stat.NFS4_OK, body);
   }
 
+  public async RESTOREFH(
+    request: msg.Nfsv4RestorefhRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4RestorefhResponse> {
+    if (!ctx.sfh) return new msg.Nfsv4RestorefhResponse(Nfsv4Stat.NFS4ERR_RESTOREFH);
+    ctx.cfh = ctx.sfh;
+    return new msg.Nfsv4RestorefhResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  public async SAVEFH(request: msg.Nfsv4SavefhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SavefhResponse> {
+    if (!ctx.cfh) return new msg.Nfsv4SavefhResponse(Nfsv4Stat.NFS4ERR_NOFILEHANDLE);
+    ctx.sfh = ctx.cfh;
+    return new msg.Nfsv4SavefhResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  public async LOOKUP(request: msg.Nfsv4LookupRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LookupResponse> {
+    const fh = this.fh;
+    const currentPath = fh.currentPath(ctx);
+    const component = request.objname;
+    if (component.length === 0) throw Nfsv4Stat.NFS4ERR_INVAL;
+    const promises = this.promises;
+    let stats: Stats;
+    try {
+      stats = await promises.stat(currentPath);
+    } catch (err: unknown) {
+      if (isErrCode('ENOENT', err)) throw Nfsv4Stat.NFS4ERR_NOENT;
+      throw Nfsv4Stat.NFS4ERR_IO;
+    }
+    if (stats.isSymbolicLink()) throw Nfsv4Stat.NFS4ERR_SYMLINK;
+    if (!stats.isDirectory()) throw Nfsv4Stat.NFS4ERR_NOTDIR;
+    const targetPath = NodePath.join(currentPath, component);
+    try {
+      const targetStats = await promises.stat(targetPath);
+      if (!targetStats) throw Nfsv4Stat.NFS4ERR_NOENT;
+    } catch (err: any) {
+      if (isErrCode('ENOENT', err)) throw Nfsv4Stat.NFS4ERR_NOENT;
+      if (isErrCode('EACCES', err)) throw Nfsv4Stat.NFS4ERR_ACCESS;
+      throw Nfsv4Stat.NFS4ERR_IO;
+    }
+    fh.setCfh(ctx, targetPath);
+    return new msg.Nfsv4LookupResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  public async LOOKUPP(request: msg.Nfsv4LookuppRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LookuppResponse> {
+    const fh = this.fh;
+    const currentPath = fh.currentPath(ctx);
+    if (currentPath === this.dir) throw Nfsv4Stat.NFS4ERR_NOENT;
+    const promises = this.promises;
+    let stats: Stats;
+    try {
+      stats = await promises.stat(currentPath);
+    } catch (err: any) {
+      if (isErrCode('ENOENT', err)) throw Nfsv4Stat.NFS4ERR_NOENT;
+      throw Nfsv4Stat.NFS4ERR_IO;
+    }
+    if (!stats.isDirectory()) throw Nfsv4Stat.NFS4ERR_NOTDIR;
+    const parentPath = NodePath.dirname(currentPath);
+    if (parentPath.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
+    fh.setCfh(ctx, parentPath);
+    return new msg.Nfsv4LookuppResponse(Nfsv4Stat.NFS4_OK);
+  }
+
   // ----------------------------------------------- Stub implementations below
 
   public async ACCESS(request: msg.Nfsv4AccessRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4AccessResponse> {
@@ -283,18 +350,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4LockuResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
-  public async LOOKUP(request: msg.Nfsv4LookupRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LookupResponse> {
-    ctx.connection.logger.log('LOOKUP', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4LookupResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async LOOKUPP(request: msg.Nfsv4LookuppRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LookuppResponse> {
-    ctx.connection.logger.log('LOOKUPP', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4LookuppResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
   public async NVERIFY(request: msg.Nfsv4NverifyRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4NverifyResponse> {
     ctx.connection.logger.log('NVERIFY', request);
     throw new Error('Not implemented');
@@ -365,21 +420,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     ctx.connection.logger.log('RENEW', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4RenewResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async RESTOREFH(
-    request: msg.Nfsv4RestorefhRequest,
-    ctx: Nfsv4OperationCtx,
-  ): Promise<msg.Nfsv4RestorefhResponse> {
-    ctx.connection.logger.log('RESTOREFH', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4RestorefhResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async SAVEFH(request: msg.Nfsv4SavefhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SavefhResponse> {
-    ctx.connection.logger.log('SAVEFH', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4SavefhResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
   public async SECINFO(request: msg.Nfsv4SecinfoRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SecinfoResponse> {

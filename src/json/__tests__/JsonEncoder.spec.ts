@@ -189,7 +189,7 @@ describe('buffer reallocation stress tests', () => {
     for (let round = 0; round < 50; round++) {
       const smallWriter = new Writer(64);
       const smallEncoder = new JsonEncoder(smallWriter);
-      
+
       for (let i = 0; i < 500; i++) {
         // Create strings < 256 chars with non-ASCII character to trigger fallback
         const asciiPart = 'a'.repeat(Math.floor(Math.random() * 200));
@@ -207,7 +207,7 @@ describe('buffer reallocation stress tests', () => {
     for (let round = 0; round < 10; round++) {
       const smallWriter = new Writer(64);
       const smallEncoder = new JsonEncoder(smallWriter);
-      
+
       for (let i = 0; i < 1000; i++) {
         const value = {
           foo: 'a'.repeat(Math.round(32000 * Math.random()) + 10),
@@ -225,7 +225,7 @@ describe('buffer reallocation stress tests', () => {
     for (let round = 0; round < 20; round++) {
       const smallWriter = new Writer(64);
       const smallEncoder = new JsonEncoder(smallWriter);
-      
+
       for (let i = 0; i < 100; i++) {
         const length = 256 + Math.floor(Math.random() * 10000);
         const value = {foo: 'a'.repeat(length)};
@@ -242,7 +242,7 @@ describe('buffer reallocation stress tests', () => {
     for (let round = 0; round < 10; round++) {
       const smallWriter = new Writer(64);
       const smallEncoder = new JsonEncoder(smallWriter);
-      
+
       for (let i = 0; i < 1000; i++) {
         const value = {foo: 'test' + i};
         const encoded = smallEncoder.encode(value);

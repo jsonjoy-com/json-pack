@@ -455,9 +455,7 @@ describe('buffer reallocation stress tests', () => {
       smallWriter.reset();
       for (let i = 0; i < 100; i++) {
         // Alternate between short strings with control chars and longer strings
-        const str = i % 2 === 0 
-          ? 'short_\x00\x01\x02_' + i
-          : 'a'.repeat(50) + '\x03\x04' + 'b'.repeat(50);
+        const str = i % 2 === 0 ? 'short_\x00\x01\x02_' + i : 'a'.repeat(50) + '\x03\x04' + 'b'.repeat(50);
         const encoded = smallEncoder.encode(str);
         const decoded = decode(encoded);
         expect(decoded).toBe(str);

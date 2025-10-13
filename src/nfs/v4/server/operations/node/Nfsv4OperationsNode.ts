@@ -15,7 +15,11 @@ import {parseBitmask, requiresLstat} from '../../../attributes';
 export interface Nfsv4OperationsNodeOpts {
   /** Node.js `fs` module. */
   fs: typeof import('node:fs');
-  /** Absolute path to the root directory to serve. */
+
+  /**
+   * Absolute path to the root directory to serve. This is some directory on the
+   * host filesystem that the NFS server will use as its root.
+   */
   dir: string;
 
   /**
@@ -216,15 +220,16 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   public async PUTFH(request: msg.Nfsv4PutfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4PutfhResponse> {
     const fh = request.object.data;
-    if (fh.length > Nfsv4Const.FHSIZE) return new msg.Nfsv4PutfhResponse(Nfsv4Stat.NFS4ERR_BADHANDLE);
+    if (fh.length > Nfsv4Const.FHSIZE) throw Nfsv4Stat.NFS4ERR_BADHANDLE;
     const valid = this.fh.validate(fh);
+    if (!valid) throw Nfsv4Stat.NFS4ERR_BADHANDLE; 
     ctx.cfh = fh;
     return new msg.Nfsv4PutfhResponse(Nfsv4Stat.NFS4_OK);
   }
 
   public async GETFH(request: msg.Nfsv4GetfhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4GetfhResponse> {
     const cfh = ctx.cfh;
-    if (!cfh) return new msg.Nfsv4GetfhResponse(Nfsv4Stat.NFS4ERR_NOFILEHANDLE);
+    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
     const fh = new struct.Nfsv4Fh(cfh);
     const body = new msg.Nfsv4GetfhResOk(fh);
     return new msg.Nfsv4GetfhResponse(Nfsv4Stat.NFS4_OK, body);
@@ -234,73 +239,83 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     request: msg.Nfsv4RestorefhRequest,
     ctx: Nfsv4OperationCtx,
   ): Promise<msg.Nfsv4RestorefhResponse> {
-    if (!ctx.sfh) return new msg.Nfsv4RestorefhResponse(Nfsv4Stat.NFS4ERR_RESTOREFH);
+    if (!ctx.sfh) throw Nfsv4Stat.NFS4ERR_RESTOREFH;
     ctx.cfh = ctx.sfh;
     return new msg.Nfsv4RestorefhResponse(Nfsv4Stat.NFS4_OK);
   }
 
   public async SAVEFH(request: msg.Nfsv4SavefhRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SavefhResponse> {
-    if (!ctx.cfh) return new msg.Nfsv4SavefhResponse(Nfsv4Stat.NFS4ERR_NOFILEHANDLE);
+    if (!ctx.cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
     ctx.sfh = ctx.cfh;
     return new msg.Nfsv4SavefhResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  private absolutePath(path: string): string {
+    const dir = this.dir;
+    const absolutePath = NodePath.join(dir, path);
+    if (absolutePath.length < dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
+    return absolutePath;
   }
 
   public async LOOKUP(request: msg.Nfsv4LookupRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LookupResponse> {
     const fh = this.fh;
     const currentPath = fh.currentPath(ctx);
+    const dirAbsolutePath = this.absolutePath(currentPath);
     const component = request.objname;
     if (component.length === 0) throw Nfsv4Stat.NFS4ERR_INVAL;
     const promises = this.promises;
     let stats: Stats;
     try {
-      stats = await promises.stat(currentPath);
+      stats = await promises.stat(dirAbsolutePath);
     } catch (err: unknown) {
       if (isErrCode('ENOENT', err)) throw Nfsv4Stat.NFS4ERR_NOENT;
       throw Nfsv4Stat.NFS4ERR_IO;
     }
     if (stats.isSymbolicLink()) throw Nfsv4Stat.NFS4ERR_SYMLINK;
     if (!stats.isDirectory()) throw Nfsv4Stat.NFS4ERR_NOTDIR;
-    const targetPath = NodePath.join(currentPath, component);
+    const targetAbsolutePath = NodePath.join(dirAbsolutePath, component);
     try {
-      const targetStats = await promises.stat(targetPath);
+      const targetStats = await promises.stat(targetAbsolutePath);
       if (!targetStats) throw Nfsv4Stat.NFS4ERR_NOENT;
     } catch (err: any) {
       if (isErrCode('ENOENT', err)) throw Nfsv4Stat.NFS4ERR_NOENT;
       if (isErrCode('EACCES', err)) throw Nfsv4Stat.NFS4ERR_ACCESS;
       throw Nfsv4Stat.NFS4ERR_IO;
     }
-    fh.setCfh(ctx, targetPath);
+    fh.setCfh(ctx, targetAbsolutePath);
     return new msg.Nfsv4LookupResponse(Nfsv4Stat.NFS4_OK);
   }
 
   public async LOOKUPP(request: msg.Nfsv4LookuppRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LookuppResponse> {
     const fh = this.fh;
     const currentPath = fh.currentPath(ctx);
-    if (currentPath === this.dir) throw Nfsv4Stat.NFS4ERR_NOENT;
+    const absolutePath = this.absolutePath(currentPath);
     const promises = this.promises;
     let stats: Stats;
     try {
-      stats = await promises.stat(currentPath);
+      stats = await promises.stat(absolutePath);
     } catch (err: any) {
       if (isErrCode('ENOENT', err)) throw Nfsv4Stat.NFS4ERR_NOENT;
       throw Nfsv4Stat.NFS4ERR_IO;
     }
     if (!stats.isDirectory()) throw Nfsv4Stat.NFS4ERR_NOTDIR;
-    const parentPath = NodePath.dirname(currentPath);
-    if (parentPath.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
-    fh.setCfh(ctx, parentPath);
+    const parentAbsolutePath = NodePath.dirname(absolutePath);
+    if (parentAbsolutePath.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
+    fh.setCfh(ctx, parentAbsolutePath);
     return new msg.Nfsv4LookuppResponse(Nfsv4Stat.NFS4_OK);
   }
 
   public async GETATTR(request: msg.Nfsv4GetattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4GetattrResponse> {
     const path = this.fh.currentPath(ctx);
+    const absolutePath = this.absolutePath(path);
     const requestedAttrNums = parseBitmask(request.attrRequest.mask);
     let stats: Stats | undefined;
     if (requiresLstat(requestedAttrNums)) {
       try {
-        stats = await this.promises.lstat(path);
+        if (ctx.connection.debug) ctx.connection.logger.log('lstat', absolutePath);
+        stats = await this.promises.lstat(absolutePath);
       } catch (error: unknown) {
-        throw normalizeNodeFsError(error);
+        throw normalizeNodeFsError(error, ctx.connection.logger);
       }
     }
     const attrs = encodeAttrs(request.attrRequest, stats, path, ctx.cfh!);

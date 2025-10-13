@@ -821,8 +821,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     }
     const stateid = openRes.resok.stateid;
     const fd = Math.floor(Math.random() * 1000000);
-    const fileOperations = this.navigateToPath(parts);
-    return new NfsFsFileHandle(fd, pathStr, this.fs, stateid, fileOperations);
+    return new NfsFsFileHandle(fd, pathStr, this, stateid);
   };
 
   public readonly statfs = (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStatFs> => {

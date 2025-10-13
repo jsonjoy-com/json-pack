@@ -374,23 +374,139 @@ export class Nfsv4FsClient implements NfsFsClient {
     return entries;
   }
 
-  public readonly appendFile = (path: misc.TFileHandle, data: misc.TData, options?: opts.IAppendFileOptions | string): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
+  public async appendFile(path: misc.TFileHandle, data: misc.TData, options?: opts.IAppendFileOptions | string): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
+    for (const part of parts.slice(0, -1)) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    const filename = parts[parts.length - 1];
+    const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
+    const claim = nfs.OpenClaimNull(filename);
+    operations.push(
+      nfs.OPEN(
+        0,
+        Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
+        Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+        openOwner,
+        0,
+        claim,
+      ),
+    );
+    const attrNums = [Nfsv4Attr.FATTR4_SIZE];
+    const attrMask = this.attrNumsToBitmap(attrNums);
+    operations.push(nfs.GETATTR(attrMask));
+    const openResponse = await this.nfs.compound(operations);
+    if (openResponse.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to open file: ${openResponse.status}`);
+    }
+    const openRes = openResponse.resarray[openResponse.resarray.length - 2] as msg.Nfsv4OpenResponse;
+    if (openRes.status !== Nfsv4Stat.NFS4_OK || !openRes.resok) {
+      throw new Error(`Failed to open file: ${openRes.status}`);
+    }
+    const getattrRes = openResponse.resarray[openResponse.resarray.length - 1] as msg.Nfsv4GetattrResponse;
+    if (getattrRes.status !== Nfsv4Stat.NFS4_OK || !getattrRes.resok) {
+      throw new Error(`Failed to get attributes: ${getattrRes.status}`);
+    }
+    const fattr = getattrRes.resok.objAttributes;
+    const reader = new Reader();
+    reader.reset(fattr.attrVals);
+    const xdr = new XdrDecoder(reader);
+    const currentSize = Number(xdr.readUnsignedHyper());
+    const openStateid = openRes.resok.stateid;
+    const buffer = this.encodeData(data);
+    const chunkSize = 65536;
+    try {
+      let offset = BigInt(currentSize);
+      for (let i = 0; i < buffer.length; i += chunkSize) {
+        const chunk = buffer.slice(i, Math.min(i + chunkSize, buffer.length));
+        const writeResponse = await this.nfs.compound([
+          nfs.WRITE(openStateid, offset, Nfsv4StableHow.FILE_SYNC4, chunk),
+        ]);
+        if (writeResponse.status !== Nfsv4Stat.NFS4_OK) {
+          throw new Error(`Failed to write file: ${writeResponse.status}`);
+        }
+        const writeRes = writeResponse.resarray[0] as msg.Nfsv4WriteResponse;
+        if (writeRes.status !== Nfsv4Stat.NFS4_OK || !writeRes.resok) {
+          throw new Error(`Failed to write file: ${writeRes.status}`);
+        }
+        offset += BigInt(writeRes.resok.count);
+      }
+    } finally {
+      await this.nfs.compound([nfs.CLOSE(0, openStateid)]);
+    }
+  }
+
+  public async truncate(path: misc.PathLike, len: number = 0): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
+    for (const part of parts) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    const writer = new Writer(16);
+    const xdr = new XdrEncoder(writer);
+    xdr.writeUnsignedHyper(BigInt(len));
+    const attrVals = writer.flush();
+    const sizeAttrs = nfs.Fattr([Nfsv4Attr.FATTR4_SIZE], attrVals);
+    const stateid = nfs.Stateid(0, new Uint8Array(12));
+    operations.push(nfs.SETATTR(stateid, sizeAttrs));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to truncate file: ${response.status}`);
+    }
+    const setattrRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4SetattrResponse;
+    if (setattrRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to truncate file: ${setattrRes.status}`);
+    }
+  }
+
+  public async unlink(path: misc.PathLike): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    if (parts.length === 0) {
+      throw new Error('Cannot unlink root directory');
+    }
+    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
+    for (const part of parts.slice(0, -1)) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    const filename = parts[parts.length - 1];
+    operations.push(nfs.REMOVE(filename));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to unlink file: ${response.status}`);
+    }
+    const removeRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4RemoveResponse;
+    if (removeRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to unlink file: ${removeRes.status}`);
+    }
+  }
+
+  public async rmdir(path: misc.PathLike, options?: opts.IRmdirOptions): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    if (parts.length === 0) {
+      throw new Error('Cannot remove root directory');
+    }
+    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
+    for (const part of parts.slice(0, -1)) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    const dirname = parts[parts.length - 1];
+    operations.push(nfs.REMOVE(dirname));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to remove directory: ${response.status}`);
+    }
+    const removeRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4RemoveResponse;
+    if (removeRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to remove directory: ${removeRes.status}`);
+    }
+  }
 
   public readonly access = (path: misc.PathLike, mode?: number): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly copyFile = (src: misc.PathLike, dest: misc.PathLike, flags?: misc.TFlagsCopy): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly link = (existingPath: misc.PathLike, newPath: misc.PathLike): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly realpath = (path: misc.PathLike, options?: opts.IRealpathOptions | string): Promise<misc.TDataOut> => {
     throw new Error('Not implemented.');
   };
 
@@ -398,23 +514,23 @@ export class Nfsv4FsClient implements NfsFsClient {
     throw new Error('Not implemented.');
   };
 
-  public readonly rmdir = (path: misc.PathLike, options?: opts.IRmdirOptions): Promise<void> => {
+  public readonly copyFile = (src: misc.PathLike, dest: misc.PathLike, flags?: misc.TFlagsCopy): Promise<void> => {
     throw new Error('Not implemented.');
   };
 
-  public readonly truncate = (path: misc.PathLike, len?: number): Promise<void> => {
+  public readonly realpath = (path: misc.PathLike, options?: opts.IRealpathOptions | string): Promise<misc.TDataOut> => {
     throw new Error('Not implemented.');
   };
 
-  public readonly unlink = (path: misc.PathLike): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly utimes = (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
+  public readonly link = (existingPath: misc.PathLike, newPath: misc.PathLike): Promise<void> => {
     throw new Error('Not implemented.');
   };
 
   public readonly symlink = (target: misc.PathLike, path: misc.PathLike, type?: misc.symlink.Type): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly utimes = (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
     throw new Error('Not implemented.');
   };
 

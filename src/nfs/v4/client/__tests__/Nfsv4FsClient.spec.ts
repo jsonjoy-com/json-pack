@@ -165,3 +165,118 @@ describe('.readdir()', () => {
     await stop();
   });
 });
+
+describe('.truncate()', () => {
+  test('can truncate file to zero', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.truncate('file.txt', 0);
+    const stats = await fs.stat('file.txt');
+    expect(stats.size).toBe(0);
+    await stop();
+  });
+
+  test('can truncate file to specific size', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.truncate('file.txt', 5);
+    const stats = await fs.stat('file.txt');
+    expect(stats.size).toBe(5);
+    const content = await fs.readFile('file.txt', 'utf8');
+    expect(content).toBe('Hello');
+    await stop();
+  });
+
+  test('can truncate nested file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.truncate('subdir/nested.dat', 6);
+    const stats = await fs.stat('subdir/nested.dat');
+    expect(stats.size).toBe(6);
+    await stop();
+  });
+});
+
+describe('.appendFile()', () => {
+  test('can append text to file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.appendFile('file.txt', ' Appended!');
+    const content = await fs.readFile('file.txt', 'utf8');
+    expect(content).toBe('Hello, NFS v4!\n Appended!');
+    await stop();
+  });
+
+  test('can append buffer to file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const data = Buffer.from(' More data');
+    await fs.appendFile('file.txt', data);
+    const content = await fs.readFile('file.txt', 'utf8');
+    expect(content).toBe('Hello, NFS v4!\n More data');
+    await stop();
+  });
+
+  test('can append to nested file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.appendFile('subdir/nested.dat', '+++');
+    const content = await fs.readFile('subdir/nested.dat', 'utf8');
+    expect(content).toBe('nested data+++');
+    await stop();
+  });
+});
+
+describe('.unlink()', () => {
+  test('can delete a file', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.unlink('file.txt');
+    expect(vol.existsSync('/export/file.txt')).toBe(false);
+    await stop();
+  });
+
+  test('can delete nested file', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.unlink('subdir/nested.dat');
+    expect(vol.existsSync('/export/subdir/nested.dat')).toBe(false);
+    await stop();
+  });
+
+  test('throws error when deleting non-existent file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await expect(fs.unlink('nonexistent.txt')).rejects.toThrow();
+    await stop();
+  });
+});
+
+describe('.rmdir()', () => {
+  test('can remove empty directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    expect(vol.existsSync('/export/emptydir')).toBe(false);
+    await fs.mkdir('emptydir');
+    expect(vol.existsSync('/export/emptydir')).toBe(true);
+    await fs.rmdir('emptydir');
+    expect(vol.existsSync('/export/emptydir')).toBe(false);
+    await stop();
+  });
+
+  test('can remove nested directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.mkdir('subdir/newsubdir');
+    await fs.rmdir('subdir/newsubdir');
+    expect(vol.existsSync('/export/subdir/newsubdir')).toBe(false);
+    await stop();
+  });
+
+  test('throws error when removing non-empty directory', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await expect(fs.rmdir('subdir')).rejects.toThrow();
+    await stop();
+  });
+});

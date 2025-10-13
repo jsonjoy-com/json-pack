@@ -180,3 +180,76 @@ describe('nested object', () => {
     });
   });
 });
+
+describe('buffer reallocation stress tests', () => {
+  test('strings with non-ASCII triggering fallback (reproduces writer.x bug)', () => {
+    // This specifically tests the bug where writer.x is not reset before fallback
+    // When a short string (<256) contains non-ASCII, it triggers writer.utf8()
+    // but writer.x has already been incremented by writing the opening quote
+    for (let round = 0; round < 50; round++) {
+      const smallWriter = new Writer(64);
+      const smallEncoder = new JsonEncoder(smallWriter);
+      
+      for (let i = 0; i < 500; i++) {
+        // Create strings < 256 chars with non-ASCII character to trigger fallback
+        const asciiPart = 'a'.repeat(Math.floor(Math.random() * 200));
+        const value = {foo: asciiPart + '\u0001' + asciiPart}; // control char triggers fallback
+        const encoded = smallEncoder.encode(value);
+        const json = Buffer.from(encoded).toString('utf-8');
+        const decoded = JSON.parse(json);
+        expect(decoded).toEqual(value);
+      }
+    }
+  });
+
+  test('many iterations with long strings (reproduces writer.utf8 bug)', () => {
+    // Run multiple test rounds to increase chance of hitting the bug
+    for (let round = 0; round < 10; round++) {
+      const smallWriter = new Writer(64);
+      const smallEncoder = new JsonEncoder(smallWriter);
+      
+      for (let i = 0; i < 1000; i++) {
+        const value = {
+          foo: 'a'.repeat(Math.round(32000 * Math.random()) + 10),
+        };
+        const encoded = smallEncoder.encode(value);
+        const json = Buffer.from(encoded).toString('utf-8');
+        const decoded = JSON.parse(json);
+        expect(decoded).toEqual(value);
+      }
+    }
+  });
+
+  test('repeated long strings >= 256 chars (reproduces writer.utf8 bug)', () => {
+    // Run multiple test rounds to increase chance of hitting the bug
+    for (let round = 0; round < 20; round++) {
+      const smallWriter = new Writer(64);
+      const smallEncoder = new JsonEncoder(smallWriter);
+      
+      for (let i = 0; i < 100; i++) {
+        const length = 256 + Math.floor(Math.random() * 10000);
+        const value = {foo: 'a'.repeat(length)};
+        const encoded = smallEncoder.encode(value);
+        const json = Buffer.from(encoded).toString('utf-8');
+        const decoded = JSON.parse(json);
+        expect(decoded).toEqual(value);
+      }
+    }
+  });
+
+  test('many short strings with buffer growth (reproduces writer.utf8 bug)', () => {
+    // Run multiple test rounds to increase chance of hitting the bug
+    for (let round = 0; round < 10; round++) {
+      const smallWriter = new Writer(64);
+      const smallEncoder = new JsonEncoder(smallWriter);
+      
+      for (let i = 0; i < 1000; i++) {
+        const value = {foo: 'test' + i};
+        const encoded = smallEncoder.encode(value);
+        const json = Buffer.from(encoded).toString('utf-8');
+        const decoded = JSON.parse(json);
+        expect(decoded).toEqual(value);
+      }
+    }
+  });
+});

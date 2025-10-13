@@ -66,3 +66,36 @@ describe('.writeFile()', () => {
     await stop();
   });
 });
+
+describe('.stat()', () => {
+  test('can stat a file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const stats = await fs.stat('file.txt');
+    expect(stats.isFile()).toBe(true);
+    expect(stats.isDirectory()).toBe(false);
+    expect(stats.size).toBe(15);
+    expect(stats.mode).toBeGreaterThan(0);
+    expect(stats.nlink).toBeGreaterThan(0);
+    await stop();
+  });
+
+  test('can stat a directory', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const stats = await fs.stat('subdir');
+    expect(stats.isDirectory()).toBe(true);
+    expect(stats.isFile()).toBe(false);
+    await stop();
+  });
+
+  test('can stat nested file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const stats = await fs.stat('subdir/nested.dat');
+    expect(stats.isFile()).toBe(true);
+    expect(stats.size).toBe(11);
+    expect(stats.ctimeMs <= Date.now()).toBe(true);
+    await stop();
+  });
+});

@@ -19,6 +19,8 @@ import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrEncoder} from '../../../xdr/XdrEncoder';
 import {XdrDecoder} from '../../../xdr/XdrDecoder';
 import {NfsFsStats} from './NfsFsStats';
+import {NfsFsDir} from './NfsFsDir';
+import {NfsFsDirent} from './NfsFsDirent';
 
 export class Nfsv4FsClient implements NfsFsClient {
   constructor(public readonly nfs: Nfsv4Client) {}
@@ -358,23 +360,7 @@ export class Nfsv4FsClient implements NfsFsClient {
             }
           }
         }
-        const isDirectory = fileType === Nfsv4FType.NF4DIR;
-        const isFile = fileType === Nfsv4FType.NF4REG;
-        const isBlockDevice = fileType === Nfsv4FType.NF4BLK;
-        const isCharacterDevice = fileType === Nfsv4FType.NF4CHR;
-        const isSymbolicLink = fileType === Nfsv4FType.NF4LNK;
-        const isFIFO = fileType === Nfsv4FType.NF4FIFO;
-        const isSocket = fileType === Nfsv4FType.NF4SOCK;
-        dirents.push({
-          name,
-          isDirectory: () => isDirectory,
-          isFile: () => isFile,
-          isBlockDevice: () => isBlockDevice,
-          isCharacterDevice: () => isCharacterDevice,
-          isSymbolicLink: () => isSymbolicLink,
-          isFIFO: () => isFIFO,
-          isSocket: () => isSocket,
-        });
+        dirents.push(new NfsFsDirent(name, fileType));
       } else {
         entries.push(name);
       }
@@ -711,9 +697,21 @@ export class Nfsv4FsClient implements NfsFsClient {
     return Buffer.from(readlinkRes.resok.link, 'utf8');
   }
 
-  public readonly opendir = (path: misc.PathLike, options?: opts.IOpendirOptions): Promise<misc.IDir> => {
-    throw new Error('Not implemented.');
-  };
+  public async opendir(path: misc.PathLike, options?: opts.IOpendirOptions): Promise<misc.IDir> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations = this.navigateToPath(parts);
+    return new NfsFsDir(pathStr, this.nfs, operations);
+  }
+
+  public async mkdtemp(prefix: string, options?: opts.IOptions): Promise<misc.TDataOut> {
+    const encoding = typeof options === 'string' ? options : options?.encoding;
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const dirName = prefix + randomSuffix;
+    await this.mkdir(dirName);
+    if (!encoding || encoding === 'utf8') return dirName;
+    return Buffer.from(dirName, 'utf8');
+  }
 
   public readonly open = (path: misc.PathLike, flags?: misc.TFlags, mode?: misc.TMode): Promise<misc.IFileHandle> => {
     throw new Error('Not implemented.');
@@ -740,10 +738,6 @@ export class Nfsv4FsClient implements NfsFsClient {
   };
 
   public readonly lstat = (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly mkdtemp = (prefix: string, options?: opts.IOptions): Promise<misc.TDataOut> => {
     throw new Error('Not implemented.');
   };
 

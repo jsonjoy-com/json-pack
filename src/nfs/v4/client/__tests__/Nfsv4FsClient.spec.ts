@@ -529,3 +529,128 @@ describe('.rm()', () => {
     await stop();
   });
 });
+
+describe('.mkdtemp()', () => {
+  test('can create temporary directory with prefix', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const tmpDir = await fs.mkdtemp('tmp-');
+    expect(tmpDir).toMatch(/^tmp-[a-z0-9]{6}$/);
+    expect(vol.existsSync('/export/' + tmpDir)).toBe(true);
+    const stats = await fs.stat(tmpDir);
+    expect(stats.isDirectory()).toBe(true);
+    await stop();
+  });
+
+  test('creates directory with random suffix', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const tmpDir1 = await fs.mkdtemp('test-');
+    const tmpDir2 = await fs.mkdtemp('test-');
+    expect(tmpDir1).not.toBe(tmpDir2);
+    await stop();
+  });
+
+  test('can create temporary directory with nested prefix', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const tmpDir = await fs.mkdtemp('subdir/tmp-');
+    expect(tmpDir).toMatch(/^subdir\/tmp-[a-z0-9]{6}$/);
+    expect(vol.existsSync('/export/' + tmpDir)).toBe(true);
+    await stop();
+  });
+
+  test('returns buffer when encoding is buffer', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const tmpDir = await fs.mkdtemp('tmp-', {encoding: 'buffer'});
+    expect(Buffer.isBuffer(tmpDir)).toBe(true);
+    await stop();
+  });
+});
+
+describe('.opendir()', () => {
+  test('can open directory and read entries', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const dir = await fs.opendir('/');
+    const entries: string[] = [];
+    let entry = await dir.read();
+    while (entry !== null) {
+      entries.push(entry.name as string);
+      entry = await dir.read();
+    }
+    expect(entries).toContain('file.txt');
+    expect(entries).toContain('subdir');
+    await dir.close();
+    await stop();
+  });
+
+  test('can iterate directory with async iterator', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const dir = await fs.opendir('/');
+    const entries: string[] = [];
+    for await (const entry of dir) {
+      entries.push(entry.name as string);
+    }
+    expect(entries).toContain('file.txt');
+    expect(entries).toContain('subdir');
+    await dir.close();
+    await stop();
+  });
+
+  test('directory entries have correct type information', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const dir = await fs.opendir('/');
+    const entries: any[] = [];
+    for await (const entry of dir) {
+      entries.push(entry);
+    }
+    const fileEntry = entries.find((e) => e.name === 'file.txt');
+    const dirEntry = entries.find((e) => e.name === 'subdir');
+    expect(fileEntry?.isFile()).toBe(true);
+    expect(fileEntry?.isDirectory()).toBe(false);
+    expect(dirEntry?.isDirectory()).toBe(true);
+    expect(dirEntry?.isFile()).toBe(false);
+    await dir.close();
+    await stop();
+  });
+
+  test('can open nested directory', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const dir = await fs.opendir('subdir');
+    const entries: string[] = [];
+    for await (const entry of dir) {
+      entries.push(entry.name as string);
+    }
+    expect(entries).toContain('nested.dat');
+    await dir.close();
+    await stop();
+  });
+
+  test('throws error when reading closed directory', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const dir = await fs.opendir('/');
+    await dir.close();
+    await expect(dir.read()).rejects.toThrow('Directory is closed');
+    await stop();
+  });
+
+  test('readSync returns entries correctly', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const dir = await fs.opendir('/');
+    await dir.read();
+    const entry = dir.readSync();
+    expect(entry).not.toBeNull();
+    if (entry) {
+      expect(typeof entry.name).toBe('string');
+    }
+    await dir.close();
+    await stop();
+  });
+});

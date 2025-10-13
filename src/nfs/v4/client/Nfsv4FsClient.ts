@@ -21,6 +21,7 @@ import {XdrDecoder} from '../../../xdr/XdrDecoder';
 import {NfsFsStats} from './NfsFsStats';
 import {NfsFsDir} from './NfsFsDir';
 import {NfsFsDirent} from './NfsFsDirent';
+import {NfsFsFileHandle} from './NfsFsFileHandle';
 
 export class Nfsv4FsClient implements NfsFsClient {
   constructor(public readonly fs: Nfsv4Client) {}
@@ -773,8 +774,55 @@ export class Nfsv4FsClient implements NfsFsClient {
     return this.utimes(path, atime, mtime);
   };
 
-  public readonly open = (path: misc.PathLike, flags?: misc.TFlags, mode?: misc.TMode): Promise<misc.IFileHandle> => {
-    throw new Error('Not implemented.');
+  public readonly open = async (
+    path: misc.PathLike,
+    flags?: misc.TFlags,
+    mode?: misc.TMode,
+  ): Promise<misc.IFileHandle> => {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations = this.navigateToParent(parts);
+    const filename = parts[parts.length - 1];
+    const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
+    const claim = nfs.OpenClaimNull(filename);
+    let access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ;
+    let openFlags = 0;
+    if (typeof flags === 'string') {
+      if (flags.includes('r') && flags.includes('+')) {
+        access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH;
+      } else if (flags.includes('w') || flags.includes('a')) {
+        access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE;
+        if (flags.includes('+')) {
+          access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH;
+        }
+      }
+    } else if (typeof flags === 'number') {
+      const O_RDONLY = 0;
+      const O_WRONLY = 1;
+      const O_RDWR = 2;
+      const O_ACCMODE = 3;
+      const accessMode = flags & O_ACCMODE;
+      if (accessMode === O_RDONLY) {
+        access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ;
+      } else if (accessMode === O_WRONLY) {
+        access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE;
+      } else if (accessMode === O_RDWR) {
+        access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH;
+      }
+    }
+    operations.push(nfs.OPEN(openFlags, access, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, 0, claim));
+    const openResponse = await this.fs.compound(operations);
+    if (openResponse.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to open file: ${openResponse.status}`);
+    }
+    const openRes = openResponse.resarray[openResponse.resarray.length - 1] as msg.Nfsv4OpenResponse;
+    if (openRes.status !== Nfsv4Stat.NFS4_OK || !openRes.resok) {
+      throw new Error(`Failed to open file: ${openRes.status}`);
+    }
+    const stateid = openRes.resok.stateid;
+    const fd = Math.floor(Math.random() * 1000000);
+    const fileOperations = this.navigateToPath(parts);
+    return new NfsFsFileHandle(fd, pathStr, this.fs, stateid, fileOperations);
   };
 
   public readonly statfs = (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStatFs> => {

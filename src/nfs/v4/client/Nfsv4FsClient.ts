@@ -23,7 +23,7 @@ import {NfsFsDir} from './NfsFsDir';
 import {NfsFsDirent} from './NfsFsDirent';
 
 export class Nfsv4FsClient implements NfsFsClient {
-  constructor(public readonly nfs: Nfsv4Client) {}
+  constructor(public readonly fs: Nfsv4Client) {}
 
   private attrNumsToBitmap(attrNums: number[]): number[] {
     const bitmap: number[] = [];
@@ -73,7 +73,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     return new TextDecoder(encoding).decode(data);
   }
 
-  public async readFile(id: misc.TFileHandle, options?: opts.IReadFileOptions | string): Promise<misc.TDataOut> {
+  public readonly readFile = async (id: misc.TFileHandle, options?: opts.IReadFileOptions | string): Promise<misc.TDataOut> => {
     const encoding = typeof options === 'string' ? options : options?.encoding;
     const path = typeof id === 'string' ? id : id.toString();
     const parts = this.parsePath(path);
@@ -84,7 +84,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     operations.push(
       nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, 0, claim),
     );
-    const openResponse = await this.nfs.compound(operations);
+    const openResponse = await this.fs.compound(operations);
     if (openResponse.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to open file: ${openResponse.status}`);
     }
@@ -98,7 +98,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const chunkSize = 65536;
     try {
       while (true) {
-        const readResponse = await this.nfs.compound([nfs.READ(offset, chunkSize, stateid)]);
+        const readResponse = await this.fs.compound([nfs.READ(offset, chunkSize, stateid)]);
         if (readResponse.status !== Nfsv4Stat.NFS4_OK) {
           throw new Error(`Failed to read file: ${readResponse.status}`);
         }
@@ -113,7 +113,7 @@ export class Nfsv4FsClient implements NfsFsClient {
         if (readRes.resok.eof) break;
       }
     } finally {
-      await this.nfs.compound([nfs.CLOSE(0, stateid)]);
+      await this.fs.compound([nfs.CLOSE(0, stateid)]);
     }
     const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
     const result = new Uint8Array(totalLength);
@@ -123,13 +123,13 @@ export class Nfsv4FsClient implements NfsFsClient {
       position += chunk.length;
     }
     return this.decodeData(result, encoding);
-  }
+  };
 
-  public async writeFile(
+  public readonly writeFile = async (
     id: misc.TFileHandle,
     data: misc.TPromisesData,
     options?: opts.IWriteFileOptions,
-  ): Promise<void> {
+  ): Promise<void> => {
     const path = typeof id === 'string' ? id : id.toString();
     const parts = this.parsePath(path);
     const operations = this.navigateToParent(parts);
@@ -153,7 +153,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const truncateAttrs = nfs.Fattr([Nfsv4Attr.FATTR4_SIZE], attrVals);
     const stateid = nfs.Stateid(0, new Uint8Array(12));
     operations.push(nfs.SETATTR(stateid, truncateAttrs));
-    const openResponse = await this.nfs.compound(operations);
+    const openResponse = await this.fs.compound(operations);
     if (openResponse.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to open file: ${openResponse.status}`);
     }
@@ -168,7 +168,7 @@ export class Nfsv4FsClient implements NfsFsClient {
       let offset = BigInt(0);
       for (let i = 0; i < buffer.length; i += chunkSize) {
         const chunk = buffer.slice(i, Math.min(i + chunkSize, buffer.length));
-        const writeResponse = await this.nfs.compound([
+        const writeResponse = await this.fs.compound([
           nfs.WRITE(openStateid, offset, Nfsv4StableHow.FILE_SYNC4, chunk),
         ]);
         if (writeResponse.status !== Nfsv4Stat.NFS4_OK) {
@@ -181,11 +181,11 @@ export class Nfsv4FsClient implements NfsFsClient {
         offset += BigInt(writeRes.resok.count);
       }
     } finally {
-      await this.nfs.compound([nfs.CLOSE(0, openStateid)]);
+      await this.fs.compound([nfs.CLOSE(0, openStateid)]);
     }
-  }
+  };
 
-  public async stat(path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> {
+  public readonly stat = async (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToPath(parts);
@@ -202,7 +202,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     ];
     const attrMask = this.attrNumsToBitmap(attrNums);
     operations.push(nfs.GETATTR(attrMask));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to stat file: ${response.status}`);
     }
@@ -292,13 +292,13 @@ export class Nfsv4FsClient implements NfsFsClient {
       nlink,
       fileType,
     );
-  }
+  };
 
-  public async lstat(path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> {
+  public readonly lstat = async (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> => {
     return this.stat(path, options);
-  }
+  };
 
-  public async mkdir(path: misc.PathLike, options?: misc.TMode | opts.IMkdirOptions): Promise<string | undefined> {
+  public readonly mkdir = async (path: misc.PathLike, options?: misc.TMode | opts.IMkdirOptions): Promise<string | undefined> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     if (parts.length === 0) {
@@ -309,7 +309,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const createType = nfs.CreateTypeDir();
     const emptyAttrs = nfs.Fattr([], new Uint8Array(0));
     operations.push(nfs.CREATE(createType, dirname, emptyAttrs));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to create directory: ${response.status}`);
     }
@@ -318,12 +318,12 @@ export class Nfsv4FsClient implements NfsFsClient {
       throw new Error(`Failed to create directory: ${createRes.status}`);
     }
     return undefined;
-  }
+  };
 
-  public async readdir(
+  public readonly readdir = async (
     path: misc.PathLike,
     options?: opts.IReaddirOptions | string,
-  ): Promise<misc.TDataOut[] | misc.IDirent[]> {
+  ): Promise<misc.TDataOut[] | misc.IDirent[]> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const withFileTypes = typeof options === 'object' && options?.withFileTypes;
     const encoding = typeof options === 'string' ? options : options?.encoding;
@@ -332,7 +332,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const attrNums = withFileTypes ? [Nfsv4Attr.FATTR4_TYPE] : [];
     const attrMask = this.attrNumsToBitmap(attrNums);
     operations.push(nfs.READDIR(attrMask));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to read directory: ${response.status}`);
     }
@@ -376,13 +376,13 @@ export class Nfsv4FsClient implements NfsFsClient {
       return entries.map((name) => Buffer.from(name, 'utf8'));
     }
     return entries;
-  }
+  };
 
-  public async appendFile(
+  public readonly appendFile = async (
     path: misc.TFileHandle,
     data: misc.TData,
     options?: opts.IAppendFileOptions | string,
-  ): Promise<void> {
+  ): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToParent(parts);
@@ -395,7 +395,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const attrNums = [Nfsv4Attr.FATTR4_SIZE];
     const attrMask = this.attrNumsToBitmap(attrNums);
     operations.push(nfs.GETATTR(attrMask));
-    const openResponse = await this.nfs.compound(operations);
+    const openResponse = await this.fs.compound(operations);
     if (openResponse.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to open file: ${openResponse.status}`);
     }
@@ -419,7 +419,7 @@ export class Nfsv4FsClient implements NfsFsClient {
       let offset = BigInt(currentSize);
       for (let i = 0; i < buffer.length; i += chunkSize) {
         const chunk = buffer.slice(i, Math.min(i + chunkSize, buffer.length));
-        const writeResponse = await this.nfs.compound([
+        const writeResponse = await this.fs.compound([
           nfs.WRITE(openStateid, offset, Nfsv4StableHow.FILE_SYNC4, chunk),
         ]);
         if (writeResponse.status !== Nfsv4Stat.NFS4_OK) {
@@ -432,11 +432,11 @@ export class Nfsv4FsClient implements NfsFsClient {
         offset += BigInt(writeRes.resok.count);
       }
     } finally {
-      await this.nfs.compound([nfs.CLOSE(0, openStateid)]);
+      await this.fs.compound([nfs.CLOSE(0, openStateid)]);
     }
-  }
+  };
 
-  public async truncate(path: misc.PathLike, len: number = 0): Promise<void> {
+  public readonly truncate = async (path: misc.PathLike, len: number = 0): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToPath(parts);
@@ -447,7 +447,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const sizeAttrs = nfs.Fattr([Nfsv4Attr.FATTR4_SIZE], attrVals);
     const stateid = nfs.Stateid(0, new Uint8Array(12));
     operations.push(nfs.SETATTR(stateid, sizeAttrs));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to truncate file: ${response.status}`);
     }
@@ -455,9 +455,9 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (setattrRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to truncate file: ${setattrRes.status}`);
     }
-  }
+  };
 
-  public async unlink(path: misc.PathLike): Promise<void> {
+  public readonly unlink = async (path: misc.PathLike): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     if (parts.length === 0) {
@@ -466,7 +466,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
     operations.push(nfs.REMOVE(filename));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to unlink file: ${response.status}`);
     }
@@ -474,9 +474,9 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (removeRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to unlink file: ${removeRes.status}`);
     }
-  }
+  };
 
-  public async rmdir(path: misc.PathLike, options?: opts.IRmdirOptions): Promise<void> {
+  public readonly rmdir = async (path: misc.PathLike, options?: opts.IRmdirOptions): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     if (parts.length === 0) {
@@ -485,7 +485,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const operations = this.navigateToParent(parts);
     const dirname = parts[parts.length - 1];
     operations.push(nfs.REMOVE(dirname));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to remove directory: ${response.status}`);
     }
@@ -493,9 +493,9 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (removeRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to remove directory: ${removeRes.status}`);
     }
-  }
+  };
 
-  public async rm(path: misc.PathLike, options?: opts.IRmOptions): Promise<void> {
+  public readonly rm = async (path: misc.PathLike, options?: opts.IRmOptions): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     if (parts.length === 0) {
@@ -522,7 +522,7 @@ export class Nfsv4FsClient implements NfsFsClient {
       const operations = this.navigateToParent(parts);
       const name = parts[parts.length - 1];
       operations.push(nfs.REMOVE(name));
-      const response = await this.nfs.compound(operations);
+      const response = await this.fs.compound(operations);
       if (response.status !== Nfsv4Stat.NFS4_OK) {
         if (!force) throw new Error(`Failed to remove: ${response.status}`);
         return;
@@ -534,9 +534,9 @@ export class Nfsv4FsClient implements NfsFsClient {
     } catch (err) {
       if (!force) throw err;
     }
-  }
+  };
 
-  public async access(path: misc.PathLike, mode: number = 0): Promise<void> {
+  public readonly access = async (path: misc.PathLike, mode: number = 0): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToPath(parts);
@@ -549,7 +549,7 @@ export class Nfsv4FsClient implements NfsFsClient {
       if (mode & 1) accessMask |= Nfsv4Access.ACCESS4_EXECUTE;
     }
     operations.push(nfs.ACCESS(accessMask));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Access denied: ${response.status}`);
     }
@@ -557,9 +557,9 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (accessRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Access denied: ${accessRes.status}`);
     }
-  }
+  };
 
-  public async rename(oldPath: misc.PathLike, newPath: misc.PathLike): Promise<void> {
+  public readonly rename = async (oldPath: misc.PathLike, newPath: misc.PathLike): Promise<void> => {
     const oldPathStr = typeof oldPath === 'string' ? oldPath : oldPath.toString();
     const newPathStr = typeof newPath === 'string' ? newPath : newPath.toString();
     const oldParts = this.parsePath(oldPathStr);
@@ -580,7 +580,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const oldname = oldParts[oldParts.length - 1];
     const newname = newParts[newParts.length - 1];
     operations.push(nfs.RENAME(oldname, newname));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to rename: ${response.status}`);
     }
@@ -588,14 +588,14 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (renameRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to rename: ${renameRes.status}`);
     }
-  }
+  };
 
-  public async copyFile(src: misc.PathLike, dest: misc.PathLike, flags?: misc.TFlagsCopy): Promise<void> {
+  public readonly copyFile = async (src: misc.PathLike, dest: misc.PathLike, flags?: misc.TFlagsCopy): Promise<void> => {
     const data = await this.readFile(src);
     await this.writeFile(dest, data);
-  }
+  };
 
-  public async realpath(path: misc.PathLike, options?: opts.IRealpathOptions | string): Promise<misc.TDataOut> {
+  public readonly realpath = async (path: misc.PathLike, options?: opts.IRealpathOptions | string): Promise<misc.TDataOut> => {
     const encoding = typeof options === 'string' ? options : options?.encoding;
     const pathStr = typeof path === 'string' ? path : path.toString();
     const normalized = '/' + this.parsePath(pathStr).join('/');
@@ -603,9 +603,9 @@ export class Nfsv4FsClient implements NfsFsClient {
       return normalized;
     }
     return Buffer.from(normalized, 'utf8');
-  }
+  };
 
-  public async link(existingPath: misc.PathLike, newPath: misc.PathLike): Promise<void> {
+  public readonly link = async (existingPath: misc.PathLike, newPath: misc.PathLike): Promise<void> => {
     const existingPathStr = typeof existingPath === 'string' ? existingPath : existingPath.toString();
     const newPathStr = typeof newPath === 'string' ? newPath : newPath.toString();
     const existingParts = this.parsePath(existingPathStr);
@@ -621,7 +621,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     }
     const newname = newParts[newParts.length - 1];
     operations.push(nfs.LINK(newname));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to create link: ${response.status}`);
     }
@@ -629,9 +629,9 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (linkRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to create link: ${linkRes.status}`);
     }
-  }
+  };
 
-  public async symlink(target: misc.PathLike, path: misc.PathLike, type?: misc.symlink.Type): Promise<void> {
+  public readonly symlink = async (target: misc.PathLike, path: misc.PathLike, type?: misc.symlink.Type): Promise<void> => {
     const targetStr = typeof target === 'string' ? target : target.toString();
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
@@ -643,7 +643,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const createType = new structs.Nfsv4CreateType(Nfsv4FType.NF4LNK, new structs.Nfsv4CreateTypeLink(targetStr));
     const emptyAttrs = nfs.Fattr([], new Uint8Array(0));
     operations.push(nfs.CREATE(createType, linkname, emptyAttrs));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to create symlink: ${response.status}`);
     }
@@ -651,9 +651,9 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (createRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to create symlink: ${createRes.status}`);
     }
-  }
+  };
 
-  public async utimes(path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> {
+  public readonly utimes = async (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToPath(parts);
@@ -671,7 +671,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const timeAttrs = nfs.Fattr([Nfsv4Attr.FATTR4_TIME_ACCESS_SET, Nfsv4Attr.FATTR4_TIME_MODIFY_SET], attrVals);
     const stateid = nfs.Stateid(0, new Uint8Array(12));
     operations.push(nfs.SETATTR(stateid, timeAttrs));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to set times: ${response.status}`);
     }
@@ -679,15 +679,15 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (setattrRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to set times: ${setattrRes.status}`);
     }
-  }
+  };
 
-  public async readlink(path: misc.PathLike, options?: opts.IOptions): Promise<misc.TDataOut> {
+  public readonly readlink = async (path: misc.PathLike, options?: opts.IOptions): Promise<misc.TDataOut> => {
     const encoding = typeof options === 'string' ? options : options?.encoding;
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToPath(parts);
     operations.push(nfs.READLINK());
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to read link: ${response.status}`);
     }
@@ -699,25 +699,25 @@ export class Nfsv4FsClient implements NfsFsClient {
       return readlinkRes.resok.link;
     }
     return Buffer.from(readlinkRes.resok.link, 'utf8');
-  }
+  };
 
-  public async opendir(path: misc.PathLike, options?: opts.IOpendirOptions): Promise<misc.IDir> {
+  public readonly opendir = async (path: misc.PathLike, options?: opts.IOpendirOptions): Promise<misc.IDir> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToPath(parts);
-    return new NfsFsDir(pathStr, this.nfs, operations);
-  }
+    return new NfsFsDir(pathStr, this.fs, operations);
+  };
 
-  public async mkdtemp(prefix: string, options?: opts.IOptions): Promise<misc.TDataOut> {
+  public readonly mkdtemp = async (prefix: string, options?: opts.IOptions): Promise<misc.TDataOut> => {
     const encoding = typeof options === 'string' ? options : options?.encoding;
     const randomSuffix = Math.random().toString(36).substring(2, 8);
     const dirName = prefix + randomSuffix;
     await this.mkdir(dirName);
     if (!encoding || encoding === 'utf8') return dirName;
     return Buffer.from(dirName, 'utf8');
-  }
+  };
 
-  public async chmod(path: misc.PathLike, mode: misc.TMode): Promise<void> {
+  public readonly chmod = async (path: misc.PathLike, mode: misc.TMode): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToPath(parts);
@@ -729,7 +729,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const attrs = nfs.Fattr([Nfsv4Attr.FATTR4_MODE], attrVals);
     const stateid = nfs.Stateid(0, new Uint8Array(12));
     operations.push(nfs.SETATTR(stateid, attrs));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to chmod: ${response.status}`);
     }
@@ -737,9 +737,9 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (setattrRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to chmod: ${setattrRes.status}`);
     }
-  }
+  };
 
-  public async chown(path: misc.PathLike, uid: number, gid: number): Promise<void> {
+  public readonly chown = async (path: misc.PathLike, uid: number, gid: number): Promise<void> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToPath(parts);
@@ -751,7 +751,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const attrs = nfs.Fattr([Nfsv4Attr.FATTR4_OWNER, Nfsv4Attr.FATTR4_OWNER_GROUP], attrVals);
     const stateid = nfs.Stateid(0, new Uint8Array(12));
     operations.push(nfs.SETATTR(stateid, attrs));
-    const response = await this.nfs.compound(operations);
+    const response = await this.fs.compound(operations);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to chown: ${response.status}`);
     }
@@ -759,19 +759,19 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (setattrRes.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to chown: ${setattrRes.status}`);
     }
-  }
+  };
 
-  public async lchmod(path: misc.PathLike, mode: misc.TMode): Promise<void> {
+  public readonly lchmod = async (path: misc.PathLike, mode: misc.TMode): Promise<void> => {
     return this.chmod(path, mode);
-  }
+  };
 
-  public async lchown(path: misc.PathLike, uid: number, gid: number): Promise<void> {
+  public readonly lchown = async (path: misc.PathLike, uid: number, gid: number): Promise<void> => {
     return this.chown(path, uid, gid);
-  }
+  };
 
-  public async lutimes(path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> {
+  public readonly lutimes = async (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
     return this.utimes(path, atime, mtime);
-  }
+  };
 
   public readonly open = (path: misc.PathLike, flags?: misc.TFlags, mode?: misc.TMode): Promise<misc.IFileHandle> => {
     throw new Error('Not implemented.');

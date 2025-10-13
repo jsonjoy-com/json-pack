@@ -136,16 +136,57 @@ export class NfsFsFileHandle extends EventEmitter implements misc.IFileHandle {
     return {bytesWritten: writeRes.resok.count, buffer: resultBuffer};
   }
 
-  writeFile(data: misc.TData, options?: opts.IWriteFileOptions): Promise<void> {
-    throw new Error('Not implemented');
+  async writeFile(data: misc.TData, options?: opts.IWriteFileOptions): Promise<void> {
+    if (this.closed) throw new Error('File handle is closed');
+    return this.client.writeFile(this.path, data, options);
   }
 
-  readv(buffers: ArrayBufferView[], position?: number | null): Promise<misc.TFileHandleReadvResult> {
-    throw new Error('Not implemented');
+  async readv(buffers: ArrayBufferView[], position?: number | null): Promise<misc.TFileHandleReadvResult> {
+    if (this.closed) throw new Error('File handle is closed');
+    let currentPosition = position !== null && position !== undefined ? BigInt(position) : BigInt(0);
+    let totalBytesRead = 0;
+    for (const buffer of buffers) {
+      const readOps: msg.Nfsv4Request[] = [nfs.READ(currentPosition, buffer.byteLength, this.stateid)];
+      const response = await this.client.fs.compound(readOps);
+      if (response.status !== Nfsv4Stat.NFS4_OK) {
+        throw new Error(`Failed to read file: ${response.status}`);
+      }
+      const readRes = response.resarray[0] as msg.Nfsv4ReadResponse;
+      if (readRes.status !== Nfsv4Stat.NFS4_OK || !readRes.resok) {
+        throw new Error(`Failed to read file: ${readRes.status}`);
+      }
+      const data = readRes.resok.data;
+      const bytesToCopy = Math.min(data.length, buffer.byteLength);
+      const uint8View = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      for (let i = 0; i < bytesToCopy; i++) {
+        uint8View[i] = data[i];
+      }
+      totalBytesRead += bytesToCopy;
+      currentPosition += BigInt(bytesToCopy);
+      if (readRes.resok.eof || bytesToCopy < buffer.byteLength) break;
+    }
+    return {bytesRead: totalBytesRead, buffers};
   }
 
-  writev(buffers: ArrayBufferView[], position?: number | null): Promise<misc.TFileHandleWritevResult> {
-    throw new Error('Not implemented');
+  async writev(buffers: ArrayBufferView[], position?: number | null): Promise<misc.TFileHandleWritevResult> {
+    if (this.closed) throw new Error('File handle is closed');
+    let currentPosition = position !== null && position !== undefined ? BigInt(position) : BigInt(0);
+    let totalBytesWritten = 0;
+    for (const buffer of buffers) {
+      const data = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+      const writeOps: msg.Nfsv4Request[] = [nfs.WRITE(this.stateid, currentPosition, Nfsv4StableHow.FILE_SYNC4, data)];
+      const response = await this.client.fs.compound(writeOps);
+      if (response.status !== Nfsv4Stat.NFS4_OK) {
+        throw new Error(`Failed to write file: ${response.status}`);
+      }
+      const writeRes = response.resarray[0] as msg.Nfsv4WriteResponse;
+      if (writeRes.status !== Nfsv4Stat.NFS4_OK || !writeRes.resok) {
+        throw new Error(`Failed to write file: ${writeRes.status}`);
+      }
+      totalBytesWritten += writeRes.resok.count;
+      currentPosition += BigInt(writeRes.resok.count);
+    }
+    return {bytesWritten: totalBytesWritten, buffers};
   }
 
   readableWebStream(options?: opts.IReadableWebStreamOptions): ReadableStream {

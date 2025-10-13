@@ -251,6 +251,127 @@ describe('NfsFsFileHandle', () => {
     });
   });
 
+  describe('.writeFile()', () => {
+    test('can write file content', async () => {
+      const {client, stop, vol} = await setupNfsClientServerTestbed();
+      const fs = new Nfsv4FsClient(client);
+      await fs.writeFile('file.txt', '');
+      const fh = await fs.open('file.txt', 'w');
+      await fh.writeFile('Complete content');
+      await fh.close();
+      const content = vol.readFileSync('/export/file.txt', 'utf8');
+      expect(content).toBe('Complete content');
+      await stop();
+    });
+
+    test('can write buffer content', async () => {
+      const {client, stop, vol} = await setupNfsClientServerTestbed();
+      const fs = new Nfsv4FsClient(client);
+      await fs.writeFile('file.txt', '');
+      const fh = await fs.open('file.txt', 'w');
+      await fh.writeFile(Buffer.from('Buffer data'));
+      await fh.close();
+      const content = vol.readFileSync('/export/file.txt', 'utf8');
+      expect(content).toBe('Buffer data');
+      await stop();
+    });
+  });
+
+  describe('.readv()', () => {
+    test('can read into multiple buffers', async () => {
+      const {client, stop} = await setupNfsClientServerTestbed();
+      const fs = new Nfsv4FsClient(client);
+      await fs.writeFile('file.txt', 'Hello, World!');
+      const fh = await fs.open('file.txt', 'r');
+      const buffer1 = Buffer.alloc(5);
+      const buffer2 = Buffer.alloc(8);
+      const result = await fh.readv([buffer1, buffer2], 0);
+      expect(result.bytesRead).toBe(13);
+      expect(buffer1.toString('utf8')).toBe('Hello');
+      expect(buffer2.toString('utf8')).toBe(', World!');
+      await fh.close();
+      await stop();
+    });
+
+    test('can read with position', async () => {
+      const {client, stop} = await setupNfsClientServerTestbed();
+      const fs = new Nfsv4FsClient(client);
+      await fs.writeFile('file.txt', 'Hello, World!');
+      const fh = await fs.open('file.txt', 'r');
+      const buffer1 = Buffer.alloc(5);
+      const buffer2 = Buffer.alloc(6);
+      const result = await fh.readv([buffer1, buffer2], 7);
+      expect(result.bytesRead).toBe(6);
+      expect(buffer1.toString('utf8', 0, 5)).toBe('World');
+      expect(buffer2.toString('utf8', 0, 1)).toBe('!');
+      await fh.close();
+      await stop();
+    });
+
+    test('handles partial reads at end of file', async () => {
+      const {client, stop} = await setupNfsClientServerTestbed();
+      const fs = new Nfsv4FsClient(client);
+      await fs.writeFile('file.txt', 'Short');
+      const fh = await fs.open('file.txt', 'r');
+      const buffer1 = Buffer.alloc(3);
+      const buffer2 = Buffer.alloc(10);
+      const result = await fh.readv([buffer1, buffer2], 0);
+      expect(result.bytesRead).toBe(5);
+      expect(buffer1.toString('utf8')).toBe('Sho');
+      expect(buffer2.toString('utf8', 0, 2)).toBe('rt');
+      await fh.close();
+      await stop();
+    });
+  });
+
+  describe('.writev()', () => {
+    test('can write multiple buffers', async () => {
+      const {client, stop, vol} = await setupNfsClientServerTestbed();
+      const fs = new Nfsv4FsClient(client);
+      await fs.writeFile('file.txt', '');
+      const fh = await fs.open('file.txt', 'w');
+      const buffer1 = Buffer.from('Hello');
+      const buffer2 = Buffer.from(', ');
+      const buffer3 = Buffer.from('World!');
+      const result = await fh.writev([buffer1, buffer2, buffer3], 0);
+      expect(result.bytesWritten).toBe(13);
+      await fh.close();
+      const content = vol.readFileSync('/export/file.txt', 'utf8');
+      expect(content).toBe('Hello, World!');
+      await stop();
+    });
+
+    test('can write with position', async () => {
+      const {client, stop, vol} = await setupNfsClientServerTestbed();
+      const fs = new Nfsv4FsClient(client);
+      await fs.writeFile('file.txt', '0123456789');
+      const fh = await fs.open('file.txt', 'r+');
+      const buffer1 = Buffer.from('XX');
+      const buffer2 = Buffer.from('YY');
+      const result = await fh.writev([buffer1, buffer2], 3);
+      expect(result.bytesWritten).toBe(4);
+      await fh.close();
+      const content = vol.readFileSync('/export/file.txt', 'utf8');
+      expect(content).toBe('012XXYY789');
+      await stop();
+    });
+
+    test('can write Uint8Array buffers', async () => {
+      const {client, stop, vol} = await setupNfsClientServerTestbed();
+      const fs = new Nfsv4FsClient(client);
+      await fs.writeFile('file.txt', '');
+      const fh = await fs.open('file.txt', 'w');
+      const buffer1 = new Uint8Array([65, 66, 67]);
+      const buffer2 = new Uint8Array([68, 69, 70]);
+      const result = await fh.writev([buffer1, buffer2], 0);
+      expect(result.bytesWritten).toBe(6);
+      await fh.close();
+      const content = vol.readFileSync('/export/file.txt', 'utf8');
+      expect(content).toBe('ABCDEF');
+      await stop();
+    });
+  });
+
   describe('multiple operations', () => {
     test('can read and write to same file handle', async () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();

@@ -418,3 +418,98 @@ describe('JsonPackValue', () => {
     });
   });
 });
+
+describe('buffer reallocation stress tests', () => {
+  test('strings with non-ASCII triggering fallback with small buffer', () => {
+    const smallWriter = new Writer(64);
+    const smallEncoder = new CborEncoder(smallWriter);
+    for (let round = 0; round < 50; round++) {
+      smallWriter.reset();
+      for (let i = 0; i < 500; i++) {
+        const str = 'test_' + i + '_\x00\x01\x02';
+        const encoded = smallEncoder.encode(str);
+        const decoded = decode(encoded);
+        expect(decoded).toBe(str);
+      }
+    }
+  });
+
+  test('very long strings that exceed ensureCapacity pre-allocation', () => {
+    // Use a Writer with initial capacity smaller than what a single string will need
+    const tinyWriter = new Writer(32);
+    const tinyEncoder = new CborEncoder(tinyWriter);
+    for (let round = 0; round < 20; round++) {
+      tinyWriter.reset();
+      // Create a string that's long enough to require more than the tiny buffer
+      const str = 'x'.repeat(100) + '\x00\x01\x02' + 'y'.repeat(100);
+      const encoded = tinyEncoder.encode(str);
+      const decoded = decode(encoded);
+      expect(decoded).toBe(str);
+    }
+  });
+
+  test('alternating short and long strings with non-ASCII', () => {
+    const smallWriter = new Writer(64);
+    const smallEncoder = new CborEncoder(smallWriter);
+    for (let round = 0; round < 30; round++) {
+      smallWriter.reset();
+      for (let i = 0; i < 100; i++) {
+        // Alternate between short strings with control chars and longer strings
+        const str = i % 2 === 0 
+          ? 'short_\x00\x01\x02_' + i
+          : 'a'.repeat(50) + '\x03\x04' + 'b'.repeat(50);
+        const encoded = smallEncoder.encode(str);
+        const decoded = decode(encoded);
+        expect(decoded).toBe(str);
+      }
+    }
+  });
+
+  test('many iterations with long strings', () => {
+    const smallWriter = new Writer(64);
+    const smallEncoder = new CborEncoder(smallWriter);
+    for (let round = 0; round < 10; round++) {
+      smallWriter.reset();
+      for (let i = 0; i < 1000; i++) {
+        const str = 'a'.repeat(Math.floor(Math.random() * 32768));
+        const encoded = smallEncoder.encode(str);
+        const decoded = decode(encoded);
+        expect(decoded).toBe(str);
+      }
+    }
+  });
+
+  test('objects with many short strings', () => {
+    const smallWriter = new Writer(64);
+    const smallEncoder = new CborEncoder(smallWriter);
+    for (let round = 0; round < 100; round++) {
+      smallWriter.reset();
+      const obj: Record<string, string> = {};
+      for (let i = 0; i < 100; i++) {
+        obj['key_' + i] = 'value_' + i;
+      }
+      const encoded = smallEncoder.encode(obj);
+      const decoded = decode(encoded);
+      expect(decoded).toEqual(obj);
+    }
+  });
+
+  test('mixed objects and strings with buffer growth', () => {
+    const smallWriter = new Writer(64);
+    const smallEncoder = new CborEncoder(smallWriter);
+    for (let round = 0; round < 50; round++) {
+      smallWriter.reset();
+      const data = {
+        str1: 'test_\x00\x01',
+        nested: {
+          str2: 'nested_\x02\x03',
+          arr: ['a', 'b', 'c_\x04'],
+        },
+        str3: 'final_\x05\x06\x07',
+      };
+      const encoded = smallEncoder.encode(data);
+      const decoded = decode(encoded);
+      expect(decoded).toEqual(data);
+    }
+  });
+});

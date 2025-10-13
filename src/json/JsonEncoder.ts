@@ -109,18 +109,6 @@ export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncode
     this.writeNumber(float);
   }
 
-  /**
-   * Write UTF-8 string directly using Buffer to avoid writer.utf8() bugs
-   * with buffer reallocation and stale offsets.
-   */
-  private writeUtf8(str: string): void {
-    const writer = this.writer;
-    const buf = Buffer.from(str, 'utf-8');
-    writer.ensureCapacity(buf.length);
-    writer.uint8.set(buf, writer.x);
-    writer.x += buf.length;
-  }
-
   public writeBin(buf: Uint8Array): void {
     const writer = this.writer;
     const length = buf.length;
@@ -172,7 +160,9 @@ export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncode
         }
         if (code < 32 || code > 126) {
           writer.x = startX;
-          this.writeUtf8(JSON.stringify(str));
+          const jsonStr = JSON.stringify(str);
+          writer.ensureCapacity(jsonStr.length * 4 + 4);
+          writer.utf8(jsonStr);
           return;
         } else uint8[x++] = code;
       }
@@ -180,7 +170,9 @@ export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncode
       writer.x = x;
       return;
     }
-    this.writeUtf8(JSON.stringify(str));
+    const jsonStr = JSON.stringify(str);
+    writer.ensureCapacity(jsonStr.length * 4 + 4);
+    writer.utf8(jsonStr);
   }
 
   public writeAsciiStr(str: string): void {

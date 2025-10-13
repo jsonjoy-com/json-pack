@@ -114,6 +114,17 @@ export const nfs = {
   },
 
   /**
+   * WRITE - Write file data.
+   * @param stateid - State ID to write to
+   * @param offset - Byte offset
+   * @param stable - Stable flag (Nfsv4StableHow)
+   * @param data - Data to write
+   */
+  WRITE(stateid: structs.Nfsv4Stateid, offset: bigint, stable: number, data: Uint8Array): msg.Nfsv4WriteRequest {
+    return new msg.Nfsv4WriteRequest(stateid, offset, stable, data);
+  },
+
+  /**
    * READLINK - Read symbolic link.
    */
   READLINK(): msg.Nfsv4ReadlinkRequest {

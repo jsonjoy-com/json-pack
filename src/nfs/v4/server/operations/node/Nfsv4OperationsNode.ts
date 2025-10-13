@@ -21,6 +21,7 @@ import {LockOwnerState} from '../LockOwnerState';
 import {ByteRangeLock} from '../ByteRangeLock';
 import {FileHandleMapper, ROOT_FH} from './fh';
 import {isErrCode, normalizeNodeFsError} from './util';
+import {Nfsv4StableHow} from '../../../constants';
 import {encodeAttrs} from './attrs';
 import {parseBitmask, requiresLstat} from '../../../attributes';
 
@@ -800,18 +801,141 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4RenewResponse(Nfsv4Stat.NFS4_OK);
   }
 
-  // ----------------------------------------------- Stub implementations below
-
-  public async COMMIT(request: msg.Nfsv4CommitRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CommitResponse> {
-    ctx.connection.logger.log('COMMIT', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4CommitResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+  public async READ(request: msg.Nfsv4ReadRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReadResponse> {
+    const stateidKey = this.makeStateidKey(request.stateid);
+    const openFile = this.openFiles.get(stateidKey);
+    if (!openFile) return new msg.Nfsv4ReadResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    const fdHandle = openFile.fd as any;
+    // If we have an fd-like handle, use its .read; otherwise open the path
+    let fd: any = undefined;
+    let openedHere = false;
+    try {
+      if (fdHandle && typeof fdHandle.read === 'function') {
+        fd = fdHandle;
+      } else {
+        fd = await this.promises.open(openFile.path, this.fs.constants.O_RDONLY);
+        openedHere = true;
+      }
+      const buf = Buffer.alloc(request.count);
+      const {bytesRead} = await fd.read(buf, 0, request.count, Number(request.offset));
+      const eof = bytesRead < request.count;
+      const data = buf.slice(0, bytesRead);
+      const resok = new msg.Nfsv4ReadResOk(eof, data);
+      return new msg.Nfsv4ReadResponse(Nfsv4Stat.NFS4_OK, resok);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4ReadResponse(status);
+    } finally {
+      try {
+        if (openedHere && fd && typeof fd.close === 'function') await fd.close();
+      } catch (e) {
+        /* ignore close errors */
+      }
+    }
   }
 
-  public async CREATE(request: msg.Nfsv4CreateRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CreateResponse> {
-    ctx.connection.logger.log('CREATE', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4CreateResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+  public async READLINK(request: msg.Nfsv4ReadlinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReadlinkResponse> {
+    const cfh = ctx.cfh;
+    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
+    const path = this.fh.decode(cfh);
+    try {
+      const target = await this.promises.readlink(path);
+      const resok = new msg.Nfsv4ReadlinkResOk(target);
+      return new msg.Nfsv4ReadlinkResponse(Nfsv4Stat.NFS4_OK, resok);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4ReadlinkResponse(status);
+    }
+  }
+
+  public async REMOVE(request: msg.Nfsv4RemoveRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RemoveResponse> {
+    const cfh = ctx.cfh;
+    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
+    const dirPath = this.fh.decode(cfh);
+  const targetFull = NodePath.resolve(NodePath.join(dirPath, request.target));
+  const targetPath = this.absolutePath(targetFull);
+    try {
+      const stats = await this.promises.lstat(targetPath);
+      if (stats.isDirectory()) {
+        // For now, use rmdir semantics (only remove empty dirs)
+        await this.promises.rmdir(targetPath);
+      } else {
+        await this.promises.unlink(targetPath);
+      }
+      return new msg.Nfsv4RemoveResponse(Nfsv4Stat.NFS4_OK);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4RemoveResponse(status);
+    }
+  }
+
+  public async RENAME(request: msg.Nfsv4RenameRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RenameResponse> {
+    const cfh = ctx.cfh;
+    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
+    const dirPath = this.fh.decode(cfh);
+    const oldFull = NodePath.resolve(NodePath.join(dirPath, request.oldname));
+    const newFull = NodePath.resolve(NodePath.join(dirPath, request.newname));
+    // Ensure both paths are inside the server root. If target escapes, return XDEV.
+    if (!(oldFull === this.dir || oldFull.startsWith(this.dir + NodePath.sep)))
+      return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);
+    if (!(newFull === this.dir || newFull.startsWith(this.dir + NodePath.sep)))
+      return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);
+    // Now map to absolute paths (this.absolutePath will validate existence and path)
+    let oldPath: string;
+    let newPath: string;
+    try {
+      oldPath = this.absolutePath(oldFull);
+      newPath = this.absolutePath(newFull);
+    } catch (e: any) {
+      const status = typeof e === 'number' ? e : Nfsv4Stat.NFS4ERR_NOENT;
+      return new msg.Nfsv4RenameResponse(status);
+    }
+    try {
+      await this.promises.rename(oldPath, newPath);
+      return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4_OK);
+    } catch (err: unknown) {
+      if (isErrCode('EXDEV', err)) return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4RenameResponse(status);
+    }
+  }
+
+  public async WRITE(request: msg.Nfsv4WriteRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4WriteResponse> {
+    const stateidKey = this.makeStateidKey(request.stateid);
+    const openFile = this.openFiles.get(stateidKey);
+    if (!openFile) return new msg.Nfsv4WriteResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    const fdHandle = openFile.fd as any;
+    let fd: any = undefined;
+    let openedHere = false;
+    try {
+      if (fdHandle && typeof fdHandle.write === 'function') {
+        fd = fdHandle;
+      } else {
+        fd = await this.promises.open(openFile.path, this.fs.constants.O_RDWR);
+        openedHere = true;
+      }
+      const buffer = Buffer.from(request.data);
+      const {bytesWritten} = await fd.write(buffer, 0, buffer.length, Number(request.offset));
+      // Handle stable flag
+      const committed = request.stable === Nfsv4StableHow.UNSTABLE4 ? Nfsv4StableHow.UNSTABLE4 : Nfsv4StableHow.FILE_SYNC4;
+      if (request.stable === Nfsv4StableHow.FILE_SYNC4 || request.stable === Nfsv4StableHow.DATA_SYNC4) {
+        // fd.datasync or fd.sync
+        if (typeof fd.datasync === 'function') await fd.datasync();
+        else if (typeof fd.sync === 'function') await fd.sync();
+      }
+      const verifier = new struct.Nfsv4Verifier(randomBytes(8));
+      const resok = new msg.Nfsv4WriteResOk(bytesWritten, committed, verifier);
+      return new msg.Nfsv4WriteResponse(Nfsv4Stat.NFS4_OK, resok);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4WriteResponse(status);
+    } finally {
+      try {
+        if (openedHere && fd && typeof fd.close === 'function') await fd.close();
+      } catch (e) {
+        /* ignore close errors */
+      }
+    }
   }
 
   public async DELEGPURGE(
@@ -828,6 +952,20 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4DelegreturnResponse(Nfsv4Stat.NFS4ERR_NOTSUPP);
   }
 
+  // ----------------------------------------------- Stub implementations below
+
+  public async COMMIT(request: msg.Nfsv4CommitRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CommitResponse> {
+    ctx.connection.logger.log('COMMIT', request);
+    throw new Error('Not implemented');
+    return new msg.Nfsv4CommitResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+  }
+
+  public async CREATE(request: msg.Nfsv4CreateRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CreateResponse> {
+    ctx.connection.logger.log('CREATE', request);
+    throw new Error('Not implemented');
+    return new msg.Nfsv4CreateResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+  }
+
   public async LINK(request: msg.Nfsv4LinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LinkResponse> {
     ctx.connection.logger.log('LINK', request);
     throw new Error('Not implemented');
@@ -840,30 +978,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
-  public async READ(request: msg.Nfsv4ReadRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReadResponse> {
-    ctx.connection.logger.log('READ', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4ReadResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async READLINK(request: msg.Nfsv4ReadlinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReadlinkResponse> {
-    ctx.connection.logger.log('READLINK', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4ReadlinkResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async REMOVE(request: msg.Nfsv4RemoveRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RemoveResponse> {
-    ctx.connection.logger.log('REMOVE', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4RemoveResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async RENAME(request: msg.Nfsv4RenameRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RenameResponse> {
-    ctx.connection.logger.log('RENAME', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
   public async SETATTR(request: msg.Nfsv4SetattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SetattrResponse> {
     ctx.connection.logger.log('SETATTR', request);
     throw new Error('Not implemented');
@@ -874,11 +988,5 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     ctx.connection.logger.log('VERIFY', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4VerifyResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async WRITE(request: msg.Nfsv4WriteRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4WriteResponse> {
-    ctx.connection.logger.log('WRITE', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4WriteResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 }

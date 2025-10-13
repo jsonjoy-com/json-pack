@@ -21,9 +21,10 @@ import {LockOwnerState} from '../LockOwnerState';
 import {ByteRangeLock} from '../ByteRangeLock';
 import {FileHandleMapper, ROOT_FH} from './fh';
 import {isErrCode, normalizeNodeFsError} from './util';
-import {Nfsv4StableHow} from '../../../constants';
+import {Nfsv4StableHow, Nfsv4Attr} from '../../../constants';
 import {encodeAttrs} from './attrs';
-import {parseBitmask, requiresLstat} from '../../../attributes';
+import {parseBitmask, requiresLstat, attrNumsToBitmap} from '../../../attributes';
+import {XdrDecoder} from '../../../../../xdr/XdrDecoder';
 
 export interface Nfsv4OperationsNodeOpts {
   /** Node.js `fs` module. */
@@ -336,20 +337,20 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   public async LOOKUP(request: msg.Nfsv4LookupRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LookupResponse> {
     const fh = this.fh;
     const currentPath = fh.currentPath(ctx);
-    const dirAbsolutePath = this.absolutePath(currentPath);
+    const currentPathAbsolute = this.absolutePath(currentPath);
     const component = request.objname;
     if (component.length === 0) throw Nfsv4Stat.NFS4ERR_INVAL;
     const promises = this.promises;
     let stats: Stats;
     try {
-      stats = await promises.stat(dirAbsolutePath);
+      stats = await promises.stat(currentPathAbsolute);
     } catch (err: unknown) {
       if (isErrCode('ENOENT', err)) throw Nfsv4Stat.NFS4ERR_NOENT;
       throw Nfsv4Stat.NFS4ERR_IO;
     }
     if (stats.isSymbolicLink()) throw Nfsv4Stat.NFS4ERR_SYMLINK;
     if (!stats.isDirectory()) throw Nfsv4Stat.NFS4ERR_NOTDIR;
-    const targetAbsolutePath = NodePath.join(dirAbsolutePath, component);
+    const targetAbsolutePath = NodePath.join(currentPathAbsolute, component);
     try {
       const targetStats = await promises.stat(targetAbsolutePath);
       if (!targetStats) throw Nfsv4Stat.NFS4ERR_NOENT;
@@ -365,46 +366,46 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   public async LOOKUPP(request: msg.Nfsv4LookuppRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LookuppResponse> {
     const fh = this.fh;
     const currentPath = fh.currentPath(ctx);
-    const absolutePath = this.absolutePath(currentPath);
+    const currentPathAbsolute = this.absolutePath(currentPath);
     const promises = this.promises;
     let stats: Stats;
     try {
-      stats = await promises.stat(absolutePath);
+      stats = await promises.stat(currentPathAbsolute);
     } catch (err: any) {
       if (isErrCode('ENOENT', err)) throw Nfsv4Stat.NFS4ERR_NOENT;
       throw Nfsv4Stat.NFS4ERR_IO;
     }
     if (!stats.isDirectory()) throw Nfsv4Stat.NFS4ERR_NOTDIR;
-    const parentAbsolutePath = NodePath.dirname(absolutePath);
+    const parentAbsolutePath = NodePath.dirname(currentPathAbsolute);
     if (parentAbsolutePath.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
     fh.setCfh(ctx, parentAbsolutePath);
     return new msg.Nfsv4LookuppResponse(Nfsv4Stat.NFS4_OK);
   }
 
   public async GETATTR(request: msg.Nfsv4GetattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4GetattrResponse> {
-    const path = this.fh.currentPath(ctx);
-    const absolutePath = this.absolutePath(path);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
     const requestedAttrNums = parseBitmask(request.attrRequest.mask);
     let stats: Stats | undefined;
     if (requiresLstat(requestedAttrNums)) {
       try {
-        if (ctx.connection.debug) ctx.connection.logger.log('lstat', absolutePath);
-        stats = await this.promises.lstat(absolutePath);
+        if (ctx.connection.debug) ctx.connection.logger.log('lstat', currentPathAbsolute);
+        stats = await this.promises.lstat(currentPathAbsolute);
       } catch (error: unknown) {
         throw normalizeNodeFsError(error, ctx.connection.logger);
       }
     }
-    const attrs = encodeAttrs(request.attrRequest, stats, path, ctx.cfh!);
+    const attrs = encodeAttrs(request.attrRequest, stats, currentPath, ctx.cfh!);
     return new msg.Nfsv4GetattrResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4GetattrResOk(attrs));
   }
 
   public async ACCESS(request: msg.Nfsv4AccessRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4AccessResponse> {
-    const path = this.fh.currentPath(ctx);
-    const absolutePath = this.absolutePath(path);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
     const promises = this.promises;
     let stats: Stats;
     try {
-      stats = await promises.lstat(absolutePath);
+      stats = await promises.lstat(currentPathAbsolute);
     } catch (error: unknown) {
       throw normalizeNodeFsError(error, ctx.connection.logger);
     }
@@ -448,11 +449,11 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   public async READDIR(request: msg.Nfsv4ReaddirRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReaddirResponse> {
     const fh = this.fh;
     const currentPath = fh.currentPath(ctx);
-    const absolutePath = this.absolutePath(currentPath);
+    const currentPathAbsolute = this.absolutePath(currentPath);
     const promises = this.promises;
     let stats: Stats;
     try {
-      stats = await promises.lstat(absolutePath);
+      stats = await promises.lstat(currentPathAbsolute);
     } catch (error: unknown) {
       throw normalizeNodeFsError(error, ctx.connection.logger);
     }
@@ -476,7 +477,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     }
     let dirents: Dirent[];
     try {
-      dirents = await promises.readdir(absolutePath, {withFileTypes: true});
+      dirents = await promises.readdir(currentPathAbsolute, {withFileTypes: true});
     } catch (error: unknown) {
       throw normalizeNodeFsError(error, ctx.connection.logger);
     }
@@ -494,7 +495,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const dirent = dirents[i];
       const name = dirent.name;
       const entryCookie = BigInt(i + 3);
-      const entryPath = NodePath.join(absolutePath, name);
+      const entryPath = NodePath.join(currentPathAbsolute, name);
       let entryStats: Stats | undefined;
       try {
         entryStats = await promises.lstat(entryPath);
@@ -520,9 +521,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async OPEN(request: msg.Nfsv4OpenRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4OpenResponse> {
-    const cfh = ctx.cfh;
-    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
-    const dirPath = this.fh.decode(cfh);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
     const ownerKey = this.makeOpenOwnerKey(request.owner.clientid, request.owner.owner);
     let ownerState = this.openOwners.get(ownerKey);
     if (!ownerState) {
@@ -534,7 +534,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     }
     const claimNull = request.claim.claim as struct.Nfsv4OpenClaimNull;
     const filename = claimNull.file;
-    const filePath = this.absolutePath(NodePath.join(dirPath, filename));
+    const filePath = NodePath.join(currentPathAbsolute, filename);
     try {
       const stats = await this.promises.lstat(filePath);
       if (!stats.isFile()) {
@@ -599,12 +599,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   ): Promise<msg.Nfsv4OpenConfirmResponse> {
     const stateidKey = this.makeStateidKey(request.openStateid);
     const openFile = this.openFiles.get(stateidKey);
-    if (!openFile) {
-      return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
-    }
-    if (openFile.seqid !== request.seqid) {
-      return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
-    }
+    if (!openFile) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
+    if (openFile.seqid !== request.seqid) throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
     openFile.confirmed = true;
     openFile.seqid++;
     const newStateid = new struct.Nfsv4Stateid(openFile.seqid, openFile.stateid.other);
@@ -618,18 +614,10 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   ): Promise<msg.Nfsv4OpenDowngradeResponse> {
     const stateidKey = this.makeStateidKey(request.openStateid);
     const openFile = this.openFiles.get(stateidKey);
-    if (!openFile) {
-      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
-    }
-    if (openFile.seqid !== request.seqid) {
-      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
-    }
-    if ((request.shareAccess & ~openFile.shareAccess) !== 0) {
-      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_INVAL);
-    }
-    if ((request.shareDeny & ~openFile.shareDeny) !== 0) {
-      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_INVAL);
-    }
+    if (!openFile) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
+    if (openFile.seqid !== request.seqid) throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
+    if ((request.shareAccess & ~openFile.shareAccess) !== 0) throw Nfsv4Stat.NFS4ERR_INVAL;
+    if ((request.shareDeny & ~openFile.shareDeny) !== 0) throw Nfsv4Stat.NFS4ERR_INVAL;
     openFile.shareAccess = request.shareAccess;
     openFile.shareDeny = request.shareDeny;
     openFile.seqid++;
@@ -673,11 +661,9 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async SECINFO(request: msg.Nfsv4SecinfoRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SecinfoResponse> {
-    const cfh = ctx.cfh;
-    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
-    const dirPath = this.fh.decode(cfh);
-    const filename = request.name;
-    const filePath = this.absolutePath(NodePath.join(dirPath, filename));
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
+    const filePath = NodePath.join(currentPathAbsolute, request.name);
     try {
       await this.promises.lstat(filePath);
     } catch (err) {
@@ -693,9 +679,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async LOCK(request: msg.Nfsv4LockRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LockResponse> {
-    const cfh = ctx.cfh;
-    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
-    const filePath = this.fh.decode(cfh);
+    const currentPath = this.fh.currentPath(ctx);
     const {locktype, offset, length, locker} = request;
     if (!locker.newLockOwner) {
       const existingOwner = locker.owner as struct.Nfsv4LockExistingOwner;
@@ -704,13 +688,13 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       if (!existingLock) {
         return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
       }
-      if (this.hasConflictingLock(filePath, locktype, offset, length, existingLock.lockOwnerKey)) {
+      if (this.hasConflictingLock(currentPath, locktype, offset, length, existingLock.lockOwnerKey)) {
         const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
         const denied = new msg.Nfsv4LockResDenied(offset, length, locktype, conflictOwner);
         return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_LOCKED, undefined, denied);
       }
       const stateid = this.createStateid();
-      const lock = new ByteRangeLock(stateid, filePath, locktype, offset, length, existingLock.lockOwnerKey);
+      const lock = new ByteRangeLock(stateid, currentPath, locktype, offset, length, existingLock.lockOwnerKey);
       const lockKey = this.makeLockKey(stateid, offset, length);
       this.locks.set(lockKey, lock);
       const lockOwner = this.lockOwners.get(existingLock.lockOwnerKey);
@@ -722,7 +706,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const openToLock = newOwner.openToLockOwner;
     const lockOwnerData = openToLock.lockOwner;
     const ownerKey = this.makeLockOwnerKey(lockOwnerData.clientid, lockOwnerData.owner);
-    if (this.hasConflictingLock(filePath, locktype, offset, length, ownerKey)) {
+    if (this.hasConflictingLock(currentPath, locktype, offset, length, ownerKey)) {
       const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
       const denied = new msg.Nfsv4LockResDenied(offset, length, locktype, conflictOwner);
       return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_LOCKED, undefined, denied);
@@ -733,7 +717,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       this.lockOwners.set(ownerKey, lockOwnerState);
     }
     const stateid = this.createStateid();
-    const lock = new ByteRangeLock(stateid, filePath, locktype, offset, length, ownerKey);
+    const lock = new ByteRangeLock(stateid, currentPath, locktype, offset, length, ownerKey);
     const lockKey = this.makeLockKey(stateid, offset, length);
     this.locks.set(lockKey, lock);
     lockOwnerState.locks.add(lockKey);
@@ -742,12 +726,10 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async LOCKT(request: msg.Nfsv4LocktRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LocktResponse> {
-    const cfh = ctx.cfh;
-    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
-    const filePath = this.fh.decode(cfh);
+    const currentPath = this.fh.currentPath(ctx);
     const {locktype, offset, length, owner} = request;
     const ownerKey = this.makeLockOwnerKey(owner.clientid, owner.owner);
-    if (this.hasConflictingLock(filePath, locktype, offset, length, ownerKey)) {
+    if (this.hasConflictingLock(currentPath, locktype, offset, length, ownerKey)) {
       const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
       const denied = new msg.Nfsv4LocktResDenied(offset, length, locktype, conflictOwner);
       return new msg.Nfsv4LocktResponse(Nfsv4Stat.NFS4ERR_LOCKED, denied);
@@ -759,9 +741,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const {lockStateid, offset, length} = request;
     const lockKey = this.makeLockKey(lockStateid, offset, length);
     const lock = this.locks.get(lockKey);
-    if (!lock) {
-      return new msg.Nfsv4LockuResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
-    }
+    if (!lock) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
     this.locks.delete(lockKey);
     const lockOwner = this.lockOwners.get(lock.lockOwnerKey);
     if (lockOwner) {
@@ -782,12 +762,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const {lockOwner} = request;
     const ownerKey = this.makeLockOwnerKey(lockOwner.clientid, lockOwner.owner);
     const lockOwnerState = this.lockOwners.get(ownerKey);
-    if (!lockOwnerState) {
-      return new msg.Nfsv4ReleaseLockOwnerResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
-    }
-    for (const lockKey of lockOwnerState.locks) {
-      this.locks.delete(lockKey);
-    }
+    if (!lockOwnerState) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
+    for (const lockKey of lockOwnerState.locks) this.locks.delete(lockKey);
     this.lockOwners.delete(ownerKey);
     return new msg.Nfsv4ReleaseLockOwnerResponse(Nfsv4Stat.NFS4_OK);
   }
@@ -795,9 +771,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   public async RENEW(request: msg.Nfsv4RenewRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RenewResponse> {
     const clientid = request.clientid;
     const client = this.clients.get(clientid);
-    if (!client) {
-      return new msg.Nfsv4RenewResponse(Nfsv4Stat.NFS4ERR_STALE_CLIENTID);
-    }
+    if (!client) throw Nfsv4Stat.NFS4ERR_STALE_CLIENTID;
     return new msg.Nfsv4RenewResponse(Nfsv4Stat.NFS4_OK);
   }
 
@@ -835,11 +809,10 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async READLINK(request: msg.Nfsv4ReadlinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReadlinkResponse> {
-    const cfh = ctx.cfh;
-    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
-    const path = this.fh.decode(cfh);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
     try {
-      const target = await this.promises.readlink(path);
+      const target = await this.promises.readlink(currentPathAbsolute);
       const resok = new msg.Nfsv4ReadlinkResOk(target);
       return new msg.Nfsv4ReadlinkResponse(Nfsv4Stat.NFS4_OK, resok);
     } catch (err: unknown) {
@@ -849,18 +822,15 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async REMOVE(request: msg.Nfsv4RemoveRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RemoveResponse> {
-    const cfh = ctx.cfh;
-    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
-    const dirPath = this.fh.decode(cfh);
-  const targetFull = NodePath.resolve(NodePath.join(dirPath, request.target));
-  const targetPath = this.absolutePath(targetFull);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
     try {
-      const stats = await this.promises.lstat(targetPath);
+      const stats = await this.promises.lstat(currentPathAbsolute);
       if (stats.isDirectory()) {
         // For now, use rmdir semantics (only remove empty dirs)
-        await this.promises.rmdir(targetPath);
+        await this.promises.rmdir(currentPathAbsolute);
       } else {
-        await this.promises.unlink(targetPath);
+        await this.promises.unlink(currentPathAbsolute);
       }
       return new msg.Nfsv4RemoveResponse(Nfsv4Stat.NFS4_OK);
     } catch (err: unknown) {
@@ -870,11 +840,11 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async RENAME(request: msg.Nfsv4RenameRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RenameResponse> {
-    const cfh = ctx.cfh;
-    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
-    const dirPath = this.fh.decode(cfh);
-    const oldFull = NodePath.resolve(NodePath.join(dirPath, request.oldname));
-    const newFull = NodePath.resolve(NodePath.join(dirPath, request.newname));
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
+    const oldFull = NodePath.join(currentPathAbsolute, request.oldname);
+    const newFull = NodePath.join(currentPathAbsolute, request.newname);
+    if (oldFull.length < this.dir.length || newFull.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
     // Ensure both paths are inside the server root. If target escapes, return XDEV.
     if (!(oldFull === this.dir || oldFull.startsWith(this.dir + NodePath.sep)))
       return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);
@@ -917,7 +887,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const buffer = Buffer.from(request.data);
       const {bytesWritten} = await fd.write(buffer, 0, buffer.length, Number(request.offset));
       // Handle stable flag
-      const committed = request.stable === Nfsv4StableHow.UNSTABLE4 ? Nfsv4StableHow.UNSTABLE4 : Nfsv4StableHow.FILE_SYNC4;
+      const committed =
+        request.stable === Nfsv4StableHow.UNSTABLE4 ? Nfsv4StableHow.UNSTABLE4 : Nfsv4StableHow.FILE_SYNC4;
       if (request.stable === Nfsv4StableHow.FILE_SYNC4 || request.stable === Nfsv4StableHow.DATA_SYNC4) {
         // fd.datasync or fd.sync
         if (typeof fd.datasync === 'function') await fd.datasync();
@@ -951,42 +922,205 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   ): Promise<msg.Nfsv4DelegreturnResponse> {
     return new msg.Nfsv4DelegreturnResponse(Nfsv4Stat.NFS4ERR_NOTSUPP);
   }
-
-  // ----------------------------------------------- Stub implementations below
-
   public async COMMIT(request: msg.Nfsv4CommitRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CommitResponse> {
-    ctx.connection.logger.log('COMMIT', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4CommitResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
+    // If there is an open file corresponding to this path, prefer that fd
+    let fd: any = undefined;
+    for (const openFile of this.openFiles.values()) {
+      if (openFile.path === currentPathAbsolute) {
+        fd = openFile.fd as any;
+        break;
+      }
+    }
+    try {
+      if (fd && typeof fd.datasync === 'function') {
+        await fd.datasync();
+      } else if (fd && typeof fd.sync === 'function') {
+        await fd.sync();
+      } else {
+        // fallback: open and fdatasync
+        const handle = await this.promises.open(currentPathAbsolute, this.fs.constants.O_RDONLY);
+        try {
+          if (typeof handle.datasync === 'function') await handle.datasync();
+          else if (typeof handle.sync === 'function') await handle.sync();
+        } finally {
+          try {
+            await handle.close();
+          } catch (e) {
+            /* ignore */
+          }
+        }
+      }
+      // Return OK; no specific commit verifier currently persisted
+      return new msg.Nfsv4CommitResponse(Nfsv4Stat.NFS4_OK);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4CommitResponse(status);
+    }
   }
 
   public async CREATE(request: msg.Nfsv4CreateRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CreateResponse> {
-    ctx.connection.logger.log('CREATE', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4CreateResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
+    const name = request.objname;
+    const createPath = NodePath.join(currentPathAbsolute, name);
+    if (createPath.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
+    try {
+      // Determine requested create mode (if provided in createattrs)
+      let mode = 0o666;
+      try {
+        if (request.createattrs && request.createattrs.attrmask) {
+          // parse createattrs for mode if present
+          const dec = new XdrDecoder();
+          dec.reader.reset(request.createattrs.attrVals);
+          const maskSet = parseBitmask(request.createattrs.attrmask.mask);
+          if (maskSet.has(Nfsv4Attr.FATTR4_MODE)) {
+            // consume any preceding attributes until MODE is reached
+            // For createattrs we assume only MODE may be present commonly
+            const m = dec.readUnsignedInt();
+            mode = m & 0o7777;
+          }
+        }
+      } catch (e) {
+        // ignore parsing errors, fall back to default mode
+      }
+      const fd = await this.promises.open(
+        createPath,
+        this.fs.constants.O_CREAT | this.fs.constants.O_EXCL | this.fs.constants.O_RDWR,
+        mode,
+      );
+      try {
+        await fd.close();
+      } catch {}
+      const stats = await this.promises.stat(createPath);
+      const fh = this.fh.encode(createPath);
+      const cinfo = new struct.Nfsv4ChangeInfo(true, 0n, 0n);
+      const attrset = new struct.Nfsv4Bitmap([]);
+      const resok = new msg.Nfsv4CreateResOk(cinfo, attrset);
+      return new msg.Nfsv4CreateResponse(Nfsv4Stat.NFS4_OK, resok);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4CreateResponse(status);
+    }
   }
 
   public async LINK(request: msg.Nfsv4LinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LinkResponse> {
-    ctx.connection.logger.log('LINK', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4LinkResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    const currentPath = this.fh.currentPath(ctx);
+    const existingPath = this.absolutePath(currentPath);
+    const savedPath = this.fh.savedPath(ctx);
+    const newPath = this.absolutePath(NodePath.join(savedPath, request.newname));
+    try {
+      await this.promises.link(existingPath, newPath);
+      const resok = new msg.Nfsv4LinkResOk(new struct.Nfsv4ChangeInfo(true, 0n, 0n));
+      return new msg.Nfsv4LinkResponse(Nfsv4Stat.NFS4_OK, resok);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4LinkResponse(status);
+    }
   }
 
   public async NVERIFY(request: msg.Nfsv4NverifyRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4NverifyResponse> {
-    ctx.connection.logger.log('NVERIFY', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
+    try {
+      const stats = await this.promises.lstat(currentPathAbsolute);
+      // request.objAttributes is a Nfsv4Fattr: use its attrmask when asking
+      // encodeAttrs to serialize the server's current attributes and compare
+      // raw attrVals bytes.
+      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPathAbsolute, ctx.cfh!);
+      if (cmpUint8Array(attrs.attrVals, request.objAttributes.attrVals))
+        return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4ERR_NOT_SAME);
+      return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4_OK);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4NverifyResponse(status);
+    }
   }
 
   public async SETATTR(request: msg.Nfsv4SetattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SetattrResponse> {
-    ctx.connection.logger.log('SETATTR', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4SetattrResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
+    try {
+      const inFattr = request.objAttributes;
+      const dec = new XdrDecoder();
+      dec.reader.reset(inFattr.attrVals);
+      const mask = inFattr.attrmask.mask;
+      for (let i = 0; i < mask.length; i++) {
+        const word = mask[i];
+        for (let bit = 0; bit < 32; bit++) {
+          const bitMask = 1 << bit;
+          if (!(word & bitMask)) continue;
+          const attrNum = i * 32 + bit;
+          switch (attrNum) {
+            case Nfsv4Attr.FATTR4_MODE: {
+              const mode = dec.readUnsignedInt();
+              await this.promises.chmod(currentPathAbsolute, mode & 0o7777);
+              break;
+            }
+            case Nfsv4Attr.FATTR4_SIZE: {
+              const size = dec.readUnsignedHyper();
+              await this.promises.truncate(currentPathAbsolute, Number(size));
+              break;
+            }
+            case Nfsv4Attr.FATTR4_FILEHANDLE: {
+              // read and ignore
+              dec.readVarlenArray(() => dec.readUnsignedInt());
+              break;
+            }
+            case Nfsv4Attr.FATTR4_SUPPORTED_ATTRS: {
+              const len = dec.readUnsignedInt();
+              for (let j = 0; j < len; j++) dec.readUnsignedInt();
+              break;
+            }
+            case Nfsv4Attr.FATTR4_TYPE: {
+              dec.readUnsignedInt();
+              break;
+            }
+            case Nfsv4Attr.FATTR4_FILEID:
+            case Nfsv4Attr.FATTR4_SPACE_USED:
+            case Nfsv4Attr.FATTR4_CHANGE: {
+              dec.readUnsignedHyper();
+              break;
+            }
+            case Nfsv4Attr.FATTR4_TIME_ACCESS:
+            case Nfsv4Attr.FATTR4_TIME_MODIFY:
+            case Nfsv4Attr.FATTR4_TIME_METADATA: {
+              dec.readHyper();
+              dec.readUnsignedInt();
+              break;
+            }
+            default: {
+              return new msg.Nfsv4SetattrResponse(Nfsv4Stat.NFS4ERR_INVAL);
+            }
+          }
+        }
+      }
+      const stats = await this.promises.lstat(currentPathAbsolute);
+      const fh = this.fh.encode(currentPath);
+      // Return updated mode and size attributes
+      const returnMask = new struct.Nfsv4Bitmap(attrNumsToBitmap([Nfsv4Attr.FATTR4_MODE, Nfsv4Attr.FATTR4_SIZE]));
+      const fattr = encodeAttrs(returnMask, stats, currentPath, fh);
+      const resok = new msg.Nfsv4SetattrResOk(returnMask);
+      return new msg.Nfsv4SetattrResponse(Nfsv4Stat.NFS4_OK, resok);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4SetattrResponse(status);
+    }
   }
 
   public async VERIFY(request: msg.Nfsv4VerifyRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4VerifyResponse> {
-    ctx.connection.logger.log('VERIFY', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4VerifyResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    const currentPath = this.fh.currentPath(ctx);
+    const currentPathAbsolute = this.absolutePath(currentPath);
+    try {
+      const stats = await this.promises.lstat(currentPathAbsolute);
+      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPath, ctx.cfh!);
+      if (cmpUint8Array(attrs.attrVals, request.objAttributes.attrVals))
+        return new msg.Nfsv4VerifyResponse(Nfsv4Stat.NFS4_OK);
+      return new msg.Nfsv4VerifyResponse(Nfsv4Stat.NFS4ERR_NOT_SAME);
+    } catch (err: unknown) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4VerifyResponse(status);
+    }
   }
 }

@@ -155,6 +155,17 @@ export class FileHandleMapper {
   }
 
   /**
+   * Gets the saved file path from the operation context.
+   * @param ctx Operation context containing the saved file handle (sfh).
+   * @returns The saved file path.
+   */
+  public savedPath(ctx: Nfsv4OperationCtx): string {
+    const sfh = ctx.sfh;
+    if (!sfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
+    return this.decode(sfh);
+  }
+
+  /**
    * Sets the current file handle in the operation context to the given path.
    * @param ctx Operation context to update.
    * @param path Absolute file path to set as the current file handle.

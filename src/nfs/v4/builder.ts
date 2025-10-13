@@ -1,6 +1,7 @@
 import {attrNumsToBitmap} from './attributes';
 import * as msg from './messages';
 import * as structs from './structs';
+import {Nfsv4FType} from './constants';
 
 /**
  * Static builder helpers for NFS v4 operations.
@@ -122,6 +123,33 @@ export const nfs = {
    */
   WRITE(stateid: structs.Nfsv4Stateid, offset: bigint, stable: number, data: Uint8Array): msg.Nfsv4WriteRequest {
     return new msg.Nfsv4WriteRequest(stateid, offset, stable, data);
+  },
+
+  /**
+   * COMMIT - Commit written data to stable storage.
+   * @param offset - Byte offset
+   * @param count - Number of bytes
+   */
+  COMMIT(offset: bigint, count: number): msg.Nfsv4CommitRequest {
+    return new msg.Nfsv4CommitRequest(offset, count);
+  },
+
+  /**
+   * CREATE - Create a new file.
+   * @param objtype - Object type to create
+   * @param objname - Name of object to create
+   * @param createattrs - Attributes for the new object
+   */
+  CREATE(objtype: structs.Nfsv4CreateType, objname: string, createattrs: structs.Nfsv4Fattr): msg.Nfsv4CreateRequest {
+    return new msg.Nfsv4CreateRequest(objtype, objname, createattrs);
+  },
+
+  /**
+   * LINK - Create a hard link.
+   * @param newname - Name for the new link
+   */
+  LINK(newname: string): msg.Nfsv4LinkRequest {
+    return new msg.Nfsv4LinkRequest(newname);
   },
 
   /**
@@ -394,6 +422,20 @@ export const nfs = {
    */
   Bitmap(attrNums: number[]): structs.Nfsv4Bitmap {
     return new structs.Nfsv4Bitmap(attrNumsToBitmap(attrNums));
+  },
+
+  /**
+   * Create Nfsv4CreateType for regular file creation.
+   */
+  CreateTypeFile(): structs.Nfsv4CreateType {
+    return new structs.Nfsv4CreateType(Nfsv4FType.NF4REG, new structs.Nfsv4CreateTypeVoid());
+  },
+
+  /**
+   * Create Nfsv4CreateType for directory creation.
+   */
+  CreateTypeDir(): structs.Nfsv4CreateType {
+    return new structs.Nfsv4CreateType(Nfsv4FType.NF4DIR, new structs.Nfsv4CreateTypeVoid());
   },
 
   /**

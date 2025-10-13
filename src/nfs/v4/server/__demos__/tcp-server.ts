@@ -7,5 +7,7 @@ vol.fromJSON({
   '/export/file.txt': 'Hello, NFS v4!\n',
 });
 
+console.log(vol.toJSON());
+
 const ops = new Nfsv4OperationsNode({fs: <any>fs, dir: '/'});
 Nfsv4TcpServer.start({ops, debug: true});

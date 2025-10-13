@@ -65,7 +65,7 @@ export class Nfsv4Connection {
     this.rmDecoder = new RmRecordDecoder();
     this.rpcDecoder = new RpcMessageDecoder();
     this.nfsDecoder = new Nfsv4Decoder();
-    const nfsEncoder = (this.nfsEncoder = new FullNfsv4Encoder());
+    const nfsEncoder = (this.nfsEncoder = new Nfsv4FullEncoder());
     this.writer = nfsEncoder.writer;
     this.rmEncoder = nfsEncoder.rmEncoder;
     this.rpcEncoder = nfsEncoder.rpcEncoder;

@@ -2,6 +2,7 @@ import {Nfsv4Stat} from '../constants';
 import {Nfsv4OperationFn} from './operations/Nfsv4Operations';
 import {Nfsv4Connection} from './Nfsv4Connection';
 import * as msg from '../messages';
+import {formatNfsv4Request, formatNfsv4Response} from '../format';
 
 /**
  * NFS v4 COMPOUND Procedure Context, holds state for a single COMPOUND procedure
@@ -95,13 +96,16 @@ export class Nfsv4CompoundProcCtx {
       else if (op instanceof msg.Nfsv4IllegalRequest) (fn = ops.ILLEGAL), (Response = msg.Nfsv4IllegalResponse);
       if (!fn || !Response) return new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4ERR_OP_ILLEGAL, tag, resarray);
       EXEC_OP: try {
-        if (debug) logger.log(fn.name, opReq);
+        // if (debug) logger.log(fn.name, opReq);
+        if (debug) logger.log(formatNfsv4Request(opReq));
         const opResponse = await fn.call(ops, opReq, this);
         if (!(opResponse instanceof Response)) throw new Error('Unexpected response, fn = ' + fn.name);
-        if (debug) logger.log(fn.name, opResponse);
+        // if (debug) logger.log(fn.name, opResponse);
+        if (debug) logger.log(': ' + formatNfsv4Response(opResponse));
         status = opResponse.status;
         resarray.push(opResponse);
       } catch (err) {
+        if (debug) logger.error(': ERROR', fn.name, err);
         if (err instanceof Response) {
           if (err.status !== Nfsv4Stat.NFS4_OK) {
             status = err.status;

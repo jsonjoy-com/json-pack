@@ -69,7 +69,8 @@
     "@jsonjoy.com/json-pointer": "^1.0.2",
     "@jsonjoy.com/util": "^1.9.0",
     "hyperdyperid": "^1.2.0",
-    "thingies": "^2.5.0"
+    "thingies": "^2.5.0",
+    "tree-dump": "^1.1.0"
   },
   "devDependencies": {
     "@msgpack/msgpack": "^3.0.0-beta2",

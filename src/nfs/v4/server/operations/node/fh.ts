@@ -30,13 +30,11 @@ export const enum FH {
  * @returns The encoded file handle, or undefined if the path is too long.
  */
 export const encodePathFh = (absolutePath: string): Uint8Array | undefined => {
-  const length = absolutePath.length;
-  const maxUtf8Bytes = length * 4; // UTF-8 can be up to 4 bytes per char
-  const maxAllocSize = maxUtf8Bytes + 1; // UTF-8 can be up to 4 bytes per char, plus 1 byte for FH_TYPE
-  if (maxAllocSize > FH.MAX_SIZE) return undefined;
-  const u8 = new Uint8Array(maxAllocSize);
+  const utf8Length = Buffer.byteLength(absolutePath, 'utf8');
+  if (utf8Length + 1 > FH.MAX_SIZE) return undefined;
+  const u8 = new Uint8Array(1 + utf8Length);
   u8[0] = FH_TYPE.PATH;
-  encode(u8, absolutePath, 1, maxUtf8Bytes);
+  encode(u8, absolutePath, 1, utf8Length);
   return u8;
 };
 

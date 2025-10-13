@@ -99,3 +99,69 @@ describe('.stat()', () => {
     await stop();
   });
 });
+
+describe('.mkdir()', () => {
+  test('can create a directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.mkdir('newdir');
+    const stats = await fs.stat('newdir');
+    expect(stats.isDirectory()).toBe(true);
+    await stop();
+  });
+
+  test('can create nested directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.mkdir('subdir/newsubdir');
+    const stats = await fs.stat('subdir/newsubdir');
+    expect(stats.isDirectory()).toBe(true);
+    await stop();
+  });
+});
+
+describe('.readdir()', () => {
+  test('can read directory entries', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const entries = await fs.readdir('/');
+    expect(Array.isArray(entries)).toBe(true);
+    expect(entries.length).toBeGreaterThan(0);
+    expect(entries).toContain('file.txt');
+    expect(entries).toContain('subdir');
+    await stop();
+  });
+
+  test('does not create directories recursively', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    expect(fs.readdir('/subdir/a/b')).rejects.toThrow();
+    await stop();
+  });
+
+  test('can read directory with file types', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const entries = await fs.readdir('/', {withFileTypes: true}) as any[];
+    expect(Array.isArray(entries)).toBe(true);
+    expect(entries.length).toBeGreaterThan(0);
+    const fileEntry = entries.find((e: any) => e.name === 'file.txt');
+    expect(fileEntry).toBeDefined();
+    expect(fileEntry.isFile()).toBe(true);
+    expect(fileEntry.isDirectory()).toBe(false);
+    const dirEntry = entries.find((e: any) => e.name === 'subdir');
+    expect(dirEntry).toBeDefined();
+    expect(dirEntry.isDirectory()).toBe(true);
+    expect(dirEntry.isFile()).toBe(false);
+    await stop();
+  });
+
+  test('can read nested directory', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const entries = await fs.readdir('subdir');
+    expect(Array.isArray(entries)).toBe(true);
+    expect(entries).toContain('nested.dat');
+    await stop();
+  });
+});

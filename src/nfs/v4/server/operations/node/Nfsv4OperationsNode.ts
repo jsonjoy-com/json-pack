@@ -10,6 +10,7 @@ import {
   Nfsv4DelegType,
   Nfsv4LockType,
   Nfsv4OpenFlags,
+  Nfsv4FType,
 } from '../../../constants';
 import {Nfsv4OperationCtx, Nfsv4Operations} from '../Nfsv4Operations';
 import * as msg from '../../../messages';
@@ -976,34 +977,50 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const createPath = NodePath.join(currentPathAbsolute, name);
     if (createPath.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
     try {
-      // Determine requested create mode (if provided in createattrs)
-      let mode = 0o666;
-      try {
-        if (request.createattrs && request.createattrs.attrmask) {
-          // parse createattrs for mode if present
-          const dec = new XdrDecoder();
-          dec.reader.reset(request.createattrs.attrVals);
-          const maskSet = parseBitmask(request.createattrs.attrmask.mask);
-          if (maskSet.has(Nfsv4Attr.FATTR4_MODE)) {
-            // consume any preceding attributes until MODE is reached
-            // For createattrs we assume only MODE may be present commonly
-            const m = dec.readUnsignedInt();
-            mode = m & 0o7777;
+      const objType = request.objtype.type;
+      if (objType === Nfsv4FType.NF4DIR) {
+        let mode = 0o777;
+        try {
+          if (request.createattrs && request.createattrs.attrmask) {
+            const dec = new XdrDecoder();
+            dec.reader.reset(request.createattrs.attrVals);
+            const maskSet = parseBitmask(request.createattrs.attrmask.mask);
+            if (maskSet.has(Nfsv4Attr.FATTR4_MODE)) {
+              const m = dec.readUnsignedInt();
+              mode = m & 0o7777;
+            }
           }
+        } catch (e) {
+          // ignore parsing errors, fall back to default mode
         }
-      } catch (e) {
-        // ignore parsing errors, fall back to default mode
+        await this.promises.mkdir(createPath, mode);
+      } else {
+        let mode = 0o666;
+        try {
+          if (request.createattrs && request.createattrs.attrmask) {
+            const dec = new XdrDecoder();
+            dec.reader.reset(request.createattrs.attrVals);
+            const maskSet = parseBitmask(request.createattrs.attrmask.mask);
+            if (maskSet.has(Nfsv4Attr.FATTR4_MODE)) {
+              const m = dec.readUnsignedInt();
+              mode = m & 0o7777;
+            }
+          }
+        } catch (e) {
+          // ignore parsing errors, fall back to default mode
+        }
+        const fd = await this.promises.open(
+          createPath,
+          this.fs.constants.O_CREAT | this.fs.constants.O_EXCL | this.fs.constants.O_RDWR,
+          mode,
+        );
+        try {
+          await fd.close();
+        } catch {}
       }
-      const fd = await this.promises.open(
-        createPath,
-        this.fs.constants.O_CREAT | this.fs.constants.O_EXCL | this.fs.constants.O_RDWR,
-        mode,
-      );
-      try {
-        await fd.close();
-      } catch {}
       const stats = await this.promises.stat(createPath);
       const fh = this.fh.encode(createPath);
+      ctx.cfh = fh;
       const cinfo = new struct.Nfsv4ChangeInfo(true, 0n, 0n);
       const attrset = new struct.Nfsv4Bitmap([]);
       const resok = new msg.Nfsv4CreateResOk(cinfo, attrset);

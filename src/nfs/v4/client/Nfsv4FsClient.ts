@@ -275,15 +275,106 @@ export class Nfsv4FsClient implements NfsFsClient {
     );
   }
 
+  public async mkdir(path: misc.PathLike, options?: misc.TMode | opts.IMkdirOptions): Promise<string | undefined> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    if (parts.length === 0) {
+      throw new Error('Cannot create root directory');
+    }
+    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
+    for (const part of parts.slice(0, -1)) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    const dirname = parts[parts.length - 1];
+    const createType = nfs.CreateTypeDir();
+    const emptyAttrs = nfs.Fattr([], new Uint8Array(0));
+    operations.push(nfs.CREATE(createType, dirname, emptyAttrs));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to create directory: ${response.status}`);
+    }
+    const createRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4CreateResponse;
+    if (createRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to create directory: ${createRes.status}`);
+    }
+    return undefined;
+  }
+
+  public async readdir(path: misc.PathLike, options?: opts.IReaddirOptions | string): Promise<misc.TDataOut[] | misc.IDirent[]> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const withFileTypes = typeof options === 'object' && options?.withFileTypes;
+    const encoding = typeof options === 'string' ? options : options?.encoding;
+    const parts = this.parsePath(pathStr);
+    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
+    for (const part of parts) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    const attrNums = withFileTypes ? [Nfsv4Attr.FATTR4_TYPE] : [];
+    const attrMask = this.attrNumsToBitmap(attrNums);
+    operations.push(nfs.READDIR(attrMask));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to read directory: ${response.status}`);
+    }
+    const readdirRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4ReaddirResponse;
+    if (readdirRes.status !== Nfsv4Stat.NFS4_OK || !readdirRes.resok) {
+      throw new Error(`Failed to read directory: ${readdirRes.status}`);
+    }
+    const entries: string[] = [];
+    const dirents: misc.IDirent[] = [];
+    const entryList = readdirRes.resok.entries;
+    for (let i = 0; i < entryList.length; i++) {
+      const entry = entryList[i];
+      const name = entry.name;
+      if (withFileTypes) {
+        const fattr = entry.attrs;
+        const reader = new Reader();
+        reader.reset(fattr.attrVals);
+        const xdr = new XdrDecoder(reader);
+        let fileType = Nfsv4FType.NF4REG;
+        const returnedMask = fattr.attrmask.mask;
+        for (let i = 0; i < returnedMask.length; i++) {
+          const word = returnedMask[i];
+          if (!word) continue;
+          for (let bit = 0; bit < 32; bit++) {
+            if (!(word & (1 << bit))) continue;
+            const attrNum = i * 32 + bit;
+            if (attrNum === Nfsv4Attr.FATTR4_TYPE) {
+              fileType = xdr.readUnsignedInt();
+            }
+          }
+        }
+        const isDirectory = fileType === Nfsv4FType.NF4DIR;
+        const isFile = fileType === Nfsv4FType.NF4REG;
+        const isBlockDevice = fileType === Nfsv4FType.NF4BLK;
+        const isCharacterDevice = fileType === Nfsv4FType.NF4CHR;
+        const isSymbolicLink = fileType === Nfsv4FType.NF4LNK;
+        const isFIFO = fileType === Nfsv4FType.NF4FIFO;
+        const isSocket = fileType === Nfsv4FType.NF4SOCK;
+        dirents.push({
+          name,
+          isDirectory: () => isDirectory,
+          isFile: () => isFile,
+          isBlockDevice: () => isBlockDevice,
+          isCharacterDevice: () => isCharacterDevice,
+          isSymbolicLink: () => isSymbolicLink,
+          isFIFO: () => isFIFO,
+          isSocket: () => isSocket,
+        });
+      } else {
+        entries.push(name);
+      }
+    }
+    if (withFileTypes) {
+      return dirents;
+    }
+    if (encoding && encoding !== 'utf8') {
+      return entries.map(name => Buffer.from(name, 'utf8'));
+    }
+    return entries;
+  }
+
   public readonly appendFile = (path: misc.TFileHandle, data: misc.TData, options?: opts.IAppendFileOptions | string): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly readdir = (path: misc.PathLike, options?: opts.IReaddirOptions | string): Promise<misc.TDataOut[] | misc.IDirent[]> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly mkdir = (path: misc.PathLike, options?: misc.TMode | opts.IMkdirOptions): Promise<string | undefined> => {
     throw new Error('Not implemented.');
   };
 

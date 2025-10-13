@@ -12,6 +12,7 @@ import {
 } from '../../../rpc';
 import {EMPTY_READER, Nfsv4Proc, Nfsv4Const} from '../constants';
 import {Nfsv4CompoundRequest, Nfsv4CompoundResponse, Nfsv4Request} from '../messages';
+import type {Nfsv4Client} from './types';
 
 export interface Nfsv4TcpClientOpts {
   host?: string;
@@ -27,7 +28,7 @@ interface PendingRequest {
   timeout?: NodeJS.Timeout;
 }
 
-export class Nfsv4TcpClient {
+export class Nfsv4TcpClient implements Nfsv4Client {
   public static fromDuplex(duplex: stream.Duplex, opts: Nfsv4TcpClientOpts = {}): Nfsv4TcpClient {
     const client = new Nfsv4TcpClient(opts);
     client.setSocket(duplex);
@@ -70,11 +71,6 @@ export class Nfsv4TcpClient {
     return this.xid;
   }
 
-  public nextSeqid(): number {
-    this.seqid = (this.seqid + 1) >>> 0;
-    return this.seqid;
-  }
-
   public async connect(): Promise<void> {
     if (this.connected) return;
     if (this.connecting) throw new Error('Connection already in progress');
@@ -96,7 +92,7 @@ export class Nfsv4TcpClient {
     });
   }
 
-  public setSocket(socket: stream.Duplex): void {
+  protected setSocket(socket: stream.Duplex): void {
     socket.on('data', this.onData.bind(this));
     socket.on('close', this.onClose.bind(this));
     socket.on('error', (err: Error) => {

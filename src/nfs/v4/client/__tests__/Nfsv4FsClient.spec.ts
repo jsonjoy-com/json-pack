@@ -468,3 +468,64 @@ describe('.link()', () => {
     await stop();
   });
 });
+
+describe('.rm()', () => {
+  test('can remove a file', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.rm('file.txt');
+    expect(vol.existsSync('/export/file.txt')).toBe(false);
+    await stop();
+  });
+
+  test('can remove an empty directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.mkdir('emptydir');
+    await fs.rm('emptydir');
+    expect(vol.existsSync('/export/emptydir')).toBe(false);
+    await stop();
+  });
+
+  test('throws error when removing non-empty directory without recursive', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await expect(fs.rm('subdir')).rejects.toThrow();
+    await stop();
+  });
+
+  test('can remove non-empty directory with recursive option', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.rm('subdir', {recursive: true});
+    expect(vol.existsSync('/export/subdir')).toBe(false);
+    await stop();
+  });
+
+  test('does not throw with force option on non-existent file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await expect(fs.rm('nonexistent.txt', {force: true})).resolves.not.toThrow();
+    await stop();
+  });
+
+  test('throws error on non-existent file without force', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await expect(fs.rm('nonexistent.txt')).rejects.toThrow();
+    await stop();
+  });
+
+  test('can remove nested directory recursively', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.mkdir('testdir');
+    await fs.mkdir('testdir/subdir1');
+    await fs.mkdir('testdir/subdir2');
+    await fs.writeFile('testdir/file1.txt', 'content1');
+    await fs.writeFile('testdir/subdir1/file2.txt', 'content2');
+    await fs.rm('testdir', {recursive: true});
+    expect(vol.existsSync('/export/testdir')).toBe(false);
+    await stop();
+  });
+});

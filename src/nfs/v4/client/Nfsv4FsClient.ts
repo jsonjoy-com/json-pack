@@ -505,6 +505,47 @@ export class Nfsv4FsClient implements NfsFsClient {
     }
   }
 
+  public async rm(path: misc.PathLike, options?: opts.IRmOptions): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    if (parts.length === 0) {
+      throw new Error('Cannot remove root directory');
+    }
+    const force = options?.force ?? false;
+    const recursive = options?.recursive ?? false;
+    if (recursive) {
+      try {
+        const stats = await this.stat(path);
+        if (stats.isDirectory()) {
+          const entries = await this.readdir(path);
+          for (const entry of entries) {
+            const entryPath = pathStr + '/' + entry;
+            await this.rm(entryPath, options);
+          }
+        }
+      } catch (err) {
+        if (!force) throw err;
+        return;
+      }
+    }
+    try {
+      const operations = this.navigateToParent(parts);
+      const name = parts[parts.length - 1];
+      operations.push(nfs.REMOVE(name));
+      const response = await this.nfs.compound(operations);
+      if (response.status !== Nfsv4Stat.NFS4_OK) {
+        if (!force) throw new Error(`Failed to remove: ${response.status}`);
+        return;
+      }
+      const removeRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4RemoveResponse;
+      if (removeRes.status !== Nfsv4Stat.NFS4_OK) {
+        if (!force) throw new Error(`Failed to remove: ${removeRes.status}`);
+      }
+    } catch (err) {
+      if (!force) throw err;
+    }
+  }
+
   public async access(path: misc.PathLike, mode: number = 0): Promise<void> {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
@@ -679,10 +720,6 @@ export class Nfsv4FsClient implements NfsFsClient {
   };
 
   public readonly chmod = (path: misc.PathLike, mode: misc.TMode): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly rm = (path: misc.PathLike, options?: opts.IRmOptions): Promise<void> => {
     throw new Error('Not implemented.');
   };
 

@@ -100,6 +100,57 @@ describe('.stat()', () => {
   });
 });
 
+describe('.lstat()', () => {
+  test('can lstat a file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const stats = await fs.lstat('file.txt');
+    expect(stats.isFile()).toBe(true);
+    expect(stats.isDirectory()).toBe(false);
+    expect(stats.size).toBe(15);
+    expect(stats.mode).toBeGreaterThan(0);
+    expect(stats.nlink).toBeGreaterThan(0);
+    await stop();
+  });
+
+  test('can lstat a directory', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const stats = await fs.lstat('subdir');
+    expect(stats.isDirectory()).toBe(true);
+    expect(stats.isFile()).toBe(false);
+    await stop();
+  });
+
+  test('can lstat a symbolic link without following it', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    vol.symlinkSync('file.txt', '/export/link.txt');
+    const stats = await fs.lstat('link.txt');
+    expect(stats.isSymbolicLink()).toBe(true);
+    expect(stats.isFile()).toBe(false);
+    await stop();
+  });
+
+  test('lstat returns different results than stat for symlinks', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    vol.symlinkSync('file.txt', '/export/link.txt');
+    const lstatResult = await fs.lstat('link.txt');
+    expect(lstatResult.isSymbolicLink()).toBe(true);
+    await stop();
+  });
+
+  test('can lstat nested file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const stats = await fs.lstat('subdir/nested.dat');
+    expect(stats.isFile()).toBe(true);
+    expect(stats.size).toBe(11);
+    await stop();
+  });
+});
+
 describe('.mkdir()', () => {
   test('can create a directory', async () => {
     const {client, stop, vol} = await setupNfsClientServerTestbed();

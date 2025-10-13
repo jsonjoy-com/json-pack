@@ -713,6 +713,10 @@ export class Nfsv4FsClient implements NfsFsClient {
     return Buffer.from(dirName, 'utf8');
   }
 
+  public async lstat(path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> {
+    return this.stat(path, options);
+  }
+
   public readonly open = (path: misc.PathLike, flags?: misc.TFlags, mode?: misc.TMode): Promise<misc.IFileHandle> => {
     throw new Error('Not implemented.');
   };
@@ -734,10 +738,6 @@ export class Nfsv4FsClient implements NfsFsClient {
   };
 
   public readonly lutimes = (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly lstat = (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> => {
     throw new Error('Not implemented.');
   };
 

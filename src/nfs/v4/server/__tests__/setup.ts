@@ -32,8 +32,17 @@ function makeDuplexPair(): {client: Duplex; server: Duplex} {
   return {client, server};
 }
 
-export const setupNfsClientServerTestbed = () => {
+export const setupNfsClientServerTestbed = async () => {
   const {vol, fs} = memfs();
+
+  // Populate the filesystem
+  vol.fromJSON({
+    '/export': null,
+    '/export/file.txt': 'Hello, NFS v4!\n',
+    '/export/subdir': null,
+    '/export/subdir/nested.dat': 'nested data',
+  });
+
   const {client: clientDuplex, server: serverDuplex} = makeDuplexPair();
   const client = Nfsv4TcpClient.fromDuplex(clientDuplex, {debug: false});
   const ops = new Nfsv4OperationsNode({fs: fs as any, dir: '/export'});
@@ -42,7 +51,7 @@ export const setupNfsClientServerTestbed = () => {
     ops,
     debug: false,
   });
-  const stop = () => {
+  const stop = async () => {
     connection.close();
     client.close();
     clientDuplex.destroy();

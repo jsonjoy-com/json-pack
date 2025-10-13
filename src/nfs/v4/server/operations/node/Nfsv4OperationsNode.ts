@@ -1,4 +1,4 @@
-import type {Stats} from 'node:fs';
+import type {Stats, Dirent} from 'node:fs';
 import * as NodePath from 'node:path';
 import {randomBytes} from 'node:crypto';
 import {Nfsv4Access, Nfsv4Const, Nfsv4Stat} from '../../../constants';
@@ -222,7 +222,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const fh = request.object.data;
     if (fh.length > Nfsv4Const.FHSIZE) throw Nfsv4Stat.NFS4ERR_BADHANDLE;
     const valid = this.fh.validate(fh);
-    if (!valid) throw Nfsv4Stat.NFS4ERR_BADHANDLE; 
+    if (!valid) throw Nfsv4Stat.NFS4ERR_BADHANDLE;
     ctx.cfh = fh;
     return new msg.Nfsv4PutfhResponse(Nfsv4Stat.NFS4_OK);
   }
@@ -252,8 +252,11 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   private absolutePath(path: string): string {
     const dir = this.dir;
+    if (path === dir) return dir;
+    if (path.startsWith(dir + NodePath.sep) || path.startsWith(dir + '/')) return path;
     const absolutePath = NodePath.join(dir, path);
     if (absolutePath.length < dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
+    if (!absolutePath.startsWith(dir)) throw Nfsv4Stat.NFS4ERR_NOENT;
     return absolutePath;
   }
 
@@ -343,7 +346,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     }
     if (requestedAccess & Nfsv4Access.ACCESS4_LOOKUP) {
       supported |= Nfsv4Access.ACCESS4_LOOKUP;
-      if (isDirectory && (mode & 0o111)) access |= Nfsv4Access.ACCESS4_LOOKUP;
+      if (isDirectory && mode & 0o111) access |= Nfsv4Access.ACCESS4_LOOKUP;
     }
     if (requestedAccess & Nfsv4Access.ACCESS4_MODIFY) {
       supported |= Nfsv4Access.ACCESS4_MODIFY;
@@ -363,10 +366,84 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     }
     if (requestedAccess & Nfsv4Access.ACCESS4_EXECUTE) {
       supported |= Nfsv4Access.ACCESS4_EXECUTE;
-      if (!isDirectory && (mode & 0o111)) access |= Nfsv4Access.ACCESS4_EXECUTE;
+      if (!isDirectory && mode & 0o111) access |= Nfsv4Access.ACCESS4_EXECUTE;
     }
     const body = new msg.Nfsv4AccessResOk(supported, access);
     return new msg.Nfsv4AccessResponse(Nfsv4Stat.NFS4_OK, body);
+  }
+
+  public async READDIR(request: msg.Nfsv4ReaddirRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReaddirResponse> {
+    const fh = this.fh;
+    const currentPath = fh.currentPath(ctx);
+    const absolutePath = this.absolutePath(currentPath);
+    const promises = this.promises;
+    let stats: Stats;
+    try {
+      stats = await promises.lstat(absolutePath);
+    } catch (error: unknown) {
+      throw normalizeNodeFsError(error, ctx.connection.logger);
+    }
+    if (!stats.isDirectory()) throw Nfsv4Stat.NFS4ERR_NOTDIR;
+    const cookie = request.cookie;
+    const requestedCookieverf = request.cookieverf.data;
+    const maxcount = request.maxcount;
+    const attrRequest = request.attrRequest;
+    let cookieverf: Uint8Array;
+    if (cookie === 0n) {
+      cookieverf = new Uint8Array(8);
+      const changeTime = BigInt(Math.floor(stats.mtimeMs * 1000000));
+      const view = new DataView(cookieverf.buffer);
+      view.setBigUint64(0, changeTime, false);
+    } else {
+      cookieverf = new Uint8Array(8);
+      const changeTime = BigInt(Math.floor(stats.mtimeMs * 1000000));
+      const view = new DataView(cookieverf.buffer);
+      view.setBigUint64(0, changeTime, false);
+      if (!cmpUint8Array(requestedCookieverf, cookieverf)) throw Nfsv4Stat.NFS4ERR_NOT_SAME;
+    }
+    let dirents: Dirent[];
+    try {
+      dirents = await promises.readdir(absolutePath, {withFileTypes: true});
+    } catch (error: unknown) {
+      throw normalizeNodeFsError(error, ctx.connection.logger);
+    }
+    const entries: struct.Nfsv4Entry[] = [];
+    let totalBytes = 0;
+    const overheadPerEntry = 32;
+    let startIndex = 0;
+    if (cookie > 0n) {
+      startIndex = Number(cookie) - 2;
+      if (startIndex < 0) startIndex = 0;
+      if (startIndex > dirents.length) startIndex = dirents.length;
+    }
+    let eof = true;
+    for (let i = startIndex; i < dirents.length; i++) {
+      const dirent = dirents[i];
+      const name = dirent.name;
+      const entryCookie = BigInt(i + 3);
+      const entryPath = NodePath.join(absolutePath, name);
+      let entryStats: Stats | undefined;
+      try {
+        entryStats = await promises.lstat(entryPath);
+      } catch (error: unknown) {
+        continue;
+      }
+      const entryFh = fh.encode(entryPath);
+      const attrs = encodeAttrs(attrRequest, entryStats, entryPath, entryFh);
+      const nameBytes = Buffer.byteLength(name, 'utf8');
+      const attrBytes = attrs.attrVals.length;
+      const entryBytes = overheadPerEntry + nameBytes + attrBytes;
+      if (totalBytes + entryBytes > maxcount && entries.length > 0) {
+        eof = false;
+        break;
+      }
+      const entry = new struct.Nfsv4Entry(entryCookie, name, attrs);
+      entries.push(entry);
+      totalBytes += entryBytes;
+    }
+    const cookieverf2 = new struct.Nfsv4Verifier(cookieverf);
+    const body = new msg.Nfsv4ReaddirResOk(cookieverf2, entries, eof);
+    return new msg.Nfsv4ReaddirResponse(Nfsv4Stat.NFS4_OK, body);
   }
 
   // ----------------------------------------------- Stub implementations below
@@ -471,12 +548,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     ctx.connection.logger.log('READ', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4ReadResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async READDIR(request: msg.Nfsv4ReaddirRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReaddirResponse> {
-    ctx.connection.logger.log('READDIR', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4ReaddirResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
   public async READLINK(request: msg.Nfsv4ReadlinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReadlinkResponse> {

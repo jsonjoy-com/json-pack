@@ -40,6 +40,12 @@ Then mount an NFSv4 share from another terminal or machine:
 mount -t nfs -o vers=4,nfsvers=4,port=8777,mountport=8777,proto=tcp,sec=none 127.0.0.1:/export ~/mnt/test
 ```
 
+Unmount with:
+
+```bash
+sudo umount -f ~/mnt/test
+```
+
 You might need to clean all hanging `mount_nfs` processes if previous mounts failed.
 
 ```bash

@@ -146,4 +146,119 @@ export class Nfsv4FsClient implements NfsFsClient {
       await this.nfs.compound([nfs.CLOSE(0, openStateid)]);
     }
   }
+
+  public readonly stat = (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly appendFile = (path: misc.TFileHandle, data: misc.TData, options?: opts.IAppendFileOptions | string): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly readdir = (path: misc.PathLike, options?: opts.IReaddirOptions | string): Promise<misc.TDataOut[] | misc.IDirent[]> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly mkdir = (path: misc.PathLike, options?: misc.TMode | opts.IMkdirOptions): Promise<string | undefined> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly access = (path: misc.PathLike, mode?: number): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly copyFile = (src: misc.PathLike, dest: misc.PathLike, flags?: misc.TFlagsCopy): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly link = (existingPath: misc.PathLike, newPath: misc.PathLike): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly realpath = (path: misc.PathLike, options?: opts.IRealpathOptions | string): Promise<misc.TDataOut> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly rename = (oldPath: misc.PathLike, newPath: misc.PathLike): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly rmdir = (path: misc.PathLike, options?: opts.IRmdirOptions): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly truncate = (path: misc.PathLike, len?: number): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly unlink = (path: misc.PathLike): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly utimes = (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly symlink = (target: misc.PathLike, path: misc.PathLike, type?: misc.symlink.Type): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly readlink = (path: misc.PathLike, options?: opts.IOptions): Promise<misc.TDataOut> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly opendir = (path: misc.PathLike, options?: opts.IOpendirOptions): Promise<misc.IDir> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly open = (path: misc.PathLike, flags?: misc.TFlags, mode?: misc.TMode): Promise<misc.IFileHandle> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly chmod = (path: misc.PathLike, mode: misc.TMode): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly rm = (path: misc.PathLike, options?: opts.IRmOptions): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly chown = (path: misc.PathLike, uid: number, gid: number): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly lchmod = (path: misc.PathLike, mode: misc.TMode): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly lchown = (path: misc.PathLike, uid: number, gid: number): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly lutimes = (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly lstat = (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly mkdtemp = (prefix: string, options?: opts.IOptions): Promise<misc.TDataOut> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly statfs = (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStatFs> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly watch = (filename: misc.PathLike, options?: opts.IWatchOptions): AsyncIterableIterator<{
+      eventType: string;
+      filename: string | Buffer;
+  }> => {
+    throw new Error('Not implemented.');
+  };
+
+  public readonly glob = (pattern: string, options?: opts.IGlobOptions): Promise<string[]> => {
+    throw new Error('Not implemented.');
+  };
 }

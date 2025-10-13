@@ -1,4 +1,4 @@
-import type {FsPromises} from 'memfs/lib/node/FsPromises';
+import type {FsPromisesApi} from 'memfs/lib/node/types';
 import * as msg from '../messages';
 
 export interface Nfsv4Client {
@@ -8,7 +8,4 @@ export interface Nfsv4Client {
   null(): Promise<void>;
 }
 
-export interface NfsFsClient {
-  readFile: FsPromises['readFile'];
-  writeFile: FsPromises['writeFile'];
-}
+export interface NfsFsClient extends Pick<FsPromisesApi, 'readFile' | 'writeFile' | 'readdir' | 'mkdir' | 'access' | 'appendFile' | 'copyFile' | 'link' | 'realpath' | 'rename' | 'rmdir' | 'truncate' | 'unlink' | 'utimes' | 'symlink' | 'stat' | 'readlink' | 'opendir' | 'open' | 'chmod' | 'rm' | 'chown' | 'lchmod' | 'lchown' | 'lutimes' | 'lstat' | 'mkdtemp' | 'statfs' | 'watch' | 'glob'> {}

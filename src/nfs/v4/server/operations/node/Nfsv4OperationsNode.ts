@@ -8,6 +8,7 @@ import {
   Nfsv4OpenAccess,
   Nfsv4OpenClaimType,
   Nfsv4DelegType,
+  Nfsv4LockType,
 } from '../../../constants';
 import {Nfsv4OperationCtx, Nfsv4Operations} from '../Nfsv4Operations';
 import * as msg from '../../../messages';
@@ -16,6 +17,8 @@ import {cmpUint8Array} from '@jsonjoy.com/buffers/lib/cmpUint8Array';
 import {ClientRecord} from '../ClientRecord';
 import {OpenFileState} from '../OpenFileState';
 import {OpenOwnerState} from '../OpenOwnerState';
+import {LockOwnerState} from '../LockOwnerState';
+import {ByteRangeLock} from '../ByteRangeLock';
 import {FileHandleMapper, ROOT_FH} from './fh';
 import {isErrCode, normalizeNodeFsError} from './util';
 import {encodeAttrs} from './attrs';
@@ -75,6 +78,11 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   /** Map from open-owner key to owner state. */
   protected openOwners: Map<string, OpenOwnerState> = new Map();
 
+  /** Map from lock key to byte-range lock. */
+  protected locks: Map<string, ByteRangeLock> = new Map();
+  /** Map from lock-owner key to lock-owner state. */
+  protected lockOwners: Map<string, LockOwnerState> = new Map();
+
   constructor(opts: Nfsv4OperationsNodeOpts) {
     this.fs = opts.fs;
     this.promises = this.fs.promises;
@@ -125,6 +133,31 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       if ((shareDeny & openFile.shareAccess) !== 0) return false;
     }
     return true;
+  }
+
+  protected makeLockOwnerKey(clientid: bigint, owner: Uint8Array): string {
+    return `${clientid}:${Buffer.from(owner).toString('hex')}`;
+  }
+
+  protected makeLockKey(stateid: struct.Nfsv4Stateid, offset: bigint, length: bigint): string {
+    return `${this.makeStateidKey(stateid)}:${offset}:${length}`;
+  }
+
+  protected hasConflictingLock(
+    path: string,
+    locktype: number,
+    offset: bigint,
+    length: bigint,
+    ownerKey: string,
+  ): boolean {
+    const isWriteLock = locktype === Nfsv4LockType.WRITE_LT;
+    for (const lock of this.locks.values()) {
+      if (lock.path !== path) continue;
+      if (!lock.overlaps(offset, length)) continue;
+      if (lock.lockOwnerKey === ownerKey) continue;
+      if (isWriteLock || lock.locktype === Nfsv4LockType.WRITE_LT) return true;
+    }
+    return false;
   }
 
   /**
@@ -638,6 +671,135 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4_OK, resok);
   }
 
+  public async SECINFO(request: msg.Nfsv4SecinfoRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SecinfoResponse> {
+    const cfh = ctx.cfh;
+    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
+    const dirPath = this.fh.decode(cfh);
+    const filename = request.name;
+    const filePath = this.absolutePath(NodePath.join(dirPath, filename));
+    try {
+      await this.promises.lstat(filePath);
+    } catch (err) {
+      if (isErrCode(err, 'ENOENT')) {
+        return new msg.Nfsv4SecinfoResponse(Nfsv4Stat.NFS4ERR_NOENT);
+      }
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4SecinfoResponse(status);
+    }
+    const flavors: struct.Nfsv4SecInfoFlavor[] = [new struct.Nfsv4SecInfoFlavor(1)];
+    const resok = new msg.Nfsv4SecinfoResOk(flavors);
+    return new msg.Nfsv4SecinfoResponse(Nfsv4Stat.NFS4_OK, resok);
+  }
+
+  public async LOCK(request: msg.Nfsv4LockRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LockResponse> {
+    const cfh = ctx.cfh;
+    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
+    const filePath = this.fh.decode(cfh);
+    const {locktype, offset, length, locker} = request;
+    if (!locker.newLockOwner) {
+      const existingOwner = locker.owner as struct.Nfsv4LockExistingOwner;
+      const stateidKey = this.makeStateidKey(existingOwner.lockStateid);
+      const existingLock = this.locks.get(stateidKey);
+      if (!existingLock) {
+        return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+      }
+      if (this.hasConflictingLock(filePath, locktype, offset, length, existingLock.lockOwnerKey)) {
+        const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
+        const denied = new msg.Nfsv4LockResDenied(offset, length, locktype, conflictOwner);
+        return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_LOCKED, undefined, denied);
+      }
+      const stateid = this.createStateid();
+      const lock = new ByteRangeLock(stateid, filePath, locktype, offset, length, existingLock.lockOwnerKey);
+      const lockKey = this.makeLockKey(stateid, offset, length);
+      this.locks.set(lockKey, lock);
+      const lockOwner = this.lockOwners.get(existingLock.lockOwnerKey);
+      if (lockOwner) lockOwner.locks.add(lockKey);
+      const resok = new msg.Nfsv4LockResOk(stateid);
+      return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4_OK, resok);
+    }
+    const newOwner = locker.owner as struct.Nfsv4LockNewOwner;
+    const openToLock = newOwner.openToLockOwner;
+    const lockOwnerData = openToLock.lockOwner;
+    const ownerKey = this.makeLockOwnerKey(lockOwnerData.clientid, lockOwnerData.owner);
+    if (this.hasConflictingLock(filePath, locktype, offset, length, ownerKey)) {
+      const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
+      const denied = new msg.Nfsv4LockResDenied(offset, length, locktype, conflictOwner);
+      return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_LOCKED, undefined, denied);
+    }
+    let lockOwnerState = this.lockOwners.get(ownerKey);
+    if (!lockOwnerState) {
+      lockOwnerState = new LockOwnerState(lockOwnerData.clientid, lockOwnerData.owner, openToLock.lockSeqid);
+      this.lockOwners.set(ownerKey, lockOwnerState);
+    }
+    const stateid = this.createStateid();
+    const lock = new ByteRangeLock(stateid, filePath, locktype, offset, length, ownerKey);
+    const lockKey = this.makeLockKey(stateid, offset, length);
+    this.locks.set(lockKey, lock);
+    lockOwnerState.locks.add(lockKey);
+    const resok = new msg.Nfsv4LockResOk(stateid);
+    return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4_OK, resok);
+  }
+
+  public async LOCKT(request: msg.Nfsv4LocktRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LocktResponse> {
+    const cfh = ctx.cfh;
+    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
+    const filePath = this.fh.decode(cfh);
+    const {locktype, offset, length, owner} = request;
+    const ownerKey = this.makeLockOwnerKey(owner.clientid, owner.owner);
+    if (this.hasConflictingLock(filePath, locktype, offset, length, ownerKey)) {
+      const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
+      const denied = new msg.Nfsv4LocktResDenied(offset, length, locktype, conflictOwner);
+      return new msg.Nfsv4LocktResponse(Nfsv4Stat.NFS4ERR_LOCKED, denied);
+    }
+    return new msg.Nfsv4LocktResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  public async LOCKU(request: msg.Nfsv4LockuRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LockuResponse> {
+    const {lockStateid, offset, length} = request;
+    const lockKey = this.makeLockKey(lockStateid, offset, length);
+    const lock = this.locks.get(lockKey);
+    if (!lock) {
+      return new msg.Nfsv4LockuResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    }
+    this.locks.delete(lockKey);
+    const lockOwner = this.lockOwners.get(lock.lockOwnerKey);
+    if (lockOwner) {
+      lockOwner.locks.delete(lockKey);
+      if (lockOwner.locks.size === 0) {
+        this.lockOwners.delete(lock.lockOwnerKey);
+      }
+    }
+    const stateid = this.createStateid();
+    const resok = new msg.Nfsv4LockuResOk(stateid);
+    return new msg.Nfsv4LockuResponse(Nfsv4Stat.NFS4_OK, resok);
+  }
+
+  public async RELEASE_LOCKOWNER(
+    request: msg.Nfsv4ReleaseLockOwnerRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4ReleaseLockOwnerResponse> {
+    const {lockOwner} = request;
+    const ownerKey = this.makeLockOwnerKey(lockOwner.clientid, lockOwner.owner);
+    const lockOwnerState = this.lockOwners.get(ownerKey);
+    if (!lockOwnerState) {
+      return new msg.Nfsv4ReleaseLockOwnerResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    }
+    for (const lockKey of lockOwnerState.locks) {
+      this.locks.delete(lockKey);
+    }
+    this.lockOwners.delete(ownerKey);
+    return new msg.Nfsv4ReleaseLockOwnerResponse(Nfsv4Stat.NFS4_OK);
+  }
+
+  public async RENEW(request: msg.Nfsv4RenewRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RenewResponse> {
+    const clientid = request.clientid;
+    const client = this.clients.get(clientid);
+    if (!client) {
+      return new msg.Nfsv4RenewResponse(Nfsv4Stat.NFS4ERR_STALE_CLIENTID);
+    }
+    return new msg.Nfsv4RenewResponse(Nfsv4Stat.NFS4_OK);
+  }
+
   // ----------------------------------------------- Stub implementations below
 
   public async COMMIT(request: msg.Nfsv4CommitRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CommitResponse> {
@@ -656,42 +818,20 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     request: msg.Nfsv4DelegpurgeRequest,
     ctx: Nfsv4OperationCtx,
   ): Promise<msg.Nfsv4DelegpurgeResponse> {
-    ctx.connection.logger.log('DELEGPURGE', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4DelegpurgeResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    return new msg.Nfsv4DelegpurgeResponse(Nfsv4Stat.NFS4ERR_NOTSUPP);
   }
 
   public async DELEGRETURN(
     request: msg.Nfsv4DelegreturnRequest,
     ctx: Nfsv4OperationCtx,
   ): Promise<msg.Nfsv4DelegreturnResponse> {
-    ctx.connection.logger.log('DELEGRETURN', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4DelegreturnResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    return new msg.Nfsv4DelegreturnResponse(Nfsv4Stat.NFS4ERR_NOTSUPP);
   }
 
   public async LINK(request: msg.Nfsv4LinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LinkResponse> {
     ctx.connection.logger.log('LINK', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4LinkResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async LOCK(request: msg.Nfsv4LockRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LockResponse> {
-    ctx.connection.logger.log('LOCK', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async LOCKT(request: msg.Nfsv4LocktRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LocktResponse> {
-    ctx.connection.logger.log('LOCKT', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4LocktResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async LOCKU(request: msg.Nfsv4LockuRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LockuResponse> {
-    ctx.connection.logger.log('LOCKU', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4LockuResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
   public async NVERIFY(request: msg.Nfsv4NverifyRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4NverifyResponse> {
@@ -724,18 +864,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
-  public async RENEW(request: msg.Nfsv4RenewRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RenewResponse> {
-    ctx.connection.logger.log('RENEW', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4RenewResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async SECINFO(request: msg.Nfsv4SecinfoRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SecinfoResponse> {
-    ctx.connection.logger.log('SECINFO', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4SecinfoResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
   public async SETATTR(request: msg.Nfsv4SetattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4SetattrResponse> {
     ctx.connection.logger.log('SETATTR', request);
     throw new Error('Not implemented');
@@ -752,14 +880,5 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     ctx.connection.logger.log('WRITE', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4WriteResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async RELEASE_LOCKOWNER(
-    request: msg.Nfsv4ReleaseLockOwnerRequest,
-    ctx: Nfsv4OperationCtx,
-  ): Promise<msg.Nfsv4ReleaseLockOwnerResponse> {
-    ctx.connection.logger.log('RELEASE_LOCKOWNER', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4ReleaseLockOwnerResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 }

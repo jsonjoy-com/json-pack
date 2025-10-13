@@ -270,6 +270,67 @@ export const nfs = {
   },
 
   /**
+   * SECINFO - Get security information for a file.
+   * @param name - Filename to get security info for
+   */
+  SECINFO(name: string): msg.Nfsv4SecinfoRequest {
+    return new msg.Nfsv4SecinfoRequest(name);
+  },
+
+  /**
+   * DELEGPURGE - Purge delegations (not supported).
+   * @param clientid - Client ID
+   */
+  DELEGPURGE(clientid: bigint): msg.Nfsv4DelegpurgeRequest {
+    return new msg.Nfsv4DelegpurgeRequest(clientid);
+  },
+
+  /**
+   * DELEGRETURN - Return delegation (not supported).
+   * @param stateid - Delegation stateid
+   */
+  DELEGRETURN(stateid: structs.Nfsv4Stateid): msg.Nfsv4DelegreturnRequest {
+    return new msg.Nfsv4DelegreturnRequest(stateid);
+  },
+
+  /**
+   * LOCKT - Test for conflicting lock (non-blocking).
+   * @param locktype - Lock type (READ_LT or WRITE_LT)
+   * @param offset - Starting byte offset
+   * @param length - Length in bytes (0xFFFFFFFFFFFFFFFF for EOF)
+   * @param owner - Lock owner
+   */
+  LOCKT(locktype: number, offset: bigint, length: bigint, owner: structs.Nfsv4LockOwner): msg.Nfsv4LocktRequest {
+    return new msg.Nfsv4LocktRequest(locktype, offset, length, owner);
+  },
+
+  /**
+   * LOCKU - Unlock byte range.
+   * @param locktype - Lock type (READ_LT or WRITE_LT)
+   * @param seqid - Sequence number
+   * @param lockStateid - Lock stateid from LOCK operation
+   * @param offset - Starting byte offset
+   * @param length - Length in bytes
+   */
+  LOCKU(
+    locktype: number,
+    seqid: number,
+    lockStateid: structs.Nfsv4Stateid,
+    offset: bigint,
+    length: bigint,
+  ): msg.Nfsv4LockuRequest {
+    return new msg.Nfsv4LockuRequest(locktype, seqid, lockStateid, offset, length);
+  },
+
+  /**
+   * RELEASE_LOCKOWNER - Release all locks for a lock-owner.
+   * @param lockOwner - Lock owner to release
+   */
+  RELEASE_LOCKOWNER(lockOwner: structs.Nfsv4LockOwner): msg.Nfsv4ReleaseLockOwnerRequest {
+    return new msg.Nfsv4ReleaseLockOwnerRequest(lockOwner);
+  },
+
+  /**
    * Create an Nfsv4Verifier (8-byte opaque data).
    * @param data - 8-byte Uint8Array, defaults to zeros
    */
@@ -339,5 +400,14 @@ export const nfs = {
    */
   OpenClaimNull(filename: string): structs.Nfsv4OpenClaim {
     return new structs.Nfsv4OpenClaim(0, new structs.Nfsv4OpenClaimNull(filename));
+  },
+
+  /**
+   * Create Nfsv4LockOwner (lock owner identifier).
+   * @param clientid - Client ID
+   * @param owner - Owner bytes (unique identifier)
+   */
+  LockOwner(clientid: bigint, owner: Uint8Array): structs.Nfsv4LockOwner {
+    return new structs.Nfsv4LockOwner(clientid, owner);
   },
 };

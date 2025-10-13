@@ -3,7 +3,17 @@ import * as misc from 'memfs/lib/node/types/misc';
 import * as opts from 'memfs/lib/node/types/options';
 import {nfs} from '../builder';
 import * as msg from '../messages';
-import {Nfsv4Stat, Nfsv4OpenAccess, Nfsv4OpenDeny, Nfsv4StableHow, Nfsv4Attr, Nfsv4OpenFlags, Nfsv4FType} from '../constants';
+import * as structs from '../structs';
+import {
+  Nfsv4Stat,
+  Nfsv4OpenAccess,
+  Nfsv4OpenDeny,
+  Nfsv4StableHow,
+  Nfsv4Attr,
+  Nfsv4OpenFlags,
+  Nfsv4FType,
+  Nfsv4Access,
+} from '../constants';
 import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrEncoder} from '../../../xdr/XdrEncoder';
@@ -21,7 +31,7 @@ export class Nfsv4FsClient implements NfsFsClient {
       while (bitmap.length <= wordIndex) {
         bitmap.push(0);
       }
-      bitmap[wordIndex] |= (1 << bitIndex);
+      bitmap[wordIndex] |= 1 << bitIndex;
     }
     return bitmap;
   }
@@ -30,6 +40,22 @@ export class Nfsv4FsClient implements NfsFsClient {
     const normalized = path.replace(/^\/+/, '').replace(/\/+$/, '');
     if (!normalized) return [];
     return normalized.split('/').filter((part) => part.length > 0);
+  }
+
+  private navigateToParent(parts: string[]): msg.Nfsv4Request[] {
+    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
+    for (const part of parts.slice(0, -1)) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    return operations;
+  }
+
+  private navigateToPath(parts: string[]): msg.Nfsv4Request[] {
+    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
+    for (const part of parts) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    return operations;
   }
 
   private encodeData(data: misc.TPromisesData): Uint8Array {
@@ -49,10 +75,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const encoding = typeof options === 'string' ? options : options?.encoding;
     const path = typeof id === 'string' ? id : id.toString();
     const parts = this.parsePath(path);
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts.slice(0, -1)) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull(filename);
@@ -107,10 +130,7 @@ export class Nfsv4FsClient implements NfsFsClient {
   ): Promise<void> {
     const path = typeof id === 'string' ? id : id.toString();
     const parts = this.parsePath(path);
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts.slice(0, -1)) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull(filename);
@@ -166,10 +186,7 @@ export class Nfsv4FsClient implements NfsFsClient {
   public async stat(path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToPath(parts);
     const attrNums = [
       Nfsv4Attr.FATTR4_TYPE,
       Nfsv4Attr.FATTR4_SIZE,
@@ -281,10 +298,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (parts.length === 0) {
       throw new Error('Cannot create root directory');
     }
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts.slice(0, -1)) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToParent(parts);
     const dirname = parts[parts.length - 1];
     const createType = nfs.CreateTypeDir();
     const emptyAttrs = nfs.Fattr([], new Uint8Array(0));
@@ -300,15 +314,15 @@ export class Nfsv4FsClient implements NfsFsClient {
     return undefined;
   }
 
-  public async readdir(path: misc.PathLike, options?: opts.IReaddirOptions | string): Promise<misc.TDataOut[] | misc.IDirent[]> {
+  public async readdir(
+    path: misc.PathLike,
+    options?: opts.IReaddirOptions | string,
+  ): Promise<misc.TDataOut[] | misc.IDirent[]> {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const withFileTypes = typeof options === 'object' && options?.withFileTypes;
     const encoding = typeof options === 'string' ? options : options?.encoding;
     const parts = this.parsePath(pathStr);
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToPath(parts);
     const attrNums = withFileTypes ? [Nfsv4Attr.FATTR4_TYPE] : [];
     const attrMask = this.attrNumsToBitmap(attrNums);
     operations.push(nfs.READDIR(attrMask));
@@ -369,30 +383,24 @@ export class Nfsv4FsClient implements NfsFsClient {
       return dirents;
     }
     if (encoding && encoding !== 'utf8') {
-      return entries.map(name => Buffer.from(name, 'utf8'));
+      return entries.map((name) => Buffer.from(name, 'utf8'));
     }
     return entries;
   }
 
-  public async appendFile(path: misc.TFileHandle, data: misc.TData, options?: opts.IAppendFileOptions | string): Promise<void> {
+  public async appendFile(
+    path: misc.TFileHandle,
+    data: misc.TData,
+    options?: opts.IAppendFileOptions | string,
+  ): Promise<void> {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts.slice(0, -1)) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull(filename);
     operations.push(
-      nfs.OPEN(
-        0,
-        Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
-        Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
-        openOwner,
-        0,
-        claim,
-      ),
+      nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, 0, claim),
     );
     const attrNums = [Nfsv4Attr.FATTR4_SIZE];
     const attrMask = this.attrNumsToBitmap(attrNums);
@@ -441,10 +449,7 @@ export class Nfsv4FsClient implements NfsFsClient {
   public async truncate(path: misc.PathLike, len: number = 0): Promise<void> {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToPath(parts);
     const writer = new Writer(16);
     const xdr = new XdrEncoder(writer);
     xdr.writeUnsignedHyper(BigInt(len));
@@ -468,10 +473,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (parts.length === 0) {
       throw new Error('Cannot unlink root directory');
     }
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts.slice(0, -1)) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
     operations.push(nfs.REMOVE(filename));
     const response = await this.nfs.compound(operations);
@@ -490,10 +492,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     if (parts.length === 0) {
       throw new Error('Cannot remove root directory');
     }
-    const operations: msg.Nfsv4Request[] = [nfs.PUTROOTFH()];
-    for (const part of parts.slice(0, -1)) {
-      operations.push(nfs.LOOKUP(part));
-    }
+    const operations = this.navigateToParent(parts);
     const dirname = parts[parts.length - 1];
     operations.push(nfs.REMOVE(dirname));
     const response = await this.nfs.compound(operations);
@@ -506,37 +505,170 @@ export class Nfsv4FsClient implements NfsFsClient {
     }
   }
 
-  public readonly access = (path: misc.PathLike, mode?: number): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
+  public async access(path: misc.PathLike, mode: number = 0): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations = this.navigateToPath(parts);
+    let accessMask = 0;
+    if (mode === 0) {
+      accessMask = Nfsv4Access.ACCESS4_READ;
+    } else {
+      if (mode & 4) accessMask |= Nfsv4Access.ACCESS4_READ;
+      if (mode & 2) accessMask |= Nfsv4Access.ACCESS4_MODIFY;
+      if (mode & 1) accessMask |= Nfsv4Access.ACCESS4_EXECUTE;
+    }
+    operations.push(nfs.ACCESS(accessMask));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Access denied: ${response.status}`);
+    }
+    const accessRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4AccessResponse;
+    if (accessRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Access denied: ${accessRes.status}`);
+    }
+  }
 
-  public readonly rename = (oldPath: misc.PathLike, newPath: misc.PathLike): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
+  public async rename(oldPath: misc.PathLike, newPath: misc.PathLike): Promise<void> {
+    const oldPathStr = typeof oldPath === 'string' ? oldPath : oldPath.toString();
+    const newPathStr = typeof newPath === 'string' ? newPath : newPath.toString();
+    const oldParts = this.parsePath(oldPathStr);
+    const newParts = this.parsePath(newPathStr);
+    if (oldParts.length === 0 || newParts.length === 0) {
+      throw new Error('Cannot rename root directory');
+    }
+    const operations: msg.Nfsv4Request[] = [];
+    operations.push(nfs.PUTROOTFH());
+    for (const part of oldParts.slice(0, -1)) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    operations.push(nfs.SAVEFH());
+    operations.push(nfs.PUTROOTFH());
+    for (const part of newParts.slice(0, -1)) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    const oldname = oldParts[oldParts.length - 1];
+    const newname = newParts[newParts.length - 1];
+    operations.push(nfs.RENAME(oldname, newname));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to rename: ${response.status}`);
+    }
+    const renameRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4RenameResponse;
+    if (renameRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to rename: ${renameRes.status}`);
+    }
+  }
 
-  public readonly copyFile = (src: misc.PathLike, dest: misc.PathLike, flags?: misc.TFlagsCopy): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
+  public async copyFile(src: misc.PathLike, dest: misc.PathLike, flags?: misc.TFlagsCopy): Promise<void> {
+    const data = await this.readFile(src);
+    await this.writeFile(dest, data);
+  }
 
-  public readonly realpath = (path: misc.PathLike, options?: opts.IRealpathOptions | string): Promise<misc.TDataOut> => {
-    throw new Error('Not implemented.');
-  };
+  public async realpath(path: misc.PathLike, options?: opts.IRealpathOptions | string): Promise<misc.TDataOut> {
+    const encoding = typeof options === 'string' ? options : options?.encoding;
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const normalized = '/' + this.parsePath(pathStr).join('/');
+    if (!encoding || encoding === 'utf8') {
+      return normalized;
+    }
+    return Buffer.from(normalized, 'utf8');
+  }
 
-  public readonly link = (existingPath: misc.PathLike, newPath: misc.PathLike): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
+  public async link(existingPath: misc.PathLike, newPath: misc.PathLike): Promise<void> {
+    const existingPathStr = typeof existingPath === 'string' ? existingPath : existingPath.toString();
+    const newPathStr = typeof newPath === 'string' ? newPath : newPath.toString();
+    const existingParts = this.parsePath(existingPathStr);
+    const newParts = this.parsePath(newPathStr);
+    if (newParts.length === 0) {
+      throw new Error('Cannot create link at root');
+    }
+    const operations = this.navigateToPath(existingParts);
+    operations.push(nfs.SAVEFH());
+    operations.push(nfs.PUTROOTFH());
+    for (const part of newParts.slice(0, -1)) {
+      operations.push(nfs.LOOKUP(part));
+    }
+    const newname = newParts[newParts.length - 1];
+    operations.push(nfs.LINK(newname));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to create link: ${response.status}`);
+    }
+    const linkRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4LinkResponse;
+    if (linkRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to create link: ${linkRes.status}`);
+    }
+  }
 
-  public readonly symlink = (target: misc.PathLike, path: misc.PathLike, type?: misc.symlink.Type): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
+  public async symlink(target: misc.PathLike, path: misc.PathLike, type?: misc.symlink.Type): Promise<void> {
+    const targetStr = typeof target === 'string' ? target : target.toString();
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    if (parts.length === 0) {
+      throw new Error('Cannot create symlink at root');
+    }
+    const operations = this.navigateToParent(parts);
+    const linkname = parts[parts.length - 1];
+    const createType = new structs.Nfsv4CreateType(Nfsv4FType.NF4LNK, new structs.Nfsv4CreateTypeLink(targetStr));
+    const emptyAttrs = nfs.Fattr([], new Uint8Array(0));
+    operations.push(nfs.CREATE(createType, linkname, emptyAttrs));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to create symlink: ${response.status}`);
+    }
+    const createRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4CreateResponse;
+    if (createRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to create symlink: ${createRes.status}`);
+    }
+  }
 
-  public readonly utimes = (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
+  public async utimes(path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations = this.navigateToPath(parts);
+    const atimeMs = typeof atime === 'number' ? atime : atime instanceof Date ? atime.getTime() : Date.now();
+    const mtimeMs = typeof mtime === 'number' ? mtime : mtime instanceof Date ? mtime.getTime() : Date.now();
+    const writer = new Writer(64);
+    const xdr = new XdrEncoder(writer);
+    xdr.writeUnsignedInt(1);
+    xdr.writeHyper(BigInt(Math.floor(atimeMs / 1000)));
+    xdr.writeUnsignedInt((atimeMs % 1000) * 1000000);
+    xdr.writeUnsignedInt(1);
+    xdr.writeHyper(BigInt(Math.floor(mtimeMs / 1000)));
+    xdr.writeUnsignedInt((mtimeMs % 1000) * 1000000);
+    const attrVals = writer.flush();
+    const timeAttrs = nfs.Fattr([Nfsv4Attr.FATTR4_TIME_ACCESS_SET, Nfsv4Attr.FATTR4_TIME_MODIFY_SET], attrVals);
+    const stateid = nfs.Stateid(0, new Uint8Array(12));
+    operations.push(nfs.SETATTR(stateid, timeAttrs));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to set times: ${response.status}`);
+    }
+    const setattrRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4SetattrResponse;
+    if (setattrRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to set times: ${setattrRes.status}`);
+    }
+  }
 
-  public readonly readlink = (path: misc.PathLike, options?: opts.IOptions): Promise<misc.TDataOut> => {
-    throw new Error('Not implemented.');
-  };
+  public async readlink(path: misc.PathLike, options?: opts.IOptions): Promise<misc.TDataOut> {
+    const encoding = typeof options === 'string' ? options : options?.encoding;
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations = this.navigateToPath(parts);
+    operations.push(nfs.READLINK());
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to read link: ${response.status}`);
+    }
+    const readlinkRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4ReadlinkResponse;
+    if (readlinkRes.status !== Nfsv4Stat.NFS4_OK || !readlinkRes.resok) {
+      throw new Error(`Failed to read link: ${readlinkRes.status}`);
+    }
+    if (!encoding || encoding === 'utf8') {
+      return readlinkRes.resok.link;
+    }
+    return Buffer.from(readlinkRes.resok.link, 'utf8');
+  }
 
   public readonly opendir = (path: misc.PathLike, options?: opts.IOpendirOptions): Promise<misc.IDir> => {
     throw new Error('Not implemented.');
@@ -582,9 +714,12 @@ export class Nfsv4FsClient implements NfsFsClient {
     throw new Error('Not implemented.');
   };
 
-  public readonly watch = (filename: misc.PathLike, options?: opts.IWatchOptions): AsyncIterableIterator<{
-      eventType: string;
-      filename: string | Buffer;
+  public readonly watch = (
+    filename: misc.PathLike,
+    options?: opts.IWatchOptions,
+  ): AsyncIterableIterator<{
+    eventType: string;
+    filename: string | Buffer;
   }> => {
     throw new Error('Not implemented.');
   };

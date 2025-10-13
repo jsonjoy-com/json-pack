@@ -8,4 +8,37 @@ export interface Nfsv4Client {
   null(): Promise<void>;
 }
 
-export interface NfsFsClient extends Pick<FsPromisesApi, 'readFile' | 'writeFile' | 'readdir' | 'mkdir' | 'access' | 'appendFile' | 'copyFile' | 'link' | 'realpath' | 'rename' | 'rmdir' | 'truncate' | 'unlink' | 'utimes' | 'symlink' | 'stat' | 'readlink' | 'opendir' | 'open' | 'chmod' | 'rm' | 'chown' | 'lchmod' | 'lchown' | 'lutimes' | 'lstat' | 'mkdtemp' | 'statfs' | 'watch' | 'glob'> {}
+export interface NfsFsClient
+  extends Pick<
+    FsPromisesApi,
+    | 'readFile'
+    | 'writeFile'
+    | 'readdir'
+    | 'mkdir'
+    | 'access'
+    | 'appendFile'
+    | 'copyFile'
+    | 'link'
+    | 'realpath'
+    | 'rename'
+    | 'rmdir'
+    | 'truncate'
+    | 'unlink'
+    | 'utimes'
+    | 'symlink'
+    | 'stat'
+    | 'readlink'
+    | 'opendir'
+    | 'open'
+    | 'chmod'
+    | 'rm'
+    | 'chown'
+    | 'lchmod'
+    | 'lchown'
+    | 'lutimes'
+    | 'lstat'
+    | 'mkdtemp'
+    | 'statfs'
+    | 'watch'
+    | 'glob'
+  > {}

@@ -850,9 +850,11 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async RENAME(request: msg.Nfsv4RenameRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RenameResponse> {
+    const savedPath = this.fh.savedPath(ctx);
     const currentPath = this.fh.currentPath(ctx);
+    const savedPathAbsolute = this.absolutePath(savedPath);
     const currentPathAbsolute = this.absolutePath(currentPath);
-    const oldFull = NodePath.join(currentPathAbsolute, request.oldname);
+    const oldFull = NodePath.join(savedPathAbsolute, request.oldname);
     const newFull = NodePath.join(currentPathAbsolute, request.newname);
     if (oldFull.length < this.dir.length || newFull.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
     // Ensure both paths are inside the server root. If target escapes, return XDEV.
@@ -994,6 +996,9 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
           // ignore parsing errors, fall back to default mode
         }
         await this.promises.mkdir(createPath, mode);
+      } else if (objType === Nfsv4FType.NF4LNK) {
+        const linkTarget = (request.objtype.objtype as struct.Nfsv4CreateTypeLink).linkdata;
+        await this.promises.symlink(linkTarget, createPath);
       } else {
         let mode = 0o666;
         try {
@@ -1072,6 +1077,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const dec = new XdrDecoder();
       dec.reader.reset(inFattr.attrVals);
       const mask = inFattr.attrmask.mask;
+      let atime: Date | undefined;
+      let mtime: Date | undefined;
       for (let i = 0; i < mask.length; i++) {
         const word = mask[i];
         for (let bit = 0; bit < 32; bit++) {
@@ -1087,6 +1094,24 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
             case Nfsv4Attr.FATTR4_SIZE: {
               const size = dec.readUnsignedHyper();
               await this.promises.truncate(currentPathAbsolute, Number(size));
+              break;
+            }
+            case Nfsv4Attr.FATTR4_TIME_ACCESS_SET: {
+              const setIt = dec.readUnsignedInt();
+              if (setIt === 1) {
+                const seconds = Number(dec.readHyper());
+                const nseconds = dec.readUnsignedInt();
+                atime = new Date(seconds * 1000 + nseconds / 1000000);
+              }
+              break;
+            }
+            case Nfsv4Attr.FATTR4_TIME_MODIFY_SET: {
+              const setIt = dec.readUnsignedInt();
+              if (setIt === 1) {
+                const seconds = Number(dec.readHyper());
+                const nseconds = dec.readUnsignedInt();
+                mtime = new Date(seconds * 1000 + nseconds / 1000000);
+              }
               break;
             }
             case Nfsv4Attr.FATTR4_FILEHANDLE: {
@@ -1121,6 +1146,12 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
             }
           }
         }
+      }
+      if (atime || mtime) {
+        const stats = await this.promises.lstat(currentPathAbsolute);
+        const atimeToSet = atime || stats.atime;
+        const mtimeToSet = mtime || stats.mtime;
+        await this.promises.utimes(currentPathAbsolute, atimeToSet, mtimeToSet);
       }
       const stats = await this.promises.lstat(currentPathAbsolute);
       const fh = this.fh.encode(currentPath);

@@ -6,7 +6,7 @@ describe('.readFile()', () => {
     const {client, stop} = await setupNfsClientServerTestbed();
     const fs = new Nfsv4FsClient(client);
     const text = await fs.readFile('file.txt', 'utf8');
-    expect(text).toBe('Hello, NFS v4!\n');;
+    expect(text).toBe('Hello, NFS v4!\n');
     await stop();
   });
 
@@ -142,7 +142,7 @@ describe('.readdir()', () => {
   test('can read directory with file types', async () => {
     const {client, stop} = await setupNfsClientServerTestbed();
     const fs = new Nfsv4FsClient(client);
-    const entries = await fs.readdir('/', {withFileTypes: true}) as any[];
+    const entries = (await fs.readdir('/', {withFileTypes: true})) as any[];
     expect(Array.isArray(entries)).toBe(true);
     expect(entries.length).toBeGreaterThan(0);
     const fileEntry = entries.find((e: any) => e.name === 'file.txt');
@@ -277,6 +277,194 @@ describe('.rmdir()', () => {
     const {client, stop} = await setupNfsClientServerTestbed();
     const fs = new Nfsv4FsClient(client);
     await expect(fs.rmdir('subdir')).rejects.toThrow();
+    await stop();
+  });
+});
+
+describe('.access()', () => {
+  test('can check file access', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await expect(fs.access('file.txt')).resolves.not.toThrow();
+    await stop();
+  });
+
+  test('can check directory access', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await expect(fs.access('subdir')).resolves.not.toThrow();
+    await stop();
+  });
+
+  test('throws error for non-existent file', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await expect(fs.access('nonexistent.txt')).rejects.toThrow();
+    await stop();
+  });
+});
+
+describe('.rename()', () => {
+  test('can rename file', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.rename('file.txt', 'renamed.txt');
+    expect(vol.existsSync('/export/file.txt')).toBe(false);
+    expect(vol.existsSync('/export/renamed.txt')).toBe(true);
+    await stop();
+  });
+
+  test('can move file to different directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.rename('file.txt', 'subdir/moved.txt');
+    expect(vol.existsSync('/export/file.txt')).toBe(false);
+    expect(vol.existsSync('/export/subdir/moved.txt')).toBe(true);
+    await stop();
+  });
+
+  test('can rename directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.mkdir('olddir');
+    await fs.rename('olddir', 'newdir');
+    expect(vol.existsSync('/export/olddir')).toBe(false);
+    expect(vol.existsSync('/export/newdir')).toBe(true);
+    await stop();
+  });
+});
+
+describe('.copyFile()', () => {
+  test('can copy file', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.copyFile('file.txt', 'copy.txt');
+    const original = vol.readFileSync('/export/file.txt', 'utf8');
+    const copy = vol.readFileSync('/export/copy.txt', 'utf8');
+    expect(copy).toBe(original);
+    await stop();
+  });
+
+  test('can copy to different directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.copyFile('file.txt', 'subdir/copy.txt');
+    const original = vol.readFileSync('/export/file.txt', 'utf8');
+    const copy = vol.readFileSync('/export/subdir/copy.txt', 'utf8');
+    expect(copy).toBe(original);
+    await stop();
+  });
+});
+
+describe('.realpath()', () => {
+  test('can resolve path', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const resolved = await fs.realpath('file.txt');
+    expect(resolved).toBe('/file.txt');
+    await stop();
+  });
+
+  test('can resolve nested path', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const resolved = await fs.realpath('subdir/nested.dat');
+    expect(resolved).toBe('/subdir/nested.dat');
+    await stop();
+  });
+
+  test('can return buffer', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const resolved = await fs.realpath('file.txt', 'buffer');
+    expect(Buffer.isBuffer(resolved)).toBe(true);
+    await stop();
+  });
+});
+
+describe('.symlink()', () => {
+  test('can create symbolic link', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.symlink('file.txt', 'link.txt');
+    const stats = vol.lstatSync('/export/link.txt');
+    expect(stats.isSymbolicLink()).toBe(true);
+    await stop();
+  });
+
+  test('can create link to nested file', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.symlink('subdir/nested.dat', 'link-nested.txt');
+    const stats = vol.lstatSync('/export/link-nested.txt');
+    expect(stats.isSymbolicLink()).toBe(true);
+    await stop();
+  });
+});
+
+describe('.readlink()', () => {
+  test('can read symbolic link', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    vol.symlinkSync('file.txt', '/export/symlink.txt');
+    const target = await fs.readlink('symlink.txt');
+    expect(target).toBe('file.txt');
+    await stop();
+  });
+
+  test('can read nested symbolic link', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    vol.symlinkSync('../file.txt', '/export/subdir/link.txt');
+    const target = await fs.readlink('subdir/link.txt');
+    expect(target).toBe('../file.txt');
+    await stop();
+  });
+});
+
+describe('.utimes()', () => {
+  test('can update file times', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const atime = new Date('2020-01-01');
+    const mtime = new Date('2020-12-31');
+    await fs.utimes('file.txt', atime, mtime);
+    const stats = await fs.stat('file.txt');
+    expect(Math.abs(Number(stats.atimeMs) - atime.getTime())).toBeLessThan(2000);
+    expect(Math.abs(Number(stats.mtimeMs) - mtime.getTime())).toBeLessThan(2000);
+    await stop();
+  });
+
+  test('can update with timestamps', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const atime = Date.now() - 86400000;
+    const mtime = Date.now() - 3600000;
+    await fs.utimes('file.txt', atime, mtime);
+    const stats = await fs.stat('file.txt');
+    expect(Math.abs(Number(stats.atimeMs) - atime)).toBeLessThan(2000);
+    expect(Math.abs(Number(stats.mtimeMs) - mtime)).toBeLessThan(2000);
+    await stop();
+  });
+});
+
+describe('.link()', () => {
+  test('can create hard link', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.link('file.txt', 'hardlink.txt');
+    expect(vol.existsSync('/export/hardlink.txt')).toBe(true);
+    const stats1 = await fs.stat('file.txt');
+    const stats2 = await fs.stat('hardlink.txt');
+    expect(stats1.ino).toBe(stats2.ino);
+    await stop();
+  });
+
+  test('can create link in different directory', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.link('file.txt', 'subdir/hardlink.txt');
+    expect(vol.existsSync('/export/subdir/hardlink.txt')).toBe(true);
     await stop();
   });
 });

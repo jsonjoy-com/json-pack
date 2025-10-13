@@ -229,117 +229,117 @@ export const formatNfsv4Op = (op: constants.Nfsv4Op): string => {
 export const formatNfsv4Attr = (attr: constants.Nfsv4Attr): string => {
   switch (attr) {
     case constants.Nfsv4Attr.FATTR4_SUPPORTED_ATTRS:
-      return 'FATTR4_SUPPORTED_ATTRS';
+      return 'supported_attrs';
     case constants.Nfsv4Attr.FATTR4_TYPE:
-      return 'FATTR4_TYPE';
+      return 'type';
     case constants.Nfsv4Attr.FATTR4_FH_EXPIRE_TYPE:
-      return 'FATTR4_FH_EXPIRE_TYPE';
+      return 'fh_expire_type';
     case constants.Nfsv4Attr.FATTR4_CHANGE:
-      return 'FATTR4_CHANGE';
+      return 'change';
     case constants.Nfsv4Attr.FATTR4_SIZE:
-      return 'FATTR4_SIZE';
+      return 'size';
     case constants.Nfsv4Attr.FATTR4_LINK_SUPPORT:
-      return 'FATTR4_LINK_SUPPORT';
+      return 'link_support';
     case constants.Nfsv4Attr.FATTR4_SYMLINK_SUPPORT:
-      return 'FATTR4_SYMLINK_SUPPORT';
+      return 'symlink_support';
     case constants.Nfsv4Attr.FATTR4_NAMED_ATTR:
-      return 'FATTR4_NAMED_ATTR';
+      return 'named_attr';
     case constants.Nfsv4Attr.FATTR4_FSID:
-      return 'FATTR4_FSID';
+      return 'fsid';
     case constants.Nfsv4Attr.FATTR4_UNIQUE_HANDLES:
-      return 'FATTR4_UNIQUE_HANDLES';
+      return 'unique_handles';
     case constants.Nfsv4Attr.FATTR4_LEASE_TIME:
-      return 'FATTR4_LEASE_TIME';
+      return 'lease_time';
     case constants.Nfsv4Attr.FATTR4_RDATTR_ERROR:
-      return 'FATTR4_RDATTR_ERROR';
+      return 'rdattr_error';
     case constants.Nfsv4Attr.FATTR4_ACL:
-      return 'FATTR4_ACL';
+      return 'acl';
     case constants.Nfsv4Attr.FATTR4_ACLSUPPORT:
-      return 'FATTR4_ACLSUPPORT';
+      return 'aclsupport';
     case constants.Nfsv4Attr.FATTR4_ARCHIVE:
-      return 'FATTR4_ARCHIVE';
+      return 'archive';
     case constants.Nfsv4Attr.FATTR4_CANSETTIME:
-      return 'FATTR4_CANSETTIME';
+      return 'can_set_time';
     case constants.Nfsv4Attr.FATTR4_CASE_INSENSITIVE:
-      return 'FATTR4_CASE_INSENSITIVE';
+      return 'case_insensitive';
     case constants.Nfsv4Attr.FATTR4_CASE_PRESERVING:
-      return 'FATTR4_CASE_PRESERVING';
+      return 'case_preserving';
     case constants.Nfsv4Attr.FATTR4_CHOWN_RESTRICTED:
-      return 'FATTR4_CHOWN_RESTRICTED';
+      return 'chown_restricted';
     case constants.Nfsv4Attr.FATTR4_FILEHANDLE:
-      return 'FATTR4_FILEHANDLE';
+      return 'filehandle';
     case constants.Nfsv4Attr.FATTR4_FILEID:
-      return 'FATTR4_FILEID';
+      return 'fileid';
     case constants.Nfsv4Attr.FATTR4_FILES_AVAIL:
-      return 'FATTR4_FILES_AVAIL';
+      return 'files_avail';
     case constants.Nfsv4Attr.FATTR4_FILES_FREE:
-      return 'FATTR4_FILES_FREE';
+      return 'files_free';
     case constants.Nfsv4Attr.FATTR4_FILES_TOTAL:
-      return 'FATTR4_FILES_TOTAL';
+      return 'files_total';
     case constants.Nfsv4Attr.FATTR4_FS_LOCATIONS:
-      return 'FATTR4_FS_LOCATIONS';
+      return 'fs_locations';
     case constants.Nfsv4Attr.FATTR4_HIDDEN:
-      return 'FATTR4_HIDDEN';
+      return 'hidden';
     case constants.Nfsv4Attr.FATTR4_HOMOGENEOUS:
-      return 'FATTR4_HOMOGENEOUS';
+      return 'homogeneous';
     case constants.Nfsv4Attr.FATTR4_MAXFILESIZE:
-      return 'FATTR4_MAXFILESIZE';
+      return 'maxfilesize';
     case constants.Nfsv4Attr.FATTR4_MAXLINK:
-      return 'FATTR4_MAXLINK';
+      return 'maxlink';
     case constants.Nfsv4Attr.FATTR4_MAXNAME:
-      return 'FATTR4_MAXNAME';
+      return 'maxname';
     case constants.Nfsv4Attr.FATTR4_MAXREAD:
-      return 'FATTR4_MAXREAD';
+      return 'maxread';
     case constants.Nfsv4Attr.FATTR4_MAXWRITE:
-      return 'FATTR4_MAXWRITE';
+      return 'maxwrite';
     case constants.Nfsv4Attr.FATTR4_MIMETYPE:
-      return 'FATTR4_MIMETYPE';
+      return 'mimetype';
     case constants.Nfsv4Attr.FATTR4_MODE:
-      return 'FATTR4_MODE';
+      return 'mode';
     case constants.Nfsv4Attr.FATTR4_NO_TRUNC:
-      return 'FATTR4_NO_TRUNC';
+      return 'no_trunc';
     case constants.Nfsv4Attr.FATTR4_NUMLINKS:
-      return 'FATTR4_NUMLINKS';
+      return 'numlinks';
     case constants.Nfsv4Attr.FATTR4_OWNER:
-      return 'FATTR4_OWNER';
+      return 'owner';
     case constants.Nfsv4Attr.FATTR4_OWNER_GROUP:
-      return 'FATTR4_OWNER_GROUP';
+      return 'owner_group';
     case constants.Nfsv4Attr.FATTR4_QUOTA_AVAIL_HARD:
-      return 'FATTR4_QUOTA_AVAIL_HARD';
+      return 'quota_avail_hard';
     case constants.Nfsv4Attr.FATTR4_QUOTA_AVAIL_SOFT:
-      return 'FATTR4_QUOTA_AVAIL_SOFT';
+      return 'quota_avail_soft';
     case constants.Nfsv4Attr.FATTR4_QUOTA_USED:
-      return 'FATTR4_QUOTA_USED';
+      return 'quota_used';
     case constants.Nfsv4Attr.FATTR4_RAWDEV:
-      return 'FATTR4_RAWDEV';
+      return 'rawdev';
     case constants.Nfsv4Attr.FATTR4_SPACE_AVAIL:
-      return 'FATTR4_SPACE_AVAIL';
+      return 'space_avail';
     case constants.Nfsv4Attr.FATTR4_SPACE_FREE:
-      return 'FATTR4_SPACE_FREE';
+      return 'space_free';
     case constants.Nfsv4Attr.FATTR4_SPACE_TOTAL:
-      return 'FATTR4_SPACE_TOTAL';
+      return 'space_total';
     case constants.Nfsv4Attr.FATTR4_SPACE_USED:
-      return 'FATTR4_SPACE_USED';
+      return 'space_used';
     case constants.Nfsv4Attr.FATTR4_SYSTEM:
-      return 'FATTR4_SYSTEM';
+      return 'system';
     case constants.Nfsv4Attr.FATTR4_TIME_ACCESS:
-      return 'FATTR4_TIME_ACCESS';
+      return 'time_access';
     case constants.Nfsv4Attr.FATTR4_TIME_ACCESS_SET:
-      return 'FATTR4_TIME_ACCESS_SET';
+      return 'time_access_set';
     case constants.Nfsv4Attr.FATTR4_TIME_BACKUP:
-      return 'FATTR4_TIME_BACKUP';
+      return 'time_backup';
     case constants.Nfsv4Attr.FATTR4_TIME_CREATE:
-      return 'FATTR4_TIME_CREATE';
+      return 'time_create';
     case constants.Nfsv4Attr.FATTR4_TIME_DELTA:
-      return 'FATTR4_TIME_DELTA';
+      return 'time_delta';
     case constants.Nfsv4Attr.FATTR4_TIME_METADATA:
-      return 'FATTR4_TIME_METADATA';
+      return 'time_metadata';
     case constants.Nfsv4Attr.FATTR4_TIME_MODIFY:
-      return 'FATTR4_TIME_MODIFY';
+      return 'time_modify';
     case constants.Nfsv4Attr.FATTR4_TIME_MODIFY_SET:
-      return 'FATTR4_TIME_MODIFY_SET';
+      return 'time_modify_set';
     case constants.Nfsv4Attr.FATTR4_MOUNTED_ON_FILEID:
-      return 'FATTR4_MOUNTED_ON_FILEID';
+      return 'mounted_on_fileid';
     default:
       return `Unknown(${attr})`;
   }

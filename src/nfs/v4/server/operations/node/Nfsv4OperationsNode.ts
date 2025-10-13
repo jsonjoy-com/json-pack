@@ -1,12 +1,21 @@
 import type {Stats, Dirent} from 'node:fs';
 import * as NodePath from 'node:path';
 import {randomBytes} from 'node:crypto';
-import {Nfsv4Access, Nfsv4Const, Nfsv4Stat} from '../../../constants';
+import {
+  Nfsv4Access,
+  Nfsv4Const,
+  Nfsv4Stat,
+  Nfsv4OpenAccess,
+  Nfsv4OpenClaimType,
+  Nfsv4DelegType,
+} from '../../../constants';
 import {Nfsv4OperationCtx, Nfsv4Operations} from '../Nfsv4Operations';
 import * as msg from '../../../messages';
 import * as struct from '../../../structs';
 import {cmpUint8Array} from '@jsonjoy.com/buffers/lib/cmpUint8Array';
 import {ClientRecord} from '../ClientRecord';
+import {OpenFileState} from '../OpenFileState';
+import {OpenOwnerState} from '../OpenOwnerState';
 import {FileHandleMapper, ROOT_FH} from './fh';
 import {isErrCode, normalizeNodeFsError} from './util';
 import {encodeAttrs} from './attrs';
@@ -59,6 +68,13 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   protected readonly fh: FileHandleMapper;
 
+  /** Next stateid sequence number. */
+  protected nextStateidSeqid = 1;
+  /** Map from stateid (as string key) to open file state. */
+  protected openFiles: Map<string, OpenFileState> = new Map();
+  /** Map from open-owner key to owner state. */
+  protected openOwners: Map<string, OpenOwnerState> = new Map();
+
   constructor(opts: Nfsv4OperationsNodeOpts) {
     this.fs = opts.fs;
     this.promises = this.fs.promises;
@@ -86,6 +102,29 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     if (this.pendingClients.size < this.maxPendingClients) return;
     const firstKey = this.pendingClients.keys().next().value;
     if (firstKey !== undefined) this.pendingClients.delete(firstKey);
+  }
+
+  protected makeOpenOwnerKey(clientid: bigint, owner: Uint8Array): string {
+    return `${clientid}:${Buffer.from(owner).toString('hex')}`;
+  }
+
+  protected makeStateidKey(stateid: struct.Nfsv4Stateid): string {
+    return `${stateid.seqid}:${Buffer.from(stateid.other).toString('hex')}`;
+  }
+
+  protected createStateid(): struct.Nfsv4Stateid {
+    const seqid = this.nextStateidSeqid++;
+    const other = randomBytes(12);
+    return new struct.Nfsv4Stateid(seqid, other);
+  }
+
+  protected canAccessFile(path: string, shareAccess: number, shareDeny: number): boolean {
+    for (const openFile of this.openFiles.values()) {
+      if (openFile.path !== path) continue;
+      if ((openFile.shareDeny & shareAccess) !== 0) return false;
+      if ((shareDeny & openFile.shareAccess) !== 0) return false;
+    }
+    return true;
   }
 
   /**
@@ -446,13 +485,160 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4ReaddirResponse(Nfsv4Stat.NFS4_OK, body);
   }
 
-  // ----------------------------------------------- Stub implementations below
+  public async OPEN(request: msg.Nfsv4OpenRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4OpenResponse> {
+    const cfh = ctx.cfh;
+    if (!cfh) throw Nfsv4Stat.NFS4ERR_NOFILEHANDLE;
+    const dirPath = this.fh.decode(cfh);
+    const ownerKey = this.makeOpenOwnerKey(request.owner.clientid, request.owner.owner);
+    let ownerState = this.openOwners.get(ownerKey);
+    if (!ownerState) {
+      ownerState = new OpenOwnerState(request.owner.clientid, request.owner.owner, request.seqid);
+      this.openOwners.set(ownerKey, ownerState);
+    }
+    if (request.claim.claimType !== Nfsv4OpenClaimType.CLAIM_NULL) {
+      return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_NOTSUPP);
+    }
+    const claimNull = request.claim.claim as struct.Nfsv4OpenClaimNull;
+    const filename = claimNull.file;
+    const filePath = this.absolutePath(NodePath.join(dirPath, filename));
+    try {
+      const stats = await this.promises.lstat(filePath);
+      if (!stats.isFile()) {
+        return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_ISDIR);
+      }
+    } catch (err) {
+      if (isErrCode(err, 'ENOENT')) {
+        return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_NOENT);
+      }
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4OpenResponse(status);
+    }
+    if (!this.canAccessFile(filePath, request.shareAccess, request.shareDeny)) {
+      return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_SHARE_DENIED);
+    }
+    let flags = 0;
+    const isWrite = (request.shareAccess & Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE) !== 0;
+    const isRead = (request.shareAccess & Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ) !== 0;
+    if (isRead && isWrite) {
+      flags = this.fs.constants.O_RDWR;
+    } else if (isWrite) {
+      flags = this.fs.constants.O_WRONLY;
+    } else {
+      flags = this.fs.constants.O_RDONLY;
+    }
+    try {
+      const fd = await this.promises.open(filePath, flags);
+      const stateid = this.createStateid();
+      const stateidKey = this.makeStateidKey(stateid);
+      const openFile = new OpenFileState(
+        stateid,
+        filePath,
+        fd,
+        request.shareAccess,
+        request.shareDeny,
+        ownerKey,
+        request.seqid,
+        false,
+      );
+      this.openFiles.set(stateidKey, openFile);
+      ownerState.opens.add(stateidKey);
+      const fh = this.fh.encode(filePath);
+      ctx.cfh = fh;
+      const cinfo = new struct.Nfsv4ChangeInfo(true, 0n, 0n);
+      const attrset = new struct.Nfsv4Bitmap([]);
+      const delegation = new struct.Nfsv4OpenDelegation(Nfsv4DelegType.OPEN_DELEGATE_NONE);
+      const resok = new msg.Nfsv4OpenResOk(stateid, cinfo, 0, attrset, delegation);
+      return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4_OK, resok);
+    } catch (err) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      return new msg.Nfsv4OpenResponse(status);
+    }
+  }
+
+  public async OPENATTR(request: msg.Nfsv4OpenattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4OpenattrResponse> {
+    return new msg.Nfsv4OpenattrResponse(Nfsv4Stat.NFS4ERR_NOTSUPP);
+  }
+
+  public async OPEN_CONFIRM(
+    request: msg.Nfsv4OpenConfirmRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4OpenConfirmResponse> {
+    const stateidKey = this.makeStateidKey(request.openStateid);
+    const openFile = this.openFiles.get(stateidKey);
+    if (!openFile) {
+      return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    }
+    if (openFile.seqid !== request.seqid) {
+      return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
+    }
+    openFile.confirmed = true;
+    openFile.seqid++;
+    const newStateid = new struct.Nfsv4Stateid(openFile.seqid, openFile.stateid.other);
+    const resok = new msg.Nfsv4OpenConfirmResOk(newStateid);
+    return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4_OK, resok);
+  }
+
+  public async OPEN_DOWNGRADE(
+    request: msg.Nfsv4OpenDowngradeRequest,
+    ctx: Nfsv4OperationCtx,
+  ): Promise<msg.Nfsv4OpenDowngradeResponse> {
+    const stateidKey = this.makeStateidKey(request.openStateid);
+    const openFile = this.openFiles.get(stateidKey);
+    if (!openFile) {
+      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    }
+    if (openFile.seqid !== request.seqid) {
+      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
+    }
+    if ((request.shareAccess & ~openFile.shareAccess) !== 0) {
+      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_INVAL);
+    }
+    if ((request.shareDeny & ~openFile.shareDeny) !== 0) {
+      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_INVAL);
+    }
+    openFile.shareAccess = request.shareAccess;
+    openFile.shareDeny = request.shareDeny;
+    openFile.seqid++;
+    const newStateid = new struct.Nfsv4Stateid(openFile.seqid, openFile.stateid.other);
+    const resok = new msg.Nfsv4OpenDowngradeResOk(newStateid);
+    return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4_OK, resok);
+  }
 
   public async CLOSE(request: msg.Nfsv4CloseRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CloseResponse> {
-    ctx.connection.logger.log('CLOSE', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    const stateidKey = this.makeStateidKey(request.openStateid);
+    const openFile = this.openFiles.get(stateidKey);
+    if (!openFile) {
+      return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4CloseResOk(request.openStateid));
+    }
+    if (openFile.seqid !== request.seqid) {
+      return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
+    }
+    try {
+      const handle = openFile.fd as any;
+      if (handle && typeof handle.close === 'function') {
+        await handle.close();
+      }
+    } catch (err) {
+      const status = normalizeNodeFsError(err, ctx.connection.logger);
+      if (status !== Nfsv4Stat.NFS4ERR_NOENT) {
+        return new msg.Nfsv4CloseResponse(status);
+      }
+    }
+    const ownerState = this.openOwners.get(openFile.openOwnerKey);
+    if (ownerState) {
+      ownerState.opens.delete(stateidKey);
+      if (ownerState.opens.size === 0) {
+        this.openOwners.delete(openFile.openOwnerKey);
+      }
+    }
+    this.openFiles.delete(stateidKey);
+    openFile.seqid++;
+    const newStateid = new struct.Nfsv4Stateid(openFile.seqid, openFile.stateid.other);
+    const resok = new msg.Nfsv4CloseResOk(newStateid);
+    return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4_OK, resok);
   }
+
+  // ----------------------------------------------- Stub implementations below
 
   public async COMMIT(request: msg.Nfsv4CommitRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CommitResponse> {
     ctx.connection.logger.log('COMMIT', request);
@@ -512,36 +698,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     ctx.connection.logger.log('NVERIFY', request);
     throw new Error('Not implemented');
     return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async OPEN(request: msg.Nfsv4OpenRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4OpenResponse> {
-    ctx.connection.logger.log('OPEN', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async OPENATTR(request: msg.Nfsv4OpenattrRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4OpenattrResponse> {
-    ctx.connection.logger.log('OPENATTR', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4OpenattrResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async OPEN_CONFIRM(
-    request: msg.Nfsv4OpenConfirmRequest,
-    ctx: Nfsv4OperationCtx,
-  ): Promise<msg.Nfsv4OpenConfirmResponse> {
-    ctx.connection.logger.log('OPEN_CONFIRM', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
-  }
-
-  public async OPEN_DOWNGRADE(
-    request: msg.Nfsv4OpenDowngradeRequest,
-    ctx: Nfsv4OperationCtx,
-  ): Promise<msg.Nfsv4OpenDowngradeResponse> {
-    ctx.connection.logger.log('OPEN_DOWNGRADE', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
   }
 
   public async READ(request: msg.Nfsv4ReadRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4ReadResponse> {

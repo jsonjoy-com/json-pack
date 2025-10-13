@@ -208,6 +208,68 @@ export const nfs = {
   },
 
   /**
+   * OPEN - Open a file.
+   * @param seqid - Sequence ID for open-owner
+   * @param shareAccess - Share access mode (OPEN4_SHARE_ACCESS_*)
+   * @param shareDeny - Share deny mode (OPEN4_SHARE_DENY_*)
+   * @param owner - Open owner (clientid + owner bytes)
+   * @param openhow - Open mode (0 for OPEN4_NOCREATE)
+   * @param claim - Open claim (use OpenClaim helper)
+   */
+  OPEN(
+    seqid: number,
+    shareAccess: number,
+    shareDeny: number,
+    owner: structs.Nfsv4OpenOwner,
+    openhow: number,
+    claim: structs.Nfsv4OpenClaim,
+  ): msg.Nfsv4OpenRequest {
+    return new msg.Nfsv4OpenRequest(seqid, shareAccess, shareDeny, owner, openhow, claim);
+  },
+
+  /**
+   * CLOSE - Close an open file.
+   * @param seqid - Sequence ID
+   * @param openStateid - State ID from OPEN
+   */
+  CLOSE(seqid: number, openStateid: structs.Nfsv4Stateid): msg.Nfsv4CloseRequest {
+    return new msg.Nfsv4CloseRequest(seqid, openStateid);
+  },
+
+  /**
+   * OPEN_CONFIRM - Confirm an open.
+   * @param openStateid - State ID from OPEN
+   * @param seqid - Sequence ID
+   */
+  OPEN_CONFIRM(openStateid: structs.Nfsv4Stateid, seqid: number): msg.Nfsv4OpenConfirmRequest {
+    return new msg.Nfsv4OpenConfirmRequest(openStateid, seqid);
+  },
+
+  /**
+   * OPEN_DOWNGRADE - Downgrade open access/deny modes.
+   * @param openStateid - State ID from OPEN
+   * @param seqid - Sequence ID
+   * @param shareAccess - New share access mode
+   * @param shareDeny - New share deny mode
+   */
+  OPEN_DOWNGRADE(
+    openStateid: structs.Nfsv4Stateid,
+    seqid: number,
+    shareAccess: number,
+    shareDeny: number,
+  ): msg.Nfsv4OpenDowngradeRequest {
+    return new msg.Nfsv4OpenDowngradeRequest(openStateid, seqid, shareAccess, shareDeny);
+  },
+
+  /**
+   * OPENATTR - Open named attribute directory.
+   * @param createdir - Whether to create the directory if it doesn't exist
+   */
+  OPENATTR(createdir: boolean = false): msg.Nfsv4OpenattrRequest {
+    return new msg.Nfsv4OpenattrRequest(createdir);
+  },
+
+  /**
    * Create an Nfsv4Verifier (8-byte opaque data).
    * @param data - 8-byte Uint8Array, defaults to zeros
    */
@@ -260,5 +322,22 @@ export const nfs = {
    */
   Bitmap(attrNums: number[]): structs.Nfsv4Bitmap {
     return new structs.Nfsv4Bitmap(attrNumsToBitmap(attrNums));
+  },
+
+  /**
+   * Create Nfsv4OpenOwner (open owner identifier).
+   * @param clientid - Client ID
+   * @param owner - Owner bytes (unique identifier)
+   */
+  OpenOwner(clientid: bigint, owner: Uint8Array): structs.Nfsv4OpenOwner {
+    return new structs.Nfsv4OpenOwner(clientid, owner);
+  },
+
+  /**
+   * Create Nfsv4OpenClaim for CLAIM_NULL (open by filename).
+   * @param filename - Name of file to open
+   */
+  OpenClaimNull(filename: string): structs.Nfsv4OpenClaim {
+    return new structs.Nfsv4OpenClaim(0, new structs.Nfsv4OpenClaimNull(filename));
   },
 };

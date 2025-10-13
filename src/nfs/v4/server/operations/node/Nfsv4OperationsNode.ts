@@ -823,14 +823,14 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   public async REMOVE(request: msg.Nfsv4RemoveRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4RemoveResponse> {
     const currentPath = this.fh.currentPath(ctx);
-    const currentPathAbsolute = this.absolutePath(currentPath);
+    const targetPath = this.absolutePath(NodePath.join(currentPath, request.target));
     try {
-      const stats = await this.promises.lstat(currentPathAbsolute);
+      const stats = await this.promises.lstat(targetPath);
       if (stats.isDirectory()) {
         // For now, use rmdir semantics (only remove empty dirs)
-        await this.promises.rmdir(currentPathAbsolute);
+        await this.promises.rmdir(targetPath);
       } else {
-        await this.promises.unlink(currentPathAbsolute);
+        await this.promises.unlink(targetPath);
       }
       return new msg.Nfsv4RemoveResponse(Nfsv4Stat.NFS4_OK);
     } catch (err: unknown) {
@@ -1006,10 +1006,10 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   }
 
   public async LINK(request: msg.Nfsv4LinkRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LinkResponse> {
-    const currentPath = this.fh.currentPath(ctx);
-    const existingPath = this.absolutePath(currentPath);
     const savedPath = this.fh.savedPath(ctx);
-    const newPath = this.absolutePath(NodePath.join(savedPath, request.newname));
+    const existingPath = this.absolutePath(savedPath);
+    const currentPath = this.fh.currentPath(ctx);
+    const newPath = this.absolutePath(NodePath.join(currentPath, request.newname));
     try {
       await this.promises.link(existingPath, newPath);
       const resok = new msg.Nfsv4LinkResOk(new struct.Nfsv4ChangeInfo(true, 0n, 0n));

@@ -1079,6 +1079,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const mask = inFattr.attrmask.mask;
       let atime: Date | undefined;
       let mtime: Date | undefined;
+      let uid: number | undefined;
+      let gid: number | undefined;
       for (let i = 0; i < mask.length; i++) {
         const word = mask[i];
         for (let bit = 0; bit < 32; bit++) {
@@ -1089,6 +1091,22 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
             case Nfsv4Attr.FATTR4_MODE: {
               const mode = dec.readUnsignedInt();
               await this.promises.chmod(currentPathAbsolute, mode & 0o7777);
+              break;
+            }
+            case Nfsv4Attr.FATTR4_OWNER: {
+              const owner = dec.readString();
+              const parsedUid = parseInt(owner, 10);
+              if (!isNaN(parsedUid)) {
+                uid = parsedUid;
+              }
+              break;
+            }
+            case Nfsv4Attr.FATTR4_OWNER_GROUP: {
+              const group = dec.readString();
+              const parsedGid = parseInt(group, 10);
+              if (!isNaN(parsedGid)) {
+                gid = parsedGid;
+              }
               break;
             }
             case Nfsv4Attr.FATTR4_SIZE: {
@@ -1146,6 +1164,12 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
             }
           }
         }
+      }
+      if (uid !== undefined || gid !== undefined) {
+        const stats = await this.promises.lstat(currentPathAbsolute);
+        const uidToSet = uid !== undefined ? uid : stats.uid;
+        const gidToSet = gid !== undefined ? gid : stats.gid;
+        await this.promises.chown(currentPathAbsolute, uidToSet, gidToSet);
       }
       if (atime || mtime) {
         const stats = await this.promises.lstat(currentPathAbsolute);

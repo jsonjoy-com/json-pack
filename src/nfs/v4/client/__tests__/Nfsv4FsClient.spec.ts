@@ -705,3 +705,119 @@ describe('.opendir()', () => {
     await stop();
   });
 });
+
+describe('.chmod()', () => {
+  test('can change file mode', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.chmod('file.txt', 0o644);
+    const stats = await fs.stat('file.txt');
+    expect(Number(stats.mode) & 0o777).toBe(0o644);
+    await stop();
+  });
+
+  test('can change directory mode', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.chmod('subdir', 0o755);
+    const stats = await fs.stat('subdir');
+    expect(Number(stats.mode) & 0o777).toBe(0o755);
+    await stop();
+  });
+
+  test('can change nested file mode', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.chmod('subdir/nested.dat', 0o600);
+    const stats = await fs.stat('subdir/nested.dat');
+    expect(Number(stats.mode) & 0o777).toBe(0o600);
+    await stop();
+  });
+});
+
+describe('.chown()', () => {
+  test('can change file owner', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.chown('file.txt', 1001, 1001);
+    await stop();
+  });
+
+  test('can change directory owner', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.chown('subdir', 1002, 1002);
+    await stop();
+  });
+
+  test('can change nested file owner', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.chown('subdir/nested.dat', 1003, 1003);
+    await stop();
+  });
+});
+
+describe('.lchmod()', () => {
+  test('can change file mode without following symlinks', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    vol.symlinkSync('file.txt', '/export/link.txt');
+    await fs.lchmod('link.txt', 0o777);
+    const stats = await fs.lstat('link.txt');
+    expect(stats.isSymbolicLink()).toBe(true);
+    await stop();
+  });
+
+  test('can change regular file mode with lchmod', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.lchmod('file.txt', 0o666);
+    const stats = await fs.stat('file.txt');
+    expect(Number(stats.mode) & 0o777).toBe(0o666);
+    await stop();
+  });
+});
+
+describe('.lchown()', () => {
+  test('can change file owner without following symlinks', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    vol.symlinkSync('file.txt', '/export/link.txt');
+    await fs.lchown('link.txt', 2001, 2001);
+    await stop();
+  });
+
+  test('can change regular file owner with lchown', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    await fs.lchown('file.txt', 2002, 2002);
+    await stop();
+  });
+});
+
+describe('.lutimes()', () => {
+  test('can update symlink times without following', async () => {
+    const {client, stop, vol} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    vol.symlinkSync('file.txt', '/export/link.txt');
+    const now = Date.now();
+    const atime = new Date(now - 10000);
+    const mtime = new Date(now - 5000);
+    await fs.lutimes('link.txt', atime, mtime);
+    await stop();
+  });
+
+  test('can update regular file times with lutimes', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const fs = new Nfsv4FsClient(client);
+    const now = Date.now();
+    const atime = new Date(now - 10000);
+    const mtime = new Date(now - 5000);
+    await fs.lutimes('file.txt', atime, mtime);
+    const stats = await fs.stat('file.txt');
+    expect(Math.abs(Number(stats.atimeMs) - atime.getTime())).toBeLessThan(2000);
+    expect(Math.abs(Number(stats.mtimeMs) - mtime.getTime())).toBeLessThan(2000);
+    await stop();
+  });
+});

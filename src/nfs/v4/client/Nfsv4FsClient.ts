@@ -294,6 +294,10 @@ export class Nfsv4FsClient implements NfsFsClient {
     );
   }
 
+  public async lstat(path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> {
+    return this.stat(path, options);
+  }
+
   public async mkdir(path: misc.PathLike, options?: misc.TMode | opts.IMkdirOptions): Promise<string | undefined> {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
@@ -713,31 +717,63 @@ export class Nfsv4FsClient implements NfsFsClient {
     return Buffer.from(dirName, 'utf8');
   }
 
-  public async lstat(path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStats> {
-    return this.stat(path, options);
+  public async chmod(path: misc.PathLike, mode: misc.TMode): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations = this.navigateToPath(parts);
+    const modeValue = typeof mode === 'number' ? mode : parseInt(mode.toString(), 8);
+    const writer = new Writer(8);
+    const xdr = new XdrEncoder(writer);
+    xdr.writeUnsignedInt(modeValue);
+    const attrVals = writer.flush();
+    const attrs = nfs.Fattr([Nfsv4Attr.FATTR4_MODE], attrVals);
+    const stateid = nfs.Stateid(0, new Uint8Array(12));
+    operations.push(nfs.SETATTR(stateid, attrs));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to chmod: ${response.status}`);
+    }
+    const setattrRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4SetattrResponse;
+    if (setattrRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to chmod: ${setattrRes.status}`);
+    }
+  }
+
+  public async chown(path: misc.PathLike, uid: number, gid: number): Promise<void> {
+    const pathStr = typeof path === 'string' ? path : path.toString();
+    const parts = this.parsePath(pathStr);
+    const operations = this.navigateToPath(parts);
+    const writer = new Writer(64);
+    const xdr = new XdrEncoder(writer);
+    xdr.writeStr(uid.toString());
+    xdr.writeStr(gid.toString());
+    const attrVals = writer.flush();
+    const attrs = nfs.Fattr([Nfsv4Attr.FATTR4_OWNER, Nfsv4Attr.FATTR4_OWNER_GROUP], attrVals);
+    const stateid = nfs.Stateid(0, new Uint8Array(12));
+    operations.push(nfs.SETATTR(stateid, attrs));
+    const response = await this.nfs.compound(operations);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to chown: ${response.status}`);
+    }
+    const setattrRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4SetattrResponse;
+    if (setattrRes.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to chown: ${setattrRes.status}`);
+    }
+  }
+
+  public async lchmod(path: misc.PathLike, mode: misc.TMode): Promise<void> {
+    return this.chmod(path, mode);
+  }
+
+  public async lchown(path: misc.PathLike, uid: number, gid: number): Promise<void> {
+    return this.chown(path, uid, gid);
+  }
+
+  public async lutimes(path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> {
+    return this.utimes(path, atime, mtime);
   }
 
   public readonly open = (path: misc.PathLike, flags?: misc.TFlags, mode?: misc.TMode): Promise<misc.IFileHandle> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly chmod = (path: misc.PathLike, mode: misc.TMode): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly chown = (path: misc.PathLike, uid: number, gid: number): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly lchmod = (path: misc.PathLike, mode: misc.TMode): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly lchown = (path: misc.PathLike, uid: number, gid: number): Promise<void> => {
-    throw new Error('Not implemented.');
-  };
-
-  public readonly lutimes = (path: misc.PathLike, atime: misc.TTime, mtime: misc.TTime): Promise<void> => {
     throw new Error('Not implemented.');
   };
 

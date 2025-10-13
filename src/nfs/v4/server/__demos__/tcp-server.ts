@@ -7,6 +7,7 @@ vol.fromJSON({
   '/export/file.txt': 'Hello, NFS v4!\n',
 });
 
+// tslint:disable-next-line:no-console
 console.log(vol.toJSON());
 
 const ops = new Nfsv4OperationsNode({fs: <any>fs, dir: '/'});

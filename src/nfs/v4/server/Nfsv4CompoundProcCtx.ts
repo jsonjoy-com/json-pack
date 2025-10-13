@@ -42,7 +42,7 @@ export class Nfsv4CompoundProcCtx {
     const {argarray, tag} = req;
     const length = argarray.length;
     let status: Nfsv4Stat = Nfsv4Stat.NFS4_OK;
-    let resarray: msg.Nfsv4Response[] = [];
+    const resarray: msg.Nfsv4Response[] = [];
     OPS_LOOP: for (let i = 0; i < length; i++) {
       const op = argarray[i];
       const opReq: msg.Nfsv4Request = op;

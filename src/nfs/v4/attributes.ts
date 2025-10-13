@@ -110,10 +110,7 @@ export const GET_ONLY_ATTRS = new Set<Nfsv4Attr>([
  * Can be set via SETATTR but not retrieved via GETATTR.
  * Attempting to get these returns NFS4ERR_INVAL.
  */
-export const SET_ONLY_ATTRS = new Set<Nfsv4Attr>([
-  Nfsv4Attr.FATTR4_TIME_ACCESS_SET,
-  Nfsv4Attr.FATTR4_TIME_MODIFY_SET,
-]);
+export const SET_ONLY_ATTRS = new Set<Nfsv4Attr>([Nfsv4Attr.FATTR4_TIME_ACCESS_SET, Nfsv4Attr.FATTR4_TIME_MODIFY_SET]);
 
 /**
  * REQUIRED attributes (Section 5.6, Table 3).
@@ -205,8 +202,8 @@ export const STAT_ATTRS = new Set<Nfsv4Attr>([
 
 /**
  * Extract attribute numbers from a bitmap mask.
- * 
- * @todo PERF: More efficient would be to parse to `Array<number>` and 
+ *
+ * @todo PERF: More efficient would be to parse to `Array<number>` and
  *     also use `Array<number>` for {@link overlap} calculation.
  */
 export const parseBitmask = (mask: number[]): Set<number> => {
@@ -228,11 +225,9 @@ export const overlaps = <T>(a: Set<T>, b: Set<T>): boolean => {
 /**
  * Check if attempting to get a set-only attribute (returns NFS4ERR_INVAL).
  */
-export const containsSetOnlyAttr = (requestedAttrs: Set<number>): boolean =>
-  overlaps(requestedAttrs, SET_ONLY_ATTRS);
+export const containsSetOnlyAttr = (requestedAttrs: Set<number>): boolean => overlaps(requestedAttrs, SET_ONLY_ATTRS);
 
 /**
  * Check if any requested attributes require lstat.
  */
-export const requiresLstat = (requestedAttrs: Set<number>): boolean =>
-  overlaps(requestedAttrs, STAT_ATTRS);
+export const requiresLstat = (requestedAttrs: Set<number>): boolean => overlaps(requestedAttrs, STAT_ATTRS);

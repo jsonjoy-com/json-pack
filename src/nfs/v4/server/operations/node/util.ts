@@ -1,5 +1,5 @@
-import {Nfsv4Stat} from "../../..";
-import type {Logger} from "../../types";
+import {Nfsv4Stat} from '../../..';
+import type {Logger} from '../../types';
 
 export const isErrCode = (code: unknown, error: unknown): boolean =>
   !!error && typeof error === 'object' && (error as any).code === code;

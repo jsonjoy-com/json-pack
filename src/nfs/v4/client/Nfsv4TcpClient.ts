@@ -1,7 +1,7 @@
-import * as net from 'net';
-import {EventEmitter} from 'events';
+import * as net from 'node:net';
+import * as stream from 'node:stream';
 import {Nfsv4Decoder} from '../Nfsv4Decoder';
-import {FullNfsv4Encoder} from '../FullNfsv4Encoder';
+import {Nfsv4FullEncoder} from '../Nfsv4FullEncoder';
 import {RmRecordDecoder} from '../../../rm';
 import {
   RpcAcceptedReplyMessage,
@@ -27,14 +27,20 @@ interface PendingRequest {
   timeout?: NodeJS.Timeout;
 }
 
-export class Nfsv4TcpClient extends EventEmitter {
+export class Nfsv4TcpClient {
+  public static fromDuplex(duplex: stream.Duplex, opts: Nfsv4TcpClientOpts = {}): Nfsv4TcpClient {
+    const client = new Nfsv4TcpClient(opts);
+    client.setSocket(duplex);
+    return client;
+  }
+
   public readonly host: string;
   public readonly port: number;
   public readonly timeout: number;
   public debug: boolean;
   public logger: Pick<typeof console, 'log' | 'error'>;
 
-  private socket: net.Socket | null = null;
+  private socket: stream.Duplex | null = null;
   private connected = false;
   private connecting = false;
   private xid = 0;
@@ -44,10 +50,9 @@ export class Nfsv4TcpClient extends EventEmitter {
   private readonly rmDecoder: RmRecordDecoder;
   private readonly rpcDecoder: RpcMessageDecoder;
   private readonly nfsDecoder: Nfsv4Decoder;
-  private readonly nfsEncoder: FullNfsv4Encoder;
+  private readonly nfsEncoder: Nfsv4FullEncoder;
 
   constructor(opts: Nfsv4TcpClientOpts = {}) {
-    super();
     this.host = opts.host || '127.0.0.1';
     this.port = opts.port || 2049;
     this.timeout = opts.timeout || 30000;
@@ -56,7 +61,7 @@ export class Nfsv4TcpClient extends EventEmitter {
     this.rmDecoder = new RmRecordDecoder();
     this.rpcDecoder = new RpcMessageDecoder();
     this.nfsDecoder = new Nfsv4Decoder();
-    this.nfsEncoder = new FullNfsv4Encoder();
+    this.nfsEncoder = new Nfsv4FullEncoder();
   }
 
   private nextXid(): number {
@@ -75,24 +80,33 @@ export class Nfsv4TcpClient extends EventEmitter {
     if (this.connecting) throw new Error('Connection already in progress');
     return new Promise((resolve, reject) => {
       this.connecting = true;
-      const socket = net.connect({host: this.host, port: this.port}, () => {
-        this.connected = true;
-        this.connecting = false;
-        if (this.debug) this.logger.log(`Connected to NFSv4 server at ${this.host}:${this.port}`);
-        this.emit('connect');
-        resolve();
-      });
-      socket.on('data', this.onData.bind(this));
-      socket.on('close', this.onClose.bind(this));
-      socket.on('error', (err: Error) => {
+      const onError = (err: Error) => {
         this.connecting = false;
         this.connected = false;
         if (this.debug) this.logger.error('Socket error:', err);
-        this.emit('error', err);
         reject(err);
+      };
+      const socket = net.connect({host: this.host, port: this.port}, () => {
+        if (this.debug) this.logger.log(`Connected to NFSv4 server at ${this.host}:${this.port}`);
+        socket.removeListener('error', onError);
+        resolve();
+        this.setSocket(socket);
       });
-      this.socket = socket;
+      socket.once('error', onError);
     });
+  }
+
+  public setSocket(socket: stream.Duplex): void {
+    socket.on('data', this.onData.bind(this));
+    socket.on('close', this.onClose.bind(this));
+    socket.on('error', (err: Error) => {
+      this.connecting = false;
+      this.connected = false;
+      if (this.debug) this.logger.error('Socket error:', err);
+    });
+    this.connected = true;
+    this.connecting = false;
+    this.socket = socket;
   }
 
   private onData(data: Uint8Array): void {
@@ -123,6 +137,11 @@ export class Nfsv4TcpClient extends EventEmitter {
         return;
       }
       if (!msg.results) {
+        // NULL procedure has no results, check if resolve expects no arguments
+        if (pending.resolve.length === 0) {
+          (pending.resolve as any)();
+          return;
+        }
         pending.reject(new Error('No results in accepted reply'));
         return;
       }
@@ -156,7 +175,6 @@ export class Nfsv4TcpClient extends EventEmitter {
       pending.reject(error);
     });
     this.pendingRequests.clear();
-    this.emit('close');
   }
 
   public async compound(request: Nfsv4CompoundRequest): Promise<Nfsv4CompoundResponse> {

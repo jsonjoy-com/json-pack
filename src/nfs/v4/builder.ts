@@ -1,0 +1,264 @@
+import {attrNumsToBitmap} from './attributes';
+import * as msg from './messages';
+import * as structs from './structs';
+
+/**
+ * Static builder helpers for NFS v4 operations.
+ * Provides a simpler API for constructing NFS v4 request messages.
+ *
+ * @example
+ * ```ts
+ * const response = await client.compound([
+ *   nfs.PUTROOTFH(),
+ *   nfs.LOOKUP('file.txt'),
+ *   nfs.GETATTR([0x00000001]),
+ * ]);
+ * ```
+ */
+export const nfs = {
+  /**
+   * PUTROOTFH - Set current filehandle to root of export.
+   */
+  PUTROOTFH(): msg.Nfsv4PutrootfhRequest {
+    return new msg.Nfsv4PutrootfhRequest();
+  },
+
+  /**
+   * PUTFH - Set current filehandle.
+   * @param fh - Filehandle to set as current
+   */
+  PUTFH(fh: structs.Nfsv4Fh): msg.Nfsv4PutfhRequest {
+    return new msg.Nfsv4PutfhRequest(fh);
+  },
+
+  /**
+   * PUTPUBFH - Set current filehandle to public filehandle.
+   */
+  PUTPUBFH(): msg.Nfsv4PutpubfhRequest {
+    return new msg.Nfsv4PutpubfhRequest();
+  },
+
+  /**
+   * GETFH - Get current filehandle.
+   */
+  GETFH(): msg.Nfsv4GetfhRequest {
+    return new msg.Nfsv4GetfhRequest();
+  },
+
+  /**
+   * LOOKUP - Lookup filename in current directory.
+   * @param name - Filename to lookup
+   */
+  LOOKUP(name: string): msg.Nfsv4LookupRequest {
+    return new msg.Nfsv4LookupRequest(name);
+  },
+
+  /**
+   * LOOKUPP - Lookup parent directory (..).
+   */
+  LOOKUPP(): msg.Nfsv4LookuppRequest {
+    return new msg.Nfsv4LookuppRequest();
+  },
+
+  /**
+   * GETATTR - Get file attributes.
+   * @param attrBitmap - Attribute bitmap (array of uint32 values)
+   */
+  GETATTR(attrBitmap: number[]): msg.Nfsv4GetattrRequest {
+    return new msg.Nfsv4GetattrRequest(new structs.Nfsv4Bitmap(attrBitmap));
+  },
+
+  /**
+   * READDIR - Read directory entries.
+   * @param attrBitmap - Attribute bitmap for entries (single uint32 or array)
+   * @param cookieverf - Cookie verifier (8 bytes), defaults to zeros
+   * @param cookie - Starting cookie, defaults to 0
+   * @param dircount - Max bytes for directory info, defaults to 1000
+   * @param maxcount - Max bytes for reply, defaults to 8192
+   */
+  READDIR(
+    attrBitmap: number | number[],
+    cookieverf?: Uint8Array,
+    cookie?: bigint,
+    dircount?: number,
+    maxcount?: number,
+  ): msg.Nfsv4ReaddirRequest {
+    const bitmap = Array.isArray(attrBitmap) ? attrBitmap : [attrBitmap];
+    const verifier = cookieverf || new Uint8Array(8);
+    return new msg.Nfsv4ReaddirRequest(
+      cookie ?? BigInt(0),
+      new structs.Nfsv4Verifier(verifier),
+      dircount ?? 1000,
+      maxcount ?? 8192,
+      new structs.Nfsv4Bitmap(bitmap),
+    );
+  },
+
+  /**
+   * ACCESS - Check access permissions.
+   * @param accessMask - Access mask (default: 0x3f for all bits)
+   */
+  ACCESS(accessMask: number = 0x0000003f): msg.Nfsv4AccessRequest {
+    return new msg.Nfsv4AccessRequest(accessMask);
+  },
+
+  /**
+   * READ - Read file data.
+   * @param offset - Byte offset to read from
+   * @param count - Number of bytes to read
+   * @param stateid - State ID (defaults to all zeros)
+   */
+  READ(offset: bigint, count: number, stateid?: structs.Nfsv4Stateid): msg.Nfsv4ReadRequest {
+    const sid = stateid || new structs.Nfsv4Stateid(0, new Uint8Array(12));
+    return new msg.Nfsv4ReadRequest(sid, offset, count);
+  },
+
+  /**
+   * READLINK - Read symbolic link.
+   */
+  READLINK(): msg.Nfsv4ReadlinkRequest {
+    return new msg.Nfsv4ReadlinkRequest();
+  },
+
+  /**
+   * SAVEFH - Save current filehandle.
+   */
+  SAVEFH(): msg.Nfsv4SavefhRequest {
+    return new msg.Nfsv4SavefhRequest();
+  },
+
+  /**
+   * RESTOREFH - Restore saved filehandle to current.
+   */
+  RESTOREFH(): msg.Nfsv4RestorefhRequest {
+    return new msg.Nfsv4RestorefhRequest();
+  },
+
+  /**
+   * SETATTR - Set file attributes.
+   * @param stateid - State ID
+   * @param attrs - Attributes to set
+   */
+  SETATTR(stateid: structs.Nfsv4Stateid, attrs: structs.Nfsv4Fattr): msg.Nfsv4SetattrRequest {
+    return new msg.Nfsv4SetattrRequest(stateid, attrs);
+  },
+
+  /**
+   * VERIFY - Verify attributes match.
+   * @param attrs - Attributes to verify
+   */
+  VERIFY(attrs: structs.Nfsv4Fattr): msg.Nfsv4VerifyRequest {
+    return new msg.Nfsv4VerifyRequest(attrs);
+  },
+
+  /**
+   * NVERIFY - Verify attributes don't match.
+   * @param attrs - Attributes to verify don't match
+   */
+  NVERIFY(attrs: structs.Nfsv4Fattr): msg.Nfsv4NverifyRequest {
+    return new msg.Nfsv4NverifyRequest(attrs);
+  },
+
+  /**
+   * REMOVE - Remove file or directory.
+   * @param name - Name of file/directory to remove
+   */
+  REMOVE(name: string): msg.Nfsv4RemoveRequest {
+    return new msg.Nfsv4RemoveRequest(name);
+  },
+
+  /**
+   * RENAME - Rename file or directory.
+   * @param oldname - Current name
+   * @param newname - New name
+   */
+  RENAME(oldname: string, newname: string): msg.Nfsv4RenameRequest {
+    return new msg.Nfsv4RenameRequest(oldname, newname);
+  },
+
+  /**
+   * RENEW - Renew client lease.
+   * @param clientid - Client ID
+   */
+  RENEW(clientid: bigint): msg.Nfsv4RenewRequest {
+    return new msg.Nfsv4RenewRequest(clientid);
+  },
+
+  /**
+   * SETCLIENTID - Establish client ID.
+   * @param client - Client identifier
+   * @param callback - Callback info
+   * @param callbackIdent - Callback identifier
+   */
+  SETCLIENTID(
+    client: structs.Nfsv4ClientId,
+    callback: structs.Nfsv4CbClient,
+    callbackIdent: number,
+  ): msg.Nfsv4SetclientidRequest {
+    return new msg.Nfsv4SetclientidRequest(client, callback, callbackIdent);
+  },
+
+  /**
+   * SETCLIENTID_CONFIRM - Confirm client ID.
+   * @param clientid - Client ID to confirm
+   * @param verifier - Verifier from SETCLIENTID response
+   */
+  SETCLIENTID_CONFIRM(clientid: bigint, verifier: structs.Nfsv4Verifier): msg.Nfsv4SetclientidConfirmRequest {
+    return new msg.Nfsv4SetclientidConfirmRequest(clientid, verifier);
+  },
+
+  /**
+   * Create an Nfsv4Verifier (8-byte opaque data).
+   * @param data - 8-byte Uint8Array, defaults to zeros
+   */
+  Verifier(data?: Uint8Array): structs.Nfsv4Verifier {
+    return new structs.Nfsv4Verifier(data || new Uint8Array(8));
+  },
+
+  /**
+   * Create an Nfsv4Stateid (state identifier).
+   * @param seqid - Sequence ID (default: 0)
+   * @param other - 12-byte opaque data (default: zeros)
+   */
+  Stateid(seqid: number = 0, other?: Uint8Array): structs.Nfsv4Stateid {
+    return new structs.Nfsv4Stateid(seqid, other || new Uint8Array(12));
+  },
+
+  /**
+   * Create Nfsv4Fattr from attribute numbers (automatically converts to bitmap).
+   * @param attrNums - Array of attribute numbers (Nfsv4Attr enum values)
+   * @param attrVals - Encoded attribute values as byte array
+   */
+  Fattr(attrNums: number[], attrVals: Uint8Array): structs.Nfsv4Fattr {
+    const bitmap = new structs.Nfsv4Bitmap(attrNumsToBitmap(attrNums));
+    return new structs.Nfsv4Fattr(bitmap, attrVals);
+  },
+
+  /**
+   * Create Nfsv4ClientId (client identifier).
+   * @param verifier - 8-byte verifier
+   * @param id - Variable-length client ID bytes
+   */
+  ClientId(verifier: structs.Nfsv4Verifier, id: Uint8Array): structs.Nfsv4ClientId {
+    return new structs.Nfsv4ClientId(verifier, id);
+  },
+
+  /**
+   * Create Nfsv4CbClient (callback client information).
+   * @param cbProgram - Callback program number
+   * @param rNetid - Network ID string (e.g., 'tcp', 'udp')
+   * @param rAddr - Network address string (e.g., '127.0.0.1.8.1')
+   */
+  CbClient(cbProgram: number, rNetid: string, rAddr: string): structs.Nfsv4CbClient {
+    const cbLocation = new structs.Nfsv4ClientAddr(rNetid, rAddr);
+    return new structs.Nfsv4CbClient(cbProgram, cbLocation);
+  },
+
+  /**
+   * Create Nfsv4Bitmap from attribute numbers.
+   * @param attrNums - Array of attribute numbers (Nfsv4Attr enum values)
+   */
+  Bitmap(attrNums: number[]): structs.Nfsv4Bitmap {
+    return new structs.Nfsv4Bitmap(attrNumsToBitmap(attrNums));
+  },
+};

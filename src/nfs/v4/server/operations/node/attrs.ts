@@ -7,14 +7,7 @@ import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {XdrEncoder} from '../../../../../xdr/XdrEncoder';
 import {Nfsv4Attr, Nfsv4FType, Nfsv4Stat} from '../../../constants';
 import * as struct from '../../../structs';
-import {REQUIRED_ATTRS, RECOMMENDED_ATTRS, SET_ONLY_ATTRS} from '../../../attributes';
-
-const setBit = (mask: number[], attrNum: number): void => {
-  const wordIndex = Math.floor(attrNum / 32);
-  const bitIndex = attrNum % 32;
-  while (mask.length <= wordIndex) mask.push(0);
-  mask[wordIndex] |= 1 << bitIndex;
-};
+import {REQUIRED_ATTRS, RECOMMENDED_ATTRS, SET_ONLY_ATTRS, setBit} from '../../../attributes';
 
 /**
  * Create a bitmap of supported attributes (all REQUIRED and RECOMMENDED attrs we implement).

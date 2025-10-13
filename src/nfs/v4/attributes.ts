@@ -231,3 +231,21 @@ export const containsSetOnlyAttr = (requestedAttrs: Set<number>): boolean => ove
  * Check if any requested attributes require lstat.
  */
 export const requiresLstat = (requestedAttrs: Set<number>): boolean => overlaps(requestedAttrs, STAT_ATTRS);
+
+export const setBit = (mask: number[], attrNum: Nfsv4Attr): void => {
+  const wordIndex = Math.floor(attrNum / 32);
+  const bitIndex = attrNum % 32;
+  while (mask.length <= wordIndex) mask.push(0);
+  mask[wordIndex] |= 1 << bitIndex;
+};
+
+/**
+ * Helper to convert attribute numbers to bitmap array.
+ * @param attrNums - Array of attribute numbers (Nfsv4Attr values)
+ * @returns Bitmap array suitable for Nfsv4Bitmap constructor
+ */
+export const attrNumsToBitmap = (attrNums: Nfsv4Attr[]): number[] => {
+  const mask: number[] = [];
+  for (const attrNum of attrNums) setBit(mask, attrNum);
+  return mask;
+};

@@ -11,7 +11,7 @@ import {
   RpcRejectedReplyMessage,
 } from '../../../rpc';
 import {EMPTY_READER, Nfsv4Proc, Nfsv4Const} from '../constants';
-import type {Nfsv4CompoundRequest, Nfsv4CompoundResponse} from '../messages';
+import {Nfsv4CompoundRequest, Nfsv4CompoundResponse, Nfsv4Request} from '../messages';
 
 export interface Nfsv4TcpClientOpts {
   host?: string;
@@ -177,8 +177,22 @@ export class Nfsv4TcpClient {
     this.pendingRequests.clear();
   }
 
-  public async compound(request: Nfsv4CompoundRequest): Promise<Nfsv4CompoundResponse> {
+  public async compound(request: Nfsv4CompoundRequest): Promise<Nfsv4CompoundResponse>;
+  public async compound(
+    operations: Nfsv4Request[],
+    tag?: string,
+    minorversion?: number,
+  ): Promise<Nfsv4CompoundResponse>;
+  public async compound(
+    requestOrOps: Nfsv4CompoundRequest | Nfsv4Request[],
+    tag: string = '',
+    minorversion: number = 0,
+  ): Promise<Nfsv4CompoundResponse> {
     if (!this.connected) throw new Error('Not connected');
+    const request =
+      requestOrOps instanceof Nfsv4CompoundRequest
+        ? requestOrOps
+        : new Nfsv4CompoundRequest(tag, minorversion, requestOrOps);
     const xid = this.nextXid();
     const cred = new RpcOpaqueAuth(0, EMPTY_READER);
     const verf = new RpcOpaqueAuth(0, EMPTY_READER);

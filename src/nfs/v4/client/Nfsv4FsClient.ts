@@ -3,7 +3,7 @@ import * as misc from 'memfs/lib/node/types/misc';
 import * as opts from 'memfs/lib/node/types/options';
 import {nfs} from '../builder';
 import * as msg from '../messages';
-import {Nfsv4Stat, Nfsv4OpenAccess, Nfsv4OpenDeny, Nfsv4StableHow, Nfsv4Attr} from '../constants';
+import {Nfsv4Stat, Nfsv4OpenAccess, Nfsv4OpenDeny, Nfsv4StableHow, Nfsv4Attr, Nfsv4OpenFlags} from '../constants';
 import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {XdrEncoder} from '../../../xdr/XdrEncoder';
 
@@ -99,7 +99,14 @@ export class Nfsv4FsClient implements NfsFsClient {
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull(filename);
     operations.push(
-      nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, 0, claim),
+      nfs.OPEN(
+        0,
+        Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
+        Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+        openOwner,
+        Nfsv4OpenFlags.OPEN4_CREATE,
+        claim,
+      ),
     );
     const writer = new Writer(16);
     const xdr = new XdrEncoder(writer);

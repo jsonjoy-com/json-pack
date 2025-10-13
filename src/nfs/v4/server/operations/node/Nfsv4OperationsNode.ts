@@ -9,6 +9,7 @@ import {
   Nfsv4OpenClaimType,
   Nfsv4DelegType,
   Nfsv4LockType,
+  Nfsv4OpenFlags,
 } from '../../../constants';
 import {Nfsv4OperationCtx, Nfsv4Operations} from '../Nfsv4Operations';
 import * as msg from '../../../messages';
@@ -535,33 +536,41 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const claimNull = request.claim.claim as struct.Nfsv4OpenClaimNull;
     const filename = claimNull.file;
     const filePath = NodePath.join(currentPathAbsolute, filename);
+    let fileExists = false;
     try {
       const stats = await this.promises.lstat(filePath);
       if (!stats.isFile()) {
         return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_ISDIR);
       }
+      fileExists = true;
     } catch (err) {
-      if (isErrCode(err, 'ENOENT')) {
-        return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_NOENT);
+      if (isErrCode('ENOENT', err)) {
+        if (request.openhow !== Nfsv4OpenFlags.OPEN4_CREATE) {
+          return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_NOENT);
+        }
+      } else {
+        const status = normalizeNodeFsError(err, ctx.connection.logger);
+        return new msg.Nfsv4OpenResponse(status);
       }
-      const status = normalizeNodeFsError(err, ctx.connection.logger);
-      return new msg.Nfsv4OpenResponse(status);
     }
-    if (!this.canAccessFile(filePath, request.shareAccess, request.shareDeny)) {
+    if (fileExists && !this.canAccessFile(filePath, request.shareAccess, request.shareDeny)) {
       return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_SHARE_DENIED);
     }
     let flags = 0;
     const isWrite = (request.shareAccess & Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE) !== 0;
     const isRead = (request.shareAccess & Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ) !== 0;
+    if (request.openhow === 1) {
+      flags = this.fs.constants.O_CREAT;
+    }
     if (isRead && isWrite) {
-      flags = this.fs.constants.O_RDWR;
+      flags |= this.fs.constants.O_RDWR;
     } else if (isWrite) {
-      flags = this.fs.constants.O_WRONLY;
+      flags |= this.fs.constants.O_WRONLY;
     } else {
-      flags = this.fs.constants.O_RDONLY;
+      flags |= this.fs.constants.O_RDONLY;
     }
     try {
-      const fd = await this.promises.open(filePath, flags);
+      const fd = await this.promises.open(filePath, flags, 0o644);
       const stateid = this.createStateid();
       const stateidKey = this.makeStateidKey(stateid);
       const openFile = new OpenFileState(

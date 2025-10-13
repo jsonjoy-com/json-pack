@@ -448,4 +448,188 @@ describe('NfsFsFileHandle', () => {
       await stop();
     });
   });
+
+  describe('streams', () => {
+    describe('.createReadStream()', () => {
+      test('can read file as stream', async () => {
+        const {client, stop} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', 'Hello, World!');
+        const fh = await fs.open('file.txt', 'r');
+        const stream = fh.createReadStream({});
+        const chunks: Buffer[] = [];
+        for await (const chunk of stream) {
+          chunks.push(chunk);
+        }
+        await fh.close();
+        const content = Buffer.concat(chunks).toString('utf8');
+        expect(content).toBe('Hello, World!');
+        await stop();
+      });
+
+      test('can read with start option', async () => {
+        const {client, stop} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', 'Hello, World!');
+        const fh = await fs.open('file.txt', 'r');
+        const stream = fh.createReadStream({start: 7});
+        const chunks: Buffer[] = [];
+        for await (const chunk of stream) {
+          chunks.push(chunk);
+        }
+        await fh.close();
+        const content = Buffer.concat(chunks).toString('utf8');
+        expect(content).toBe('World!');
+        await stop();
+      });
+
+      test('can read with start and end options', async () => {
+        const {client, stop} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', 'Hello, World!');
+        const fh = await fs.open('file.txt', 'r');
+        const stream = fh.createReadStream({start: 0, end: 5});
+        const chunks: Buffer[] = [];
+        for await (const chunk of stream) {
+          chunks.push(chunk);
+        }
+        await fh.close();
+        const content = Buffer.concat(chunks).toString('utf8');
+        expect(content).toBe('Hello');
+        await stop();
+      });
+
+      test('stream has path property', async () => {
+        const {client, stop} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        const fh = await fs.open('file.txt', 'r');
+        const stream = fh.createReadStream({});
+        expect(stream.path).toBe('file.txt');
+        stream.destroy();
+        await fh.close();
+        await stop();
+      });
+    });
+
+    describe('.createWriteStream()', () => {
+      test('can write file as stream', async () => {
+        const {client, stop, vol} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', '');
+        const fh = await fs.open('file.txt', 'w');
+        const stream = fh.createWriteStream({});
+        stream.write('Hello');
+        stream.write(', ');
+        stream.write('World!');
+        await new Promise((resolve, reject) => {
+          stream.end((err?: Error) => (err ? reject(err) : resolve(undefined)));
+        });
+        await fh.close();
+        const content = vol.readFileSync('/export/file.txt', 'utf8');
+        expect(content).toBe('Hello, World!');
+        await stop();
+      });
+
+      test('can write with start option', async () => {
+        const {client, stop, vol} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', '0123456789');
+        const fh = await fs.open('file.txt', 'r+');
+        const stream = fh.createWriteStream({start: 5});
+        stream.write('XXXXX');
+        await new Promise((resolve, reject) => {
+          stream.end((err?: Error) => (err ? reject(err) : resolve(undefined)));
+        });
+        await fh.close();
+        const content = vol.readFileSync('/export/file.txt', 'utf8');
+        expect(content).toBe('01234XXXXX');
+        await stop();
+      });
+
+      test('stream has path property', async () => {
+        const {client, stop} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', '');
+        const fh = await fs.open('file.txt', 'w');
+        const stream = fh.createWriteStream({});
+        expect(stream.path).toBe('file.txt');
+        stream.destroy();
+        await fh.close();
+        await stop();
+      });
+
+      test('handles multiple chunks efficiently', async () => {
+        const {client, stop, vol} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', '');
+        const fh = await fs.open('file.txt', 'w');
+        const stream = fh.createWriteStream({});
+        for (let i = 0; i < 10; i++) {
+          stream.write(`chunk${i}`);
+        }
+        await new Promise((resolve, reject) => {
+          stream.end((err?: Error) => (err ? reject(err) : resolve(undefined)));
+        });
+        await fh.close();
+        const content = vol.readFileSync('/export/file.txt', 'utf8');
+        expect(content).toBe('chunk0chunk1chunk2chunk3chunk4chunk5chunk6chunk7chunk8chunk9');
+        await stop();
+      });
+    });
+
+    describe('.readableWebStream()', () => {
+      test('can create web stream', async () => {
+        const {client, stop} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', 'Hello, Web Streams!');
+        const fh = await fs.open('file.txt', 'r');
+        const webStream = fh.readableWebStream();
+        expect(webStream).toBeInstanceOf(ReadableStream);
+        const reader = webStream.getReader();
+        const chunks: Uint8Array[] = [];
+        while (true) {
+          const {done, value} = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+        await fh.close();
+        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const result = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of chunks) {
+          result.set(chunk, offset);
+          offset += chunk.length;
+        }
+        const content = new TextDecoder().decode(result);
+        expect(content).toBe('Hello, Web Streams!');
+        await stop();
+      });
+
+      test('can read with start option', async () => {
+        const {client, stop} = await setupNfsClientServerTestbed();
+        const fs = new Nfsv4FsClient(client);
+        await fs.writeFile('file.txt', 'Hello, Web Streams!');
+        const fh = await fs.open('file.txt', 'r');
+        const webStream = fh.readableWebStream({} as any);
+        const reader = webStream.getReader();
+        const chunks: Uint8Array[] = [];
+        while (true) {
+          const {done, value} = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+        await fh.close();
+        const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        const result = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of chunks) {
+          result.set(chunk, offset);
+          offset += chunk.length;
+        }
+        const content = new TextDecoder().decode(result);
+        expect(content).toBe('Hello, Web Streams!');
+        await stop();
+      });
+    });
+  });
 });

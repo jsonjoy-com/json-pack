@@ -1,4 +1,5 @@
 import {EventEmitter} from 'events';
+import {Readable, Writable} from 'stream';
 import * as msg from '../messages';
 import * as structs from '../structs';
 import {nfs} from '../builder';
@@ -190,14 +191,91 @@ export class NfsFsFileHandle extends EventEmitter implements misc.IFileHandle {
   }
 
   readableWebStream(options?: opts.IReadableWebStreamOptions): ReadableStream {
-    throw new Error('Not implemented');
+    if (this.closed) throw new Error('File handle is closed');
+    const stream = this.createReadStream(options as any);
+    return Readable.toWeb(stream as any) as ReadableStream;
   }
 
   createReadStream(options?: opts.IFileHandleReadStreamOptions): misc.IReadStream {
-    throw new Error('Not implemented');
+    if (this.closed) throw new Error('File handle is closed');
+    const start = options?.start ?? 0;
+    const end = options?.end;
+    const highWaterMark = options?.highWaterMark ?? 64 * 1024;
+    let position = typeof start === 'number' ? start : 0;
+    const endPosition = typeof end === 'number' ? end : Infinity;
+    let reading = false;
+    const self = this;
+    const stream = new Readable({
+      highWaterMark,
+      async read(size) {
+        if (reading) return;
+        reading = true;
+        try {
+          while (true) {
+            if (position >= endPosition) {
+              this.push(null);
+              break;
+            }
+            const bytesToRead = Math.min(size, endPosition - position);
+            if (bytesToRead <= 0) {
+              this.push(null);
+              break;
+            }
+            const buffer = Buffer.alloc(bytesToRead);
+            const result = await self.read(buffer, 0, bytesToRead, position);
+            if (result.bytesRead === 0) {
+              this.push(null);
+              break;
+            }
+            position += result.bytesRead;
+            const chunk = buffer.slice(0, result.bytesRead);
+            if (!this.push(chunk)) break;
+            if (result.bytesRead < bytesToRead) {
+              this.push(null);
+              break;
+            }
+          }
+        } catch (err) {
+          this.destroy(err as Error);
+        } finally {
+          reading = false;
+        }
+      },
+    }) as misc.IReadStream;
+    stream.path = this.path;
+    return stream;
   }
 
   createWriteStream(options?: opts.IFileHandleWriteStreamOptions): misc.IWriteStream {
-    throw new Error('Not implemented');
+    if (this.closed) throw new Error('File handle is closed');
+    const start = options?.start ?? 0;
+    const highWaterMark = options?.highWaterMark ?? 64 * 1024;
+    let position = typeof start === 'number' ? start : 0;
+    const self = this;
+    const stream = new Writable({
+      highWaterMark,
+      async write(chunk, encoding, callback) {
+        try {
+          const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+          const result = await self.write(buffer, 0, buffer.length, position);
+          position += result.bytesWritten;
+          callback();
+        } catch (err) {
+          callback(err as Error);
+        }
+      },
+      async writev(chunks, callback) {
+        try {
+          const buffers = chunks.map(({chunk}) => (Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+          const result = await self.writev(buffers, position);
+          position += result.bytesWritten;
+          callback();
+        } catch (err) {
+          callback(err as Error);
+        }
+      },
+    }) as misc.IWriteStream;
+    stream.path = this.path;
+    return stream;
   }
 }

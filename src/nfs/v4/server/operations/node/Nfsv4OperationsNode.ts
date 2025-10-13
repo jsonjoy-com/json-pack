@@ -1,7 +1,7 @@
 import type {Stats} from 'node:fs';
 import * as NodePath from 'node:path';
 import {randomBytes} from 'node:crypto';
-import {Nfsv4Const, Nfsv4Stat} from '../../../constants';
+import {Nfsv4Access, Nfsv4Const, Nfsv4Stat} from '../../../constants';
 import {Nfsv4OperationCtx, Nfsv4Operations} from '../Nfsv4Operations';
 import * as msg from '../../../messages';
 import * as struct from '../../../structs';
@@ -322,13 +322,54 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     return new msg.Nfsv4GetattrResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4GetattrResOk(attrs));
   }
 
-  // ----------------------------------------------- Stub implementations below
-
   public async ACCESS(request: msg.Nfsv4AccessRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4AccessResponse> {
-    ctx.connection.logger.log('ACCESS', request);
-    throw new Error('Not implemented');
-    return new msg.Nfsv4AccessResponse(Nfsv4Stat.NFS4ERR_SERVERFAULT);
+    const path = this.fh.currentPath(ctx);
+    const absolutePath = this.absolutePath(path);
+    const promises = this.promises;
+    let stats: Stats;
+    try {
+      stats = await promises.lstat(absolutePath);
+    } catch (error: unknown) {
+      throw normalizeNodeFsError(error, ctx.connection.logger);
+    }
+    const requestedAccess = request.access;
+    const isDirectory = stats.isDirectory();
+    const mode = stats.mode;
+    let supported = 0;
+    let access = 0;
+    if (requestedAccess & Nfsv4Access.ACCESS4_READ) {
+      supported |= Nfsv4Access.ACCESS4_READ;
+      if (mode & 0o444) access |= Nfsv4Access.ACCESS4_READ;
+    }
+    if (requestedAccess & Nfsv4Access.ACCESS4_LOOKUP) {
+      supported |= Nfsv4Access.ACCESS4_LOOKUP;
+      if (isDirectory && (mode & 0o111)) access |= Nfsv4Access.ACCESS4_LOOKUP;
+    }
+    if (requestedAccess & Nfsv4Access.ACCESS4_MODIFY) {
+      supported |= Nfsv4Access.ACCESS4_MODIFY;
+      if (mode & 0o222) access |= Nfsv4Access.ACCESS4_MODIFY;
+    }
+    if (requestedAccess & Nfsv4Access.ACCESS4_EXTEND) {
+      supported |= Nfsv4Access.ACCESS4_EXTEND;
+      if (mode & 0o222) access |= Nfsv4Access.ACCESS4_EXTEND;
+    }
+    if (requestedAccess & Nfsv4Access.ACCESS4_DELETE) {
+      if (!isDirectory) {
+        supported |= 0;
+      } else {
+        supported |= Nfsv4Access.ACCESS4_DELETE;
+        if (mode & 0o222) access |= Nfsv4Access.ACCESS4_DELETE;
+      }
+    }
+    if (requestedAccess & Nfsv4Access.ACCESS4_EXECUTE) {
+      supported |= Nfsv4Access.ACCESS4_EXECUTE;
+      if (!isDirectory && (mode & 0o111)) access |= Nfsv4Access.ACCESS4_EXECUTE;
+    }
+    const body = new msg.Nfsv4AccessResOk(supported, access);
+    return new msg.Nfsv4AccessResponse(Nfsv4Stat.NFS4_OK, body);
   }
+
+  // ----------------------------------------------- Stub implementations below
 
   public async CLOSE(request: msg.Nfsv4CloseRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4CloseResponse> {
     ctx.connection.logger.log('CLOSE', request);

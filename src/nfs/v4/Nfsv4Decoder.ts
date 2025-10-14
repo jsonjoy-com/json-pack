@@ -132,7 +132,9 @@ export class Nfsv4Decoder {
       case Nfsv4Op.ILLEGAL:
         return this.decodeIllegalRequest();
       default:
-        throw new Nfsv4DecodingError(`Unknown operation: ${op}`);
+        // Per RFC 7530 §15.2.4, operations 0, 1, 2 are not defined and any
+        // unknown operation code should be treated as ILLEGAL
+        return this.decodeIllegalRequest();
     }
   }
 
@@ -215,7 +217,8 @@ export class Nfsv4Decoder {
       case Nfsv4Op.ILLEGAL:
         return this.decodeIllegalResponse();
       default:
-        throw new Nfsv4DecodingError(`Unknown operation: ${op}`);
+        // Per RFC 7530 §15.2.4, treat unknown operation codes as ILLEGAL
+        return this.decodeIllegalResponse();
     }
   }
 

@@ -463,4 +463,13 @@ export const nfs = {
   LockOwner(clientid: bigint, owner: Uint8Array): structs.Nfsv4LockOwner {
     return new structs.Nfsv4LockOwner(clientid, owner);
   },
+
+  /**
+   * ILLEGAL - Illegal operation (for testing RFC 7530 §15.2.4 compliance).
+   * This operation is used to test server handling of illegal operation codes.
+   * Per RFC 7530, the server should respond with NFS4ERR_OP_ILLEGAL.
+   */
+  ILLEGAL(): msg.Nfsv4IllegalRequest {
+    return new msg.Nfsv4IllegalRequest();
+  },
 };

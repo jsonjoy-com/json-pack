@@ -10,7 +10,7 @@ describe('CLOSE operation', () => {
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull('file.txt');
     const openReq = nfs.OPEN(
-      0,
+      1,
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
@@ -23,7 +23,7 @@ describe('CLOSE operation', () => {
     expect(openRes.status).toBe(Nfsv4Stat.NFS4_OK);
     expect(openRes.resok).toBeDefined();
     const stateid = openRes.resok!.stateid;
-    const closeReq = nfs.CLOSE(0, stateid);
+    const closeReq = nfs.CLOSE(2, stateid);
     const closeResponse = await client.compound([closeReq]);
     expect(closeResponse.status).toBe(Nfsv4Stat.NFS4_OK);
     const closeRes = closeResponse.resarray[0] as msg.Nfsv4CloseResponse;
@@ -37,7 +37,7 @@ describe('CLOSE operation', () => {
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull('file.txt');
     const openReq = nfs.OPEN(
-      0,
+      1,
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
@@ -47,10 +47,10 @@ describe('CLOSE operation', () => {
     const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);
     const openRes = openResponse.resarray[1] as msg.Nfsv4OpenResponse;
     const stateid = openRes.resok!.stateid;
-    const closeReq1 = nfs.CLOSE(0, stateid);
+    const closeReq1 = nfs.CLOSE(2, stateid);
     const closeResponse1 = await client.compound([closeReq1]);
     expect(closeResponse1.status).toBe(Nfsv4Stat.NFS4_OK);
-    const closeReq2 = nfs.CLOSE(0, stateid);
+    const closeReq2 = nfs.CLOSE(2, stateid);
     const closeResponse2 = await client.compound([closeReq2]);
     expect(closeResponse2.status).toBe(Nfsv4Stat.NFS4_OK);
     await stop();
@@ -83,7 +83,7 @@ describe('CLOSE operation', () => {
     const openOwner1 = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim1 = nfs.OpenClaimNull('file.txt');
     const openReq1 = nfs.OPEN(
-      0,
+      1,
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_WRITE,
       openOwner1,
@@ -97,7 +97,7 @@ describe('CLOSE operation', () => {
     const openOwner2 = nfs.OpenOwner(BigInt(2), new Uint8Array([5, 6, 7, 8]));
     const claim2 = nfs.OpenClaimNull('file.txt');
     const openReq2 = nfs.OPEN(
-      0,
+      1,
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner2,
@@ -107,7 +107,7 @@ describe('CLOSE operation', () => {
     const openResponse2 = await client.compound([nfs.PUTROOTFH(), openReq2]);
     const openRes2 = openResponse2.resarray[1] as msg.Nfsv4OpenResponse;
     expect(openRes2.status).toBe(Nfsv4Stat.NFS4ERR_SHARE_DENIED);
-    const closeReq = nfs.CLOSE(0, stateid);
+    const closeReq = nfs.CLOSE(2, stateid);
     await client.compound([closeReq]);
     const openResponse3 = await client.compound([nfs.PUTROOTFH(), openReq2]);
     expect(openResponse3.status).toBe(Nfsv4Stat.NFS4_OK);
@@ -123,7 +123,7 @@ describe('CLOSE operation', () => {
     for (let i = 0; i < 3; i++) {
       const claim = nfs.OpenClaimNull('file.txt');
       const openReq = nfs.OPEN(
-        i,
+        i + 1,
         Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
         Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
         openOwner,
@@ -136,7 +136,7 @@ describe('CLOSE operation', () => {
       stateids.push(openRes.resok!.stateid);
     }
     for (let i = 0; i < 3; i++) {
-      const closeReq = nfs.CLOSE(i, stateids[i]);
+      const closeReq = nfs.CLOSE(i + 4, stateids[i]);
       const closeResponse = await client.compound([closeReq]);
       expect(closeResponse.status).toBe(Nfsv4Stat.NFS4_OK);
     }

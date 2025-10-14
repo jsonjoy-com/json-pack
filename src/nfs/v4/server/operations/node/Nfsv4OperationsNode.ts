@@ -59,6 +59,13 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   protected readonly promises: (typeof import('node:fs'))['promises'];
   protected dir: string;
 
+  /**
+   * Lease time in seconds.
+   * Per RFC 7530 §9.5, this is the time a client has to renew its lease
+   * before the server may reclaim its state. Default is 90 seconds.
+   */
+  protected readonly leaseTime: number = 90;
+
   /** Confirmed clients. */
   protected clients: Map<bigint, ClientRecord> = new Map();
   /** Clients pending SETCLIENTID_CONFIRM confirmation. */
@@ -118,6 +125,35 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   protected makeOpenOwnerKey(clientid: bigint, owner: Uint8Array): string {
     return `${clientid}:${Buffer.from(owner).toString('hex')}`;
+  }
+
+  /**
+   * Validates a seqid from a client request against the owner's current seqid.
+   * Per RFC 7530 §9.1.7, the server expects seqid = last_seqid + 1 for new operations,
+   * or seqid = last_seqid for replayed requests (idempotent retry).
+   *
+   * @param requestSeqid - seqid from the client request
+   * @param ownerSeqid - current seqid stored for the owner
+   * @returns 'valid' if seqid matches expected next value, 'replay' if it matches last value, 'invalid' otherwise
+   */
+  protected validateSeqid(requestSeqid: number, ownerSeqid: number): 'valid' | 'replay' | 'invalid' {
+    const nextSeqid = ownerSeqid === 0xffffffff ? 1 : ownerSeqid + 1;
+    if (requestSeqid === nextSeqid) return 'valid';
+    if (requestSeqid === ownerSeqid) return 'replay';
+    return 'invalid';
+  }
+
+  /**
+   * Renews the lease for a client.
+   * Per RFC 7530 §9.5, any stateful operation renews the client's lease.
+   *
+   * @param clientid - The client ID whose lease should be renewed
+   */
+  protected renewClientLease(clientid: bigint): void {
+    const client = this.clients.get(clientid);
+    if (client) {
+      client.lastRenew = Date.now();
+    }
   }
 
   protected makeStateidKey(stateid: struct.Nfsv4Stateid): string {
@@ -397,7 +433,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         throw normalizeNodeFsError(error, ctx.connection.logger);
       }
     }
-    const attrs = encodeAttrs(request.attrRequest, stats, currentPath, ctx.cfh!);
+    const attrs = encodeAttrs(request.attrRequest, stats, currentPath, ctx.cfh!, this.leaseTime);
     return new msg.Nfsv4GetattrResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4GetattrResOk(attrs));
   }
 
@@ -505,7 +541,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         continue;
       }
       const entryFh = fh.encode(entryPath);
-      const attrs = encodeAttrs(attrRequest, entryStats, entryPath, entryFh);
+      const attrs = encodeAttrs(attrRequest, entryStats, entryPath, entryFh, this.leaseTime);
       const nameBytes = Buffer.byteLength(name, 'utf8');
       const attrBytes = attrs.attrVals.length;
       const entryBytes = overheadPerEntry + nameBytes + attrBytes;
@@ -526,10 +562,18 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const currentPath = this.fh.currentPath(ctx);
     const currentPathAbsolute = this.absolutePath(currentPath);
     const ownerKey = this.makeOpenOwnerKey(request.owner.clientid, request.owner.owner);
+    this.renewClientLease(request.owner.clientid);
     let ownerState = this.openOwners.get(ownerKey);
     if (!ownerState) {
-      ownerState = new OpenOwnerState(request.owner.clientid, request.owner.owner, request.seqid);
+      ownerState = new OpenOwnerState(request.owner.clientid, request.owner.owner, 0);
       this.openOwners.set(ownerKey, ownerState);
+    } else {
+      const seqidValidation = this.validateSeqid(request.seqid, ownerState.seqid);
+      if (seqidValidation === 'invalid') {
+        if (request.seqid !== 0) {
+          return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
+        }
+      }
     }
     if (request.claim.claimType !== Nfsv4OpenClaimType.CLAIM_NULL) {
       return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_NOTSUPP);
@@ -581,11 +625,12 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         request.shareAccess,
         request.shareDeny,
         ownerKey,
-        request.seqid,
+        ownerState.seqid,
         false,
       );
       this.openFiles.set(stateidKey, openFile);
       ownerState.opens.add(stateidKey);
+      ownerState.seqid = request.seqid;
       const fh = this.fh.encode(filePath);
       ctx.cfh = fh;
       const cinfo = new struct.Nfsv4ChangeInfo(true, 0n, 0n);
@@ -610,10 +655,35 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const stateidKey = this.makeStateidKey(request.openStateid);
     const openFile = this.openFiles.get(stateidKey);
     if (!openFile) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
-    if (openFile.seqid !== request.seqid) throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
+    const ownerState = this.openOwners.get(openFile.openOwnerKey);
+    if (!ownerState) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
+    const seqidValidation = this.validateSeqid(request.seqid, ownerState.seqid);
+    if (seqidValidation === 'invalid') throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
+    if (seqidValidation === 'replay') {
+      const newStateid = new struct.Nfsv4Stateid(openFile.stateid.seqid, openFile.stateid.other);
+      const resok = new msg.Nfsv4OpenConfirmResOk(newStateid);
+      return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4_OK, resok);
+    }
     openFile.confirmed = true;
-    openFile.seqid++;
-    const newStateid = new struct.Nfsv4Stateid(openFile.seqid, openFile.stateid.other);
+    ownerState.seqid = request.seqid;
+    const newSeqid = this.nextStateidSeqid++;
+    const newStateid = new struct.Nfsv4Stateid(newSeqid, openFile.stateid.other);
+    const oldKey = stateidKey;
+    const newKey = this.makeStateidKey(newStateid);
+    const updatedOpenFile = new OpenFileState(
+      newStateid,
+      openFile.path,
+      openFile.fd,
+      openFile.shareAccess,
+      openFile.shareDeny,
+      openFile.openOwnerKey,
+      ownerState.seqid,
+      true,
+    );
+    this.openFiles.delete(oldKey);
+    this.openFiles.set(newKey, updatedOpenFile);
+    ownerState.opens.delete(oldKey);
+    ownerState.opens.add(newKey);
     const resok = new msg.Nfsv4OpenConfirmResOk(newStateid);
     return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4_OK, resok);
   }
@@ -625,13 +695,36 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const stateidKey = this.makeStateidKey(request.openStateid);
     const openFile = this.openFiles.get(stateidKey);
     if (!openFile) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
-    if (openFile.seqid !== request.seqid) throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
+    const ownerState = this.openOwners.get(openFile.openOwnerKey);
+    if (!ownerState) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
+    const seqidValidation = this.validateSeqid(request.seqid, ownerState.seqid);
+    if (seqidValidation === 'invalid') throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
+    if (seqidValidation === 'replay') {
+      const newStateid = new struct.Nfsv4Stateid(openFile.stateid.seqid, openFile.stateid.other);
+      const resok = new msg.Nfsv4OpenDowngradeResOk(newStateid);
+      return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4_OK, resok);
+    }
     if ((request.shareAccess & ~openFile.shareAccess) !== 0) throw Nfsv4Stat.NFS4ERR_INVAL;
     if ((request.shareDeny & ~openFile.shareDeny) !== 0) throw Nfsv4Stat.NFS4ERR_INVAL;
-    openFile.shareAccess = request.shareAccess;
-    openFile.shareDeny = request.shareDeny;
-    openFile.seqid++;
-    const newStateid = new struct.Nfsv4Stateid(openFile.seqid, openFile.stateid.other);
+    ownerState.seqid = request.seqid;
+    const newSeqid = this.nextStateidSeqid++;
+    const newStateid = new struct.Nfsv4Stateid(newSeqid, openFile.stateid.other);
+    const oldKey = stateidKey;
+    const newKey = this.makeStateidKey(newStateid);
+    const updatedOpenFile = new OpenFileState(
+      newStateid,
+      openFile.path,
+      openFile.fd,
+      request.shareAccess,
+      request.shareDeny,
+      openFile.openOwnerKey,
+      ownerState.seqid,
+      openFile.confirmed,
+    );
+    this.openFiles.delete(oldKey);
+    this.openFiles.set(newKey, updatedOpenFile);
+    ownerState.opens.delete(oldKey);
+    ownerState.opens.add(newKey);
     const resok = new msg.Nfsv4OpenDowngradeResOk(newStateid);
     return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4_OK, resok);
   }
@@ -642,8 +735,19 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     if (!openFile) {
       return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4CloseResOk(request.openStateid));
     }
-    if (openFile.seqid !== request.seqid) {
+    const ownerState = this.openOwners.get(openFile.openOwnerKey);
+    if (!ownerState) {
+      return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    }
+    this.renewClientLease(ownerState.clientid);
+    const seqidValidation = this.validateSeqid(request.seqid, ownerState.seqid);
+    if (seqidValidation === 'invalid') {
       return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
+    }
+    if (seqidValidation === 'replay') {
+      const newStateid = new struct.Nfsv4Stateid(openFile.stateid.seqid, openFile.stateid.other);
+      const resok = new msg.Nfsv4CloseResOk(newStateid);
+      return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4_OK, resok);
     }
     try {
       const handle = openFile.fd as any;
@@ -656,16 +760,14 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         return new msg.Nfsv4CloseResponse(status);
       }
     }
-    const ownerState = this.openOwners.get(openFile.openOwnerKey);
-    if (ownerState) {
-      ownerState.opens.delete(stateidKey);
-      if (ownerState.opens.size === 0) {
-        this.openOwners.delete(openFile.openOwnerKey);
-      }
+    ownerState.seqid = request.seqid;
+    ownerState.opens.delete(stateidKey);
+    if (ownerState.opens.size === 0) {
+      this.openOwners.delete(openFile.openOwnerKey);
     }
     this.openFiles.delete(stateidKey);
-    openFile.seqid++;
-    const newStateid = new struct.Nfsv4Stateid(openFile.seqid, openFile.stateid.other);
+    const newSeqid = this.nextStateidSeqid++;
+    const newStateid = new struct.Nfsv4Stateid(newSeqid, openFile.stateid.other);
     const resok = new msg.Nfsv4CloseResOk(newStateid);
     return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4_OK, resok);
   }
@@ -1059,7 +1161,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       // request.objAttributes is a Nfsv4Fattr: use its attrmask when asking
       // encodeAttrs to serialize the server's current attributes and compare
       // raw attrVals bytes.
-      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPathAbsolute, ctx.cfh!);
+      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPathAbsolute, ctx.cfh!, this.leaseTime);
       if (cmpUint8Array(attrs.attrVals, request.objAttributes.attrVals))
         return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4ERR_NOT_SAME);
       return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4_OK);
@@ -1181,7 +1283,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const fh = this.fh.encode(currentPath);
       // Return updated mode and size attributes
       const returnMask = new struct.Nfsv4Bitmap(attrNumsToBitmap([Nfsv4Attr.FATTR4_MODE, Nfsv4Attr.FATTR4_SIZE]));
-      const fattr = encodeAttrs(returnMask, stats, currentPath, fh);
+      const fattr = encodeAttrs(returnMask, stats, currentPath, fh, this.leaseTime);
       const resok = new msg.Nfsv4SetattrResOk(returnMask);
       return new msg.Nfsv4SetattrResponse(Nfsv4Stat.NFS4_OK, resok);
     } catch (err: unknown) {
@@ -1195,7 +1297,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const currentPathAbsolute = this.absolutePath(currentPath);
     try {
       const stats = await this.promises.lstat(currentPathAbsolute);
-      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPath, ctx.cfh!);
+      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPath, ctx.cfh!, this.leaseTime);
       if (cmpUint8Array(attrs.attrVals, request.objAttributes.attrVals))
         return new msg.Nfsv4VerifyResponse(Nfsv4Stat.NFS4_OK);
       return new msg.Nfsv4VerifyResponse(Nfsv4Stat.NFS4ERR_NOT_SAME);

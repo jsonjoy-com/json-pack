@@ -74,7 +74,10 @@ export class Nfsv4FsClient implements NfsFsClient {
     return new TextDecoder(encoding).decode(data);
   }
 
-  public readonly readFile = async (id: misc.TFileHandle, options?: opts.IReadFileOptions | string): Promise<misc.TDataOut> => {
+  public readonly readFile = async (
+    id: misc.TFileHandle,
+    options?: opts.IReadFileOptions | string,
+  ): Promise<misc.TDataOut> => {
     const encoding = typeof options === 'string' ? options : options?.encoding;
     const path = typeof id === 'string' ? id : id.toString();
     const parts = this.parsePath(path);
@@ -299,7 +302,10 @@ export class Nfsv4FsClient implements NfsFsClient {
     return this.stat(path, options);
   };
 
-  public readonly mkdir = async (path: misc.PathLike, options?: misc.TMode | opts.IMkdirOptions): Promise<string | undefined> => {
+  public readonly mkdir = async (
+    path: misc.PathLike,
+    options?: misc.TMode | opts.IMkdirOptions,
+  ): Promise<string | undefined> => {
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
     if (parts.length === 0) {
@@ -591,12 +597,19 @@ export class Nfsv4FsClient implements NfsFsClient {
     }
   };
 
-  public readonly copyFile = async (src: misc.PathLike, dest: misc.PathLike, flags?: misc.TFlagsCopy): Promise<void> => {
+  public readonly copyFile = async (
+    src: misc.PathLike,
+    dest: misc.PathLike,
+    flags?: misc.TFlagsCopy,
+  ): Promise<void> => {
     const data = await this.readFile(src);
     await this.writeFile(dest, data);
   };
 
-  public readonly realpath = async (path: misc.PathLike, options?: opts.IRealpathOptions | string): Promise<misc.TDataOut> => {
+  public readonly realpath = async (
+    path: misc.PathLike,
+    options?: opts.IRealpathOptions | string,
+  ): Promise<misc.TDataOut> => {
     const encoding = typeof options === 'string' ? options : options?.encoding;
     const pathStr = typeof path === 'string' ? path : path.toString();
     const normalized = '/' + this.parsePath(pathStr).join('/');
@@ -632,7 +645,11 @@ export class Nfsv4FsClient implements NfsFsClient {
     }
   };
 
-  public readonly symlink = async (target: misc.PathLike, path: misc.PathLike, type?: misc.symlink.Type): Promise<void> => {
+  public readonly symlink = async (
+    target: misc.PathLike,
+    path: misc.PathLike,
+    type?: misc.symlink.Type,
+  ): Promise<void> => {
     const targetStr = typeof target === 'string' ? target : target.toString();
     const pathStr = typeof path === 'string' ? path : path.toString();
     const parts = this.parsePath(pathStr);
@@ -786,7 +803,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull(filename);
     let access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ;
-    let openFlags = 0;
+    const openFlags = 0;
     if (typeof flags === 'string') {
       if (flags.includes('r') && flags.includes('+')) {
         access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH;
@@ -802,12 +819,16 @@ export class Nfsv4FsClient implements NfsFsClient {
       const O_RDWR = 2;
       const O_ACCMODE = 3;
       const accessMode = flags & O_ACCMODE;
-      if (accessMode === O_RDONLY) {
-        access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ;
-      } else if (accessMode === O_WRONLY) {
-        access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE;
-      } else if (accessMode === O_RDWR) {
-        access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH;
+      switch (accessMode) {
+        case O_RDONLY:
+          access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ;
+          break;
+        case O_WRONLY:
+          access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE;
+          break;
+        case O_RDWR:
+          access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH;
+          break;
       }
     }
     operations.push(nfs.OPEN(openFlags, access, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, 0, claim));

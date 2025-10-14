@@ -29,12 +29,14 @@ const createSupportedAttrsBitmap = (): number[] => {
  * @param stats Optional file stats (required only if stat-based attributes are requested)
  * @param path File path (for context)
  * @param fh Optional file handle (required only if FATTR4_FILEHANDLE is requested)
+ * @param leaseTime Optional lease time in seconds (required only if FATTR4_LEASE_TIME is requested)
  */
 export const encodeAttrs = (
   requestedAttrs: struct.Nfsv4Bitmap,
   stats: Stats | undefined,
   path: string,
   fh?: Uint8Array,
+  leaseTime?: number,
 ): struct.Nfsv4Fattr => {
   const writer = new Writer(512);
   const xdr = new XdrEncoder(writer);
@@ -137,6 +139,13 @@ export const encodeAttrs = (
           const changeTime = BigInt(Math.floor(stats.mtimeMs * 1000000));
           xdr.writeUnsignedHyper(changeTime);
           setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_LEASE_TIME: {
+          if (leaseTime !== undefined) {
+            xdr.writeUnsignedInt(leaseTime);
+            setBit(supportedMask, attrNum);
+          }
           break;
         }
         case Nfsv4Attr.FATTR4_FILEHANDLE: {

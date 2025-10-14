@@ -34,8 +34,7 @@ export class NfsFsDir implements misc.IDir {
     const operations = [...this.operations];
     operations.push(nfs.READDIR(attrMask));
     const response = await this.nfs.compound(operations);
-    if (response.status !== Nfsv4Stat.NFS4_OK)
-      throw new Error(`Failed to read directory: ${response.status}`);
+    if (response.status !== Nfsv4Stat.NFS4_OK) throw new Error(`Failed to read directory: ${response.status}`);
     const readdirRes = response.resarray[response.resarray.length - 1] as msg.Nfsv4ReaddirResponse;
     if (readdirRes.status !== Nfsv4Stat.NFS4_OK || !readdirRes.resok)
       throw new Error(`Failed to read directory: ${readdirRes.status}`);
@@ -87,9 +86,7 @@ export class NfsFsDir implements misc.IDir {
 
   public async read(): Promise<misc.IDirent | null>;
   public async read(callback?: (err: Error | null, dir?: misc.IDirent | null) => void): Promise<misc.IDirent | null>;
-  public async read(
-    callback?: (err: Error | null, dir?: misc.IDirent | null) => void,
-  ): Promise<misc.IDirent | null> {
+  public async read(callback?: (err: Error | null, dir?: misc.IDirent | null) => void): Promise<misc.IDirent | null> {
     try {
       if (this.closed) {
         const err = new Error('Directory is closed');

@@ -56,5 +56,12 @@ export class ClientRecord {
      * This helps handle network retries and duplicate requests gracefully.
      */
     public cache: msg.Nfsv4SetclientidResponse | undefined = undefined,
+
+    /**
+     * Last time this client renewed its lease (in milliseconds since epoch).
+     * Per RFC 7530 §9.5, any stateful operation from the client renews the lease.
+     * The server must track this to detect expired leases and revoke client state.
+     */
+    public lastRenew: number = Date.now(),
   ) {}
 }

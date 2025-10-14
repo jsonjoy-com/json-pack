@@ -112,7 +112,7 @@ export class NfsFsFileHandle extends EventEmitter implements misc.IFileHandle {
   ): Promise<misc.TFileHandleWriteResult> {
     if (this.closed) throw new Error('File handle is closed');
     const actualOffset = offset ?? 0;
-    const actualLength = length ?? (buffer.byteLength - actualOffset);
+    const actualLength = length ?? buffer.byteLength - actualOffset;
     const writePos = position !== null && position !== undefined ? BigInt(position) : BigInt(0);
     let data: Uint8Array;
     if (buffer instanceof Uint8Array) {
@@ -122,7 +122,11 @@ export class NfsFsFileHandle extends EventEmitter implements misc.IFileHandle {
     } else if (buffer instanceof DataView) {
       data = new Uint8Array(buffer.buffer, buffer.byteOffset + actualOffset, actualLength);
     } else {
-      data = new Uint8Array((buffer as ArrayBufferView).buffer, (buffer as ArrayBufferView).byteOffset + actualOffset, actualLength);
+      data = new Uint8Array(
+        (buffer as ArrayBufferView).buffer,
+        (buffer as ArrayBufferView).byteOffset + actualOffset,
+        actualLength,
+      );
     }
     const writeOps: msg.Nfsv4Request[] = [nfs.WRITE(this.stateid, writePos, Nfsv4StableHow.FILE_SYNC4, data)];
     const response = await this.client.fs.compound(writeOps);
@@ -133,7 +137,8 @@ export class NfsFsFileHandle extends EventEmitter implements misc.IFileHandle {
     if (writeRes.status !== Nfsv4Stat.NFS4_OK || !writeRes.resok) {
       throw new Error(`Failed to write file: ${writeRes.status}`);
     }
-    const resultBuffer = buffer instanceof Uint8Array || Buffer.isBuffer(buffer) ? buffer : new Uint8Array(buffer.buffer);
+    const resultBuffer =
+      buffer instanceof Uint8Array || Buffer.isBuffer(buffer) ? buffer : new Uint8Array(buffer.buffer);
     return {bytesWritten: writeRes.resok.count, buffer: resultBuffer};
   }
 

@@ -84,7 +84,7 @@ describe('OPEN_DOWNGRADE operation', () => {
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull('file.txt');
     const openReq = nfs.OPEN(
-      0,
+      1,
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
@@ -96,7 +96,7 @@ describe('OPEN_DOWNGRADE operation', () => {
     const stateid = openRes.resok!.stateid;
     const downgradeReq = nfs.OPEN_DOWNGRADE(
       stateid,
-      0,
+      2,
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
     );

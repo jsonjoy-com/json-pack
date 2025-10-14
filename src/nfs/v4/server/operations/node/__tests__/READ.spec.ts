@@ -9,7 +9,7 @@ describe('READ operation', () => {
     // open file.txt for read
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1]));
     const claim = nfs.OpenClaimNull('file.txt');
-    const openReq = nfs.OPEN(0, 1, 0, openOwner, 0, claim);
+    const openReq = nfs.OPEN(0, 1, 0, openOwner, nfs.OpenHowNoCreate(), claim);
     const res = await client.compound([nfs.PUTROOTFH(), openReq]);
     expect(res.status).toBe(Nfsv4Stat.NFS4_OK);
     const openRes = res.resarray[1] as msg.Nfsv4OpenResponse;
@@ -33,7 +33,7 @@ describe('READ operation', () => {
     vol.writeFileSync('/export/short.txt', 'abc');
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([2]));
     const claim = nfs.OpenClaimNull('short.txt');
-    const openReq = nfs.OPEN(0, 1, 0, openOwner, 0, claim);
+    const openReq = nfs.OPEN(0, 1, 0, openOwner, nfs.OpenHowNoCreate(), claim);
     const res = await client.compound([nfs.PUTROOTFH(), openReq]);
     const openRes = res.resarray[1] as msg.Nfsv4OpenResponse;
     const stateid = openRes.resok!.stateid;

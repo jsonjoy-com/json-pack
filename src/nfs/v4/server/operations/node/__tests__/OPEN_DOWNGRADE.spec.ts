@@ -14,7 +14,7 @@ describe('OPEN_DOWNGRADE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
-      0,
+      nfs.OpenHowNoCreate(),
       claim,
     );
     const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);
@@ -44,7 +44,7 @@ describe('OPEN_DOWNGRADE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_BOTH,
       openOwner,
-      0,
+      nfs.OpenHowNoCreate(),
       claim,
     );
     const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);
@@ -88,7 +88,7 @@ describe('OPEN_DOWNGRADE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
-      0,
+      nfs.OpenHowNoCreate(),
       claim,
     );
     const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);
@@ -115,7 +115,7 @@ describe('OPEN_DOWNGRADE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
-      0,
+      nfs.OpenHowNoCreate(),
       claim,
     );
     const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);

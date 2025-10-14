@@ -8,7 +8,10 @@ describe('WRITE operation', () => {
     const {client, stop, vol} = await setupNfsClientServerTestbed();
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1]));
     const claim = nfs.OpenClaimNull('file.txt');
-    const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, 2, 0, openOwner, 0, claim)]);
+    const openRes = await client.compound([
+      nfs.PUTROOTFH(),
+      nfs.OPEN(0, 2, 0, openOwner, nfs.OpenHowNoCreate(), claim),
+    ]);
     const stateid = (openRes.resarray[1] as any).resok.stateid;
     const data = new Uint8Array(Buffer.from('NEWDATA'));
     const writeReq = nfs.WRITE(stateid, BigInt(0), Nfsv4StableHow.UNSTABLE4, data);
@@ -22,7 +25,10 @@ describe('WRITE operation', () => {
     const {client, stop, vol} = await setupNfsClientServerTestbed();
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1]));
     const claim = nfs.OpenClaimNull('file.txt');
-    const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, 2, 0, openOwner, 0, claim)]);
+    const openRes = await client.compound([
+      nfs.PUTROOTFH(),
+      nfs.OPEN(0, 2, 0, openOwner, nfs.OpenHowNoCreate(), claim),
+    ]);
     const stateid = (openRes.resarray[1] as any).resok.stateid;
     const data = new Uint8Array(Buffer.from('STABLE'));
     const writeReq2 = nfs.WRITE(stateid, BigInt(0), Nfsv4StableHow.FILE_SYNC4, data);

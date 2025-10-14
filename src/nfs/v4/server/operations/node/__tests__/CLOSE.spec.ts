@@ -14,7 +14,7 @@ describe('CLOSE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
-      0,
+      nfs.OpenHowNoCreate(),
       claim,
     );
     const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);
@@ -41,7 +41,7 @@ describe('CLOSE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
-      0,
+      nfs.OpenHowNoCreate(),
       claim,
     );
     const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);
@@ -65,7 +65,7 @@ describe('CLOSE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner,
-      0,
+      nfs.OpenHowNoCreate(),
       claim,
     );
     const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);
@@ -87,7 +87,7 @@ describe('CLOSE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_WRITE,
       openOwner1,
-      0,
+      nfs.OpenHowNoCreate(),
       claim1,
     );
     const openResponse1 = await client.compound([nfs.PUTROOTFH(), openReq1]);
@@ -101,7 +101,7 @@ describe('CLOSE operation', () => {
       Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
       Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
       openOwner2,
-      0,
+      nfs.OpenHowNoCreate(),
       claim2,
     );
     const openResponse2 = await client.compound([nfs.PUTROOTFH(), openReq2]);
@@ -127,7 +127,7 @@ describe('CLOSE operation', () => {
         Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
         Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
         openOwner,
-        0,
+        nfs.OpenHowNoCreate(),
         claim,
       );
       const openResponse = await client.compound([nfs.PUTROOTFH(), openReq]);

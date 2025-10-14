@@ -553,7 +553,7 @@ export class Nfsv4OpenRequest implements XdrType {
     public readonly shareAccess: number,
     public readonly shareDeny: number,
     public readonly owner: structs.Nfsv4OpenOwner,
-    public readonly openhow: number,
+    public readonly openhow: structs.Nfsv4OpenHow,
     public readonly claim: structs.Nfsv4OpenClaim,
   ) {}
 
@@ -563,7 +563,7 @@ export class Nfsv4OpenRequest implements XdrType {
     xdr.writeUnsignedInt(this.shareAccess);
     xdr.writeUnsignedInt(this.shareDeny);
     this.owner.encode(xdr);
-    xdr.writeUnsignedInt(this.openhow);
+    this.openhow.encode(xdr);
     this.claim.encode(xdr);
   }
 }

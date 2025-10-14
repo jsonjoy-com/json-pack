@@ -86,7 +86,14 @@ export class Nfsv4FsClient implements NfsFsClient {
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull(filename);
     operations.push(
-      nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, 0, claim),
+      nfs.OPEN(
+        0,
+        Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
+        Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+        openOwner,
+        nfs.OpenHowNoCreate(),
+        claim,
+      ),
     );
     const openResponse = await this.fs.compound(operations);
     if (openResponse.status !== Nfsv4Stat.NFS4_OK) {
@@ -146,7 +153,7 @@ export class Nfsv4FsClient implements NfsFsClient {
         Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
         Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
         openOwner,
-        Nfsv4OpenFlags.OPEN4_CREATE,
+        nfs.OpenHowCreateUnchecked(),
         claim,
       ),
     );
@@ -397,7 +404,14 @@ export class Nfsv4FsClient implements NfsFsClient {
     const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
     const claim = nfs.OpenClaimNull(filename);
     operations.push(
-      nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, 0, claim),
+      nfs.OPEN(
+        0,
+        Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
+        Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+        openOwner,
+        nfs.OpenHowNoCreate(),
+        claim,
+      ),
     );
     const attrNums = [Nfsv4Attr.FATTR4_SIZE];
     const attrMask = this.attrNumsToBitmap(attrNums);
@@ -831,7 +845,9 @@ export class Nfsv4FsClient implements NfsFsClient {
           break;
       }
     }
-    operations.push(nfs.OPEN(openFlags, access, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, 0, claim));
+    operations.push(
+      nfs.OPEN(openFlags, access, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), claim),
+    );
     const openResponse = await this.fs.compound(operations);
     if (openResponse.status !== Nfsv4Stat.NFS4_OK) {
       throw new Error(`Failed to open file: ${openResponse.status}`);

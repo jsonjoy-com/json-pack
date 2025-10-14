@@ -330,6 +330,58 @@ export class Nfsv4SecInfo implements XdrType {
 }
 
 /**
+ * Open create attributes for UNCHECKED4 and GUARDED4 modes
+ */
+export class Nfsv4CreateAttrs implements XdrType {
+  constructor(public readonly createattrs: Nfsv4Fattr) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.createattrs.encode(xdr);
+  }
+}
+
+/**
+ * Open create attributes for EXCLUSIVE4 mode
+ */
+export class Nfsv4CreateVerf implements XdrType {
+  constructor(public readonly createverf: Nfsv4Verifier) {}
+
+  encode(xdr: XdrEncoder): void {
+    this.createverf.encode(xdr);
+  }
+}
+
+/**
+ * Open create mode discriminated union
+ */
+export class Nfsv4CreateHow implements XdrType {
+  constructor(
+    public readonly mode: number,
+    public readonly how?: Nfsv4CreateAttrs | Nfsv4CreateVerf,
+  ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.mode);
+    this.how?.encode(xdr);
+  }
+}
+
+/**
+ * Open how discriminated union
+ */
+export class Nfsv4OpenHow implements XdrType {
+  constructor(
+    public readonly opentype: number,
+    public readonly how?: Nfsv4CreateHow,
+  ) {}
+
+  encode(xdr: XdrEncoder): void {
+    xdr.writeUnsignedInt(this.opentype);
+    this.how?.encode(xdr);
+  }
+}
+
+/**
  * Open claim - claim file by name
  */
 export class Nfsv4OpenClaimNull implements XdrType {

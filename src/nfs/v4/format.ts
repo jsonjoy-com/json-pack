@@ -606,13 +606,17 @@ export const formatNfsv4Request = (req: msg.Nfsv4Request, tab: string = ''): str
   } else if (req instanceof msg.Nfsv4NverifyRequest) {
     return 'NVERIFY' + printTree(tab, [(tab) => `attrs = ${formatNfsv4Bitmap(req.objAttributes.attrmask)}`]);
   } else if (req instanceof msg.Nfsv4OpenRequest) {
-    return (
-      'OPEN' +
-      printTree(tab, [
-        (tab) => `seqid = ${req.seqid}`,
-        (tab) => `claim = ${formatNfsv4OpenClaimType(req.claim.claimType)}`,
-      ])
-    );
+    const items: Array<(tab: string) => string> = [
+      (tab) => `seqid = ${req.seqid}`,
+      (tab) => `shareAccess = ${formatNfsv4OpenAccess(req.shareAccess)}`,
+      (tab) => `shareDeny = ${formatNfsv4OpenDeny(req.shareDeny)}`,
+      (tab) => `opentype = ${formatNfsv4OpenFlags(req.openhow.opentype)}`,
+    ];
+    if (req.openhow.how) {
+      items.push((tab) => `createmode = ${formatNfsv4CreateMode(req.openhow.how!.mode)}`);
+    }
+    items.push((tab) => `claim = ${formatNfsv4OpenClaimType(req.claim.claimType)}`);
+    return 'OPEN' + printTree(tab, items);
   } else if (req instanceof msg.Nfsv4OpenattrRequest) {
     return 'OPENATTR' + printTree(tab, [(tab) => `createdir = ${req.createdir}`]);
   } else if (req instanceof msg.Nfsv4OpenConfirmRequest) {

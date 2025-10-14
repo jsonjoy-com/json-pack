@@ -11,6 +11,7 @@ import {
   Nfsv4LockType,
   Nfsv4OpenFlags,
   Nfsv4FType,
+  Nfsv4CreateMode,
 } from '../../../constants';
 import {Nfsv4OperationCtx, Nfsv4Operations} from '../Nfsv4Operations';
 import * as msg from '../../../messages';
@@ -582,6 +583,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const claimNull = request.claim.claim as struct.Nfsv4OpenClaimNull;
     const filename = claimNull.file;
     const filePath = NodePath.join(currentPathAbsolute, filename);
+    const opentype = request.openhow.opentype;
+    const isCreate = opentype === Nfsv4OpenFlags.OPEN4_CREATE;
     let fileExists = false;
     try {
       const stats = await this.promises.lstat(filePath);
@@ -591,7 +594,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       fileExists = true;
     } catch (err) {
       if (isErrCode('ENOENT', err)) {
-        if (request.openhow !== Nfsv4OpenFlags.OPEN4_CREATE) {
+        if (!isCreate) {
           return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_NOENT);
         }
       } else {
@@ -605,8 +608,12 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     let flags = 0;
     const isWrite = (request.shareAccess & Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE) !== 0;
     const isRead = (request.shareAccess & Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ) !== 0;
-    if (request.openhow === 1) {
+    if (isCreate) {
       flags = this.fs.constants.O_CREAT;
+      const createHow = request.openhow.how;
+      if (createHow && createHow.mode === Nfsv4CreateMode.EXCLUSIVE4) {
+        flags |= this.fs.constants.O_EXCL;
+      }
     }
     if (isRead && isWrite) {
       flags |= this.fs.constants.O_RDWR;

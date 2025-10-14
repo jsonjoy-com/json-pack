@@ -1,6 +1,6 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrDecoder} from '../../xdr/XdrDecoder';
-import {Nfsv4Op, Nfsv4CbOp, Nfsv4FType, Nfsv4DelegType, Nfsv4Stat} from './constants';
+import {Nfsv4Op, Nfsv4CbOp, Nfsv4FType, Nfsv4DelegType, Nfsv4Stat, Nfsv4CreateMode, Nfsv4OpenFlags} from './constants';
 import {Nfsv4DecodingError} from './errors';
 import * as msg from './messages';
 import * as structs from './structs';
@@ -343,6 +343,32 @@ export class Nfsv4Decoder {
     }
   }
 
+  private readOpenHow(): structs.Nfsv4OpenHow {
+    const xdr = this.xdr;
+    const opentype = xdr.readUnsignedInt();
+    if (opentype === Nfsv4OpenFlags.OPEN4_NOCREATE) return new structs.Nfsv4OpenHow(opentype);
+    const mode = xdr.readUnsignedInt();
+    switch (mode) {
+      case Nfsv4CreateMode.UNCHECKED4:
+      case Nfsv4CreateMode.GUARDED4: {
+        const createattrs = this.readFattr();
+        return new structs.Nfsv4OpenHow(
+          opentype,
+          new structs.Nfsv4CreateHow(mode, new structs.Nfsv4CreateAttrs(createattrs)),
+        );
+      }
+      case Nfsv4CreateMode.EXCLUSIVE4: {
+        const createverf = this.readVerifier();
+        return new structs.Nfsv4OpenHow(
+          opentype,
+          new structs.Nfsv4CreateHow(mode, new structs.Nfsv4CreateVerf(createverf)),
+        );
+      }
+      default:
+        throw new Nfsv4DecodingError(`Unknown create mode: ${mode}`);
+    }
+  }
+
   private readOpenDelegation(): structs.Nfsv4OpenDelegation {
     const xdr = this.xdr;
     const delegationType = xdr.readUnsignedInt() as Nfsv4DelegType;
@@ -652,7 +678,7 @@ export class Nfsv4Decoder {
     const shareAccess = xdr.readUnsignedInt();
     const shareDeny = xdr.readUnsignedInt();
     const owner = this.readOpenOwner();
-    const openhow = xdr.readUnsignedInt();
+    const openhow = this.readOpenHow();
     const claim = this.readOpenClaim();
     return new msg.Nfsv4OpenRequest(seqid, shareAccess, shareDeny, owner, openhow, claim);
   }

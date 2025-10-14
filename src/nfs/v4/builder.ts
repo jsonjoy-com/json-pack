@@ -1,7 +1,7 @@
 import {attrNumsToBitmap} from './attributes';
 import * as msg from './messages';
 import * as structs from './structs';
-import {Nfsv4FType} from './constants';
+import {Nfsv4CreateMode, Nfsv4FType, Nfsv4OpenFlags} from './constants';
 
 /**
  * Static builder helpers for NFS v4 operations.
@@ -252,7 +252,7 @@ export const nfs = {
    * @param shareAccess - Share access mode (OPEN4_SHARE_ACCESS_*)
    * @param shareDeny - Share deny mode (OPEN4_SHARE_DENY_*)
    * @param owner - Open owner (clientid + owner bytes)
-   * @param openhow - Open mode (0 for OPEN4_NOCREATE)
+   * @param openhow - Open how structure (use OpenHow helper)
    * @param claim - Open claim (use OpenClaim helper)
    */
   OPEN(
@@ -260,7 +260,7 @@ export const nfs = {
     shareAccess: number,
     shareDeny: number,
     owner: structs.Nfsv4OpenOwner,
-    openhow: number,
+    openhow: structs.Nfsv4OpenHow,
     claim: structs.Nfsv4OpenClaim,
   ): msg.Nfsv4OpenRequest {
     return new msg.Nfsv4OpenRequest(seqid, shareAccess, shareDeny, owner, openhow, claim);
@@ -453,6 +453,42 @@ export const nfs = {
    */
   OpenClaimNull(filename: string): structs.Nfsv4OpenClaim {
     return new structs.Nfsv4OpenClaim(0, new structs.Nfsv4OpenClaimNull(filename));
+  },
+
+  /**
+   * Create Nfsv4OpenHow for OPEN4_NOCREATE (open existing file).
+   */
+  OpenHowNoCreate(): structs.Nfsv4OpenHow {
+    return new structs.Nfsv4OpenHow(Nfsv4OpenFlags.OPEN4_NOCREATE);
+  },
+
+  /**
+   * Create Nfsv4OpenHow for OPEN4_CREATE with UNCHECKED4 mode.
+   * @param createattrs - Optional file attributes to set on create
+   */
+  OpenHowCreateUnchecked(createattrs?: structs.Nfsv4Fattr): structs.Nfsv4OpenHow {
+    const attrs = createattrs || new structs.Nfsv4Fattr(new structs.Nfsv4Bitmap([]), new Uint8Array(0));
+    const how = new structs.Nfsv4CreateHow(Nfsv4CreateMode.UNCHECKED4, new structs.Nfsv4CreateAttrs(attrs));
+    return new structs.Nfsv4OpenHow(Nfsv4OpenFlags.OPEN4_CREATE, how);
+  },
+
+  /**
+   * Create Nfsv4OpenHow for OPEN4_CREATE with GUARDED4 mode.
+   * @param createattrs - Optional file attributes to set on create
+   */
+  OpenHowCreateGuarded(createattrs?: structs.Nfsv4Fattr): structs.Nfsv4OpenHow {
+    const attrs = createattrs || new structs.Nfsv4Fattr(new structs.Nfsv4Bitmap([]), new Uint8Array(0));
+    const how = new structs.Nfsv4CreateHow(Nfsv4CreateMode.GUARDED4, new structs.Nfsv4CreateAttrs(attrs));
+    return new structs.Nfsv4OpenHow(Nfsv4OpenFlags.OPEN4_CREATE, how);
+  },
+
+  /**
+   * Create Nfsv4OpenHow for OPEN4_CREATE with EXCLUSIVE4 mode.
+   * @param verifier - 8-byte verifier for exclusive create
+   */
+  OpenHowCreateExclusive(verifier: structs.Nfsv4Verifier): structs.Nfsv4OpenHow {
+    const how = new structs.Nfsv4CreateHow(Nfsv4CreateMode.EXCLUSIVE4, new structs.Nfsv4CreateVerf(verifier));
+    return new structs.Nfsv4OpenHow(Nfsv4OpenFlags.OPEN4_CREATE, how);
   },
 
   /**

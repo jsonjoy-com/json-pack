@@ -53,7 +53,7 @@ export class FileHandleMapper {
   protected idToPath: Map<number, string> = new Map();
   protected pathToId: Map<string, Uint8Array> = new Map();
 
-  protected readonly maxFhTableSize = 10000;
+  protected readonly maxFhTableSize = 100000;
 
   constructor(
     stamp: number,
@@ -105,9 +105,9 @@ export class FileHandleMapper {
    */
   public encode(path: string): Uint8Array {
     if (path === this.dir) return ROOT_FH;
-    let fh = encodePathFh(path);
-    if (fh) return fh;
-    fh = this.pathToId.get(path);
+    // let fh = encodePathFh(path);
+    // if (fh) return fh;
+    let fh = this.pathToId.get(path);
     if (fh) return fh;
     fh = randomBytes(8);
     fh[0] = FH_TYPE.ID;
@@ -173,5 +173,23 @@ export class FileHandleMapper {
   public setCfh(ctx: Nfsv4OperationCtx, path: string): void {
     const newFh = this.encode(path);
     ctx.cfh = newFh;
+  }
+
+  /**
+   * Updates the file handle mappings when a file is renamed.
+   * This ensures that existing file handles pointing to the old path
+   * continue to work after the rename operation.
+   * @param oldPath The old absolute file path.
+   * @param newPath The new absolute file path.
+   */
+  public rename(oldPath: string, newPath: string): void {
+    const fh = this.pathToId.get(oldPath);
+    if (!fh) return;
+    const type = fh[0];
+    if (type !== FH_TYPE.ID) return;
+    const id = fh[3] * 0x100000000 + fh[4] * 0x1000000 + (fh[5] << 16) + (fh[6] << 8) + fh[7];
+    this.pathToId.delete(oldPath);
+    this.pathToId.set(newPath, fh);
+    this.idToPath.set(id, newPath);
   }
 }

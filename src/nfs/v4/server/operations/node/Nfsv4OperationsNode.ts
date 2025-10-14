@@ -1172,6 +1172,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     }
     try {
       await this.promises.rename(oldPath, newPath);
+      this.fh.rename(oldPath, newPath);
       return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4_OK);
     } catch (err: unknown) {
       if (isErrCode('EXDEV', err)) return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);

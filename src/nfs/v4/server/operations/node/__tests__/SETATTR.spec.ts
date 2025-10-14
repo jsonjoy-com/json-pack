@@ -84,7 +84,7 @@ describe('SETATTR operation', () => {
     const setattrReq = nfs.SETATTR(stateid, attrs);
     const r = await client.compound([nfs.PUTROOTFH(), nfs.LOOKUP('file.txt'), setattrReq]);
     const setattrRes = r.resarray[2] as msg.Nfsv4SetattrResponse;
-    expect(setattrRes.status).toBe(Nfsv4Stat.NFS4ERR_INVAL);
+    expect(setattrRes.status).toBe(Nfsv4Stat.NFS4ERR_ATTRNOTSUPP);
     await stop();
   });
 });

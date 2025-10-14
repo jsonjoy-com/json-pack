@@ -5,22 +5,9 @@
 import type {Stats} from 'node:fs';
 import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {XdrEncoder} from '../../../../../xdr/XdrEncoder';
-import {Nfsv4Attr, Nfsv4FType, Nfsv4Stat} from '../../../constants';
+import {Nfsv4Attr, Nfsv4FType, Nfsv4FhExpireType, Nfsv4Stat} from '../../../constants';
 import * as struct from '../../../structs';
 import {REQUIRED_ATTRS, RECOMMENDED_ATTRS, SET_ONLY_ATTRS, setBit} from '../../../attributes';
-
-/**
- * Create a bitmap of supported attributes (all REQUIRED and RECOMMENDED attrs we implement).
- */
-const createSupportedAttrsBitmap = (): number[] => {
-  const mask: number[] = [];
-  const allSupported = [...Array.from(REQUIRED_ATTRS), ...Array.from(RECOMMENDED_ATTRS)];
-  for (let i = 0; i < allSupported.length; i++) {
-    const attrNum = allSupported[i];
-    setBit(mask, attrNum);
-  }
-  return mask;
-};
 
 /**
  * Encodes file attributes based on the requested bitmap.
@@ -51,10 +38,30 @@ export const encodeAttrs = (
       const attrNum = wordIndex * 32 + bit;
       switch (attrNum) {
         case Nfsv4Attr.FATTR4_SUPPORTED_ATTRS: {
-          const supportedAttrsBitmap = createSupportedAttrsBitmap();
-          xdr.writeUnsignedInt(supportedAttrsBitmap.length);
-          for (let j = 0; j < supportedAttrsBitmap.length; j++) {
-            xdr.writeUnsignedInt(supportedAttrsBitmap[j]);
+          const implementedAttrs: number[] = [];
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_SUPPORTED_ATTRS);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_TYPE);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_FH_EXPIRE_TYPE);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_CHANGE);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_SIZE);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_LINK_SUPPORT);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_SYMLINK_SUPPORT);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_NAMED_ATTR);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_FSID);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_UNIQUE_HANDLES);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_LEASE_TIME);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_RDATTR_ERROR);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_FILEHANDLE);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_FILEID);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_MODE);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_NUMLINKS);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_SPACE_USED);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_TIME_ACCESS);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_TIME_METADATA);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_TIME_MODIFY);
+          xdr.writeUnsignedInt(implementedAttrs.length);
+          for (let j = 0; j < implementedAttrs.length; j++) {
+            xdr.writeUnsignedInt(implementedAttrs[j]);
           }
           setBit(supportedMask, attrNum);
           break;
@@ -146,6 +153,42 @@ export const encodeAttrs = (
             xdr.writeUnsignedInt(leaseTime);
             setBit(supportedMask, attrNum);
           }
+          break;
+        }
+        case Nfsv4Attr.FATTR4_FH_EXPIRE_TYPE: {
+          xdr.writeUnsignedInt(Nfsv4FhExpireType.FH4_VOLATILE_ANY);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_LINK_SUPPORT: {
+          xdr.writeUnsignedInt(1);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_SYMLINK_SUPPORT: {
+          xdr.writeUnsignedInt(1);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_NAMED_ATTR: {
+          xdr.writeUnsignedInt(0);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_FSID: {
+          xdr.writeUnsignedHyper(BigInt(0));
+          xdr.writeUnsignedHyper(BigInt(0));
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_UNIQUE_HANDLES: {
+          xdr.writeUnsignedInt(1);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_RDATTR_ERROR: {
+          xdr.writeUnsignedInt(0);
+          setBit(supportedMask, attrNum);
           break;
         }
         case Nfsv4Attr.FATTR4_FILEHANDLE: {

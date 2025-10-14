@@ -1262,7 +1262,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
               break;
             }
             default: {
-              return new msg.Nfsv4SetattrResponse(Nfsv4Stat.NFS4ERR_INVAL);
+              return new msg.Nfsv4SetattrResponse(Nfsv4Stat.NFS4ERR_ATTRNOTSUPP);
             }
           }
         }

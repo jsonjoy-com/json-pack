@@ -1139,10 +1139,18 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     try {
       const stats = await this.promises.lstat(targetPath);
       if (stats.isDirectory()) {
-        // For now, use rmdir semantics (only remove empty dirs)
         await this.promises.rmdir(targetPath);
       } else {
         await this.promises.unlink(targetPath);
+        const appleDoublePath = NodePath.join(NodePath.dirname(targetPath), '._' + NodePath.basename(targetPath));
+        try {
+          const appleDoubleStats = await this.promises.stat(appleDoublePath);
+          if (appleDoubleStats.isFile()) {
+            await this.promises.unlink(appleDoublePath);
+          }
+        } catch (err) {
+          if (!isErrCode('ENOENT', err)) throw err;
+        }
       }
       return new msg.Nfsv4RemoveResponse(Nfsv4Stat.NFS4_OK);
     } catch (err: unknown) {
@@ -1173,6 +1181,17 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     try {
       await this.promises.rename(oldPath, newPath);
       this.fh.rename(oldPath, newPath);
+      const oldAppleDouble = NodePath.join(NodePath.dirname(oldPath), '._' + NodePath.basename(oldPath));
+      const newAppleDouble = NodePath.join(NodePath.dirname(newPath), '._' + NodePath.basename(newPath));
+      try {
+        const stats = await this.promises.stat(oldAppleDouble);
+        if (stats.isFile()) {
+          await this.promises.rename(oldAppleDouble, newAppleDouble);
+          this.fh.rename(oldAppleDouble, newAppleDouble);
+        }
+      } catch (err) {
+        if (!isErrCode('ENOENT', err)) throw err;
+      }
       return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4_OK);
     } catch (err: unknown) {
       if (isErrCode('EXDEV', err)) return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);

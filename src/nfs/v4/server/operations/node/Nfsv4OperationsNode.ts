@@ -22,11 +22,12 @@ import {OpenFileState} from '../OpenFileState';
 import {OpenOwnerState} from '../OpenOwnerState';
 import {LockOwnerState} from '../LockOwnerState';
 import {ByteRangeLock} from '../ByteRangeLock';
+import {FilesystemStats} from '../FilesystemStats';
 import {FileHandleMapper, ROOT_FH} from './fh';
 import {isErrCode, normalizeNodeFsError} from './util';
 import {Nfsv4StableHow, Nfsv4Attr} from '../../../constants';
 import {encodeAttrs} from './attrs';
-import {parseBitmask, requiresLstat, attrNumsToBitmap} from '../../../attributes';
+import {parseBitmask, requiresLstat, attrNumsToBitmap, requiresFsStats} from '../../../attributes';
 import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {XdrEncoder} from '../../../../../xdr/XdrEncoder';
 import {XdrDecoder} from '../../../../../xdr/XdrDecoder';
@@ -52,6 +53,12 @@ export interface Nfsv4OperationsNodeOpts {
    * @default 1000
    */
   maxPendingClients?: number;
+
+  /**
+   * Optional function to provide filesystem statistics.
+   * If not provided, defaults to 2TB available space and 2M available inodes.
+   */
+  fsStats?: () => Promise<FilesystemStats>;
 }
 
 /**
@@ -104,6 +111,11 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
    */
   protected changeCounter: bigint = 0n;
 
+  /**
+   * Function to retrieve filesystem statistics.
+   */
+  protected fsStats: () => Promise<FilesystemStats>;
+
   constructor(opts: Nfsv4OperationsNodeOpts) {
     this.fs = opts.fs;
     this.promises = this.fs.promises;
@@ -111,7 +123,17 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     this.fh = new FileHandleMapper(this.bootStamp, this.dir);
     this.maxClients = opts.maxClients ?? 1000;
     this.maxPendingClients = opts.maxPendingClients ?? 1000;
+    this.fsStats = opts.fsStats ?? this.defaultFsStats;
   }
+
+  /**
+   * Default filesystem statistics: 2TB available space, 2M available inodes.
+   */
+  protected defaultFsStats = async (): Promise<FilesystemStats> => {
+    const twoTB = BigInt(2 * 1024 * 1024 * 1024 * 1024); // 2TB
+    const twoM = BigInt(2 * 1000 * 1000); // 2M inodes
+    return new FilesystemStats(twoTB, twoTB, twoTB * 2n, twoM, twoM, twoM * 2n);
+  };
 
   protected findClientByIdString(
     map: Map<bigint, ClientRecord>,
@@ -474,7 +496,15 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         throw normalizeNodeFsError(error, ctx.connection.logger);
       }
     }
-    const attrs = encodeAttrs(request.attrRequest, stats, currentPath, ctx.cfh!, this.leaseTime);
+    let fsStats: FilesystemStats | undefined;
+    if (requiresFsStats(requestedAttrNums)) {
+      try {
+        fsStats = await this.fsStats();
+      } catch (error: unknown) {
+        ctx.connection.logger.error(error);
+      }
+    }
+    const attrs = encodeAttrs(request.attrRequest, stats, currentPath, ctx.cfh!, this.leaseTime, fsStats);
     return new msg.Nfsv4GetattrResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4GetattrResOk(attrs));
   }
 
@@ -570,6 +600,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       if (startIndex > dirents.length) startIndex = dirents.length;
     }
     let eof = true;
+    const fsStats = await this.fsStats();
     for (let i = startIndex; i < dirents.length; i++) {
       const dirent = dirents[i];
       const name = dirent.name;
@@ -582,7 +613,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         continue;
       }
       const entryFh = fh.encode(entryPath);
-      const attrs = encodeAttrs(attrRequest, entryStats, entryPath, entryFh, this.leaseTime);
+      const attrs = encodeAttrs(attrRequest, entryStats, entryPath, entryFh, this.leaseTime, fsStats);
       const nameBytes = Buffer.byteLength(name, 'utf8');
       const attrBytes = attrs.attrVals.length;
       const entryBytes = overheadPerEntry + nameBytes + attrBytes;
@@ -1380,10 +1411,18 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const currentPathAbsolute = this.absolutePath(currentPath);
     try {
       const stats = await this.promises.lstat(currentPathAbsolute);
+      const fsStats = await this.fsStats();
       // request.objAttributes is a Nfsv4Fattr: use its attrmask when asking
       // encodeAttrs to serialize the server's current attributes and compare
       // raw attrVals bytes.
-      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPathAbsolute, ctx.cfh!, this.leaseTime);
+      const attrs = encodeAttrs(
+        request.objAttributes.attrmask,
+        stats,
+        currentPathAbsolute,
+        ctx.cfh!,
+        this.leaseTime,
+        fsStats,
+      );
       if (cmpUint8Array(attrs.attrVals, request.objAttributes.attrVals))
         return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4ERR_NOT_SAME);
       return new msg.Nfsv4NverifyResponse(Nfsv4Stat.NFS4_OK);
@@ -1503,9 +1542,10 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       }
       const stats = await this.promises.lstat(currentPathAbsolute);
       const fh = this.fh.encode(currentPath);
+      const fsStats = await this.fsStats();
       // Return updated mode and size attributes
       const returnMask = new struct.Nfsv4Bitmap(attrNumsToBitmap([Nfsv4Attr.FATTR4_MODE, Nfsv4Attr.FATTR4_SIZE]));
-      const fattr = encodeAttrs(returnMask, stats, currentPath, fh, this.leaseTime);
+      const fattr = encodeAttrs(returnMask, stats, currentPath, fh, this.leaseTime, fsStats);
       const resok = new msg.Nfsv4SetattrResOk(returnMask);
       return new msg.Nfsv4SetattrResponse(Nfsv4Stat.NFS4_OK, resok);
     } catch (err: unknown) {
@@ -1519,7 +1559,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const currentPathAbsolute = this.absolutePath(currentPath);
     try {
       const stats = await this.promises.lstat(currentPathAbsolute);
-      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPath, ctx.cfh!, this.leaseTime);
+      const fsStats = await this.fsStats();
+      const attrs = encodeAttrs(request.objAttributes.attrmask, stats, currentPath, ctx.cfh!, this.leaseTime, fsStats);
       if (cmpUint8Array(attrs.attrVals, request.objAttributes.attrVals))
         return new msg.Nfsv4VerifyResponse(Nfsv4Stat.NFS4_OK);
       return new msg.Nfsv4VerifyResponse(Nfsv4Stat.NFS4ERR_NOT_SAME);

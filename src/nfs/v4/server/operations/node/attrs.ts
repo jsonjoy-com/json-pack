@@ -7,7 +7,8 @@ import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {XdrEncoder} from '../../../../../xdr/XdrEncoder';
 import {Nfsv4Attr, Nfsv4FType, Nfsv4FhExpireType, Nfsv4Stat} from '../../../constants';
 import * as struct from '../../../structs';
-import {REQUIRED_ATTRS, RECOMMENDED_ATTRS, SET_ONLY_ATTRS, setBit} from '../../../attributes';
+import {SET_ONLY_ATTRS, setBit} from '../../../attributes';
+import type {FilesystemStats} from '../FilesystemStats';
 
 /**
  * Encodes file attributes based on the requested bitmap.
@@ -17,6 +18,7 @@ import {REQUIRED_ATTRS, RECOMMENDED_ATTRS, SET_ONLY_ATTRS, setBit} from '../../.
  * @param path File path (for context)
  * @param fh Optional file handle (required only if FATTR4_FILEHANDLE is requested)
  * @param leaseTime Optional lease time in seconds (required only if FATTR4_LEASE_TIME is requested)
+ * @param fsStats Optional filesystem statistics (required for space/files attributes)
  */
 export const encodeAttrs = (
   requestedAttrs: struct.Nfsv4Bitmap,
@@ -24,6 +26,7 @@ export const encodeAttrs = (
   path: string,
   fh?: Uint8Array,
   leaseTime?: number,
+  fsStats?: FilesystemStats,
 ): struct.Nfsv4Fattr => {
   const writer = new Writer(512);
   const xdr = new XdrEncoder(writer);
@@ -56,6 +59,12 @@ export const encodeAttrs = (
           setBit(implementedAttrs, Nfsv4Attr.FATTR4_MODE);
           setBit(implementedAttrs, Nfsv4Attr.FATTR4_NUMLINKS);
           setBit(implementedAttrs, Nfsv4Attr.FATTR4_SPACE_USED);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_SPACE_AVAIL);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_SPACE_FREE);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_SPACE_TOTAL);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_FILES_AVAIL);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_FILES_FREE);
+          setBit(implementedAttrs, Nfsv4Attr.FATTR4_FILES_TOTAL);
           setBit(implementedAttrs, Nfsv4Attr.FATTR4_TIME_ACCESS);
           setBit(implementedAttrs, Nfsv4Attr.FATTR4_TIME_METADATA);
           setBit(implementedAttrs, Nfsv4Attr.FATTR4_TIME_MODIFY);
@@ -108,6 +117,42 @@ export const encodeAttrs = (
         case Nfsv4Attr.FATTR4_SPACE_USED: {
           if (!stats) break;
           xdr.writeUnsignedHyper(BigInt(stats.blocks * 512));
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_SPACE_AVAIL: {
+          if (!fsStats) break;
+          xdr.writeUnsignedHyper(fsStats.spaceAvail);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_SPACE_FREE: {
+          if (!fsStats) break;
+          xdr.writeUnsignedHyper(fsStats.spaceFree);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_SPACE_TOTAL: {
+          if (!fsStats) break;
+          xdr.writeUnsignedHyper(fsStats.spaceTotal);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_FILES_AVAIL: {
+          if (!fsStats) break;
+          xdr.writeUnsignedHyper(fsStats.filesAvail);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_FILES_FREE: {
+          if (!fsStats) break;
+          xdr.writeUnsignedHyper(fsStats.filesFree);
+          setBit(supportedMask, attrNum);
+          break;
+        }
+        case Nfsv4Attr.FATTR4_FILES_TOTAL: {
+          if (!fsStats) break;
+          xdr.writeUnsignedHyper(fsStats.filesTotal);
           setBit(supportedMask, attrNum);
           break;
         }

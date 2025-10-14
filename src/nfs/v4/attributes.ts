@@ -200,6 +200,15 @@ export const STAT_ATTRS = new Set<Nfsv4Attr>([
   Nfsv4Attr.FATTR4_TIME_MODIFY,
 ]);
 
+export const FS_ATTRS = new Set<Nfsv4Attr>([
+  Nfsv4Attr.FATTR4_FILES_AVAIL,
+  Nfsv4Attr.FATTR4_FILES_FREE,
+  Nfsv4Attr.FATTR4_FILES_TOTAL,
+  Nfsv4Attr.FATTR4_SPACE_AVAIL,
+  Nfsv4Attr.FATTR4_SPACE_FREE,
+  Nfsv4Attr.FATTR4_SPACE_TOTAL,
+]);
+
 /**
  * Extract attribute numbers from a bitmap mask.
  *
@@ -231,6 +240,8 @@ export const containsSetOnlyAttr = (requestedAttrs: Set<number>): boolean => ove
  * Check if any requested attributes require lstat.
  */
 export const requiresLstat = (requestedAttrs: Set<number>): boolean => overlaps(requestedAttrs, STAT_ATTRS);
+
+export const requiresFsStats = (requestedAttrs: Set<number>): boolean => overlaps(requestedAttrs, FS_ATTRS);
 
 export const setBit = (mask: number[], attrNum: Nfsv4Attr): void => {
   const wordIndex = Math.floor(attrNum / 32);

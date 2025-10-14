@@ -176,13 +176,31 @@ export class FileHandleMapper {
   }
 
   /**
+   * Removes a file handle mapping for the given path.
+   * This is used when a file is deleted or replaced.
+   * @param path The absolute file path to remove from the mapping.
+   */
+  public remove(path: string): void {
+    const fh = this.pathToId.get(path);
+    if (!fh) return;
+    const type = fh[0];
+    if (type !== FH_TYPE.ID) return;
+    const id = fh[3] * 0x100000000 + fh[4] * 0x1000000 + (fh[5] << 16) + (fh[6] << 8) + fh[7];
+    this.pathToId.delete(path);
+    this.idToPath.delete(id);
+  }
+
+  /**
    * Updates the file handle mappings when a file is renamed.
    * This ensures that existing file handles pointing to the old path
    * continue to work after the rename operation.
+   * When renaming over an existing file, the destination file handle
+   * is removed from the cache since that file will be replaced.
    * @param oldPath The old absolute file path.
    * @param newPath The new absolute file path.
    */
   public rename(oldPath: string, newPath: string): void {
+    this.remove(newPath);
     const fh = this.pathToId.get(oldPath);
     if (!fh) return;
     const type = fh[0];

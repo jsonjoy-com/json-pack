@@ -705,7 +705,9 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       ownerState.opens.add(stateidKey);
       const fh = this.fh.encode(filePath);
       ctx.cfh = fh;
-      const cinfo = new struct.Nfsv4ChangeInfo(true, 0n, 0n);
+      const before = this.changeCounter;
+      const after = ++this.changeCounter;
+      const cinfo = new struct.Nfsv4ChangeInfo(true, before, after);
       const attrset = new struct.Nfsv4Bitmap([]);
       const delegation = new struct.Nfsv4OpenDelegation(Nfsv4DelegType.OPEN_DELEGATE_NONE);
       const resok = new msg.Nfsv4OpenResOk(stateid, cinfo, 0, attrset, delegation);
@@ -1150,8 +1152,9 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       } else {
         await this.promises.unlink(targetPath);
       }
+      this.fh.remove(targetPath);
       const before = this.changeCounter;
-      const after = this.changeCounter++;
+      const after = ++this.changeCounter;
       const cinfo = new struct.Nfsv4ChangeInfo(true, before, after);
       const resok = new msg.Nfsv4RemoveResOk(cinfo);
       return new msg.Nfsv4RemoveResponse(Nfsv4Stat.NFS4_OK, resok);
@@ -1184,7 +1187,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       await this.promises.rename(oldPath, newPath);
       this.fh.rename(oldPath, newPath);
       const before = this.changeCounter;
-      const after = this.changeCounter++;
+      const after = ++this.changeCounter;
       const sourceCinfo = new struct.Nfsv4ChangeInfo(true, before, after);
       const targetCinfo = new struct.Nfsv4ChangeInfo(true, before, after);
       const resok = new msg.Nfsv4RenameResOk(sourceCinfo, targetCinfo);
@@ -1340,7 +1343,9 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const stats = await this.promises.stat(createPath);
       const fh = this.fh.encode(createPath);
       ctx.cfh = fh;
-      const cinfo = new struct.Nfsv4ChangeInfo(true, 0n, 0n);
+      const before = this.changeCounter;
+      const after = ++this.changeCounter;
+      const cinfo = new struct.Nfsv4ChangeInfo(true, before, after);
       const attrset = new struct.Nfsv4Bitmap([]);
       const resok = new msg.Nfsv4CreateResOk(cinfo, attrset);
       return new msg.Nfsv4CreateResponse(Nfsv4Stat.NFS4_OK, resok);
@@ -1357,7 +1362,9 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const newPath = this.absolutePath(NodePath.join(currentPath, request.newname));
     try {
       await this.promises.link(existingPath, newPath);
-      const resok = new msg.Nfsv4LinkResOk(new struct.Nfsv4ChangeInfo(true, 0n, 0n));
+      const before = this.changeCounter;
+      const after = ++this.changeCounter;
+      const resok = new msg.Nfsv4LinkResOk(new struct.Nfsv4ChangeInfo(true, before, after));
       return new msg.Nfsv4LinkResponse(Nfsv4Stat.NFS4_OK, resok);
     } catch (err: unknown) {
       const status = normalizeNodeFsError(err, ctx.connection.logger);

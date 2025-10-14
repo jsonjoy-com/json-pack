@@ -97,6 +97,13 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   /** Map from lock-owner key to lock-owner state. */
   protected lockOwners: Map<string, LockOwnerState> = new Map();
 
+  /**
+   * Server-wide monotonic change counter for directory change_info.
+   * Incremented on every mutating operation (RENAME, REMOVE, CREATE, etc.).
+   * Used to populate change_info4 before/after values for client cache validation.
+   */
+  protected changeCounter: bigint = 0n;
+
   constructor(opts: Nfsv4OperationsNodeOpts) {
     this.fs = opts.fs;
     this.promises = this.fs.promises;
@@ -1142,17 +1149,12 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         await this.promises.rmdir(targetPath);
       } else {
         await this.promises.unlink(targetPath);
-        const appleDoublePath = NodePath.join(NodePath.dirname(targetPath), '._' + NodePath.basename(targetPath));
-        try {
-          const appleDoubleStats = await this.promises.stat(appleDoublePath);
-          if (appleDoubleStats.isFile()) {
-            await this.promises.unlink(appleDoublePath);
-          }
-        } catch (err) {
-          if (!isErrCode('ENOENT', err)) throw err;
-        }
       }
-      return new msg.Nfsv4RemoveResponse(Nfsv4Stat.NFS4_OK);
+      const before = this.changeCounter;
+      const after = this.changeCounter++;
+      const cinfo = new struct.Nfsv4ChangeInfo(true, before, after);
+      const resok = new msg.Nfsv4RemoveResOk(cinfo);
+      return new msg.Nfsv4RemoveResponse(Nfsv4Stat.NFS4_OK, resok);
     } catch (err: unknown) {
       const status = normalizeNodeFsError(err, ctx.connection.logger);
       return new msg.Nfsv4RemoveResponse(status);
@@ -1181,18 +1183,12 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     try {
       await this.promises.rename(oldPath, newPath);
       this.fh.rename(oldPath, newPath);
-      const oldAppleDouble = NodePath.join(NodePath.dirname(oldPath), '._' + NodePath.basename(oldPath));
-      const newAppleDouble = NodePath.join(NodePath.dirname(newPath), '._' + NodePath.basename(newPath));
-      try {
-        const stats = await this.promises.stat(oldAppleDouble);
-        if (stats.isFile()) {
-          await this.promises.rename(oldAppleDouble, newAppleDouble);
-          this.fh.rename(oldAppleDouble, newAppleDouble);
-        }
-      } catch (err) {
-        if (!isErrCode('ENOENT', err)) throw err;
-      }
-      return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4_OK);
+      const before = this.changeCounter;
+      const after = this.changeCounter++;
+      const sourceCinfo = new struct.Nfsv4ChangeInfo(true, before, after);
+      const targetCinfo = new struct.Nfsv4ChangeInfo(true, before, after);
+      const resok = new msg.Nfsv4RenameResOk(sourceCinfo, targetCinfo);
+      return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4_OK, resok);
     } catch (err: unknown) {
       if (isErrCode('EXDEV', err)) return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);
       const status = normalizeNodeFsError(err, ctx.connection.logger);

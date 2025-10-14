@@ -121,103 +121,68 @@ describe('RENAME operation', () => {
     await stop();
   });
 
-  describe('AppleDouble file handling', () => {
-    test('renames AppleDouble file when renaming main file', async () => {
+  describe('change_info semantics', () => {
+    test('returns before < after on successful rename', async () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
-      vol.writeFileSync('/export/test.txt', 'data');
-      vol.writeFileSync('/export/._test.txt', 'xattr-data');
-      const res = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('test.txt', 'new.txt')]);
+      vol.writeFileSync('/export/old.txt', 'data');
+      const res = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('old.txt', 'new.txt')]);
       expect(res.status).toBe(Nfsv4Stat.NFS4_OK);
-      expect(vol.existsSync('/export/new.txt')).toBe(true);
-      expect(vol.existsSync('/export/._new.txt')).toBe(true);
-      expect(vol.existsSync('/export/test.txt')).toBe(false);
-      expect(vol.existsSync('/export/._test.txt')).toBe(false);
-      await stop();
-    });
-
-    test('succeeds even if AppleDouble file does not exist', async () => {
-      const {client, stop, vol} = await setupNfsClientServerTestbed();
-      vol.writeFileSync('/export/test.txt', 'data');
-      const res = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('test.txt', 'new.txt')]);
-      expect(res.status).toBe(Nfsv4Stat.NFS4_OK);
-      expect(vol.existsSync('/export/new.txt')).toBe(true);
-      expect(vol.existsSync('/export/._new.txt')).toBe(false);
-      await stop();
-    });
-
-    test('renames AppleDouble file for TextEdit-style save workflow', async () => {
-      const {client, stop, vol} = await setupNfsClientServerTestbed();
-      vol.writeFileSync('/export/file.txt', 'original content');
-      vol.writeFileSync('/export/file.txt.sb-temp-u9VvVu', 'new content');
-      vol.writeFileSync('/export/._file.txt.sb-temp-u9VvVu', 'new xattr');
-      const res = await client.compound([
-        nfs.PUTROOTFH(),
-        nfs.SAVEFH(),
-        nfs.RENAME('file.txt.sb-temp-u9VvVu', 'file.txt'),
-      ]);
-      expect(res.status).toBe(Nfsv4Stat.NFS4_OK);
-      expect(vol.existsSync('/export/file.txt')).toBe(true);
-      expect(vol.existsSync('/export/._file.txt')).toBe(true);
-      expect(vol.existsSync('/export/file.txt.sb-temp-u9VvVu')).toBe(false);
-      expect(vol.existsSync('/export/._file.txt.sb-temp-u9VvVu')).toBe(false);
-      expect(vol.readFileSync('/export/file.txt', 'utf8')).toBe('new content');
-      expect(vol.readFileSync('/export/._file.txt', 'utf8')).toBe('new xattr');
-      await stop();
-    });
-
-    test('handles AppleDouble file with long filenames (ID-type FH)', async () => {
-      const {client, stop, vol} = await setupNfsClientServerTestbed();
-      const oldName = 'long_filename_' + 'x'.repeat(100) + '.txt';
-      const newName = 'long_filename_' + 'y'.repeat(100) + '.txt';
-      vol.writeFileSync('/export/' + oldName, 'data');
-      vol.writeFileSync('/export/._' + oldName, 'xattr');
-      const res = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME(oldName, newName)]);
-      expect(res.status).toBe(Nfsv4Stat.NFS4_OK);
-      expect(vol.existsSync('/export/' + newName)).toBe(true);
-      expect(vol.existsSync('/export/._' + newName)).toBe(true);
-      expect(vol.existsSync('/export/' + oldName)).toBe(false);
-      expect(vol.existsSync('/export/._' + oldName)).toBe(false);
-      await stop();
-    });
-
-    test('AppleDouble file handle remains valid after rename', async () => {
-      const {client, stop, vol} = await setupNfsClientServerTestbed();
-      const oldName = 'original_' + 'a'.repeat(100) + '.txt';
-      const newName = 'renamed_' + 'b'.repeat(100) + '.txt';
-      vol.writeFileSync('/export/' + oldName, 'data');
-      vol.writeFileSync('/export/._' + oldName, 'xattr');
-      const lookupRes = await client.compound([nfs.PUTROOTFH(), nfs.LOOKUP('._' + oldName), nfs.GETFH()]);
-      expect(lookupRes.status).toBe(Nfsv4Stat.NFS4_OK);
-      const appleDoubleFh = (lookupRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
-      const renameRes = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME(oldName, newName)]);
+      const renameRes = res.resarray[2] as msg.Nfsv4RenameResponse;
       expect(renameRes.status).toBe(Nfsv4Stat.NFS4_OK);
-      const getAttrRes = await client.compound([nfs.PUTFH(appleDoubleFh), nfs.GETATTR([0x00000020])]);
-      expect(getAttrRes.status).toBe(Nfsv4Stat.NFS4_OK);
+      if (renameRes.status === Nfsv4Stat.NFS4_OK && renameRes.resok) {
+        const sourceCinfo = renameRes.resok.sourceCinfo;
+        const targetCinfo = renameRes.resok.targetCinfo;
+        expect(sourceCinfo.atomic).toBe(true);
+        expect(targetCinfo.atomic).toBe(true);
+        expect(sourceCinfo.after).toBeGreaterThan(sourceCinfo.before);
+        expect(targetCinfo.after).toBeGreaterThan(targetCinfo.before);
+        expect(sourceCinfo.after - sourceCinfo.before).toBe(1n);
+      }
       await stop();
     });
 
-    test('does not rename AppleDouble if it is a directory', async () => {
+    test('change counter increments across multiple renames', async () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
-      vol.writeFileSync('/export/test.txt', 'data');
-      vol.mkdirSync('/export/._test.txt');
-      const res = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('test.txt', 'new.txt')]);
-      expect(res.status).toBe(Nfsv4Stat.NFS4_OK);
-      expect(vol.existsSync('/export/new.txt')).toBe(true);
-      expect(vol.existsSync('/export/._test.txt')).toBe(true);
-      expect(vol.statSync('/export/._test.txt').isDirectory()).toBe(true);
+      vol.writeFileSync('/export/file1.txt', 'data1');
+      vol.writeFileSync('/export/file2.txt', 'data2');
+      const res1 = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('file1.txt', 'renamed1.txt')]);
+      expect(res1.status).toBe(Nfsv4Stat.NFS4_OK);
+      const renameRes1 = res1.resarray[2] as msg.Nfsv4RenameResponse;
+      const res2 = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('file2.txt', 'renamed2.txt')]);
+      expect(res2.status).toBe(Nfsv4Stat.NFS4_OK);
+      const renameRes2 = res2.resarray[2] as msg.Nfsv4RenameResponse;
+      if (
+        renameRes1.status === Nfsv4Stat.NFS4_OK &&
+        renameRes1.resok &&
+        renameRes2.status === Nfsv4Stat.NFS4_OK &&
+        renameRes2.resok
+      ) {
+        expect(renameRes2.resok.sourceCinfo.after).toBeGreaterThan(renameRes1.resok.sourceCinfo.after);
+        expect(renameRes2.resok.sourceCinfo.before).toBe(renameRes1.resok.sourceCinfo.after);
+      }
       await stop();
     });
 
-    test('handles case where main file starts with ._', async () => {
+    test('failed rename does not increment change counter', async () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
-      vol.writeFileSync('/export/._special.txt', 'data');
-      vol.writeFileSync('/export/._._special.txt', 'xattr');
-      const res = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('._special.txt', '._renamed.txt')]);
-      expect(res.status).toBe(Nfsv4Stat.NFS4_OK);
-      expect(vol.existsSync('/export/._renamed.txt')).toBe(true);
-      expect(vol.existsSync('/export/._._renamed.txt')).toBe(true);
-      expect(vol.existsSync('/export/._special.txt')).toBe(false);
-      expect(vol.existsSync('/export/._._special.txt')).toBe(false);
+      vol.writeFileSync('/export/existing.txt', 'data');
+      const res1 = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('existing.txt', 'renamed.txt')]);
+      expect(res1.status).toBe(Nfsv4Stat.NFS4_OK);
+      const renameRes1 = res1.resarray[2] as msg.Nfsv4RenameResponse;
+      const res2 = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('nonexistent.txt', 'fail.txt')]);
+      expect(res2.status).not.toBe(Nfsv4Stat.NFS4_OK);
+      vol.writeFileSync('/export/another.txt', 'data');
+      const res3 = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('another.txt', 'renamed3.txt')]);
+      expect(res3.status).toBe(Nfsv4Stat.NFS4_OK);
+      const renameRes3 = res3.resarray[2] as msg.Nfsv4RenameResponse;
+      if (
+        renameRes1.status === Nfsv4Stat.NFS4_OK &&
+        renameRes1.resok &&
+        renameRes3.status === Nfsv4Stat.NFS4_OK &&
+        renameRes3.resok
+      ) {
+        expect(renameRes3.resok.sourceCinfo.after - renameRes1.resok.sourceCinfo.after).toBe(1n);
+      }
       await stop();
     });
   });

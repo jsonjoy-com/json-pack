@@ -541,94 +541,44 @@ const formatFileHandle = (fh: structs.Nfsv4Fh): string => {
 
 export const formatNfsv4Request = (req: msg.Nfsv4Request, tab: string = ''): string => {
   if (req instanceof msg.Nfsv4AccessRequest) {
-    return 'ACCESS' + printTree(tab, [(tab) => `access = ${formatNfsv4Access(req.access)}`]);
+    return `ACCESS access = ${formatNfsv4Access(req.access)}`;
   } else if (req instanceof msg.Nfsv4CloseRequest) {
     return `CLOSE seqid = ${req.seqid}, stateid = ${formatStateid(req.openStateid, tab)}`;
   } else if (req instanceof msg.Nfsv4CommitRequest) {
-    return 'COMMIT' + printTree(tab, [(tab) => `offset = ${req.offset}`, (tab) => `count = ${req.count}`]);
+    return `COMMIT offset = ${req.offset}, count = ${req.count}`;
   } else if (req instanceof msg.Nfsv4CreateRequest) {
-    return (
-      'CREATE' +
-      printTree(tab, [
-        (tab) => `objtype = ${formatNfsv4FType(req.objtype.type)}`,
-        (tab) => `objname = "${req.objname}"`,
-      ])
-    );
+    return `CREATE objtype = ${formatNfsv4FType(req.objtype.type)}, objname = "${req.objname}"`;
   } else if (req instanceof msg.Nfsv4DelegpurgeRequest) {
-    return 'DELEGPURGE' + printTree(tab, [(tab) => `clientid = ${req.clientid}`]);
+    return `DELEGPURGE clientid = ${req.clientid}`;
   } else if (req instanceof msg.Nfsv4DelegreturnRequest) {
-    return 'DELEGRETURN' + printTree(tab, [(tab) => `stateid = ${formatStateid(req.delegStateid, tab)}`]);
+    return `DELEGRETURN stateid = ${formatStateid(req.delegStateid, tab)}`;
   } else if (req instanceof msg.Nfsv4GetattrRequest) {
-    return 'GETATTR' + printTree(tab, [(tab) => `attrs = ${formatNfsv4Bitmap(req.attrRequest)}`]);
+    return `GETATTR attrs = ${formatNfsv4Bitmap(req.attrRequest)}`;
   } else if (req instanceof msg.Nfsv4GetfhRequest) {
     return 'GETFH';
   } else if (req instanceof msg.Nfsv4LinkRequest) {
-    return 'LINK' + printTree(tab, [(tab) => `newname = "${req.newname}"`]);
+    return `LINK newname = "${req.newname}"`;
   } else if (req instanceof msg.Nfsv4LockRequest) {
-    return (
-      'LOCK' +
-      printTree(tab, [
-        (tab) => `locktype = ${formatNfsv4LockType(req.locktype)}`,
-        (tab) => `reclaim = ${req.reclaim}`,
-        (tab) => `offset = ${req.offset}`,
-        (tab) => `length = ${req.length}`,
-      ])
-    );
+    return `LOCK locktype = ${formatNfsv4LockType(req.locktype)}, reclaim = ${req.reclaim}, offset = ${req.offset}, length = ${req.length}`;
   } else if (req instanceof msg.Nfsv4LocktRequest) {
-    return (
-      'LOCKT' +
-      printTree(tab, [
-        (tab) => `locktype = ${formatNfsv4LockType(req.locktype)}`,
-        (tab) => `offset = ${req.offset}`,
-        (tab) => `length = ${req.length}`,
-      ])
-    );
+    return `LOCKT locktype = ${formatNfsv4LockType(req.locktype)}, offset = ${req.offset}, length = ${req.length}`;
   } else if (req instanceof msg.Nfsv4LockuRequest) {
-    return (
-      'LOCKU' +
-      printTree(tab, [
-        (tab) => `locktype = ${formatNfsv4LockType(req.locktype)}`,
-        (tab) => `seqid = ${req.seqid}`,
-        (tab) => `stateid = ${formatStateid(req.lockStateid, tab)}`,
-        (tab) => `offset = ${req.offset}`,
-        (tab) => `length = ${req.length}`,
-      ])
-    );
+    return `LOCKU locktype = ${formatNfsv4LockType(req.locktype)}, seqid = ${req.seqid}, stateid = ${formatStateid(req.lockStateid, tab)}, offset = ${req.offset}, length = ${req.length}`;
   } else if (req instanceof msg.Nfsv4LookupRequest) {
-    return 'LOOKUP' + printTree(tab, [(tab) => `objname = "${req.objname}"`]);
+    return `LOOKUP objname = "${req.objname}"`;
   } else if (req instanceof msg.Nfsv4LookuppRequest) {
     return 'LOOKUPP';
   } else if (req instanceof msg.Nfsv4NverifyRequest) {
-    return 'NVERIFY' + printTree(tab, [(tab) => `attrs = ${formatNfsv4Bitmap(req.objAttributes.attrmask)}`]);
+    return `NVERIFY attrs = ${formatNfsv4Bitmap(req.objAttributes.attrmask)}`;
   } else if (req instanceof msg.Nfsv4OpenRequest) {
-    const items: Array<(tab: string) => string> = [
-      (tab) => `seqid = ${req.seqid}`,
-      (tab) => `shareAccess = ${formatNfsv4OpenAccess(req.shareAccess)}`,
-      (tab) => `shareDeny = ${formatNfsv4OpenDeny(req.shareDeny)}`,
-      (tab) => `opentype = ${formatNfsv4OpenFlags(req.openhow.opentype)}`,
-    ];
-    if (req.openhow.how) {
-      items.push((tab) => `createmode = ${formatNfsv4CreateMode(req.openhow.how!.mode)}`);
-    }
-    items.push((tab) => `claim = ${formatNfsv4OpenClaimType(req.claim.claimType)}`);
-    return 'OPEN' + printTree(tab, items);
+    const createInfo = req.openhow.how ? `, createmode = ${formatNfsv4CreateMode(req.openhow.how!.mode)}` : '';
+    return `OPEN seqid = ${req.seqid}, shareAccess = ${formatNfsv4OpenAccess(req.shareAccess)}, shareDeny = ${formatNfsv4OpenDeny(req.shareDeny)}, opentype = ${formatNfsv4OpenFlags(req.openhow.opentype)}${createInfo}, claim = ${formatNfsv4OpenClaimType(req.claim.claimType)}`;
   } else if (req instanceof msg.Nfsv4OpenattrRequest) {
-    return 'OPENATTR' + printTree(tab, [(tab) => `createdir = ${req.createdir}`]);
+    return `OPENATTR createdir = ${req.createdir}`;
   } else if (req instanceof msg.Nfsv4OpenConfirmRequest) {
-    return (
-      'OPEN_CONFIRM' +
-      printTree(tab, [(tab) => `stateid = ${formatStateid(req.openStateid, tab)}`, (tab) => `seqid = ${req.seqid}`])
-    );
+    return `OPEN_CONFIRM stateid = ${formatStateid(req.openStateid, tab)}, seqid = ${req.seqid}`;
   } else if (req instanceof msg.Nfsv4OpenDowngradeRequest) {
-    return (
-      'OPEN_DOWNGRADE' +
-      printTree(tab, [
-        (tab) => `stateid = ${formatStateid(req.openStateid, tab)}`,
-        (tab) => `seqid = ${req.seqid}`,
-        (tab) => `shareAccess = ${formatNfsv4OpenAccess(req.shareAccess)}`,
-        (tab) => `shareDeny = ${formatNfsv4OpenDeny(req.shareDeny)}`,
-      ])
-    );
+    return `OPEN_DOWNGRADE stateid = ${formatStateid(req.openStateid, tab)}, seqid = ${req.seqid}, shareAccess = ${formatNfsv4OpenAccess(req.shareAccess)}, shareDeny = ${formatNfsv4OpenDeny(req.shareDeny)}`;
   } else if (req instanceof msg.Nfsv4PutfhRequest) {
     return `PUTFH fh = ${formatFileHandle(req.object)}`;
   } else if (req instanceof msg.Nfsv4PutpubfhRequest) {
@@ -636,62 +586,33 @@ export const formatNfsv4Request = (req: msg.Nfsv4Request, tab: string = ''): str
   } else if (req instanceof msg.Nfsv4PutrootfhRequest) {
     return 'PUTROOTFH';
   } else if (req instanceof msg.Nfsv4ReadRequest) {
-    return (
-      'READ' +
-      printTree(tab, [
-        (tab) => `stateid = ${formatStateid(req.stateid, tab)}`,
-        (tab) => `offset = ${req.offset}`,
-        (tab) => `count = ${req.count}`,
-      ])
-    );
+    return `READ stateid = ${formatStateid(req.stateid, tab)}, offset = ${req.offset}, count = ${req.count}`;
   } else if (req instanceof msg.Nfsv4ReaddirRequest) {
-    return (
-      'READDIR' +
-      printTree(tab, [
-        (tab) => `cookie = ${req.cookie}`,
-        (tab) => `dircount = ${req.dircount}`,
-        (tab) => `maxcount = ${req.maxcount}`,
-        (tab) => `attrs = ${formatNfsv4Bitmap(req.attrRequest)}`,
-      ])
-    );
+    return `READDIR cookie = ${req.cookie}, dircount = ${req.dircount}, maxcount = ${req.maxcount}, attrs = ${formatNfsv4Bitmap(req.attrRequest)}`;
   } else if (req instanceof msg.Nfsv4ReadlinkRequest) {
     return 'READLINK';
   } else if (req instanceof msg.Nfsv4RemoveRequest) {
-    return 'REMOVE' + printTree(tab, [(tab) => `target = "${req.target}"`]);
+    return `REMOVE target = "${req.target}"`;
   } else if (req instanceof msg.Nfsv4RenameRequest) {
-    return 'RENAME' + printTree(tab, [(tab) => `oldname = "${req.oldname}"`, (tab) => `newname = "${req.newname}"`]);
+    return `RENAME oldname = "${req.oldname}", newname = "${req.newname}"`;
   } else if (req instanceof msg.Nfsv4RenewRequest) {
-    return 'RENEW' + printTree(tab, [(tab) => `clientid = ${req.clientid}`]);
+    return `RENEW clientid = ${req.clientid}`;
   } else if (req instanceof msg.Nfsv4RestorefhRequest) {
     return 'RESTOREFH';
   } else if (req instanceof msg.Nfsv4SavefhRequest) {
     return 'SAVEFH';
   } else if (req instanceof msg.Nfsv4SecinfoRequest) {
-    return 'SECINFO' + printTree(tab, [(tab) => `name = "${req.name}"`]);
+    return `SECINFO name = "${req.name}"`;
   } else if (req instanceof msg.Nfsv4SetattrRequest) {
-    return (
-      'SETATTR' +
-      printTree(tab, [
-        (tab) => `stateid = ${formatStateid(req.stateid, tab)}`,
-        (tab) => `attrs = ${formatNfsv4Bitmap(req.objAttributes.attrmask)}`,
-      ])
-    );
+    return `SETATTR stateid = ${formatStateid(req.stateid, tab)}, attrs = ${formatNfsv4Bitmap(req.objAttributes.attrmask)}`;
   } else if (req instanceof msg.Nfsv4SetclientidRequest) {
-    return 'SETCLIENTID' + printTree(tab, [(tab) => `callbackIdent = ${req.callbackIdent}`]);
+    return `SETCLIENTID callbackIdent = ${req.callbackIdent}`;
   } else if (req instanceof msg.Nfsv4SetclientidConfirmRequest) {
-    return 'SETCLIENTID_CONFIRM' + printTree(tab, [(tab) => `clientid = ${req.clientid}`]);
+    return `SETCLIENTID_CONFIRM clientid = ${req.clientid}`;
   } else if (req instanceof msg.Nfsv4VerifyRequest) {
-    return 'VERIFY' + printTree(tab, [(tab) => `attrs = ${formatNfsv4Bitmap(req.objAttributes.attrmask)}`]);
+    return `VERIFY attrs = ${formatNfsv4Bitmap(req.objAttributes.attrmask)}`;
   } else if (req instanceof msg.Nfsv4WriteRequest) {
-    return (
-      'WRITE' +
-      printTree(tab, [
-        (tab) => `stateid = ${formatStateid(req.stateid, tab)}`,
-        (tab) => `offset = ${req.offset}`,
-        (tab) => `stable = ${formatNfsv4StableHow(req.stable)}`,
-        (tab) => `length = ${req.data.length}`,
-      ])
-    );
+    return `WRITE stateid = ${formatStateid(req.stateid, tab)}, offset = ${req.offset}, stable = ${formatNfsv4StableHow(req.stable)}, length = ${req.data.length}`;
   } else if (req instanceof msg.Nfsv4ReleaseLockOwnerRequest) {
     return 'RELEASE_LOCKOWNER';
   } else if (req instanceof msg.Nfsv4IllegalRequest) {
@@ -702,7 +623,10 @@ export const formatNfsv4Request = (req: msg.Nfsv4Request, tab: string = ''): str
 
 export const formatNfsv4Response = (res: msg.Nfsv4Response, tab: string = ''): string => {
   if (res instanceof msg.Nfsv4AccessResponse) {
-    return `ACCESS (${formatNfsv4Stat(res.status)}) supported = ${formatNfsv4Access(res.resok!.supported)}, access = ${formatNfsv4Access(res.resok!.access)}`;
+    if (res.status === constants.Nfsv4Stat.NFS4_OK && res.resok) {
+      return `ACCESS (${formatNfsv4Stat(res.status)}) supported = ${formatNfsv4Access(res.resok.supported)}, access = ${formatNfsv4Access(res.resok.access)}`;
+    }
+    return `ACCESS (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4CloseResponse) {
     const items: Array<(tab: string) => string> = [];
     if (res.status === constants.Nfsv4Stat.NFS4_OK && res.resok) {
@@ -712,7 +636,7 @@ export const formatNfsv4Response = (res: msg.Nfsv4Response, tab: string = ''): s
   } else if (res instanceof msg.Nfsv4CommitResponse) {
     return `COMMIT (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4CreateResponse) {
-    return `CREATE (${formatNfsv4Stat(res.status)}) status = ${formatNfsv4Stat(res.status)}`);
+    return `CREATE (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4DelegpurgeResponse) {
     return `DELEGPURGE (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4DelegreturnResponse) {
@@ -724,23 +648,35 @@ export const formatNfsv4Response = (res: msg.Nfsv4Response, tab: string = ''): s
     }
     return `GETATTR (${formatNfsv4Stat(res.status)})` + printTree(tab, items);
   } else if (res instanceof msg.Nfsv4GetfhResponse) {
-    return `GETFH (${formatNfsv4Stat(res.status)}) fh = ${formatFileHandle(res.resok!.object)}`;
+    if (res.status === constants.Nfsv4Stat.NFS4_OK && res.resok) {
+      return `GETFH (${formatNfsv4Stat(res.status)}) fh = ${formatFileHandle(res.resok.object)}`;
+    }
+    return `GETFH (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4LinkResponse) {
     return `LINK (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4LockResponse) {
-    return `LOCK (${formatNfsv4Stat(res.status)}) stateid = ${formatStateid(res.resok!.lockStateid, tab)}`;
+    if (res.status === constants.Nfsv4Stat.NFS4_OK && res.resok) {
+      return `LOCK (${formatNfsv4Stat(res.status)}) stateid = ${formatStateid(res.resok.lockStateid, tab)}`;
+    }
+    return `LOCK (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4LocktResponse) {
     return `LOCKT (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4LockuResponse) {
-    return `LOCKU (${formatNfsv4Stat(res.status)}) stateid = ${formatStateid(res.resok!.lockStateid, tab)}`;
+    if (res.status === constants.Nfsv4Stat.NFS4_OK && res.resok) {
+      return `LOCKU (${formatNfsv4Stat(res.status)}) stateid = ${formatStateid(res.resok.lockStateid, tab)}`;
+    }
+    return `LOCKU (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4LookupResponse) {
     return `LOOKUP (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4LookuppResponse) {
-    return `LOCKUPP (${formatNfsv4Stat(res.status)})`;
+    return `LOOKUPP (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4NverifyResponse) {
     return `NVERIFY (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4OpenResponse) {
-    return `OPEN (${formatNfsv4Stat(res.status)}) stateid = ${formatStateid(res.resok!.stateid, tab)}`;
+    if (res.status === constants.Nfsv4Stat.NFS4_OK && res.resok) {
+      return `OPEN (${formatNfsv4Stat(res.status)}) stateid = ${formatStateid(res.resok.stateid, tab)}`;
+    }
+    return `OPEN (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4OpenattrResponse) {
     return `OPENATTR (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4OpenConfirmResponse) {
@@ -762,7 +698,10 @@ export const formatNfsv4Response = (res: msg.Nfsv4Response, tab: string = ''): s
   } else if (res instanceof msg.Nfsv4PutrootfhResponse) {
     return `PUTROOTFH (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4ReadResponse) {
-    return `READ (${formatNfsv4Stat(res.status)}) eof = ${res.resok!.eof} length = ${res.resok!.data.length}`;
+    if (res.status === constants.Nfsv4Stat.NFS4_OK && res.resok) {
+      return `READ (${formatNfsv4Stat(res.status)}) eof = ${res.resok.eof}, length = ${res.resok.data.length}`;
+    }
+    return `READ (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4ReaddirResponse) {
     return `READDIR (${formatNfsv4Stat(res.status)})`;
   } else if (res instanceof msg.Nfsv4ReadlinkResponse) {

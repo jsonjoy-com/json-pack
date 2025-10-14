@@ -1,7 +1,7 @@
 import {attrNumsToBitmap} from './attributes';
 import * as msg from './messages';
 import * as structs from './structs';
-import {Nfsv4CreateMode, Nfsv4FType, Nfsv4OpenFlags} from './constants';
+import {Nfsv4CreateMode, Nfsv4FType, Nfsv4LockType, Nfsv4OpenFlags} from './constants';
 
 /**
  * Static builder helpers for NFS v4 operations.
@@ -333,6 +333,24 @@ export const nfs = {
   },
 
   /**
+   * LOCK - Lock byte range.
+   * @param locktype - Lock type (READ_LT, WRITE_LT, READW_LT, or WRITEW_LT)
+   * @param reclaim - True if reclaiming lock after server restart
+   * @param offset - Starting byte offset
+   * @param length - Length in bytes (0xFFFFFFFFFFFFFFFF for EOF)
+   * @param locker - Lock owner info (new or existing lock owner)
+   */
+  LOCK(
+    locktype: Nfsv4LockType,
+    reclaim: boolean,
+    offset: bigint,
+    length: bigint,
+    locker: structs.Nfsv4LockOwnerInfo,
+  ): msg.Nfsv4LockRequest {
+    return new msg.Nfsv4LockRequest(locktype, reclaim, offset, length, locker);
+  },
+
+  /**
    * LOCKT - Test for conflicting lock (non-blocking).
    * @param locktype - Lock type (READ_LT or WRITE_LT)
    * @param offset - Starting byte offset
@@ -498,6 +516,33 @@ export const nfs = {
    */
   LockOwner(clientid: bigint, owner: Uint8Array): structs.Nfsv4LockOwner {
     return new structs.Nfsv4LockOwner(clientid, owner);
+  },
+
+  /**
+   * Create Nfsv4LockOwnerInfo for new lock owner (open_to_lock_owner).
+   * @param openSeqid - Current open-owner seqid
+   * @param openStateid - Open stateid from OPEN operation
+   * @param lockSeqid - Initial lock-owner seqid (typically 0)
+   * @param lockOwner - Lock owner identifier
+   */
+  NewLockOwner(
+    openSeqid: number,
+    openStateid: structs.Nfsv4Stateid,
+    lockSeqid: number,
+    lockOwner: structs.Nfsv4LockOwner,
+  ): structs.Nfsv4LockOwnerInfo {
+    const openToLockOwner = new structs.Nfsv4OpenToLockOwner(openSeqid, openStateid, lockSeqid, lockOwner);
+    return new structs.Nfsv4LockOwnerInfo(true, new structs.Nfsv4LockNewOwner(openToLockOwner));
+  },
+
+  /**
+   * Create Nfsv4LockOwnerInfo for existing lock owner.
+   * @param lockStateid - Lock stateid from previous LOCK operation
+   * @param lockSeqid - Lock-owner seqid
+   */
+  ExistingLockOwner(lockStateid: structs.Nfsv4Stateid, lockSeqid: number): structs.Nfsv4LockOwnerInfo {
+    const owner = new structs.Nfsv4LockExistingOwner(lockStateid, lockSeqid);
+    return new structs.Nfsv4LockOwnerInfo(false, owner);
   },
 
   /**

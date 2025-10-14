@@ -824,19 +824,48 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const newOwner = locker.owner as struct.Nfsv4LockNewOwner;
     const openToLock = newOwner.openToLockOwner;
     const lockOwnerData = openToLock.lockOwner;
-    const ownerKey = this.makeLockOwnerKey(lockOwnerData.clientid, lockOwnerData.owner);
-    if (this.hasConflictingLock(currentPath, locktype, offset, length, ownerKey)) {
+    const openStateidKey = this.makeStateidKey(openToLock.openStateid);
+    const openFile = this.openFiles.get(openStateidKey);
+    if (!openFile) {
+      return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    }
+    const openOwnerKey = openFile.openOwnerKey;
+    const openOwnerState = this.openOwners.get(openOwnerKey);
+    if (!openOwnerState) {
+      return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_BAD_STATEID);
+    }
+    this.renewClientLease(lockOwnerData.clientid);
+    const seqidValidation = this.validateSeqid(openToLock.openSeqid, openOwnerState.seqid);
+    if (seqidValidation === 'invalid') {
+      return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
+    }
+    if (seqidValidation === 'replay') {
+      for (const [key, lock] of this.locks.entries()) {
+        if (
+          lock.lockOwnerKey === this.makeLockOwnerKey(lockOwnerData.clientid, lockOwnerData.owner) &&
+          lock.path === currentPath &&
+          lock.offset === offset &&
+          lock.length === length
+        ) {
+          const resok = new msg.Nfsv4LockResOk(lock.stateid);
+          return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4_OK, resok);
+        }
+      }
+    }
+    openOwnerState.seqid = openToLock.openSeqid;
+    const lockOwnerKey = this.makeLockOwnerKey(lockOwnerData.clientid, lockOwnerData.owner);
+    if (this.hasConflictingLock(currentPath, locktype, offset, length, lockOwnerKey)) {
       const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
       const denied = new msg.Nfsv4LockResDenied(offset, length, locktype, conflictOwner);
       return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_LOCKED, undefined, denied);
     }
-    let lockOwnerState = this.lockOwners.get(ownerKey);
+    let lockOwnerState = this.lockOwners.get(lockOwnerKey);
     if (!lockOwnerState) {
       lockOwnerState = new LockOwnerState(lockOwnerData.clientid, lockOwnerData.owner, openToLock.lockSeqid);
-      this.lockOwners.set(ownerKey, lockOwnerState);
+      this.lockOwners.set(lockOwnerKey, lockOwnerState);
     }
     const stateid = this.createStateid();
-    const lock = new ByteRangeLock(stateid, currentPath, locktype, offset, length, ownerKey);
+    const lock = new ByteRangeLock(stateid, currentPath, locktype, offset, length, lockOwnerKey);
     const lockKey = this.makeLockKey(stateid, offset, length);
     this.locks.set(lockKey, lock);
     lockOwnerState.locks.add(lockKey);

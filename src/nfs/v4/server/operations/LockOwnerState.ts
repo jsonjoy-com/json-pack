@@ -32,5 +32,20 @@ export class LockOwnerState {
      * Used to track all active locks and clean them up if the owner goes away.
      */
     public readonly locks: Set<string> = new Set(),
+
+    /**
+     * Cached response from the last successful operation.
+     * Per RFC 7530 §9.1.7, when a client retries with the same seqid (replay),
+     * the server must return the cached response instead of re-executing the operation.
+     * This ensures idempotency for LOCK and LOCKU operations.
+     */
+    public lastResponse?: any,
+
+    /**
+     * Signature of the last request to validate true replays.
+     * Used to detect mismatched replays where the client reuses a seqid but changes
+     * the request parameters, which must be rejected with NFS4ERR_BAD_SEQID.
+     */
+    public lastRequestKey?: string,
   ) {}
 }

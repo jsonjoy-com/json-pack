@@ -20,6 +20,7 @@ export class NfsFsFileHandle extends EventEmitter implements misc.IFileHandle {
     public readonly path: string,
     private readonly client: Nfsv4FsClient,
     private readonly stateid: structs.Nfsv4Stateid,
+    private readonly openOwner: structs.Nfsv4OpenOwner,
   ) {
     super();
     this.fd = fd;
@@ -32,11 +33,7 @@ export class NfsFsFileHandle extends EventEmitter implements misc.IFileHandle {
   async close(): Promise<void> {
     if (this.closed) return;
     this.closed = true;
-    const closeOps: msg.Nfsv4Request[] = [nfs.CLOSE(0, this.stateid)];
-    const response = await this.client.fs.compound(closeOps);
-    if (response.status !== Nfsv4Stat.NFS4_OK) {
-      throw new Error(`Failed to close file: ${response.status}`);
-    }
+    await this.client.closeStateid(this.openOwner, this.stateid);
     this.emit('close');
   }
 

@@ -33,5 +33,20 @@ export class OpenOwnerState {
      * Used to track all active opens and clean them up if the owner goes away.
      */
     public readonly opens: Set<string> = new Set(),
+
+    /**
+     * Cached response from the last successful operation.
+     * Per RFC 7530 §9.1.7, when a client retries with the same seqid (replay),
+     * the server must return the cached response instead of re-executing the operation.
+     * This ensures idempotency for operations like OPEN, OPEN_CONFIRM, OPEN_DOWNGRADE, CLOSE.
+     */
+    public lastResponse?: any,
+
+    /**
+     * Signature of the last OPEN request. Used to distinguish true replays
+     * (identical requests) from clients that reuse seqids with different
+     * parameters, which must be rejected with BAD_SEQID.
+     */
+    public lastRequestKey?: string,
   ) {}
 }

@@ -26,6 +26,25 @@ import {NfsFsFileHandle} from './NfsFsFileHandle';
 export class Nfsv4FsClient implements NfsFsClient {
   constructor(public readonly fs: Nfsv4Client) {}
 
+  private readonly openOwnerSeqids: Map<string, number> = new Map();
+  private readonly defaultOpenOwnerId = new Uint8Array([1, 2, 3, 4]);
+
+  private makeOpenOwnerKey(owner: structs.Nfsv4OpenOwner): string {
+    return `${owner.clientid}:${Buffer.from(owner.owner).toString('hex')}`;
+  }
+
+  private nextOpenOwnerSeqid(owner: structs.Nfsv4OpenOwner): number {
+    const key = this.makeOpenOwnerKey(owner);
+    const last = this.openOwnerSeqids.get(key);
+    const next = last === undefined ? 0 : last === 0xffffffff ? 1 : (last + 1) >>> 0;
+    this.openOwnerSeqids.set(key, next);
+    return next;
+  }
+
+  private createDefaultOpenOwner(): structs.Nfsv4OpenOwner {
+    return nfs.OpenOwner(BigInt(1), new Uint8Array(this.defaultOpenOwnerId));
+  }
+
   private attrNumsToBitmap(attrNums: number[]): number[] {
     const bitmap: number[] = [];
     for (const attrNum of attrNums) {
@@ -74,6 +93,17 @@ export class Nfsv4FsClient implements NfsFsClient {
     return new TextDecoder(encoding).decode(data);
   }
 
+  public readonly closeStateid = async (
+    openOwner: structs.Nfsv4OpenOwner,
+    stateid: structs.Nfsv4Stateid,
+  ): Promise<void> => {
+    const seqid = this.nextOpenOwnerSeqid(openOwner);
+    const response = await this.fs.compound([nfs.CLOSE(seqid, stateid)]);
+    if (response.status !== Nfsv4Stat.NFS4_OK) {
+      throw new Error(`Failed to close file: ${response.status}`);
+    }
+  };
+
   public readonly readFile = async (
     id: misc.TFileHandle,
     options?: opts.IReadFileOptions | string,
@@ -83,11 +113,12 @@ export class Nfsv4FsClient implements NfsFsClient {
     const parts = this.parsePath(path);
     const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
-    const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
+    const openOwner = this.createDefaultOpenOwner();
     const claim = nfs.OpenClaimNull(filename);
+    const openSeqid = this.nextOpenOwnerSeqid(openOwner);
     operations.push(
       nfs.OPEN(
-        0,
+        openSeqid,
         Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
         Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
         openOwner,
@@ -124,7 +155,7 @@ export class Nfsv4FsClient implements NfsFsClient {
         if (readRes.resok.eof) break;
       }
     } finally {
-      await this.fs.compound([nfs.CLOSE(0, stateid)]);
+      await this.closeStateid(openOwner, stateid);
     }
     const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
     const result = new Uint8Array(totalLength);
@@ -145,11 +176,12 @@ export class Nfsv4FsClient implements NfsFsClient {
     const parts = this.parsePath(path);
     const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
-    const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
+    const openOwner = this.createDefaultOpenOwner();
     const claim = nfs.OpenClaimNull(filename);
+    const openSeqid = this.nextOpenOwnerSeqid(openOwner);
     operations.push(
       nfs.OPEN(
-        0,
+        openSeqid,
         Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
         Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
         openOwner,
@@ -192,7 +224,7 @@ export class Nfsv4FsClient implements NfsFsClient {
         offset += BigInt(writeRes.resok.count);
       }
     } finally {
-      await this.fs.compound([nfs.CLOSE(0, openStateid)]);
+      await this.closeStateid(openOwner, openStateid);
     }
   };
 
@@ -401,11 +433,12 @@ export class Nfsv4FsClient implements NfsFsClient {
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
-    const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
+    const openOwner = this.createDefaultOpenOwner();
     const claim = nfs.OpenClaimNull(filename);
+    const openSeqid = this.nextOpenOwnerSeqid(openOwner);
     operations.push(
       nfs.OPEN(
-        0,
+        openSeqid,
         Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_WRITE,
         Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
         openOwner,
@@ -453,7 +486,7 @@ export class Nfsv4FsClient implements NfsFsClient {
         offset += BigInt(writeRes.resok.count);
       }
     } finally {
-      await this.fs.compound([nfs.CLOSE(0, openStateid)]);
+      await this.closeStateid(openOwner, openStateid);
     }
   };
 
@@ -814,10 +847,10 @@ export class Nfsv4FsClient implements NfsFsClient {
     const parts = this.parsePath(pathStr);
     const operations = this.navigateToParent(parts);
     const filename = parts[parts.length - 1];
-    const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
+    const openOwner = this.createDefaultOpenOwner();
     const claim = nfs.OpenClaimNull(filename);
     let access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ;
-    const openFlags = 0;
+    const openSeqid = this.nextOpenOwnerSeqid(openOwner);
     if (typeof flags === 'string') {
       if (flags.includes('r') && flags.includes('+')) {
         access = Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH;
@@ -846,7 +879,7 @@ export class Nfsv4FsClient implements NfsFsClient {
       }
     }
     operations.push(
-      nfs.OPEN(openFlags, access, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), claim),
+      nfs.OPEN(openSeqid, access, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), claim),
     );
     const openResponse = await this.fs.compound(operations);
     if (openResponse.status !== Nfsv4Stat.NFS4_OK) {
@@ -858,7 +891,7 @@ export class Nfsv4FsClient implements NfsFsClient {
     }
     const stateid = openRes.resok.stateid;
     const fd = Math.floor(Math.random() * 1000000);
-    return new NfsFsFileHandle(fd, pathStr, this, stateid);
+    return new NfsFsFileHandle(fd, pathStr, this, stateid, openOwner);
   };
 
   public readonly statfs = (path: misc.PathLike, options?: opts.IStatOptions): Promise<misc.IStatFs> => {

@@ -97,9 +97,16 @@ export class Nfsv4FsClient implements NfsFsClient {
     openOwner: structs.Nfsv4OpenOwner,
     stateid: structs.Nfsv4Stateid,
   ): Promise<void> => {
+    const key = this.makeOpenOwnerKey(openOwner);
+    const previousSeqid = this.openOwnerSeqids.get(key);
     const seqid = this.nextOpenOwnerSeqid(openOwner);
     const response = await this.fs.compound([nfs.CLOSE(seqid, stateid)]);
     if (response.status !== Nfsv4Stat.NFS4_OK) {
+      if (previousSeqid !== undefined) {
+        this.openOwnerSeqids.set(key, previousSeqid);
+      } else {
+        this.openOwnerSeqids.delete(key);
+      }
       throw new Error(`Failed to close file: ${response.status}`);
     }
   };

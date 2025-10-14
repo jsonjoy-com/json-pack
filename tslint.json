@@ -11,6 +11,7 @@
     "no-unnecessary-initializer": false,
     "no-this-assignment": false,
     "no-duplicate-imports": false,
+    "no-invalid-this": false,
     "no-angle-bracket-type-assertion": false,
     "ban-comma-operator": false,
     "no-unused-expression": false,

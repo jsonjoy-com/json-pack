@@ -575,6 +575,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         }
       }
     }
+    ownerState.seqid = request.seqid;
     if (request.claim.claimType !== Nfsv4OpenClaimType.CLAIM_NULL) {
       return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_NOTSUPP);
     }
@@ -630,7 +631,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       );
       this.openFiles.set(stateidKey, openFile);
       ownerState.opens.add(stateidKey);
-      ownerState.seqid = request.seqid;
       const fh = this.fh.encode(filePath);
       ctx.cfh = fh;
       const cinfo = new struct.Nfsv4ChangeInfo(true, 0n, 0n);
@@ -664,8 +664,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const resok = new msg.Nfsv4OpenConfirmResOk(newStateid);
       return new msg.Nfsv4OpenConfirmResponse(Nfsv4Stat.NFS4_OK, resok);
     }
-    openFile.confirmed = true;
     ownerState.seqid = request.seqid;
+    openFile.confirmed = true;
     const newSeqid = this.nextStateidSeqid++;
     const newStateid = new struct.Nfsv4Stateid(newSeqid, openFile.stateid.other);
     const oldKey = stateidKey;
@@ -704,9 +704,9 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const resok = new msg.Nfsv4OpenDowngradeResOk(newStateid);
       return new msg.Nfsv4OpenDowngradeResponse(Nfsv4Stat.NFS4_OK, resok);
     }
+    ownerState.seqid = request.seqid;
     if ((request.shareAccess & ~openFile.shareAccess) !== 0) throw Nfsv4Stat.NFS4ERR_INVAL;
     if ((request.shareDeny & ~openFile.shareDeny) !== 0) throw Nfsv4Stat.NFS4ERR_INVAL;
-    ownerState.seqid = request.seqid;
     const newSeqid = this.nextStateidSeqid++;
     const newStateid = new struct.Nfsv4Stateid(newSeqid, openFile.stateid.other);
     const oldKey = stateidKey;
@@ -749,6 +749,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       const resok = new msg.Nfsv4CloseResOk(newStateid);
       return new msg.Nfsv4CloseResponse(Nfsv4Stat.NFS4_OK, resok);
     }
+    ownerState.seqid = request.seqid;
     try {
       const handle = openFile.fd as any;
       if (handle && typeof handle.close === 'function') {
@@ -760,7 +761,6 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         return new msg.Nfsv4CloseResponse(status);
       }
     }
-    ownerState.seqid = request.seqid;
     ownerState.opens.delete(stateidKey);
     if (ownerState.opens.size === 0) {
       this.openOwners.delete(openFile.openOwnerKey);

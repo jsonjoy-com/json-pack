@@ -614,7 +614,10 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     } else {
       const seqidValidation = this.validateSeqid(request.seqid, ownerState.seqid);
       if (seqidValidation === 'invalid') {
-        if (request.seqid !== 0) {
+        if (request.seqid === 0) {
+          ownerState.seqid = 0;
+          previousSeqid = 0;
+        } else {
           return new msg.Nfsv4OpenResponse(Nfsv4Stat.NFS4ERR_BAD_SEQID);
         }
       } else if (seqidValidation === 'replay') {

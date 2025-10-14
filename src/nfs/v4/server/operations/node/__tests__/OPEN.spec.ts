@@ -210,4 +210,45 @@ describe('OPEN operation', () => {
     expect(openRes.status).toBe(Nfsv4Stat.NFS4ERR_NOTSUPP);
     await stop();
   });
+
+  test('allows seqid=0 to reset open-owner state after desync', async () => {
+    const {client, stop} = await setupNfsClientServerTestbed();
+    const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
+    const claim = nfs.OpenClaimNull('file.txt');
+    const openReq1 = nfs.OPEN(
+      0,
+      Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
+      Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+      openOwner,
+      nfs.OpenHowNoCreate(),
+      claim,
+    );
+    const response1 = await client.compound([nfs.PUTROOTFH(), openReq1]);
+    expect(response1.status).toBe(Nfsv4Stat.NFS4_OK);
+    const openRes1 = response1.resarray[1] as msg.Nfsv4OpenResponse;
+    expect(openRes1.status).toBe(Nfsv4Stat.NFS4_OK);
+    const openReq2 = nfs.OPEN(
+      100,
+      Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
+      Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+      openOwner,
+      nfs.OpenHowNoCreate(),
+      claim,
+    );
+    const response2 = await client.compound([nfs.PUTROOTFH(), openReq2]);
+    const openRes2 = response2.resarray[1] as msg.Nfsv4OpenResponse;
+    expect(openRes2.status).toBe(Nfsv4Stat.NFS4ERR_BAD_SEQID);
+    const openReq3 = nfs.OPEN(
+      0,
+      Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_READ,
+      Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+      openOwner,
+      nfs.OpenHowNoCreate(),
+      claim,
+    );
+    const response3 = await client.compound([nfs.PUTROOTFH(), openReq3]);
+    const openRes3 = response3.resarray[1] as msg.Nfsv4OpenResponse;
+    expect(openRes3.status).toBe(Nfsv4Stat.NFS4_OK);
+    await stop();
+  });
 });

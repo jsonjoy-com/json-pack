@@ -16,7 +16,7 @@ describe('RENAME operation', () => {
     vol.writeFileSync('/export/file.txt', 'data');
     // Simulate EXDEV by calling rename with invalid target outside export
     const res = await client.compound([nfs.PUTROOTFH(), nfs.SAVEFH(), nfs.RENAME('file.txt', '../outside.txt')]);
-    expect(res.status).toBe(Nfsv4Stat.NFS4ERR_XDEV);
+    expect(res.status).toBe(Nfsv4Stat.NFS4ERR_NOENT);
     await stop();
   });
 });

@@ -1159,12 +1159,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     const oldFull = NodePath.join(savedPathAbsolute, request.oldname);
     const newFull = NodePath.join(currentPathAbsolute, request.newname);
     if (oldFull.length < this.dir.length || newFull.length < this.dir.length) throw Nfsv4Stat.NFS4ERR_NOENT;
-    // Ensure both paths are inside the server root. If target escapes, return XDEV.
-    if (!(oldFull === this.dir || oldFull.startsWith(this.dir + NodePath.sep)))
-      return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);
-    if (!(newFull === this.dir || newFull.startsWith(this.dir + NodePath.sep)))
-      return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_XDEV);
-    // Now map to absolute paths (this.absolutePath will validate existence and path)
+    if (!oldFull.startsWith(this.dir)) return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_NOENT);
+    if (!newFull.startsWith(this.dir)) return new msg.Nfsv4RenameResponse(Nfsv4Stat.NFS4ERR_NOENT);
     let oldPath: string;
     let newPath: string;
     try {

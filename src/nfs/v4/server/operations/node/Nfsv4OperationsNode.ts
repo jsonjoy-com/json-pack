@@ -22,6 +22,7 @@ import {OpenFileState} from '../OpenFileState';
 import {OpenOwnerState} from '../OpenOwnerState';
 import {LockOwnerState} from '../LockOwnerState';
 import {ByteRangeLock} from '../ByteRangeLock';
+import {LockStateid} from '../LockStateid';
 import {FilesystemStats} from '../FilesystemStats';
 import {FileHandleMapper, ROOT_FH} from './fh';
 import {isErrCode, normalizeNodeFsError} from './util';
@@ -103,6 +104,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
   protected locks: Map<string, ByteRangeLock> = new Map();
   /** Map from lock-owner key to lock-owner state. */
   protected lockOwners: Map<string, LockOwnerState> = new Map();
+  /** Map from lock stateid 'other' field to lock stateid state. Per RFC 7530, one stateid per lock-owner per file. */
+  protected lockStateids: Map<string, LockStateid> = new Map();
 
   /**
    * Server-wide monotonic change counter for directory change_info.
@@ -244,6 +247,28 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   protected makeLockKey(stateid: struct.Nfsv4Stateid, offset: bigint, length: bigint): string {
     return `${this.makeStateidKey(stateid)}:${offset}:${length}`;
+  }
+
+  protected makeLockStateidKey(lockOwnerKey: string, path: string): string {
+    return `${lockOwnerKey}:${path}`;
+  }
+
+  protected getOrCreateLockStateid(lockOwnerKey: string, path: string): LockStateid {
+    const key = this.makeLockStateidKey(lockOwnerKey, path);
+    let lockStateid = this.lockStateids.get(key);
+    if (!lockStateid) {
+      const other = randomBytes(12);
+      lockStateid = new LockStateid(other, 1, lockOwnerKey, path);
+      this.lockStateids.set(key, lockStateid);
+      const otherKey = Buffer.from(other).toString('hex');
+      this.lockStateids.set(otherKey, lockStateid);
+    }
+    return lockStateid;
+  }
+
+  protected findLockStateidByOther(other: Uint8Array): LockStateid | undefined {
+    const otherKey = Buffer.from(other).toString('hex');
+    return this.lockStateids.get(otherKey);
   }
 
   protected hasConflictingLock(
@@ -950,7 +975,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
         const denied = new msg.Nfsv4LockResDenied(offset, length, locktype, conflictOwner);
         return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_LOCKED, undefined, denied);
       }
-      const stateid = this.createStateid();
+      const lockStateid = this.getOrCreateLockStateid(existingLockOwnerKey, currentPath);
+      const stateid = lockStateid.incrementAndGetStateid();
       const lock = new ByteRangeLock(stateid, currentPath, locktype, offset, length, existingLockOwnerKey);
       const lockKey = this.makeLockKey(stateid, offset, length);
       this.locks.set(lockKey, lock);
@@ -1027,7 +1053,8 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       }
     }
     lockOwnerState.seqid = openToLock.lockSeqid;
-    const stateid = this.createStateid();
+    const lockStateid = this.getOrCreateLockStateid(lockOwnerKey, currentPath);
+    const stateid = lockStateid.incrementAndGetStateid();
     const lock = new ByteRangeLock(stateid, currentPath, locktype, offset, length, lockOwnerKey);
     const lockKey = this.makeLockKey(stateid, offset, length);
     this.locks.set(lockKey, lock);
@@ -1053,43 +1080,16 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
 
   public async LOCKU(request: msg.Nfsv4LockuRequest, ctx: Nfsv4OperationCtx): Promise<msg.Nfsv4LockuResponse> {
     const {lockStateid, offset, length, seqid} = request;
-    const lockKey = this.makeLockKey(lockStateid, offset, length);
-    const stateidKey = this.makeStateidKey(lockStateid);
-    const lock = this.locks.get(lockKey);
-    let ownerKey: string | undefined;
-    let lockOwnerState: LockOwnerState | undefined;
-    if (lock) {
-      ownerKey = lock.lockOwnerKey;
-      lockOwnerState = this.lockOwners.get(ownerKey);
-      if (!lockOwnerState) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
-      this.renewClientLease(lockOwnerState.clientid);
-    } else {
-      const suffix = `:${stateidKey}:${offset.toString()}:${length.toString()}:${seqid}`;
-      for (const [candidateKey, candidateState] of this.lockOwners.entries()) {
-        const lastKey = candidateState.lastRequestKey;
-        if (lastKey && lastKey.startsWith('LOCKU:') && lastKey.endsWith(suffix)) {
-          lockOwnerState = candidateState;
-          ownerKey = candidateKey;
-          break;
-        }
-      }
-      if (!lockOwnerState) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
-      this.renewClientLease(lockOwnerState.clientid);
-    }
-    const requestKey = this.makeLockuRequestKey(ownerKey!, lockStateid, offset, length, seqid);
+    const lockStateidState = this.findLockStateidByOther(lockStateid.other);
+    if (!lockStateidState) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
+    const ownerKey = lockStateidState.lockOwnerKey;
+    const lockOwnerState = this.lockOwners.get(ownerKey);
+    if (!lockOwnerState) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
+    this.renewClientLease(lockOwnerState.clientid);
+    const currentPath = this.fh.currentPath(ctx);
+    if (lockStateidState.path !== currentPath) throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
+    const requestKey = this.makeLockuRequestKey(ownerKey, lockStateid, offset, length, seqid);
     const seqidValidation = this.validateSeqid(seqid, lockOwnerState.seqid);
-    if (!lock) {
-      if (seqidValidation === 'replay') {
-        if (lockOwnerState.lastRequestKey === requestKey && lockOwnerState.lastResponse) {
-          return lockOwnerState.lastResponse;
-        }
-        throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
-      }
-      if (seqidValidation === 'invalid') {
-        throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
-      }
-      throw Nfsv4Stat.NFS4ERR_BAD_STATEID;
-    }
     if (seqidValidation === 'invalid') {
       throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
     }
@@ -1100,9 +1100,13 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       throw Nfsv4Stat.NFS4ERR_BAD_SEQID;
     }
     lockOwnerState.seqid = seqid;
-    this.locks.delete(lockKey);
-    lockOwnerState.locks.delete(lockKey);
-    const stateid = this.createStateid();
+    const lockKey = this.makeLockKey(lockStateid, offset, length);
+    const lock = this.locks.get(lockKey);
+    if (lock) {
+      this.locks.delete(lockKey);
+      lockOwnerState.locks.delete(lockKey);
+    }
+    const stateid = lockStateidState.incrementAndGetStateid();
     const resok = new msg.Nfsv4LockuResOk(stateid);
     const response = new msg.Nfsv4LockuResponse(Nfsv4Stat.NFS4_OK, resok);
     lockOwnerState.lastResponse = response;

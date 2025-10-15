@@ -200,6 +200,10 @@ export const STAT_ATTRS = new Set<Nfsv4Attr>([
   Nfsv4Attr.FATTR4_TIME_MODIFY,
 ]);
 
+/**
+ * Attributes that require filesystem stats (e.g. disk space).
+ * If none of these are requested, we can skip the filesystem stats call.
+ */
 export const FS_ATTRS = new Set<Nfsv4Attr>([
   Nfsv4Attr.FATTR4_FILES_AVAIL,
   Nfsv4Attr.FATTR4_FILES_FREE,

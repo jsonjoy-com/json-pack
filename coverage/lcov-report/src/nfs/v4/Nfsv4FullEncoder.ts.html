@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/nfs/v4/FullNfsv4Encoder.ts</title>
+    <title>Code coverage report for src/nfs/v4/Nfsv4FullEncoder.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../../prettify.css" />
     <link rel="stylesheet" href="../../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/nfs/v4</a> FullNfsv4Encoder.ts</h1>
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">src/nfs/v4</a> Nfsv4FullEncoder.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">89.58% </span>
+                <span class="strong">68.18% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>43/48</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">75% </span>
-                <span class="quiet">Branches</span>
-                <span class='fraction'>3/4</span>
+                <span class='fraction'>30/44</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
-                <span class="quiet">Functions</span>
-                <span class='fraction'>8/8</span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">89.58% </span>
+                <span class="strong">63.63% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>7/11</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">68.18% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>43/48</span>
+                <span class='fraction'>30/44</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -181,42 +181,31 @@
 <a name='L116'></a><a href='#L116'>116</a>
 <a name='L117'></a><a href='#L117'>117</a>
 <a name='L118'></a><a href='#L118'>118</a>
-<a name='L119'></a><a href='#L119'>119</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-yes">26x</span>
+<span class="cline-any cline-yes">26x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -224,14 +213,60 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">26x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">572x</span>
+<span class="cline-any cline-yes">572x</span>
+<span class="cline-any cline-yes">572x</span>
+<span class="cline-any cline-yes">572x</span>
+<span class="cline-any cline-yes">572x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">765x</span>
+<span class="cline-any cline-yes">765x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">765x</span>
+<span class="cline-any cline-yes">765x</span>
+<span class="cline-any cline-yes">765x</span>
+<span class="cline-any cline-yes">765x</span>
+<span class="cline-any cline-yes">765x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">759x</span>
+<span class="cline-any cline-yes">759x</span>
+<span class="cline-any cline-yes">759x</span>
+<span class="cline-any cline-yes">759x</span>
+<span class="cline-any cline-yes">759x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -254,8 +289,6 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -264,8 +297,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -274,22 +309,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -299,31 +319,50 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Writer} from '@jsonjoy.com/util/lib/buffers/Writer';
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {Writer} from '@jsonjoy.com/buffers/lib/Writer';
 import {Nfsv4Encoder} from './Nfsv4Encoder';
 import {RpcMessageEncoder} from '../../rpc/RpcMessageEncoder';
 import {RmRecordEncoder} from '../../rm/RmRecordEncoder';
-import {Nfsv4Proc, Nfsv4Const} from './constants';
+import {Nfsv4Proc, Nfsv4CbProc, Nfsv4Const} from './constants';
 import {RpcOpaqueAuth} from '../../rpc/messages';
 import {RpcAcceptStat} from '../../rpc/constants';
+import {XdrEncoder} from '../../xdr';
 import type * as msg from './messages';
 import type {IWriter, IWriterGrowable} from '@jsonjoy.com/util/lib/buffers';
 &nbsp;
-const MAX_SINGLE_FRAME_SIZE = 0x7fffffff;
-const RM_HEADER_SIZE = 4;
+export class Nfsv4FullEncoder&lt;W extends IWriter &amp; IWriterGrowable = IWriter &amp; IWriterGrowable&gt; {
+  public readonly nfsEncoder: Nfsv4Encoder&lt;W&gt;;
+  public readonly rpcEncoder: RpcMessageEncoder&lt;W&gt;;
+  public readonly rmEncoder: RmRecordEncoder&lt;W&gt;;
+  public readonly xdr: XdrEncoder;
 &nbsp;
-export class FullNfsv4Encoder&lt;W extends IWriter &amp; IWriterGrowable = IWriter &amp; IWriterGrowable&gt; {
-  protected readonly nfsEncoder: Nfsv4Encoder&lt;W&gt;;
-  protected readonly rpcEncoder: RpcMessageEncoder&lt;W&gt;;
-  protected readonly rmEncoder: RmRecordEncoder&lt;W&gt;;
-&nbsp;
-  constructor(
-    public program: number = Nfsv4Const.PROGRAM,
-    public readonly writer: W = new Writer() as any,
-  ) {
+  constructor(public readonly writer: W = new Writer() as any) {
     this.nfsEncoder = new Nfsv4Encoder(writer);
     this.rpcEncoder = new RpcMessageEncoder(writer);
     this.rmEncoder = new RmRecordEncoder(writer);
+    this.xdr = this.nfsEncoder.xdr;
   }
 &nbsp;
   public encodeCall(
@@ -344,36 +383,29 @@ export class FullNfsv4Encoder&lt;W extends IWriter &amp; IWriterGrowable = IWrit
     verf: RpcOpaqueAuth,
     request: msg.Nfsv4CompoundRequest,
   ): void {
-    const writer = this.writer;
-    const rmHeaderPosition = writer.x;
-    writer.x += RM_HEADER_SIZE;
+    const rm = this.rmEncoder;
+    const state = rm.startRecord();
     this.rpcEncoder.writeCall(xid, Nfsv4Const.PROGRAM, Nfsv4Const.VERSION, proc, cred, verf);
     this.nfsEncoder.writeCompound(request, true);
-    this.writeRmHeader(rmHeaderPosition, writer.x);
+    rm.endRecord(state);
   }
 &nbsp;
-  public encodeAcceptedReply(
+  public encodeAcceptedCompoundReply(
     xid: number,
     proc: Nfsv4Proc,
     verf: RpcOpaqueAuth,
     response: msg.Nfsv4CompoundResponse,
   ): Uint8Array {
-    this.writeAcceptedReply(xid, proc, verf, response);
+    this.writeAcceptedCompoundReply(xid, verf, response);
     return this.writer.flush();
   }
 &nbsp;
-  public writeAcceptedReply(
-    xid: number,
-    proc: Nfsv4Proc,
-    verf: RpcOpaqueAuth,
-    response: msg.Nfsv4CompoundResponse,
-  ): void {
-    const writer = this.writer;
-    const rmHeaderPosition = writer.x;
-    writer.x += RM_HEADER_SIZE;
+  public writeAcceptedCompoundReply(xid: number, verf: RpcOpaqueAuth, compound: msg.Nfsv4CompoundResponse): void {
+    const rm = this.rmEncoder;
+    const state = rm.startRecord();
     this.rpcEncoder.writeAcceptedReply(xid, verf, RpcAcceptStat.SUCCESS);
-    this.nfsEncoder.writeCompound(response, false);
-    this.writeRmHeader(rmHeaderPosition, writer.x);
+    compound.encode(this.xdr);
+    rm.endRecord(state);
   }
 &nbsp;
   public encodeRejectedReply(
@@ -392,29 +424,60 @@ export class FullNfsv4Encoder&lt;W extends IWriter &amp; IWriterGrowable = IWrit
     mismatchInfo?: {low: number; high: number},
     authStat?: number,
   ): void {
-    const writer = this.writer;
-    const rmHeaderPosition = writer.x;
-    writer.x += RM_HEADER_SIZE;
+    const rm = this.rmEncoder;
+    const state = rm.startRecord();
     this.rpcEncoder.writeRejectedReply(xid, rejectStat, mismatchInfo, authStat);
-    this.writeRmHeader(rmHeaderPosition, writer.x);
+    rm.endRecord(state);
   }
 &nbsp;
-  private writeRmHeader(rmHeaderPosition: number, endPosition: number): void {
-    const writer = this.writer;
-    const rmEncoder = this.rmEncoder;
-    const totalSize = endPosition - rmHeaderPosition - RM_HEADER_SIZE;
-    if (totalSize &lt;= MAX_SINGLE_FRAME_SIZE) {
-      const currentX = writer.x;
-      writer.x = rmHeaderPosition;
-      rmEncoder.writeHdr(1, totalSize);
-      writer.x = currentX;
-    } else <span class="missing-if-branch" title="else path not taken" >E</span>{
-      const currentX = <span class="cstat-no" title="statement not covered" >writer.x;</span>
-<span class="cstat-no" title="statement not covered" >      writer.x = rmHeaderPosition;</span>
-      const data = <span class="cstat-no" title="statement not covered" >writer.uint8.subarray(rmHeaderPosition + RM_HEADER_SIZE, currentX);</span>
-<span class="cstat-no" title="statement not covered" >      writer.reset();</span>
-<span class="cstat-no" title="statement not covered" >      rmEncoder.writeRecord(data);</span>
-    }
+  public <span class="fstat-no" title="function not covered" >encodeCbCall(</span>
+    xid: number,
+    cbProgram: number,
+    proc: Nfsv4CbProc,
+    cred: RpcOpaqueAuth,
+    verf: RpcOpaqueAuth,
+    request: msg.Nfsv4CbCompoundRequest,
+  ): Uint8Array {
+<span class="cstat-no" title="statement not covered" >    this.writeCbCall(xid, cbProgram, proc, cred, verf, request);</span>
+<span class="cstat-no" title="statement not covered" >    return this.writer.flush();</span>
+  }
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >writeCbCall(</span>
+    xid: number,
+    cbProgram: number,
+    proc: Nfsv4CbProc,
+    cred: RpcOpaqueAuth,
+    verf: RpcOpaqueAuth,
+    request: msg.Nfsv4CbCompoundRequest,
+  ): void {
+    const rm = <span class="cstat-no" title="statement not covered" >this.rmEncoder;</span>
+    const state = <span class="cstat-no" title="statement not covered" >rm.startRecord();</span>
+<span class="cstat-no" title="statement not covered" >    this.rpcEncoder.writeCall(xid, cbProgram, Nfsv4Const.VERSION, proc, cred, verf);</span>
+<span class="cstat-no" title="statement not covered" >    this.nfsEncoder.writeCbCompound(request, true);</span>
+<span class="cstat-no" title="statement not covered" >    rm.endRecord(state);</span>
+  }
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >encodeCbAcceptedReply(</span>
+    xid: number,
+    proc: Nfsv4CbProc,
+    verf: RpcOpaqueAuth,
+    response: msg.Nfsv4CbCompoundResponse,
+  ): Uint8Array {
+<span class="cstat-no" title="statement not covered" >    this.writeCbAcceptedReply(xid, proc, verf, response);</span>
+<span class="cstat-no" title="statement not covered" >    return this.writer.flush();</span>
+  }
+&nbsp;
+  public <span class="fstat-no" title="function not covered" >writeCbAcceptedReply(</span>
+    xid: number,
+    proc: Nfsv4CbProc,
+    verf: RpcOpaqueAuth,
+    response: msg.Nfsv4CbCompoundResponse,
+  ): void {
+    const rm = <span class="cstat-no" title="statement not covered" >this.rmEncoder;</span>
+    const state = <span class="cstat-no" title="statement not covered" >rm.startRecord();</span>
+<span class="cstat-no" title="statement not covered" >    this.rpcEncoder.writeAcceptedReply(xid, verf, RpcAcceptStat.SUCCESS);</span>
+<span class="cstat-no" title="statement not covered" >    this.nfsEncoder.writeCbCompound(response, false);</span>
+<span class="cstat-no" title="statement not covered" >    rm.endRecord(state);</span>
   }
 }
 &nbsp;</pre></td></tr></table></pre>
@@ -424,7 +487,7 @@ export class FullNfsv4Encoder&lt;W extends IWriter &amp; IWriterGrowable = IWrit
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-09T11:51:26.290Z
+                at 2025-10-15T11:52:45.584Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

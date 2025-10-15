@@ -1,4 +1,4 @@
-import type {XdrEncoder, XdrType} from '../../xdr';
+import type {XdrDecoder, XdrEncoder, XdrType} from '../../xdr';
 import type {Nfsv4FType, Nfsv4TimeHow, Nfsv4DelegType} from './constants';
 
 /**
@@ -72,6 +72,12 @@ export class Nfsv4Fsid implements XdrType {
  * Stateid structure for state management
  */
 export class Nfsv4Stateid implements XdrType {
+  static decode(xdr: XdrDecoder): Nfsv4Stateid {
+    const seqid = xdr.readUnsignedInt();
+    const other = xdr.readOpaque(12);
+    return new Nfsv4Stateid(seqid, other);
+  }
+
   constructor(
     public readonly seqid: number,
     public readonly other: Uint8Array,

@@ -1,6 +1,6 @@
 import {Nfsv4Stat, type Nfsv4LockType, Nfsv4Op, Nfsv4CbOp} from './constants';
-import type {XdrEncoder, XdrType} from '../../xdr';
-import type * as structs from './structs';
+import * as structs from './structs';
+import type {XdrDecoder, XdrEncoder, XdrType} from '../../xdr';
 
 export type Nfsv4Operation = Nfsv4Request | Nfsv4Response;
 
@@ -85,6 +85,11 @@ export type Nfsv4Response =
   | Nfsv4IllegalResponse;
 
 export class Nfsv4AccessRequest implements XdrType {
+  static decode(xdr: XdrDecoder): Nfsv4AccessRequest {
+    const access = xdr.readUnsignedInt();
+    return new Nfsv4AccessRequest(access);
+  }
+
   constructor(public readonly access: number) {}
 
   encode(xdr: XdrEncoder): void {
@@ -119,6 +124,12 @@ export class Nfsv4AccessResponse implements XdrType {
 }
 
 export class Nfsv4CloseRequest {
+  static decode(xdr: XdrDecoder): Nfsv4CloseRequest {
+    const seqid = xdr.readUnsignedInt();
+    const openStateid = structs.Nfsv4Stateid.decode(xdr);
+    return new Nfsv4CloseRequest(seqid, openStateid);
+  }
+
   constructor(
     public readonly seqid: number,
     public readonly openStateid: structs.Nfsv4Stateid,
@@ -153,6 +164,12 @@ export class Nfsv4CloseResponse implements XdrType {
 }
 
 export class Nfsv4CommitRequest implements XdrType {
+  public static decode(xdr: XdrDecoder): Nfsv4CommitRequest {
+    const offset = xdr.readUnsignedHyper();
+    const count = xdr.readUnsignedInt();
+    return new Nfsv4CommitRequest(offset, count);
+  }
+
   constructor(
     public readonly offset: bigint,
     public readonly count: number,
@@ -227,6 +244,11 @@ export class Nfsv4CreateResponse implements XdrType {
 }
 
 export class Nfsv4DelegpurgeRequest implements XdrType {
+  static decode(xdr: XdrDecoder): Nfsv4DelegpurgeRequest {
+    const clientid = xdr.readUnsignedHyper();
+    return new Nfsv4DelegpurgeRequest(clientid);
+  }
+
   constructor(public readonly clientid: bigint) {}
 
   encode(xdr: XdrEncoder): void {
@@ -245,6 +267,11 @@ export class Nfsv4DelegpurgeResponse implements XdrType {
 }
 
 export class Nfsv4DelegreturnRequest implements XdrType {
+  static decode(xdr: XdrDecoder): Nfsv4DelegreturnRequest {
+    const delegStateid = structs.Nfsv4Stateid.decode(xdr);
+    return new Nfsv4DelegreturnRequest(delegStateid);
+  }
+
   constructor(public readonly delegStateid: structs.Nfsv4Stateid) {}
 
   encode(xdr: XdrEncoder): void {
@@ -720,6 +747,11 @@ export class Nfsv4PutpubfhRequest implements XdrType {
 }
 
 export class Nfsv4PutpubfhResponse implements XdrType {
+  static decode(xdr: XdrDecoder): Nfsv4PutpubfhResponse {
+    const status = xdr.readUnsignedInt();
+    return new Nfsv4PutpubfhResponse(status);
+  }
+
   constructor(public readonly status: Nfsv4Stat) {}
 
   encode(xdr: XdrEncoder): void {

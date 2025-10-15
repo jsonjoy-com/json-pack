@@ -54,19 +54,20 @@ export class Nfsv4Decoder {
   }
 
   private decodeRequest(op: Nfsv4Op): msg.Nfsv4Request | undefined {
+    const xdr = this.xdr;
     switch (op) {
       case Nfsv4Op.ACCESS:
-        return this.decodeAccessRequest();
+        return msg.Nfsv4AccessRequest.decode(xdr);
       case Nfsv4Op.CLOSE:
-        return this.decodeCloseRequest();
+        return msg.Nfsv4CloseRequest.decode(xdr);
       case Nfsv4Op.COMMIT:
-        return this.decodeCommitRequest();
+        return msg.Nfsv4CommitRequest.decode(xdr);
       case Nfsv4Op.CREATE:
         return this.decodeCreateRequest();
       case Nfsv4Op.DELEGPURGE:
-        return this.decodeDelegpurgeRequest();
+        return msg.Nfsv4DelegpurgeRequest.decode(xdr);
       case Nfsv4Op.DELEGRETURN:
-        return this.decodeDelegreturnRequest();
+        return msg.Nfsv4DelegreturnRequest.decode(xdr);
       case Nfsv4Op.GETATTR:
         return this.decodeGetattrRequest();
       case Nfsv4Op.GETFH:
@@ -96,9 +97,9 @@ export class Nfsv4Decoder {
       case Nfsv4Op.PUTFH:
         return this.decodePutfhRequest();
       case Nfsv4Op.PUTPUBFH:
-        return this.decodePutpubfhRequest();
+        return new msg.Nfsv4PutpubfhRequest();
       case Nfsv4Op.PUTROOTFH:
-        return this.decodePutrootfhRequest();
+        return new msg.Nfsv4PutrootfhRequest();
       case Nfsv4Op.READ:
         return this.decodeReadRequest();
       case Nfsv4Op.READDIR:
@@ -114,7 +115,7 @@ export class Nfsv4Decoder {
       case Nfsv4Op.RESTOREFH:
         return this.decodeRestorefhRequest();
       case Nfsv4Op.SAVEFH:
-        return this.decodeSavefhRequest();
+        return new msg.Nfsv4SavefhRequest();
       case Nfsv4Op.SECINFO:
         return this.decodeSecinfoRequest();
       case Nfsv4Op.SETATTR:
@@ -139,6 +140,7 @@ export class Nfsv4Decoder {
   }
 
   private decodeResponse(op: Nfsv4Op): msg.Nfsv4Response | undefined {
+    const xdr = this.xdr;
     switch (op) {
       case Nfsv4Op.ACCESS:
         return this.decodeAccessResponse();
@@ -181,7 +183,7 @@ export class Nfsv4Decoder {
       case Nfsv4Op.PUTFH:
         return this.decodePutfhResponse();
       case Nfsv4Op.PUTPUBFH:
-        return this.decodePutpubfhResponse();
+        return msg.Nfsv4PutpubfhResponse.decode(xdr);
       case Nfsv4Op.PUTROOTFH:
         return this.decodePutrootfhResponse();
       case Nfsv4Op.READ:
@@ -233,10 +235,7 @@ export class Nfsv4Decoder {
   }
 
   private readStateid(): structs.Nfsv4Stateid {
-    const xdr = this.xdr;
-    const seqid = xdr.readUnsignedInt();
-    const other = xdr.readOpaque(12);
-    return new structs.Nfsv4Stateid(seqid, other);
+    return structs.Nfsv4Stateid.decode(this.xdr);
   }
 
   private readBitmap(): structs.Nfsv4Bitmap {
@@ -429,11 +428,6 @@ export class Nfsv4Decoder {
     return new structs.Nfsv4SecInfoFlavor(flavor);
   }
 
-  private decodeAccessRequest(): msg.Nfsv4AccessRequest {
-    const access = this.xdr.readUnsignedInt();
-    return new msg.Nfsv4AccessRequest(access);
-  }
-
   private decodeAccessResponse(): msg.Nfsv4AccessResponse {
     const xdr = this.xdr;
     const status = xdr.readUnsignedInt();
@@ -459,13 +453,6 @@ export class Nfsv4Decoder {
       return new msg.Nfsv4CloseResponse(status, new msg.Nfsv4CloseResOk(openStateid));
     }
     return new msg.Nfsv4CloseResponse(status);
-  }
-
-  private decodeCommitRequest(): msg.Nfsv4CommitRequest {
-    const xdr = this.xdr;
-    const offset = xdr.readUnsignedHyper();
-    const count = xdr.readUnsignedInt();
-    return new msg.Nfsv4CommitRequest(offset, count);
   }
 
   private decodeCommitResponse(): msg.Nfsv4CommitResponse {
@@ -515,19 +502,9 @@ export class Nfsv4Decoder {
     return new msg.Nfsv4CreateResponse(status);
   }
 
-  private decodeDelegpurgeRequest(): msg.Nfsv4DelegpurgeRequest {
-    const clientid = this.xdr.readUnsignedHyper();
-    return new msg.Nfsv4DelegpurgeRequest(clientid);
-  }
-
   private decodeDelegpurgeResponse(): msg.Nfsv4DelegpurgeResponse {
     const status = this.xdr.readUnsignedInt();
     return new msg.Nfsv4DelegpurgeResponse(status);
-  }
-
-  private decodeDelegreturnRequest(): msg.Nfsv4DelegreturnRequest {
-    const delegStateid = this.readStateid();
-    return new msg.Nfsv4DelegreturnRequest(delegStateid);
   }
 
   private decodeDelegreturnResponse(): msg.Nfsv4DelegreturnResponse {
@@ -748,19 +725,6 @@ export class Nfsv4Decoder {
   private decodePutfhResponse(): msg.Nfsv4PutfhResponse {
     const status = this.xdr.readUnsignedInt();
     return new msg.Nfsv4PutfhResponse(status);
-  }
-
-  private decodePutpubfhRequest(): msg.Nfsv4PutpubfhRequest {
-    return new msg.Nfsv4PutpubfhRequest();
-  }
-
-  private decodePutpubfhResponse(): msg.Nfsv4PutpubfhResponse {
-    const status = this.xdr.readUnsignedInt();
-    return new msg.Nfsv4PutpubfhResponse(status);
-  }
-
-  private decodePutrootfhRequest(): msg.Nfsv4PutrootfhRequest {
-    return new msg.Nfsv4PutrootfhRequest();
   }
 
   private decodePutrootfhResponse(): msg.Nfsv4PutrootfhResponse {

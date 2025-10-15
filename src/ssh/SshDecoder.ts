@@ -1,7 +1,7 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
+import {JsonPackMpint} from '../JsonPackMpint';
 import type {IReader, IReaderResettable} from '@jsonjoy.com/buffers/lib';
 import type {BinaryJsonDecoder} from '../types';
-import {JsonPackMpint} from '../JsonPackMpint';
 
 /**
  * SSH 2.0 binary decoder for SSH protocol data types.

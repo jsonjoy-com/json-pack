@@ -10,7 +10,7 @@ import {
 import {RpcRejectStat, RpcAuthStat} from '../../../rpc/constants';
 import {Nfsv4Encoder} from '../Nfsv4Encoder';
 import {Nfsv4Decoder} from '../Nfsv4Decoder';
-import {FullNfsv4Encoder} from '../FullNfsv4Encoder';
+import {Nfsv4FullEncoder} from '../Nfsv4FullEncoder';
 import {Nfsv4Proc, Nfsv4Stat} from '../constants';
 import * as msg from '../messages';
 import * as structs from '../structs';
@@ -43,7 +43,7 @@ describe('FullNfsv4Encoder', () => {
 
   describe('encoding correctness', () => {
     test('encodes COMPOUND request correctly', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const request = createTestRequest();
       const xid = 12345;
       const proc = Nfsv4Proc.COMPOUND;
@@ -65,7 +65,7 @@ describe('FullNfsv4Encoder', () => {
     });
 
     test('produces same output as separate encoders', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const nfsEncoder = new Nfsv4Encoder();
       const rpcEncoder = new RpcMessageEncoder();
       const rmEncoder = new RmRecordEncoder();
@@ -84,7 +84,7 @@ describe('FullNfsv4Encoder', () => {
 
   describe('encoding with different request types', () => {
     test('encodes LOOKUP request', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const fhData = new Uint8Array([1, 2, 3, 4]);
       const putfh = new msg.Nfsv4PutfhRequest(new structs.Nfsv4Fh(fhData));
       const lookup = new msg.Nfsv4LookupRequest('test.txt');
@@ -110,7 +110,7 @@ describe('FullNfsv4Encoder', () => {
     });
 
     test('encodes READ request', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const fhData = new Uint8Array([1, 2, 3, 4]);
       const putfh = new msg.Nfsv4PutfhRequest(new structs.Nfsv4Fh(fhData));
       const stateid = new structs.Nfsv4Stateid(0, new Uint8Array(12).fill(0));
@@ -139,7 +139,7 @@ describe('FullNfsv4Encoder', () => {
 
   describe('edge cases', () => {
     test('handles empty auth credentials', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const request = createTestRequest();
       const xid = 1;
       const proc = Nfsv4Proc.COMPOUND;
@@ -153,7 +153,7 @@ describe('FullNfsv4Encoder', () => {
     });
 
     test('handles large file handles', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const fhData = new Uint8Array(128).fill(0xff);
       const putfh = new msg.Nfsv4PutfhRequest(new structs.Nfsv4Fh(fhData));
       const getattr = new msg.Nfsv4GetattrRequest(new structs.Nfsv4Bitmap([0]));
@@ -174,7 +174,7 @@ describe('FullNfsv4Encoder', () => {
     });
 
     test('handles empty COMPOUND request', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const request = new msg.Nfsv4CompoundRequest('empty', 0, []);
       const xid = 1;
       const proc = Nfsv4Proc.COMPOUND;
@@ -193,7 +193,7 @@ describe('FullNfsv4Encoder', () => {
 
   describe('response encoding', () => {
     test('encodes COMPOUND success response correctly', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const xid = 12345;
       const proc = Nfsv4Proc.COMPOUND;
       const verf = createTestVerf();
@@ -203,7 +203,7 @@ describe('FullNfsv4Encoder', () => {
         new msg.Nfsv4GetattrResOk(new structs.Nfsv4Fattr(new structs.Nfsv4Bitmap([0]), new Uint8Array())),
       );
       const response = new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4_OK, 'test', [putfhRes, getattrRes]);
-      const encoded = fullEncoder.encodeAcceptedReply(xid, proc, verf, response);
+      const encoded = fullEncoder.encodeAcceptedCompoundReply(xid, proc, verf, response);
       rmDecoder.push(encoded);
       const rmRecord = rmDecoder.readRecord();
       expect(rmRecord).toBeDefined();
@@ -218,7 +218,7 @@ describe('FullNfsv4Encoder', () => {
     });
 
     test('encodes READ success response correctly', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const xid = 54321;
       const proc = Nfsv4Proc.COMPOUND;
       const verf = createTestVerf();
@@ -226,7 +226,7 @@ describe('FullNfsv4Encoder', () => {
       const putfhRes = new msg.Nfsv4PutfhResponse(Nfsv4Stat.NFS4_OK);
       const readRes = new msg.Nfsv4ReadResponse(Nfsv4Stat.NFS4_OK, new msg.Nfsv4ReadResOk(true, data));
       const response = new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4_OK, 'read', [putfhRes, readRes]);
-      const encoded = fullEncoder.encodeAcceptedReply(xid, proc, verf, response);
+      const encoded = fullEncoder.encodeAcceptedCompoundReply(xid, proc, verf, response);
       rmDecoder.push(encoded);
       const rmRecord = rmDecoder.readRecord();
       expect(rmRecord).toBeDefined();
@@ -246,7 +246,7 @@ describe('FullNfsv4Encoder', () => {
     });
 
     test('produces same output as separate encoders for responses', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const nfsEncoder = new Nfsv4Encoder();
       const rpcEncoder = new RpcMessageEncoder();
       const rmEncoder = new RmRecordEncoder();
@@ -259,7 +259,7 @@ describe('FullNfsv4Encoder', () => {
         new msg.Nfsv4GetattrResOk(new structs.Nfsv4Fattr(new structs.Nfsv4Bitmap([0]), new Uint8Array())),
       );
       const response = new msg.Nfsv4CompoundResponse(Nfsv4Stat.NFS4_OK, 'test', [putfhRes, getattrRes]);
-      const fullEncoded = fullEncoder.encodeAcceptedReply(xid, proc, verf, response);
+      const fullEncoded = fullEncoder.encodeAcceptedCompoundReply(xid, proc, verf, response);
       const nfsEncoded = nfsEncoder.encodeCompound(response, false);
       const rpcEncoded = rpcEncoder.encodeAcceptedReply(xid, verf, 0, undefined, nfsEncoded);
       const rmEncoded = rmEncoder.encodeRecord(rpcEncoded);
@@ -269,7 +269,7 @@ describe('FullNfsv4Encoder', () => {
 
   describe('rejected reply encoding', () => {
     test('encodes RPC_MISMATCH rejected reply', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const xid = 99999;
       const encoded = fullEncoder.encodeRejectedReply(xid, RpcRejectStat.RPC_MISMATCH, {low: 4, high: 4});
       rmDecoder.push(encoded);
@@ -286,7 +286,7 @@ describe('FullNfsv4Encoder', () => {
     });
 
     test('encodes AUTH_ERROR rejected reply', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const xid = 88888;
       const encoded = fullEncoder.encodeRejectedReply(
         xid,
@@ -306,7 +306,7 @@ describe('FullNfsv4Encoder', () => {
     });
 
     test('produces same output as separate encoders for rejected replies', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const rpcEncoder = new RpcMessageEncoder();
       const rmEncoder = new RmRecordEncoder();
       const xid = 12345;
@@ -319,7 +319,7 @@ describe('FullNfsv4Encoder', () => {
 
   describe('multi-operation COMPOUND requests', () => {
     test('encodes complex multi-operation COMPOUND', () => {
-      const fullEncoder = new FullNfsv4Encoder();
+      const fullEncoder = new Nfsv4FullEncoder();
       const fhData = new Uint8Array([1, 2, 3, 4]);
       const putfh = new msg.Nfsv4PutfhRequest(new structs.Nfsv4Fh(fhData));
       const lookup = new msg.Nfsv4LookupRequest('file.txt');

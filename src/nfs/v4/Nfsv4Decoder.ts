@@ -1,6 +1,6 @@
 import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
 import {XdrDecoder} from '../../xdr/XdrDecoder';
-import {Nfsv4Op, Nfsv4FType, Nfsv4DelegType} from './constants';
+import {Nfsv4Op, Nfsv4CbOp, Nfsv4FType, Nfsv4DelegType, Nfsv4Stat, Nfsv4CreateMode, Nfsv4OpenFlags} from './constants';
 import {Nfsv4DecodingError} from './errors';
 import * as msg from './messages';
 import * as structs from './structs';
@@ -16,25 +16,16 @@ export class Nfsv4Decoder {
     reader: Reader,
     isRequest: boolean,
   ): msg.Nfsv4CompoundRequest | msg.Nfsv4CompoundResponse | undefined {
-    this.xdr.reader = reader;
-    const startPos = reader.x;
-    try {
-      if (isRequest) {
-        return this.decodeCompoundRequest();
-      } else {
-        return this.decodeCompoundResponse();
-      }
-    } catch (err) {
-      if (err instanceof RangeError) {
-        reader.x = startPos;
-        return undefined;
-      }
-      throw err;
+    if (isRequest) {
+      return this.decodeCompoundRequest(reader);
+    } else {
+      return this.decodeCompoundResponse(reader);
     }
   }
 
-  private decodeCompoundRequest(): msg.Nfsv4CompoundRequest {
+  public decodeCompoundRequest(reader: Reader): msg.Nfsv4CompoundRequest {
     const xdr = this.xdr;
+    xdr.reader = reader;
     const tag = xdr.readString();
     const minorversion = xdr.readUnsignedInt();
     const argarray: msg.Nfsv4Request[] = [];
@@ -47,8 +38,9 @@ export class Nfsv4Decoder {
     return new msg.Nfsv4CompoundRequest(tag, minorversion, argarray);
   }
 
-  private decodeCompoundResponse(): msg.Nfsv4CompoundResponse {
+  public decodeCompoundResponse(reader: Reader): msg.Nfsv4CompoundResponse {
     const xdr = this.xdr;
+    xdr.reader = reader;
     const status = xdr.readUnsignedInt();
     const tag = xdr.readString();
     const resarray: msg.Nfsv4Response[] = [];
@@ -62,19 +54,20 @@ export class Nfsv4Decoder {
   }
 
   private decodeRequest(op: Nfsv4Op): msg.Nfsv4Request | undefined {
+    const xdr = this.xdr;
     switch (op) {
       case Nfsv4Op.ACCESS:
-        return this.decodeAccessRequest();
+        return msg.Nfsv4AccessRequest.decode(xdr);
       case Nfsv4Op.CLOSE:
-        return this.decodeCloseRequest();
+        return msg.Nfsv4CloseRequest.decode(xdr);
       case Nfsv4Op.COMMIT:
-        return this.decodeCommitRequest();
+        return msg.Nfsv4CommitRequest.decode(xdr);
       case Nfsv4Op.CREATE:
         return this.decodeCreateRequest();
       case Nfsv4Op.DELEGPURGE:
-        return this.decodeDelegpurgeRequest();
+        return msg.Nfsv4DelegpurgeRequest.decode(xdr);
       case Nfsv4Op.DELEGRETURN:
-        return this.decodeDelegreturnRequest();
+        return msg.Nfsv4DelegreturnRequest.decode(xdr);
       case Nfsv4Op.GETATTR:
         return this.decodeGetattrRequest();
       case Nfsv4Op.GETFH:
@@ -104,9 +97,9 @@ export class Nfsv4Decoder {
       case Nfsv4Op.PUTFH:
         return this.decodePutfhRequest();
       case Nfsv4Op.PUTPUBFH:
-        return this.decodePutpubfhRequest();
+        return new msg.Nfsv4PutpubfhRequest();
       case Nfsv4Op.PUTROOTFH:
-        return this.decodePutrootfhRequest();
+        return new msg.Nfsv4PutrootfhRequest();
       case Nfsv4Op.READ:
         return this.decodeReadRequest();
       case Nfsv4Op.READDIR:
@@ -122,7 +115,7 @@ export class Nfsv4Decoder {
       case Nfsv4Op.RESTOREFH:
         return this.decodeRestorefhRequest();
       case Nfsv4Op.SAVEFH:
-        return this.decodeSavefhRequest();
+        return new msg.Nfsv4SavefhRequest();
       case Nfsv4Op.SECINFO:
         return this.decodeSecinfoRequest();
       case Nfsv4Op.SETATTR:
@@ -140,11 +133,14 @@ export class Nfsv4Decoder {
       case Nfsv4Op.ILLEGAL:
         return this.decodeIllegalRequest();
       default:
-        throw new Nfsv4DecodingError(`Unknown operation: ${op}`);
+        // Per RFC 7530 §15.2.4, operations 0, 1, 2 are not defined and any
+        // unknown operation code should be treated as ILLEGAL
+        return this.decodeIllegalRequest();
     }
   }
 
   private decodeResponse(op: Nfsv4Op): msg.Nfsv4Response | undefined {
+    const xdr = this.xdr;
     switch (op) {
       case Nfsv4Op.ACCESS:
         return this.decodeAccessResponse();
@@ -187,7 +183,7 @@ export class Nfsv4Decoder {
       case Nfsv4Op.PUTFH:
         return this.decodePutfhResponse();
       case Nfsv4Op.PUTPUBFH:
-        return this.decodePutpubfhResponse();
+        return msg.Nfsv4PutpubfhResponse.decode(xdr);
       case Nfsv4Op.PUTROOTFH:
         return this.decodePutrootfhResponse();
       case Nfsv4Op.READ:
@@ -223,7 +219,8 @@ export class Nfsv4Decoder {
       case Nfsv4Op.ILLEGAL:
         return this.decodeIllegalResponse();
       default:
-        throw new Nfsv4DecodingError(`Unknown operation: ${op}`);
+        // Per RFC 7530 §15.2.4, treat unknown operation codes as ILLEGAL
+        return this.decodeIllegalResponse();
     }
   }
 
@@ -237,24 +234,14 @@ export class Nfsv4Decoder {
     return new structs.Nfsv4Verifier(data);
   }
 
-  // TODO: Why is this not used?
-  private readTime(): structs.Nfsv4Time {
-    const xdr = this.xdr;
-    const seconds = xdr.readHyper();
-    const nseconds = xdr.readUnsignedInt();
-    return new structs.Nfsv4Time(seconds, nseconds);
-  }
-
   private readStateid(): structs.Nfsv4Stateid {
-    const xdr = this.xdr;
-    const seqid = xdr.readUnsignedInt();
-    const other = xdr.readOpaque(12);
-    return new structs.Nfsv4Stateid(seqid, other);
+    return structs.Nfsv4Stateid.decode(this.xdr);
   }
 
   private readBitmap(): structs.Nfsv4Bitmap {
     const xdr = this.xdr;
     const count = xdr.readUnsignedInt();
+    if (count > 8) throw Nfsv4Stat.NFS4ERR_BADXDR;
     const mask: number[] = [];
     for (let i = 0; i < count; i++) mask.push(xdr.readUnsignedInt());
     return new structs.Nfsv4Bitmap(mask);
@@ -355,6 +342,32 @@ export class Nfsv4Decoder {
     }
   }
 
+  private readOpenHow(): structs.Nfsv4OpenHow {
+    const xdr = this.xdr;
+    const opentype = xdr.readUnsignedInt();
+    if (opentype === Nfsv4OpenFlags.OPEN4_NOCREATE) return new structs.Nfsv4OpenHow(opentype);
+    const mode = xdr.readUnsignedInt();
+    switch (mode) {
+      case Nfsv4CreateMode.UNCHECKED4:
+      case Nfsv4CreateMode.GUARDED4: {
+        const createattrs = this.readFattr();
+        return new structs.Nfsv4OpenHow(
+          opentype,
+          new structs.Nfsv4CreateHow(mode, new structs.Nfsv4CreateAttrs(createattrs)),
+        );
+      }
+      case Nfsv4CreateMode.EXCLUSIVE4: {
+        const createverf = this.readVerifier();
+        return new structs.Nfsv4OpenHow(
+          opentype,
+          new structs.Nfsv4CreateHow(mode, new structs.Nfsv4CreateVerf(createverf)),
+        );
+      }
+      default:
+        throw new Nfsv4DecodingError(`Unknown create mode: ${mode}`);
+    }
+  }
+
   private readOpenDelegation(): structs.Nfsv4OpenDelegation {
     const xdr = this.xdr;
     const delegationType = xdr.readUnsignedInt() as Nfsv4DelegType;
@@ -415,11 +428,6 @@ export class Nfsv4Decoder {
     return new structs.Nfsv4SecInfoFlavor(flavor);
   }
 
-  private decodeAccessRequest(): msg.Nfsv4AccessRequest {
-    const access = this.xdr.readUnsignedInt();
-    return new msg.Nfsv4AccessRequest(access);
-  }
-
   private decodeAccessResponse(): msg.Nfsv4AccessResponse {
     const xdr = this.xdr;
     const status = xdr.readUnsignedInt();
@@ -447,13 +455,6 @@ export class Nfsv4Decoder {
     return new msg.Nfsv4CloseResponse(status);
   }
 
-  private decodeCommitRequest(): msg.Nfsv4CommitRequest {
-    const xdr = this.xdr;
-    const offset = xdr.readUnsignedHyper();
-    const count = xdr.readUnsignedInt();
-    return new msg.Nfsv4CommitRequest(offset, count);
-  }
-
   private decodeCommitResponse(): msg.Nfsv4CommitResponse {
     const status = this.xdr.readUnsignedInt();
     if (status === 0) {
@@ -467,12 +468,10 @@ export class Nfsv4Decoder {
     const xdr = this.xdr;
     const type = xdr.readUnsignedInt() as Nfsv4FType;
     let objtype: structs.Nfsv4CreateType;
-    const objname = xdr.readString();
-    const createattrs = this.readFattr();
     switch (type) {
       case Nfsv4FType.NF4LNK: {
         const linkdata = xdr.readString();
-        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeLink(linkdata, createattrs));
+        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeLink(linkdata));
         break;
       }
       case Nfsv4FType.NF4BLK:
@@ -480,13 +479,17 @@ export class Nfsv4Decoder {
         const specdata1 = xdr.readUnsignedInt();
         const specdata2 = xdr.readUnsignedInt();
         const devdata = new structs.Nfsv4SpecData(specdata1, specdata2);
-        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeDevice(devdata, createattrs));
+        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeDevice(devdata));
         break;
       }
-      default:
-        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeOther(createattrs));
+      default: {
+        objtype = new structs.Nfsv4CreateType(type, new structs.Nfsv4CreateTypeVoid());
+        break;
+      }
     }
-    return new msg.Nfsv4CreateRequest(objtype, objname);
+    const objname = xdr.readString();
+    const createattrs = this.readFattr();
+    return new msg.Nfsv4CreateRequest(objtype, objname, createattrs);
   }
 
   private decodeCreateResponse(): msg.Nfsv4CreateResponse {
@@ -499,19 +502,9 @@ export class Nfsv4Decoder {
     return new msg.Nfsv4CreateResponse(status);
   }
 
-  private decodeDelegpurgeRequest(): msg.Nfsv4DelegpurgeRequest {
-    const clientid = this.xdr.readUnsignedHyper();
-    return new msg.Nfsv4DelegpurgeRequest(clientid);
-  }
-
   private decodeDelegpurgeResponse(): msg.Nfsv4DelegpurgeResponse {
     const status = this.xdr.readUnsignedInt();
     return new msg.Nfsv4DelegpurgeResponse(status);
-  }
-
-  private decodeDelegreturnRequest(): msg.Nfsv4DelegreturnRequest {
-    const delegStateid = this.readStateid();
-    return new msg.Nfsv4DelegreturnRequest(delegStateid);
   }
 
   private decodeDelegreturnResponse(): msg.Nfsv4DelegreturnResponse {
@@ -662,7 +655,7 @@ export class Nfsv4Decoder {
     const shareAccess = xdr.readUnsignedInt();
     const shareDeny = xdr.readUnsignedInt();
     const owner = this.readOpenOwner();
-    const openhow = xdr.readUnsignedInt();
+    const openhow = this.readOpenHow();
     const claim = this.readOpenClaim();
     return new msg.Nfsv4OpenRequest(seqid, shareAccess, shareDeny, owner, openhow, claim);
   }
@@ -732,19 +725,6 @@ export class Nfsv4Decoder {
   private decodePutfhResponse(): msg.Nfsv4PutfhResponse {
     const status = this.xdr.readUnsignedInt();
     return new msg.Nfsv4PutfhResponse(status);
-  }
-
-  private decodePutpubfhRequest(): msg.Nfsv4PutpubfhRequest {
-    return new msg.Nfsv4PutpubfhRequest();
-  }
-
-  private decodePutpubfhResponse(): msg.Nfsv4PutpubfhResponse {
-    const status = this.xdr.readUnsignedInt();
-    return new msg.Nfsv4PutpubfhResponse(status);
-  }
-
-  private decodePutrootfhRequest(): msg.Nfsv4PutrootfhRequest {
-    return new msg.Nfsv4PutrootfhRequest();
   }
 
   private decodePutrootfhResponse(): msg.Nfsv4PutrootfhResponse {
@@ -979,5 +959,117 @@ export class Nfsv4Decoder {
   private decodeIllegalResponse(): msg.Nfsv4IllegalResponse {
     const status = this.xdr.readUnsignedInt();
     return new msg.Nfsv4IllegalResponse(status);
+  }
+
+  public decodeCbCompound(
+    reader: Reader,
+    isRequest: boolean,
+  ): msg.Nfsv4CbCompoundRequest | msg.Nfsv4CbCompoundResponse | undefined {
+    this.xdr.reader = reader;
+    const startPos = reader.x;
+    try {
+      if (isRequest) {
+        return this.decodeCbCompoundRequest();
+      } else {
+        return this.decodeCbCompoundResponse();
+      }
+    } catch (err) {
+      if (err instanceof RangeError) {
+        reader.x = startPos;
+        return undefined;
+      }
+      throw err;
+    }
+  }
+
+  private decodeCbCompoundRequest(): msg.Nfsv4CbCompoundRequest {
+    const xdr = this.xdr;
+    const tag = xdr.readString();
+    const minorversion = xdr.readUnsignedInt();
+    const callbackIdent = xdr.readUnsignedInt();
+    const argarray: msg.Nfsv4CbRequest[] = [];
+    const count = xdr.readUnsignedInt();
+    for (let i = 0; i < count; i++) {
+      const op = xdr.readUnsignedInt() as Nfsv4CbOp;
+      const request = this.decodeCbRequest(op);
+      if (request) argarray.push(request);
+    }
+    return new msg.Nfsv4CbCompoundRequest(tag, minorversion, callbackIdent, argarray);
+  }
+
+  private decodeCbCompoundResponse(): msg.Nfsv4CbCompoundResponse {
+    const xdr = this.xdr;
+    const status = xdr.readUnsignedInt();
+    const tag = xdr.readString();
+    const resarray: msg.Nfsv4CbResponse[] = [];
+    const count = xdr.readUnsignedInt();
+    for (let i = 0; i < count; i++) {
+      const op = xdr.readUnsignedInt() as Nfsv4CbOp;
+      const response = this.decodeCbResponse(op);
+      if (response) resarray.push(response);
+    }
+    return new msg.Nfsv4CbCompoundResponse(status, tag, resarray);
+  }
+
+  private decodeCbRequest(op: Nfsv4CbOp): msg.Nfsv4CbRequest | undefined {
+    switch (op) {
+      case Nfsv4CbOp.CB_GETATTR:
+        return this.decodeCbGetattrRequest();
+      case Nfsv4CbOp.CB_RECALL:
+        return this.decodeCbRecallRequest();
+      case Nfsv4CbOp.CB_ILLEGAL:
+        return this.decodeCbIllegalRequest();
+      default:
+        throw new Nfsv4DecodingError(`Unknown callback operation: ${op}`);
+    }
+  }
+
+  private decodeCbResponse(op: Nfsv4CbOp): msg.Nfsv4CbResponse | undefined {
+    switch (op) {
+      case Nfsv4CbOp.CB_GETATTR:
+        return this.decodeCbGetattrResponse();
+      case Nfsv4CbOp.CB_RECALL:
+        return this.decodeCbRecallResponse();
+      case Nfsv4CbOp.CB_ILLEGAL:
+        return this.decodeCbIllegalResponse();
+      default:
+        throw new Nfsv4DecodingError(`Unknown callback operation: ${op}`);
+    }
+  }
+
+  private decodeCbGetattrRequest(): msg.Nfsv4CbGetattrRequest {
+    const fh = this.readFh();
+    const attrRequest = this.readBitmap();
+    return new msg.Nfsv4CbGetattrRequest(fh, attrRequest);
+  }
+
+  private decodeCbGetattrResponse(): msg.Nfsv4CbGetattrResponse {
+    const status = this.xdr.readUnsignedInt();
+    if (status === 0) {
+      const objAttributes = this.readFattr();
+      return new msg.Nfsv4CbGetattrResponse(status, new msg.Nfsv4CbGetattrResOk(objAttributes));
+    }
+    return new msg.Nfsv4CbGetattrResponse(status);
+  }
+
+  private decodeCbRecallRequest(): msg.Nfsv4CbRecallRequest {
+    const stateid = this.readStateid();
+    const truncate = this.xdr.readBoolean();
+    const fh = this.readFh();
+    return new msg.Nfsv4CbRecallRequest(stateid, truncate, fh);
+  }
+
+  private decodeCbRecallResponse(): msg.Nfsv4CbRecallResponse {
+    const status = this.xdr.readUnsignedInt();
+    return new msg.Nfsv4CbRecallResponse(status);
+  }
+
+  private decodeCbIllegalRequest(): msg.Nfsv4CbIllegalRequest {
+    return new msg.Nfsv4CbIllegalRequest();
+  }
+
+  private decodeCbIllegalResponse(): msg.Nfsv4CbIllegalResponse {
+    const status = this.xdr.readUnsignedInt();
+    return new msg.Nfsv4CbIllegalResponse(status);
   }
 }

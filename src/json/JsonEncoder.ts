@@ -146,7 +146,8 @@ export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncode
     const length = str.length;
     writer.ensureCapacity(length * 4 + 2);
     if (length < 256) {
-      let x = writer.x;
+      const startX = writer.x;
+      let x = startX;
       const uint8 = writer.uint8;
       uint8[x++] = 0x22; // "
       for (let i = 0; i < length; i++) {
@@ -158,7 +159,10 @@ export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncode
             break;
         }
         if (code < 32 || code > 126) {
-          writer.utf8(JSON.stringify(str));
+          writer.x = startX;
+          const jsonStr = JSON.stringify(str);
+          writer.ensureCapacity(jsonStr.length * 4 + 4);
+          writer.utf8(jsonStr);
           return;
         } else uint8[x++] = code;
       }
@@ -166,7 +170,9 @@ export class JsonEncoder implements BinaryJsonEncoder, StreamingBinaryJsonEncode
       writer.x = x;
       return;
     }
-    writer.utf8(JSON.stringify(str));
+    const jsonStr = JSON.stringify(str);
+    writer.ensureCapacity(jsonStr.length * 4 + 4);
+    writer.utf8(jsonStr);
   }
 
   public writeAsciiStr(str: string): void {

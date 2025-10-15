@@ -1,3 +1,8 @@
+import {Reader} from '@jsonjoy.com/buffers/lib/Reader';
+
+export const EMPY_U8 = new Uint8Array(0);
+export const EMPTY_READER = new Reader(EMPY_U8);
+
 /**
  * NFSv4 Protocol Constants
  * Based on RFC 7530

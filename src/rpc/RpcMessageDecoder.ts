@@ -10,6 +10,9 @@ import {
   RpcMismatchInfo,
 } from './messages';
 
+const EMPTY_BUFFER = new Uint8Array(0);
+const EMPTY_READER = new Reader(EMPTY_BUFFER);
+
 export class RpcMessageDecoder {
   public decodeMessage(reader: Reader): RpcMessage | undefined {
     const startPos = reader.x;
@@ -84,7 +87,7 @@ export class RpcMessageDecoder {
     if (length > 400) throw new RpcDecodingError('Auth body too large');
     const paddedLength = (length + 3) & ~3;
     if (reader.size() < paddedLength) return undefined;
-    const body = length > 0 ? reader.cut(length) : new Reader(new Uint8Array(0));
+    const body = length > 0 ? reader.cut(length) : EMPTY_READER;
     const padding = paddedLength - length;
     if (padding > 0) reader.skip(padding);
     return new RpcOpaqueAuth(flavor, body);

@@ -13,15 +13,29 @@ describe('Stateid validation and lifecycle (RFC 7530 §9.1.4)', () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
       vol.writeFileSync('/export/file.txt', 'test content');
       const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
-      const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), nfs.OpenClaimNull('file.txt')), nfs.GETFH()]);
+      const openRes = await client.compound([
+        nfs.PUTROOTFH(),
+        nfs.OPEN(
+          0,
+          Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
+          Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+          openOwner,
+          nfs.OpenHowNoCreate(),
+          nfs.OpenClaimNull('file.txt'),
+        ),
+        nfs.GETFH(),
+      ]);
       const openStateid = (openRes.resarray[1] as msg.Nfsv4OpenResponse).resok!.stateid;
       const fh = (openRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
       const lockOwner = nfs.LockOwner(BigInt(1), new Uint8Array([5, 6, 7, 8]));
-      const lockRes = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner))]);
+      const lockRes = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner)),
+      ]);
       const lockStateid = (lockRes.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
       expect(typeof lockStateid.seqid).toBe('number');
       expect(lockStateid.seqid).toBeGreaterThanOrEqual(0);
-      expect(lockStateid.seqid).toBeLessThanOrEqual(0xFFFFFFFF);
+      expect(lockStateid.seqid).toBeLessThanOrEqual(0xffffffff);
       await stop();
     });
 
@@ -29,11 +43,25 @@ describe('Stateid validation and lifecycle (RFC 7530 §9.1.4)', () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
       vol.writeFileSync('/export/file.txt', 'test content');
       const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
-      const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), nfs.OpenClaimNull('file.txt')), nfs.GETFH()]);
+      const openRes = await client.compound([
+        nfs.PUTROOTFH(),
+        nfs.OPEN(
+          0,
+          Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
+          Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+          openOwner,
+          nfs.OpenHowNoCreate(),
+          nfs.OpenClaimNull('file.txt'),
+        ),
+        nfs.GETFH(),
+      ]);
       const openStateid = (openRes.resarray[1] as msg.Nfsv4OpenResponse).resok!.stateid;
       const fh = (openRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
       const lockOwner = nfs.LockOwner(BigInt(1), new Uint8Array([5, 6, 7, 8]));
-      const lockRes = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner))]);
+      const lockRes = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner)),
+      ]);
       const lockStateid = (lockRes.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
       expect(lockStateid.other).toBeInstanceOf(Uint8Array);
       expect(lockStateid.other.length).toBe(12);
@@ -44,11 +72,25 @@ describe('Stateid validation and lifecycle (RFC 7530 §9.1.4)', () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
       vol.writeFileSync('/export/file.txt', 'test content');
       const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
-      const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), nfs.OpenClaimNull('file.txt')), nfs.GETFH()]);
+      const openRes = await client.compound([
+        nfs.PUTROOTFH(),
+        nfs.OPEN(
+          0,
+          Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
+          Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+          openOwner,
+          nfs.OpenHowNoCreate(),
+          nfs.OpenClaimNull('file.txt'),
+        ),
+        nfs.GETFH(),
+      ]);
       const openStateid = (openRes.resarray[1] as msg.Nfsv4OpenResponse).resok!.stateid;
       const fh = (openRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
       const lockOwner = nfs.LockOwner(BigInt(1), new Uint8Array([5, 6, 7, 8]));
-      const lockRes = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner))]);
+      const lockRes = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner)),
+      ]);
       const lockStateid = (lockRes.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
       expect(lockStateid.seqid).toBeGreaterThanOrEqual(1);
       expect(lockStateid.seqid).toBeLessThanOrEqual(2);
@@ -59,14 +101,31 @@ describe('Stateid validation and lifecycle (RFC 7530 §9.1.4)', () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
       vol.writeFileSync('/export/file.txt', 'test content');
       const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
-      const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), nfs.OpenClaimNull('file.txt')), nfs.GETFH()]);
+      const openRes = await client.compound([
+        nfs.PUTROOTFH(),
+        nfs.OPEN(
+          0,
+          Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
+          Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+          openOwner,
+          nfs.OpenHowNoCreate(),
+          nfs.OpenClaimNull('file.txt'),
+        ),
+        nfs.GETFH(),
+      ]);
       const openStateid = (openRes.resarray[1] as msg.Nfsv4OpenResponse).resok!.stateid;
       const fh = (openRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
       const lockOwner = nfs.LockOwner(BigInt(1), new Uint8Array([5, 6, 7, 8]));
-      const lockRes1 = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner))]);
+      const lockRes1 = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner)),
+      ]);
       const lockStateid1 = (lockRes1.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
       const initialSeqid = lockStateid1.seqid;
-      const lockRes2 = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(200), BigInt(100), nfs.ExistingLockOwner(lockStateid1, 1))]);
+      const lockRes2 = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(200), BigInt(100), nfs.ExistingLockOwner(lockStateid1, 1)),
+      ]);
       const lockStateid2 = (lockRes2.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
       expect(lockStateid2.seqid).toBe(initialSeqid + 1);
       await stop();
@@ -76,13 +135,30 @@ describe('Stateid validation and lifecycle (RFC 7530 §9.1.4)', () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
       vol.writeFileSync('/export/file.txt', 'test content');
       const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
-      const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), nfs.OpenClaimNull('file.txt')), nfs.GETFH()]);
+      const openRes = await client.compound([
+        nfs.PUTROOTFH(),
+        nfs.OPEN(
+          0,
+          Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
+          Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+          openOwner,
+          nfs.OpenHowNoCreate(),
+          nfs.OpenClaimNull('file.txt'),
+        ),
+        nfs.GETFH(),
+      ]);
       const openStateid = (openRes.resarray[1] as msg.Nfsv4OpenResponse).resok!.stateid;
       const fh = (openRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
       const lockOwner = nfs.LockOwner(BigInt(1), new Uint8Array([5, 6, 7, 8]));
-      const lockRes1 = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner))]);
+      const lockRes1 = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner)),
+      ]);
       const lockStateid1 = (lockRes1.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
-      const lockRes2 = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(200), BigInt(100), nfs.ExistingLockOwner(lockStateid1, 1))]);
+      const lockRes2 = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(200), BigInt(100), nfs.ExistingLockOwner(lockStateid1, 1)),
+      ]);
       const lockStateid2 = (lockRes2.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
       expect(lockStateid2.other).toEqual(lockStateid1.other);
       await stop();
@@ -100,14 +176,31 @@ describe('Stateid validation and lifecycle (RFC 7530 §9.1.4)', () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
       vol.writeFileSync('/export/file.txt', 'test content');
       const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
-      const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), nfs.OpenClaimNull('file.txt')), nfs.GETFH()]);
+      const openRes = await client.compound([
+        nfs.PUTROOTFH(),
+        nfs.OPEN(
+          0,
+          Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
+          Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+          openOwner,
+          nfs.OpenHowNoCreate(),
+          nfs.OpenClaimNull('file.txt'),
+        ),
+        nfs.GETFH(),
+      ]);
       const openStateid = (openRes.resarray[1] as msg.Nfsv4OpenResponse).resok!.stateid;
       const fh = (openRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
       const lockOwner = nfs.LockOwner(BigInt(1), new Uint8Array([5, 6, 7, 8]));
-      const lockRes1 = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner))]);
+      const lockRes1 = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner)),
+      ]);
       const seqid1 = (lockRes1.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid.seqid;
       const lockStateid1 = (lockRes1.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
-      const lockRes2 = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(200), BigInt(100), nfs.ExistingLockOwner(lockStateid1, 1))]);
+      const lockRes2 = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(200), BigInt(100), nfs.ExistingLockOwner(lockStateid1, 1)),
+      ]);
       const seqid2 = (lockRes2.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid.seqid;
       expect(seqid2).toBe(seqid1 + 1);
       await stop();
@@ -117,14 +210,31 @@ describe('Stateid validation and lifecycle (RFC 7530 §9.1.4)', () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
       vol.writeFileSync('/export/file.txt', 'test content');
       const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
-      const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), nfs.OpenClaimNull('file.txt')), nfs.GETFH()]);
+      const openRes = await client.compound([
+        nfs.PUTROOTFH(),
+        nfs.OPEN(
+          0,
+          Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
+          Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+          openOwner,
+          nfs.OpenHowNoCreate(),
+          nfs.OpenClaimNull('file.txt'),
+        ),
+        nfs.GETFH(),
+      ]);
       const openStateid = (openRes.resarray[1] as msg.Nfsv4OpenResponse).resok!.stateid;
       const fh = (openRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
       const lockOwner = nfs.LockOwner(BigInt(1), new Uint8Array([5, 6, 7, 8]));
-      const lockRes = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner))]);
+      const lockRes = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner)),
+      ]);
       const lockStateid = (lockRes.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
       const seqid1 = lockStateid.seqid;
-      const unlockRes = await client.compound([nfs.PUTFH(fh), nfs.LOCKU(Nfsv4LockType.WRITE_LT, 1, lockStateid, BigInt(0), BigInt(100))]);
+      const unlockRes = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCKU(Nfsv4LockType.WRITE_LT, 1, lockStateid, BigInt(0), BigInt(100)),
+      ]);
       const seqid2 = (unlockRes.resarray[1] as msg.Nfsv4LockuResponse).resok!.lockStateid.seqid;
       expect(seqid2).toBe(seqid1 + 1);
       await stop();
@@ -134,16 +244,39 @@ describe('Stateid validation and lifecycle (RFC 7530 §9.1.4)', () => {
       const {client, stop, vol} = await setupNfsClientServerTestbed();
       vol.writeFileSync('/export/file.txt', 'test content');
       const openOwner = nfs.OpenOwner(BigInt(1), new Uint8Array([1, 2, 3, 4]));
-      const openRes = await client.compound([nfs.PUTROOTFH(), nfs.OPEN(0, Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH, Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE, openOwner, nfs.OpenHowNoCreate(), nfs.OpenClaimNull('file.txt')), nfs.GETFH()]);
+      const openRes = await client.compound([
+        nfs.PUTROOTFH(),
+        nfs.OPEN(
+          0,
+          Nfsv4OpenAccess.OPEN4_SHARE_ACCESS_BOTH,
+          Nfsv4OpenDeny.OPEN4_SHARE_DENY_NONE,
+          openOwner,
+          nfs.OpenHowNoCreate(),
+          nfs.OpenClaimNull('file.txt'),
+        ),
+        nfs.GETFH(),
+      ]);
       const openStateid = (openRes.resarray[1] as msg.Nfsv4OpenResponse).resok!.stateid;
       const fh = (openRes.resarray[2] as msg.Nfsv4GetfhResponse).resok!.object;
       const lockOwner1 = nfs.LockOwner(BigInt(1), new Uint8Array([5, 6, 7, 8]));
-      const lockRes1 = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(0), BigInt(100), nfs.NewLockOwner(1, openStateid, 0, lockOwner1))]);
+      const lockRes1 = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(
+          Nfsv4LockType.WRITE_LT,
+          false,
+          BigInt(0),
+          BigInt(100),
+          nfs.NewLockOwner(1, openStateid, 0, lockOwner1),
+        ),
+      ]);
       const lockStateid1 = (lockRes1.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid;
       const seqid1 = lockStateid1.seqid;
       const lockOwner2 = nfs.LockOwner(BigInt(1), new Uint8Array([9, 10, 11, 12]));
       await client.compound([nfs.PUTFH(fh), nfs.LOCKT(Nfsv4LockType.READ_LT, BigInt(50), BigInt(100), lockOwner2)]);
-      const lockRes2 = await client.compound([nfs.PUTFH(fh), nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(200), BigInt(100), nfs.ExistingLockOwner(lockStateid1, 1))]);
+      const lockRes2 = await client.compound([
+        nfs.PUTFH(fh),
+        nfs.LOCK(Nfsv4LockType.WRITE_LT, false, BigInt(200), BigInt(100), nfs.ExistingLockOwner(lockStateid1, 1)),
+      ]);
       const seqid2 = (lockRes2.resarray[1] as msg.Nfsv4LockResponse).resok!.lockStateid.seqid;
       expect(seqid2).toBe(seqid1 + 1);
       await stop();

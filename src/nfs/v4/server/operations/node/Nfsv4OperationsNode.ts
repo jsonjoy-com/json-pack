@@ -973,7 +973,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
       if (this.hasConflictingLock(currentPath, locktype, offset, length, existingLockOwnerKey)) {
         const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
         const denied = new msg.Nfsv4LockResDenied(offset, length, locktype, conflictOwner);
-        return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_LOCKED, undefined, denied);
+        return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_DENIED, undefined, denied);
       }
       const lockStateid = this.getOrCreateLockStateid(existingLockOwnerKey, currentPath);
       const stateid = lockStateid.incrementAndGetStateid();
@@ -1031,7 +1031,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     if (this.hasConflictingLock(currentPath, locktype, offset, length, lockOwnerKey)) {
       const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
       const denied = new msg.Nfsv4LockResDenied(offset, length, locktype, conflictOwner);
-      return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_LOCKED, undefined, denied);
+      return new msg.Nfsv4LockResponse(Nfsv4Stat.NFS4ERR_DENIED, undefined, denied);
     }
     let lockOwnerState = this.lockOwners.get(lockOwnerKey);
     if (!lockOwnerState) {
@@ -1073,7 +1073,7 @@ export class Nfsv4OperationsNode implements Nfsv4Operations {
     if (this.hasConflictingLock(currentPath, locktype, offset, length, ownerKey)) {
       const conflictOwner = new struct.Nfsv4LockOwner(BigInt(0), new Uint8Array());
       const denied = new msg.Nfsv4LocktResDenied(offset, length, locktype, conflictOwner);
-      return new msg.Nfsv4LocktResponse(Nfsv4Stat.NFS4ERR_LOCKED, denied);
+      return new msg.Nfsv4LocktResponse(Nfsv4Stat.NFS4ERR_DENIED, denied);
     }
     return new msg.Nfsv4LocktResponse(Nfsv4Stat.NFS4_OK);
   }

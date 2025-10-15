@@ -37,7 +37,7 @@ PORT=8777 npx ts-node src/nfs/v4/server/__demos__/tcp-server.ts
 Then mount an NFSv4 share from another terminal or machine:
 
 ```bash
-mount -t nfs -o vers=4,nfsvers=4,port=8777,mountport=8777,proto=tcp,sec=none 127.0.0.1:/export ~/mnt/test
+mount -t nfs -o vers=4,nfsvers=4,port=8777,mountport=8777,proto=tcp,sec=none,noowners 127.0.0.1:/export ~/mnt/test
 ```
 
 Unmount with:
